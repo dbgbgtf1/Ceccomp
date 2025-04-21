@@ -3,15 +3,20 @@ A tool to resolve seccomp just like seccomp-tools, written in c
 (Havn't finish yet)
 
 ## Code to be done
-[ ] dump
-[ ] emu
-[x] disasm
-[ ] asm
+- [x] dump
+- [ ] emu
+- [x] disasm
+- [ ] asm
 
 ## cnDoc
 to do
 
 ## Doc
+
+> Ceccomp disasm arch xxx.bpf
+
+> Ceccomp dump program program-args
+
 to do
 
 ## Supported architecture
