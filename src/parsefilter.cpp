@@ -1,7 +1,9 @@
-#include "../include/parsefilter.h"
-#include "../include/color.h"
-#include "../include/transfer.h"
+#include "parsefilter.h"
+#include "color.h"
+#include "transfer.h"
+#include <cstddef>
 #include <inttypes.h>
+#include <linux/bpf_common.h>
 #include <seccomp.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -16,11 +18,6 @@
 #ifndef DEBUG
 #define printf_debug(...)
 #endif
-
-#define BLUE_A BLUE ("A")
-#define BLUE_X BLUE ("X")
-#define BLUE_S BLUE ("%s")
-#define BLUE_H BLUE ("0x%x")
 
 struct Reg
 {
@@ -48,27 +45,41 @@ struct Reg
     return retSameType (val);
   }
 
-  const char *
-  retSameType (uint32_t val) const
-  {
-    const char *ret = NULL;
-    if (m_str != NULL)
-      {
-        if (!strcmp (m_str, syscall_nr))
-          ret = seccomp_syscall_resolve_num_arch (m_arch, val);
-        else if (!strcmp (m_str, architecture))
-          ret = ARCH2STR (val);
-      }
-    // if ret == NULL, the transfer failed or it doesn't need transfer
-    // so just transfer the val to str
-    if (ret == NULL)
-      {
-        ret = (char *)malloc (0x10);
-        snprintf ((char *)ret, 0x10, "0x%x", val);
-      }
-    return ret;
-  }
+  const char *retSameType (uint32_t val) const;
+
+  const char *TryTransfer (uint32_t val) const;
 };
+
+const char *
+Reg::TryTransfer (uint32_t val) const
+{
+  const char *ret = NULL;
+  if (!strcmp (m_str, syscall_nr))
+    ret = seccomp_syscall_resolve_num_arch (m_arch, val);
+  else if (!strcmp (m_str, architecture))
+    {
+      ret = ARCH2STR (val);
+      if (ret == NULL)
+        printf ("unknown or unsupported architecture: " BLUE_H, val);
+    }
+  return ret;
+}
+
+const char *
+Reg::retSameType (uint32_t val) const
+{
+  const char *ret = NULL;
+  if (m_str != NULL)
+    ret = TryTransfer (val);
+  // if ret == NULL, the transfer failed or it doesn't need transfer
+  // so just transfer the val to str
+  if (ret == NULL)
+    {
+      ret = (char *)malloc (0x20);
+      snprintf ((char *)ret, 0x20, BLUE_H, val);
+    }
+  return ret;
+}
 
 struct Parser
 {
@@ -121,12 +132,12 @@ Parser::LD (const filter *const f_ptr)
     {
     case BPF_IMM:
       printf_debug ("%s: 0x%x\n", "LD | IMM", k);
-      printf (BLUE_A " = " BLUE_H "\n", k);
+      printf (BLUE_A " = " BLUE_H, k);
       A.SetVal (k);
       return;
     case BPF_ABS:
       printf_debug ("%s: 0x%x\n", "LD | ABS", k);
-      printf (BLUE_A " = " BLUE_S "\n", ABS2STR (k));
+      printf (BLUE_A " = " BLUE_S, ABS2STR (k));
       A.SetVal (ABS2STR (k));
       return;
     case BPF_IND:
@@ -134,19 +145,19 @@ Parser::LD (const filter *const f_ptr)
       return;
     case BPF_MEM:
       printf_debug ("%s: 0x%x\n", "LD | MEM", k);
-      printf (BLUE_A " = " BLUE ("mem[0x%x]") "\n", k);
+      printf (BLUE_A " = " BLUE ("mem[0x%x]"), k);
       A.SetVal (mem[k].m_str);
       return;
     case BPF_LEN:
       printf_debug ("%s: 0x%x\n", "LD | LEN", k);
-      printf (BLUE_A " = " BLUE_H "\n", (uint32_t)sizeof (seccomp_data));
+      printf (BLUE_A " = " BLUE_H, (uint32_t)sizeof (seccomp_data));
       A.SetVal (sizeof (seccomp_data));
       return;
     case BPF_MSH:
       printf_debug ("%s: 0x%x\n", "LD | MSH", k);
       return;
     default:
-      printf ("unknown LD: mode: 0x%x\n", mode);
+      printf ("unknown LD: mode: 0x%x", mode);
     }
 }
 
@@ -160,12 +171,12 @@ Parser::LDX (const filter *const f_ptr)
     {
     case BPF_IMM:
       printf_debug ("%s: 0x%x\n", "LDX | IMM", k);
-      printf (BLUE_X " = " BLUE_H "\n", k);
+      printf (BLUE_X " = " BLUE_H, k);
       X.SetVal (k);
       return;
     case BPF_ABS:
       printf_debug ("%s: 0x%x\n", "LDX | ABS", k);
-      printf (BLUE_X " = " BLUE_S "\n", ABS2STR (k));
+      printf (BLUE_X " = " BLUE_S, ABS2STR (k));
       X.SetVal (ABS2STR (k));
       return;
     case BPF_IND:
@@ -173,19 +184,19 @@ Parser::LDX (const filter *const f_ptr)
       return;
     case BPF_MEM:
       printf_debug ("%s: 0x%x\n", "LDX | MEM", k);
-      printf (BLUE_X " = " BLUE ("mem[0x%x]") "\n", k);
+      printf (BLUE_X " = " BLUE ("mem[0x%x]"), k);
       X.SetVal (mem[k].m_str);
       return;
     case BPF_LEN:
       printf_debug ("%s: 0x%x\n", "LDX | LEN", k);
-      printf (BLUE_X " = " BLUE_H "\n", (uint32_t)sizeof (seccomp_data));
+      printf (BLUE_X " = " BLUE_H, (uint32_t)sizeof (seccomp_data));
       X.SetVal (sizeof (seccomp_data));
       return;
     case BPF_MSH:
       printf_debug ("%s: 0x%x\n", "LDX | MSH", k);
       return;
     default:
-      printf ("unknown LDX: mode: 0x%x\n", mode);
+      printf ("unknown LDX: mode: 0x%x", mode);
     }
 }
 
@@ -193,7 +204,7 @@ void
 Parser::ST (const filter *const f_ptr)
 {
   printf_debug ("%s: %s\n", "ST", A.m_str);
-  printf (BLUE ("mem[0x%x]") " = " BLUE_A "\n", f_ptr->k);
+  printf (BLUE ("mem[0x%x]") " = " BLUE_A, f_ptr->k);
   mem[f_ptr->k].SetVal (A.m_str);
 }
 
@@ -201,7 +212,7 @@ void
 Parser::STX (const filter *const f_ptr)
 {
   printf_debug ("%s: %s\n", "STX", X.m_str);
-  printf (BLUE ("mem[0x%x]") " = " BLUE_X "\n", f_ptr->k);
+  printf (BLUE ("mem[0x%x]") " = " BLUE_X, f_ptr->k);
   mem[f_ptr->k].SetVal (X.m_str);
 }
 
@@ -213,146 +224,167 @@ Parser::ALU (const filter *const f_ptr)
   uint32_t k = f_ptr->k;
   char tmp[0x100];
 
-  switch (op | src)
+  switch (src)
     {
-    case BPF_ADD | BPF_X:
-      printf_debug ("%s: %s\n", "ALU | ADD | BPF_X", X.m_str);
-      snprintf (tmp, 0x100, "(%s += %s)", A.m_str, X.m_str);
-      printf (BLUE_A " += " BLUE_S "\n", X.m_str);
-      A.SetVal (tmp);
-      return;
-    case BPF_ADD | BPF_K:
-      printf_debug ("%s: 0x%x\n", "ALU | ADD | BPF_K", k);
-      snprintf (tmp, 0x100, "(%s += 0x%x)", A.m_str, k);
-      printf (BLUE_A " += " BLUE_H "\n", k);
-      A.SetVal (tmp);
-      return;
+    case BPF_K:
+      switch (op)
+        {
+        case BPF_ADD:
+          printf_debug ("%s: 0x%x\n", "ALU | ADD | BPF_K", k);
+          snprintf (tmp, 0x100, "(%s += 0x%x)", A.m_str, k);
+          printf (BLUE_A " += " BLUE_H, k);
+          A.SetVal (tmp);
+          return;
+        case BPF_SUB:
+          printf_debug ("%s: 0x%x\n", "ALU | SUB | BPF_K", k);
+          snprintf (tmp, 0x100, "(%s -= 0x%x)", A.m_str, k);
+          printf (BLUE_A " -= " BLUE_H, k);
+          A.SetVal (tmp);
+          return;
 
-    case BPF_SUB | BPF_X:
-      printf_debug ("%s: %s\n", "ALU | SUB | BPF_X", X.m_str);
-      snprintf (tmp, 0x100, "(%s -= %s)", A.m_str, X.m_str);
-      printf (BLUE_A " -= " BLUE_S "\n", X.m_str);
-      A.SetVal (tmp);
-      return;
-    case BPF_SUB | BPF_K:
-      printf_debug ("%s: 0x%x\n", "ALU | SUB | BPF_K", k);
-      snprintf (tmp, 0x100, "(%s -= 0x%x)", A.m_str, k);
-      printf (BLUE_A " -= " BLUE_H "\n", k);
-      A.SetVal (tmp);
-      return;
+        case BPF_MUL:
+          printf_debug ("%s: 0x%x\n", "ALU | MUL | BPF_K", k);
+          snprintf (tmp, 0x100, "(%s *= 0x%x)", A.m_str, k);
+          printf (BLUE_A " *= " BLUE_H, k);
+          A.SetVal (tmp);
+          return;
 
-    case BPF_MUL | BPF_X:
-      printf_debug ("%s: %s\n", "ALU | MUL | BPF_X", X.m_str);
-      snprintf (tmp, 0x100, "(%s *= %s)", A.m_str, X.m_str);
-      printf (BLUE_A " *= " BLUE_S "\n", X.m_str);
-      A.SetVal (tmp);
-      return;
-    case BPF_MUL | BPF_K:
-      printf_debug ("%s: 0x%x\n", "ALU | MUL | BPF_K", k);
-      snprintf (tmp, 0x100, "(%s *= 0x%x)", A.m_str, k);
-      printf (BLUE_A " *= " BLUE_H "\n", k);
-      A.SetVal (tmp);
-      return;
+        case BPF_DIV:
+          printf_debug ("%s: 0x%x\n", "ALU | DIV | BPF_K", k);
+          snprintf (tmp, 0x100, "(%s /= 0x%x)", A.m_str, k);
+          printf (BLUE_A " /= " BLUE_H " ", k);
+          A.SetVal (tmp);
+          return;
 
-    case BPF_DIV | BPF_X:
-      printf_debug ("%s: %s\n", "ALU | DIV | BPF_X", X.m_str);
-      snprintf (tmp, 0x100, "(%s /= %s)", A.m_str, X.m_str);
-      printf (BLUE_A " /= " BLUE_S "\n", X.m_str);
-      A.SetVal (tmp);
-      return;
-    case BPF_DIV | BPF_K:
-      printf_debug ("%s: 0x%x\n", "ALU | DIV | BPF_K", k);
-      snprintf (tmp, 0x100, "(%s /= 0x%x)", A.m_str, k);
-      printf (BLUE_A " /= " BLUE_H " \n", k);
-      A.SetVal (tmp);
-      return;
+        case BPF_AND:
+          printf_debug ("%s: 0x%x\n", "ALU | AND | BPF_K", k);
+          snprintf (tmp, 0x100, "(%s &= 0x%x)", A.m_str, k);
+          printf (BLUE_A " &= " BLUE_H, k);
+          A.SetVal (tmp);
+          return;
 
-    case BPF_AND | BPF_X:
-      printf_debug ("%s: %s\n", "ALU | AND | BPF_X", X.m_str);
-      snprintf (tmp, 0x100, "(%s &= %s)", A.m_str, X.m_str);
-      printf (BLUE_A " &= " BLUE_S "\n", X.m_str);
-      A.SetVal (tmp);
-      return;
-    case BPF_AND | BPF_K:
-      printf_debug ("%s: 0x%x\n", "ALU | AND | BPF_K", k);
-      snprintf (tmp, 0x100, "(%s &= 0x%x)", A.m_str, k);
-      printf (BLUE_A " &= " BLUE_H "\n", k);
-      A.SetVal (tmp);
-      return;
+        case BPF_OR:
+          printf_debug ("%s: 0x%x\n", "ALU | OR | BPF_K", k);
+          snprintf (tmp, 0x100, "(%s |= 0x%x)", A.m_str, k);
+          printf (BLUE_A " |= " BLUE_H, k);
+          A.SetVal (tmp);
+          return;
 
-    case BPF_OR | BPF_X:
-      printf_debug ("%s: %s\n", "ALU | OR | BPF_X", X.m_str);
-      snprintf (tmp, 0x100, "(%s |= %s)", A.m_str, X.m_str);
-      printf (BLUE_A " |= " BLUE_S "\n", X.m_str);
-      A.SetVal (tmp);
-      return;
-    case BPF_OR | BPF_K:
-      printf_debug ("%s: 0x%x\n", "ALU | OR | BPF_K", k);
-      snprintf (tmp, 0x100, "(%s |= 0x%x)", A.m_str, k);
-      printf (BLUE_A " |= " BLUE_H "\n", k);
-      A.SetVal (tmp);
-      return;
+        case BPF_XOR:
+          printf_debug ("%s: 0x%x\n", "ALU | XOR | BPF_K", k);
+          snprintf (tmp, 0x100, "(%s ^= 0x%x)", A.m_str, k);
+          printf (BLUE_A " ^= " BLUE_H, k);
+          A.SetVal (tmp);
+          return;
 
-    case BPF_XOR | BPF_X:
-      printf_debug ("%s: %s\n", "ALU | XOR | BPF_X", X.m_str);
-      snprintf (tmp, 0x100, "(%s ^= %s)", A.m_str, X.m_str);
-      printf (BLUE_A " ^= " BLUE_S "\n", X.m_str);
-      A.SetVal (tmp);
-      return;
-    case BPF_XOR | BPF_K:
-      printf_debug ("%s: 0x%x\n", "ALU | XOR | BPF_K", k);
-      snprintf (tmp, 0x100, "(%s ^= 0x%x)", A.m_str, k);
-      printf (BLUE_A " ^= " BLUE_H "\n", k);
-      A.SetVal (tmp);
-      return;
+        case BPF_MOD:
+          printf_debug ("%s: 0x%x\n", "ALU | MOD | BPF_K", k);
+          snprintf (tmp, 0x100, "(%s %%= 0x%x)", A.m_str, k);
+          printf (BLUE_A " %%= " BLUE_H, k);
+          A.SetVal (tmp);
+          return;
 
-    case BPF_MOD | BPF_X:
-      printf_debug ("%s: %s\n", "ALU | MOD | BPF_X", X.m_str);
-      snprintf (tmp, 0x100, "(%s %%= %s)", A.m_str, X.m_str);
-      printf (BLUE_A " %%= " BLUE_S "\n", X.m_str);
-      A.SetVal (tmp);
-      return;
-    case BPF_MOD | BPF_K:
-      printf_debug ("%s: 0x%x\n", "ALU | MOD | BPF_K", k);
-      snprintf (tmp, 0x100, "(%s %%= 0x%x)", A.m_str, k);
-      printf (BLUE_A " %%= " BLUE_H "\n", k);
-      A.SetVal (tmp);
-      return;
+        case BPF_LSH:
+          printf_debug ("%s: 0x%x\n", "ALU | LSH | BPF_K", k);
+          snprintf (tmp, 0x100, "(%s <<= 0x%x)", A.m_str, k);
+          printf (BLUE_A " <<= " BLUE_H, k);
+          A.SetVal (tmp);
+          return;
 
-    case BPF_LSH | BPF_X:
-      printf_debug ("%s: %s\n", "ALU | LSH | BPF_X", X.m_str);
-      snprintf (tmp, 0x100, "(%s <<= %s)", A.m_str, X.m_str);
-      printf (BLUE_A " <<= " BLUE_S "\n", X.m_str);
-      A.SetVal (tmp);
-      return;
-    case BPF_LSH | BPF_K:
-      printf_debug ("%s: 0x%x\n", "ALU | LSH | BPF_K", k);
-      snprintf (tmp, 0x100, "(%s <<= 0x%x)", A.m_str, k);
-      printf (BLUE_A " <<= " BLUE_H "\n", k);
-      A.SetVal (tmp);
-      return;
+        case BPF_RSH:
+          printf_debug ("%s: 0x%x\n", "ALU | RSH | BPF_K", k);
+          snprintf (tmp, 0x100, "(%s >>= 0x%x)", A.m_str, k);
+          printf (BLUE_A " >>= " BLUE_H, k);
+          A.SetVal (tmp);
+          return;
 
-    case BPF_RSH | BPF_X:
-      printf_debug ("%s: %s\n", "ALU | RSH | BPF_X", X.m_str);
-      snprintf (tmp, 0x100, "(%s >>= %s)", A.m_str, X.m_str);
-      printf (BLUE_A " >>= " BLUE_S "\n", X.m_str);
-      A.SetVal (tmp);
-      return;
-    case BPF_RSH | BPF_K:
-      printf_debug ("%s: 0x%x\n", "ALU | RSH | BPF_K", k);
-      snprintf (tmp, 0x100, "(%s >>= 0x%x)", A.m_str, k);
-      printf (BLUE_A " >>= " BLUE_H "\n", k);
-      A.SetVal (tmp);
-      return;
+          // NEG don't need BPF_K or BPF_X
+          // buf BPF_K = 0, so put it here
+        case BPF_NEG:
+          printf_debug ("%s\n", "BPF_NEG");
+          snprintf (tmp, 0x100, "(-%s)", A.m_str);
+          printf (BLUE_A " = " BLUE ("-A"));
+          A.SetVal (tmp);
+          return;
 
-    case BPF_NEG:
-      printf_debug ("%s\n", "BPF_NEG");
-      snprintf (tmp, 0x100, "(-%s)", A.m_str);
-      printf (BLUE_A " = " BLUE ("-A") "\n");
-      A.SetVal (tmp);
-      return;
-    default:
-      printf ("unknown alu: op: 0x%x, src: 0x%x\n", op, src);
+        default:
+          printf ("unknown alu: op: 0x%x, src: 0x%x", op, src);
+          return;
+        }
+    case BPF_X:
+      switch (op)
+        {
+        case BPF_ADD:
+          printf_debug ("%s: %s\n", "ALU | ADD | BPF_X", X.m_str);
+          snprintf (tmp, 0x100, "(%s += %s)", A.m_str, X.m_str);
+          printf (BLUE_A " += " BLUE_S, X.m_str);
+          A.SetVal (tmp);
+          return;
+        case BPF_SUB:
+          printf_debug ("%s: %s\n", "ALU | SUB | BPF_X", X.m_str);
+          snprintf (tmp, 0x100, "(%s -= %s)", A.m_str, X.m_str);
+          printf (BLUE_A " -= " BLUE_S, X.m_str);
+          A.SetVal (tmp);
+          return;
+        case BPF_MUL:
+          printf_debug ("%s: %s\n", "ALU | MUL | BPF_X", X.m_str);
+          snprintf (tmp, 0x100, "(%s *= %s)", A.m_str, X.m_str);
+          printf (BLUE_A " *= " BLUE_S, X.m_str);
+          A.SetVal (tmp);
+          return;
+
+        case BPF_DIV:
+          printf_debug ("%s: %s\n", "ALU | DIV | BPF_X", X.m_str);
+          snprintf (tmp, 0x100, "(%s /= %s)", A.m_str, X.m_str);
+          printf (BLUE_A " /= " BLUE_S, X.m_str);
+          A.SetVal (tmp);
+          return;
+
+        case BPF_AND:
+          printf_debug ("%s: %s\n", "ALU | AND | BPF_X", X.m_str);
+          snprintf (tmp, 0x100, "(%s &= %s)", A.m_str, X.m_str);
+          printf (BLUE_A " &= " BLUE_S, X.m_str);
+          A.SetVal (tmp);
+          return;
+
+        case BPF_OR:
+          printf_debug ("%s: %s\n", "ALU | OR | BPF_X", X.m_str);
+          snprintf (tmp, 0x100, "(%s |= %s)", A.m_str, X.m_str);
+          printf (BLUE_A " |= " BLUE_S, X.m_str);
+          A.SetVal (tmp);
+          return;
+
+        case BPF_XOR:
+          printf_debug ("%s: %s\n", "ALU | XOR | BPF_X", X.m_str);
+          snprintf (tmp, 0x100, "(%s ^= %s)", A.m_str, X.m_str);
+          printf (BLUE_A " ^= " BLUE_S, X.m_str);
+          A.SetVal (tmp);
+          return;
+
+        case BPF_MOD:
+          printf_debug ("%s: %s\n", "ALU | MOD | BPF_X", X.m_str);
+          snprintf (tmp, 0x100, "(%s %%= %s)", A.m_str, X.m_str);
+          printf (BLUE_A " %%= " BLUE_S, X.m_str);
+          A.SetVal (tmp);
+          return;
+
+        case BPF_LSH:
+          printf_debug ("%s: %s\n", "ALU | LSH | BPF_X", X.m_str);
+          snprintf (tmp, 0x100, "(%s <<= %s)", A.m_str, X.m_str);
+          printf (BLUE_A " <<= " BLUE_S, X.m_str);
+          A.SetVal (tmp);
+          return;
+
+        case BPF_RSH:
+          printf_debug ("%s: %s\n", "ALU | RSH | BPF_X", X.m_str);
+          snprintf (tmp, 0x100, "(%s >>= %s)", A.m_str, X.m_str);
+          printf (BLUE_A " >>= " BLUE_S, X.m_str);
+          A.SetVal (tmp);
+          return;
+
+        default:
+          printf ("unknown alu: op: 0x%x, src: 0x%x", op, src);
+        }
     }
 }
 
@@ -367,11 +399,11 @@ Parser::JMP (const filter *const f_ptr, const char *const syms[4]) const
     {
     case BPF_JA | BPF_X:
       printf_debug ("%s: %0004d\n", "JMP | JA | BPF_X", atoi (X.m_str));
-      printf ("goto %s\n", X.m_str);
+      printf ("goto %s", X.m_str);
       return false;
     case BPF_JA | BPF_K:
       printf_debug ("%s: %0004d\n", "JMP | JA | BPF_K", k);
-      printf ("goto 0x%x\n", k);
+      printf ("goto 0x%x", k);
       return false;
 
     case BPF_JEQ | BPF_X:
@@ -410,7 +442,7 @@ Parser::JMP (const filter *const f_ptr, const char *const syms[4]) const
       printf (syms[3], A.retSameType (k));
       return true;
     default:
-      printf ("unknown jmp: jmode: 0x%x, src: 0x%x\n", jmode, src);
+      printf ("unknown jmp: jmode: 0x%x, src: 0x%x", jmode, src);
       return false;
     }
 }
@@ -431,17 +463,17 @@ Parser::JmpWrap (const filter *const f_ptr, const int pc) const
   if (jt == 0 && jf != 0)
     {
       if (JMP (f_ptr, False))
-        printf ("goto %0004d\n", pc + jf + 1);
+        printf ("goto %0004d", pc + jf + 1);
     }
   else if (jf == 0 && jt != 0)
     {
       if (JMP (f_ptr, True))
-        printf ("goto %0004d\n", pc + jt + 1);
+        printf ("goto %0004d", pc + jt + 1);
     }
   else
     {
       if (JMP (f_ptr, True))
-        printf ("goto %0004d, else goto %0004d\n", pc + jt + 1, pc + jf + 1);
+        printf ("goto %0004d, else goto %0004d", pc + jt + 1, pc + jf + 1);
     }
 }
 
@@ -454,14 +486,14 @@ Parser::RET (const filter *const f_ptr) const
     {
     case BPF_A:
       printf_debug ("%s: %s\n", "RET | BPF_A", A.m_str);
-      printf ("ret %s\n", RETVAL2STR (atoi (A.m_str)));
+      printf ("ret %s", RETVAL2STR (atoi (A.m_str)));
       return;
     case BPF_K:
       printf_debug ("%s: 0x%x\n", "RET | BPF_K", f_ptr->k);
-      printf ("ret %s\n", RETVAL2STR (f_ptr->k));
+      printf ("ret %s", RETVAL2STR (f_ptr->k));
       return;
     default:
-      printf ("unknown ret: 0x%x\n", ret);
+      printf ("unknown ret: 0x%x", ret);
     }
 }
 
@@ -483,7 +515,7 @@ Parser::MISC (const filter *const f_ptr)
       A.SetVal (1);
       return;
     default:
-      printf ("unknown mode: 0x%x\n", mode);
+      printf ("unknown mode: 0x%x", mode);
     }
 }
 
@@ -492,8 +524,6 @@ Parser::CLASS (const int idx)
 {
   filter *f_ptr = &m_prog->filter[idx];
   uint16_t cls = BPF_CLASS (f_ptr->code);
-
-  printf ("%04d\t", idx);
 
   switch (cls)
     {
@@ -522,7 +552,7 @@ Parser::CLASS (const int idx)
       MISC (f_ptr);
       return;
     default:
-      printf ("unknown class: 0x%x\n", cls);
+      printf ("unknown class: 0x%x", cls);
     }
 }
 
@@ -534,7 +564,15 @@ extern "C"
     Parser parser (arch, prog);
     uint32_t len = prog->len;
 
+    printf (" Line  CODE  JT   JF      K\n");
+    printf ("---------------------------------\n");
     for (uint32_t i = 0; i < len; i++)
-      parser.CLASS (i);
+      {
+        filter *f_ptr = &prog->filter[i];
+        printf (" %04d: 0x%02x 0x%02x 0x%02x 0x%08x ", i, f_ptr->code,
+                f_ptr->jt, f_ptr->jf, f_ptr->k);
+        parser.CLASS (i);
+        printf ("\n");
+      }
   }
 }

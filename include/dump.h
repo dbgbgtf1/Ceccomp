@@ -2,17 +2,22 @@
 #define DUMP
 
 #include "Main.h"
-#include "parsefilter.h"
 #include <stdint.h>
 
-uint64_t SyscallHandle (syscall_info *Info, int pid, fprog *prog);
+static void Strict();
 
-void DumpFilter (syscall_info *Info, int pid, fprog *prog);
+// clang-format on
+static const uint64_t CheckSCMP (const syscall_info *const Info, const int pid, fprog * const prog);
 
-void Child (char *argv[]);
+static void DumpFilter (const syscall_info *const Info, const int pid, fprog *const prog);
+// clang-format off
 
-void Parent (int pid);
+static void Filter (const syscall_info *const Info, const int pid, fprog *const prog);
 
-void dump (char *argv[]);
+static void Child (char *const argv[]);
+
+static void Parent (const int pid);
+
+extern void dump (const int argc, char *const argv[]);
 
 #endif

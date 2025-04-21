@@ -1,6 +1,6 @@
-#include "../include/transfer.h"
-#include "../include/Main.h"
-#include "../include/color.h"
+#include "transfer.h"
+#include "Main.h"
+#include "color.h"
 #include <seccomp.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -51,7 +51,6 @@ ARCH2STR (uint32_t token)
     case SCMP_ARCH_RISCV64:
       return "RISCV64";
     default:
-      printf ("unknown or unsupported architecture token: 0x%x", token);
       return NULL;
     }
 }
@@ -98,8 +97,7 @@ STR2ARCH (const char *const arch)
   else if (!strcmp (arch, "RISCV64"))
     return SCMP_ARCH_RISCV64;
   else
-    printf ("unknown or unsupported architecture name: %s", arch);
-  return 0;
+    return 0;
 }
 
 const char *const
@@ -112,35 +110,35 @@ ABS2STR (const uint32_t offset)
     case offsetof (seccomp_data, arch):
       return architecture;
     case offsetof (seccomp_data, instruction_pointer):
-      return "low pc";
+      return low_pc;
     case offsetof (seccomp_data, instruction_pointer) + 4:
-      return "high pc";
+      return high_pc;
     case offsetof (seccomp_data, args[0]):
-      return "low args[0]";
+      return low_arg0;
     case offsetof (seccomp_data, args[0]) + 4:
-      return "high args[0]";
+      return high_arg0;
     case offsetof (seccomp_data, args[1]):
-      return "low args[1]";
+      return low_arg1;
     case offsetof (seccomp_data, args[1]) + 4:
-      return "high args[1]";
+      return high_arg1;
     case offsetof (seccomp_data, args[2]):
-      return "low args[2]";
+      return low_arg2;
     case offsetof (seccomp_data, args[2]) + 4:
-      return "high args[2]";
+      return high_arg2;
     case offsetof (seccomp_data, args[3]):
-      return "low args[3]";
+      return low_arg3;
     case offsetof (seccomp_data, args[3]) + 4:
-      return "high args[3]";
+      return high_arg3;
     case offsetof (seccomp_data, args[4]):
-      return "low args[4]";
+      return low_arg4;
     case offsetof (seccomp_data, args[4]) + 4:
-      return "high args[4]";
+      return high_arg4;
     case offsetof (seccomp_data, args[5]):
-      return "low args[5]";
+      return low_arg5;
     case offsetof (seccomp_data, args[5]) + 4:
-      return "high args[5]";
+      return high_arg5;
     default:
-      printf ("unaligned seccomp_data offset: 0x%x\n", offset);
+      printf("unknown offset of seccomp_data: " BLUE_H, offset);
       return NULL;
     }
 }
@@ -167,7 +165,7 @@ RETVAL2STR (const uint32_t retval)
     case SCMP_ACT_TRACE (0):
       return YELLOW("TRACE");
     default:
-      printf ("unknown ret value of seccomp: 0x%x\n", retval);
+      printf("unknown ret value of seccomp: " BLUE_H, retval);
       return NULL;
     }
 }
