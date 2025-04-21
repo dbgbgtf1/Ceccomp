@@ -18,9 +18,8 @@ CPP_OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.cpp.o, $(CPP_SRCS))
 
 OBJS := $(C_OBJS) $(CPP_OBJS)
 
-$(BUILD_DIR)/test: $(OBJS)
+$(BUILD_DIR)/Ceccomp: $(OBJS)
 	$(CXX) $(CFLAGS) $(OBJS) -g -o $@
-	rm -rf raw_bpf rule
 
 $(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) -I$(INC_DIRS) -c $< -g -o $@
