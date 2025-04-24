@@ -9,7 +9,7 @@ extern "C"
 {
 #endif
 
-  extern void ParseFilter (uint32_t arch, const fprog *const prog);
+  void ParseFilter (uint32_t arch, fprog *prog);
 
 #ifdef __cplusplus
 }

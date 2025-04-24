@@ -1,13 +1,15 @@
 #include "transfer.h"
 #include "Main.h"
 #include "color.h"
+#include "emu.h"
 #include <seccomp.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-const char *const
+char *
 ARCH2STR (uint32_t token)
 {
   switch (token)
@@ -55,117 +57,274 @@ ARCH2STR (uint32_t token)
     }
 }
 
-const uint32_t
-STR2ARCH (const char *const arch)
+uint32_t
+STR2ARCH (char *arch)
 {
-  if (!strcmp (arch, "X86"))
-    return SCMP_ARCH_X86;
-  else if (!strcmp (arch, "X86_64"))
+  if (STARTWITH (arch, "X86_64"))
     return SCMP_ARCH_X86_64;
-  else if (!strcmp (arch, "X32"))
+  else if (STARTWITH (arch, "X86"))
+    return SCMP_ARCH_X86;
+  else if (STARTWITH (arch, "X32"))
     return SCMP_ARCH_X32;
-  else if (!strcmp (arch, "ARM"))
+  else if (STARTWITH (arch, "ARM"))
     return SCMP_ARCH_ARM;
-  else if (!strcmp (arch, "AARCH64"))
+  else if (STARTWITH (arch, "AARCH64"))
     return SCMP_ARCH_AARCH64;
-  else if (!strcmp (arch, "MIPS"))
+  else if (STARTWITH (arch, "MIPS"))
     return SCMP_ARCH_MIPS;
-  else if (!strcmp (arch, "MIPSEL"))
+  else if (STARTWITH (arch, "MIPSEL"))
     return SCMP_ARCH_MIPSEL;
-  else if (!strcmp (arch, "MIPS64"))
+  else if (STARTWITH (arch, "MIPS64"))
     return SCMP_ARCH_MIPS64;
-  else if (!strcmp (arch, "MIPSEL64"))
+  else if (STARTWITH (arch, "MIPSEL64"))
     return SCMP_ARCH_MIPSEL64;
-  else if (!strcmp (arch, "MIPS64N32"))
+  else if (STARTWITH (arch, "MIPS64N32"))
     return SCMP_ARCH_MIPS64N32;
-  else if (!strcmp (arch, "MIPSEL64N32"))
+  else if (STARTWITH (arch, "MIPSEL64N32"))
     return SCMP_ARCH_MIPSEL64N32;
-  else if (!strcmp (arch, "PARISC"))
+  else if (STARTWITH (arch, "PARISC"))
     return SCMP_ARCH_PARISC;
-  else if (!strcmp (arch, "PARISC64"))
+  else if (STARTWITH (arch, "PARISC64"))
     return SCMP_ARCH_PARISC64;
-  else if (!strcmp (arch, "PPC"))
+  else if (STARTWITH (arch, "PPC"))
     return SCMP_ARCH_PPC;
-  else if (!strcmp (arch, "PPC64"))
+  else if (STARTWITH (arch, "PPC64"))
     return SCMP_ARCH_PPC64;
-  else if (!strcmp (arch, "PPC64LE"))
+  else if (STARTWITH (arch, "PPC64LE"))
     return SCMP_ARCH_PPC64LE;
-  else if (!strcmp (arch, "S390"))
+  else if (STARTWITH (arch, "S390"))
     return SCMP_ARCH_S390;
-  else if (!strcmp (arch, "S390X"))
+  else if (STARTWITH (arch, "S390X"))
     return SCMP_ARCH_S390X;
-  else if (!strcmp (arch, "RISCV64"))
+  else if (STARTWITH (arch, "RISCV64"))
     return SCMP_ARCH_RISCV64;
   else
-    return 0;
+    return -1;
 }
 
-const char *const
-ABS2STR (const uint32_t offset)
+char *
+ABS2STR (uint32_t offset)
 {
   switch (offset)
     {
     case offsetof (seccomp_data, nr):
-      return syscall_nr;
+      return PURPLE(syscall_nr);
     case offsetof (seccomp_data, arch):
-      return architecture;
+      return PURPLE(architecture);
+
     case offsetof (seccomp_data, instruction_pointer):
-      return low_pc;
+      return PURPLE(low_pc);
     case offsetof (seccomp_data, instruction_pointer) + 4:
-      return high_pc;
+      return PURPLE(high_pc);
+
     case offsetof (seccomp_data, args[0]):
-      return low_arg0;
-    case offsetof (seccomp_data, args[0]) + 4:
-      return high_arg0;
+      return PURPLE(low_arg0);
     case offsetof (seccomp_data, args[1]):
-      return low_arg1;
-    case offsetof (seccomp_data, args[1]) + 4:
-      return high_arg1;
+      return PURPLE(low_arg1);
     case offsetof (seccomp_data, args[2]):
-      return low_arg2;
-    case offsetof (seccomp_data, args[2]) + 4:
-      return high_arg2;
+      return PURPLE(low_arg2);
     case offsetof (seccomp_data, args[3]):
-      return low_arg3;
-    case offsetof (seccomp_data, args[3]) + 4:
-      return high_arg3;
+      return PURPLE(low_arg3);
     case offsetof (seccomp_data, args[4]):
-      return low_arg4;
-    case offsetof (seccomp_data, args[4]) + 4:
-      return high_arg4;
+      return PURPLE(low_arg4);
     case offsetof (seccomp_data, args[5]):
-      return low_arg5;
+      return PURPLE(low_arg5);
+
+    case offsetof (seccomp_data, args[0]) + 4:
+      return PURPLE(high_arg0);
+    case offsetof (seccomp_data, args[1]) + 4:
+      return PURPLE(high_arg1);
+    case offsetof (seccomp_data, args[2]) + 4:
+      return PURPLE(high_arg2);
+    case offsetof (seccomp_data, args[3]) + 4:
+      return PURPLE(high_arg3);
+    case offsetof (seccomp_data, args[4]) + 4:
+      return PURPLE(high_arg4);
     case offsetof (seccomp_data, args[5]) + 4:
-      return high_arg5;
+      return PURPLE(high_arg5);
+
     default:
-      printf("unknown offset of seccomp_data: " BLUE_H, offset);
       return NULL;
     }
 }
 
-const char *const
-RETVAL2STR (const uint32_t retval)
+uint32_t
+STR2ABS (char *str)
+{
+  if (STARTWITH (str, syscall_nr))
+    return offsetof (seccomp_data, nr);
+  else if (STARTWITH (str, architecture))
+    return offsetof (seccomp_data, arch);
+
+  else if (STARTWITH (str, low_pc))
+    return offsetof (seccomp_data, instruction_pointer);
+  else if (STARTWITH (str, high_pc))
+    return offsetof (seccomp_data, instruction_pointer) + 4;
+
+  else if (STARTWITH (str, low_arg0))
+    return offsetof (seccomp_data, args[0]);
+  else if (STARTWITH (str, low_arg1))
+    return offsetof (seccomp_data, args[1]);
+  else if (STARTWITH (str, low_arg2))
+    return offsetof (seccomp_data, args[2]);
+  else if (STARTWITH (str, low_arg3))
+    return offsetof (seccomp_data, args[3]);
+  else if (STARTWITH (str, low_arg4))
+    return offsetof (seccomp_data, args[4]);
+  else if (STARTWITH (str, low_arg5))
+    return offsetof (seccomp_data, args[5]);
+
+  else if (STARTWITH (str, high_arg0))
+    return offsetof (seccomp_data, args[0]) + 4;
+  else if (STARTWITH (str, high_arg1))
+    return offsetof (seccomp_data, args[1]) + 4;
+  else if (STARTWITH (str, high_arg2))
+    return offsetof (seccomp_data, args[2]) + 4;
+  else if (STARTWITH (str, high_arg3))
+    return offsetof (seccomp_data, args[3]) + 4;
+  else if (STARTWITH (str, high_arg4))
+    return offsetof (seccomp_data, args[4]) + 4;
+  else if (STARTWITH (str, high_arg5))
+    return offsetof (seccomp_data, args[5]) + 4;
+  else
+    return -1;
+}
+
+char *
+RETVAL2STR (uint32_t retval)
 {
   switch (retval & ~0xffff)
     {
     case SCMP_ACT_KILL:
-      return RED("KILL");
+      return RED ("KILL");
     case SCMP_ACT_ALLOW:
-      return GREEN("ALLOW");
+      return GREEN ("ALLOW");
     case SCMP_ACT_KILL_PROCESS:
-      return RED("KILL_PROCESS");
+      return RED ("KILL_PROCESS");
     case SCMP_ACT_TRAP:
-      return YELLOW("TRAP");
+      return YELLOW ("TRAP");
     case SCMP_ACT_NOTIFY:
-      return YELLOW("notify");
+      return YELLOW ("NOTIFY");
     case SCMP_ACT_LOG:
-      return YELLOW("LOG");
+      return YELLOW ("LOG");
     case SCMP_ACT_ERRNO (0):
-      return RED("ERRNO");
+      return RED ("ERRNO");
     case SCMP_ACT_TRACE (0):
-      return YELLOW("TRACE");
+      return YELLOW ("TRACE");
     default:
-      printf("unknown ret value of seccomp: " BLUE_H, retval);
+      return NULL;
+    }
+}
+
+uint32_t
+STR2RETVAL (char *str)
+{
+  if (strstr (str, "KILL"))
+    return SCMP_ACT_KILL;
+  else if (strstr (str, "ALLOW"))
+    return SCMP_ACT_ALLOW;
+  else if (strstr (str, "KILL_PROCESS"))
+    return SCMP_ACT_KILL_PROCESS;
+  else if (strstr (str, "TRAP"))
+    return SCMP_ACT_TRAP;
+  else if (strstr (str, "NOTIFY"))
+    return SCMP_ACT_NOTIFY;
+  else if (strstr (str, "LOG"))
+    return SCMP_ACT_LOG;
+  else if (strstr (str, "ERRNO"))
+    return SCMP_ACT_ERRNO (0);
+  else if (strstr (str, "TRACE"))
+    return SCMP_ACT_TRACE (0);
+  else
+    return -1;
+}
+
+uint32_t
+STR2REG (char *str)
+{
+  if (STARTWITH (str, "$A"))
+    return offsetof (reg_mem, A);
+  else if (STARTWITH (str, "$X"))
+    return offsetof (reg_mem, X);
+
+  else if (STARTWITH (str, "$mem[0x0]"))
+    return offsetof (reg_mem, mem[0x1]);
+  else if (STARTWITH (str, "$mem[0x2]"))
+    return offsetof (reg_mem, mem[0x2]);
+  else if (STARTWITH (str, "$mem[0x3]"))
+    return offsetof (reg_mem, mem[0x3]);
+  else if (STARTWITH (str, "$mem[0x4]"))
+    return offsetof (reg_mem, mem[0x4]);
+  else if (STARTWITH (str, "$mem[0x5]"))
+    return offsetof (reg_mem, mem[0x5]);
+  else if (STARTWITH (str, "$mem[0x6]"))
+    return offsetof (reg_mem, mem[0x6]);
+  else if (STARTWITH (str, "$mem[0x7]"))
+    return offsetof (reg_mem, mem[0x7]);
+  else if (STARTWITH (str, "$mem[0x8]"))
+    return offsetof (reg_mem, mem[0x8]);
+  else if (STARTWITH (str, "$mem[0x9]"))
+    return offsetof (reg_mem, mem[0x9]);
+  else if (STARTWITH (str, "$mem[0xa]"))
+    return offsetof (reg_mem, mem[0xa]);
+  else if (STARTWITH (str, "$mem[0xb]"))
+    return offsetof (reg_mem, mem[0xb]);
+  else if (STARTWITH (str, "$mem[0xc]"))
+    return offsetof (reg_mem, mem[0xc]);
+  else if (STARTWITH (str, "$mem[0xd]"))
+    return offsetof (reg_mem, mem[0xd]);
+  else if (STARTWITH (str, "$mem[0xe]"))
+    return offsetof (reg_mem, mem[0xe]);
+  else if (STARTWITH (str, "$mem[0xf]"))
+    return offsetof (reg_mem, mem[0xf]);
+
+  return -1;
+}
+
+char *
+REG2STR (uint32_t offset)
+{
+  uint32_t mem_offset = offsetof (reg_mem, mem[0]);
+
+  switch (offset)
+    {
+    case offsetof (reg_mem, A):
+      return "$A";
+    case offsetof (reg_mem, X):
+      return "$X";
+    case offsetof (reg_mem, mem[0x0]):
+      return "$mem[0x0]";
+    case offsetof (reg_mem, mem[0x1]):
+      return "$mem[0x1]";
+    case offsetof (reg_mem, mem[0x2]):
+      return "$mem[0x2]";
+    case offsetof (reg_mem, mem[0x3]):
+      return "$mem[0x3]";
+    case offsetof (reg_mem, mem[0x4]):
+      return "$mem[0x4]";
+    case offsetof (reg_mem, mem[0x5]):
+      return "$mem[0x5]";
+    case offsetof (reg_mem, mem[0x6]):
+      return "$mem[0x6]";
+    case offsetof (reg_mem, mem[0x7]):
+      return "$mem[0x7]";
+    case offsetof (reg_mem, mem[0x8]):
+      return "$mem[0x8]";
+    case offsetof (reg_mem, mem[0x9]):
+      return "$mem[0x9]";
+    case offsetof (reg_mem, mem[0xa]):
+      return "$mem[0xa]";
+    case offsetof (reg_mem, mem[0xb]):
+      return "$mem[0xb]";
+    case offsetof (reg_mem, mem[0xc]):
+      return "$mem[0xc]";
+    case offsetof (reg_mem, mem[0xd]):
+      return "$mem[0xd]";
+    case offsetof (reg_mem, mem[0xe]):
+      return "$mem[0xe]";
+    case offsetof (reg_mem, mem[0xf]):
+      return "$mem[0xf]";
+    default:
       return NULL;
     }
 }

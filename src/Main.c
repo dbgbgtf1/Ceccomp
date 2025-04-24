@@ -1,5 +1,6 @@
 #include "disasm.h"
 #include "dump.h"
+#include "emu.h"
 #include <stdio.h>
 #include <string.h>
 
@@ -10,18 +11,25 @@ help ()
   printf ("Example as follows\n");
   printf ("Ceccomp dump program program-args\n");
   printf ("Ceccomp disasm xxx.bpf\n");
+  printf ("Ceccomp emu dump-result arch nr [ argv[0] - argv[5] ] (default as "
+          "0)\n");
 }
 
 int
-main (const int argc, char *const argv[], const char *const env[])
+main (int argc, char *argv[], char *env[])
 {
   if (argc < 2)
     help ();
   if (!strcmp (argv[1], "dump"))
-    dump (argc, &argv[2]);
-  // Ceccomp dump program program-args
+    dump (argc - 2, &argv[2]);
+  // Ceccomp dump program [ program-args ]
+
+  else if (!strcmp (argv[1], "emu"))
+    emu (argc - 2, &argv[2]);
+  // Ceccomp emu dump-result arch nr [ argv[0] - argv[5] ] (default as 0)
+
   else if (!strcmp (argv[1], "disasm"))
-    disasm (argc, &argv[2]);
+    disasm (argc - 2, &argv[2]);
   // Ceccomp disasm arch xxx.bpf
 }
 

@@ -2,10 +2,9 @@
 #include "dump.h"
 #include "Main.h"
 #include "parsefilter.h"
+#include "color.h"
 #include "error.h"
-#include <sys/ptrace.h>
 #include <sys/prctl.h>
-#include <linux/ptrace.h>
 #include <seccomp.h>
 #include <sys/wait.h>
 #include <signal.h>
@@ -22,12 +21,14 @@
 void
 Strict ()
 {
-  printf ("Strict Mode Detected?!\n");
-  printf ("Only read, write, _exit!\n");
+  printf ("---------------------------------\n");
+  printf (RED ("Strict Mode Detected?!\n"));
+  printf (RED ("Only read, write, _exit!\n"));
+  printf ("---------------------------------\n");
 }
 
-const uint64_t
-CheckSCMP (const syscall_info *const Info, const int pid, fprog * const prog)
+uint64_t
+CheckSCMP (syscall_info *Info, int pid, fprog *prog)
 {
   uint64_t seccomp_mode = false;
   uint32_t arch = Info->arch;
@@ -62,7 +63,7 @@ CheckSCMP (const syscall_info *const Info, const int pid, fprog * const prog)
 }
 
 void
-DumpFilter (const syscall_info *const Info, const int pid, fprog *const prog)
+DumpFilter (syscall_info *Info, int pid, fprog *prog)
 {
   size_t *sFilter = (size_t *)prog->filter;
   uint32_t offset = offsetof (fprog, filter);
@@ -76,7 +77,7 @@ DumpFilter (const syscall_info *const Info, const int pid, fprog *const prog)
 }
 
 void
-Filter (const syscall_info *const Info, const int pid, fprog *const prog)
+Filter (syscall_info *Info, int pid, fprog *prog)
 {
   prog->filter = malloc (prog->len * sizeof (filter));
   DumpFilter (Info, pid, prog);
@@ -85,8 +86,10 @@ Filter (const syscall_info *const Info, const int pid, fprog *const prog)
 }
 
 void
-Child (char *const argv[])
+Child (char *argv[])
 {
+  close (STDOUT_FILENO);
+
   ptrace (PTRACE_TRACEME, 0, 0, 0);
   raise (SIGSTOP);
 
@@ -97,7 +100,7 @@ Child (char *const argv[])
 }
 
 void
-Parent (const int pid)
+Parent (int pid)
 {
   syscall_info *Info = malloc (sizeof (syscall_info));
   fprog *prog = malloc (sizeof (fprog));
@@ -133,10 +136,14 @@ Parent (const int pid)
 }
 
 void
-dump (const int argc, char *const argv[])
+dump (int argc, char *argv[])
 {
-  if (argc <= 2)
-    PEXIT ("%s", "usage: Ceccomp dump program prgram-args");
+  // argv[0] = program name
+  // dump need these args to run at least
+
+  if (argc <= 0)
+    PEXIT ("%s",
+           "No enough args\nusage: Ceccomp dump program [ prgram-args ]");
 
   int pid = fork ();
   if (pid == 0)

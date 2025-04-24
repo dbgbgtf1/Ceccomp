@@ -1,4 +1,8 @@
-./build/
-./compile_commands.json
+build/
+compile_commands.json
+a.out
+Ceccomp
+Test
+result
 *.gdb_history
 *.cache/
