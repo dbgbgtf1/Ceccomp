@@ -121,7 +121,7 @@ AssignLine (line_set *Line, reg_mem *reg, seccomp_data *data)
   printf (BLUE_LS " = " BLUE_S "\n", lvar_len, Line->clean_line, rvar);
 }
 
-void
+uint32_t
 RetLine (line_set *Line)
 {
   char *retval_str = STRAFTER (Line->clean_line, "return");
@@ -132,6 +132,8 @@ RetLine (line_set *Line)
   retval_str = RETVAL2STR (retval);
 
   printf ("return %s\n", retval_str);
+
+  return 0xffffffff;
 }
 
 void
@@ -163,7 +165,7 @@ ResolveLines (FILE *fp, seccomp_data *data)
       if (STARTWITH (clean_line, "if"))
         actual_idx = IfLine (&Line, reg, data);
       else if (STARTWITH (clean_line, "ret"))
-        RetLine (&Line);
+        actual_idx = RetLine (&Line);
       else if (*clean_line == '$')
         AssignLine (&Line, reg, data);
       else

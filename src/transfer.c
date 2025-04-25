@@ -108,40 +108,40 @@ ABS2STR (uint32_t offset)
   switch (offset)
     {
     case offsetof (seccomp_data, nr):
-      return PURPLE(syscall_nr);
+      return syscall_nr;
     case offsetof (seccomp_data, arch):
-      return PURPLE(architecture);
+      return architecture;
 
     case offsetof (seccomp_data, instruction_pointer):
-      return PURPLE(low_pc);
+      return low_pc;
     case offsetof (seccomp_data, instruction_pointer) + 4:
-      return PURPLE(high_pc);
+      return high_pc;
 
     case offsetof (seccomp_data, args[0]):
-      return PURPLE(low_arg0);
+      return low_arg0;
     case offsetof (seccomp_data, args[1]):
-      return PURPLE(low_arg1);
+      return low_arg1;
     case offsetof (seccomp_data, args[2]):
-      return PURPLE(low_arg2);
+      return low_arg2;
     case offsetof (seccomp_data, args[3]):
-      return PURPLE(low_arg3);
+      return low_arg3;
     case offsetof (seccomp_data, args[4]):
-      return PURPLE(low_arg4);
+      return low_arg4;
     case offsetof (seccomp_data, args[5]):
-      return PURPLE(low_arg5);
+      return low_arg5;
 
     case offsetof (seccomp_data, args[0]) + 4:
-      return PURPLE(high_arg0);
+      return high_arg0;
     case offsetof (seccomp_data, args[1]) + 4:
-      return PURPLE(high_arg1);
+      return high_arg1;
     case offsetof (seccomp_data, args[2]) + 4:
-      return PURPLE(high_arg2);
+      return high_arg2;
     case offsetof (seccomp_data, args[3]) + 4:
-      return PURPLE(high_arg3);
+      return high_arg3;
     case offsetof (seccomp_data, args[4]) + 4:
-      return PURPLE(high_arg4);
+      return high_arg4;
     case offsetof (seccomp_data, args[5]) + 4:
-      return PURPLE(high_arg5);
+      return high_arg5;
 
     default:
       return NULL;
