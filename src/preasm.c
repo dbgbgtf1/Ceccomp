@@ -79,20 +79,19 @@ ClearSpace (char *Line)
     }
 }
 
-char *
-PreAsm (FILE *fp)
+void
+PreAsm (FILE *fp, line_set *Line)
 {
-  char *Line;
   do
     {
-      Line = RetLines (fp);
-      if (Line == NULL)
-        return Line;
+      Line->origin_line = RetLines (fp);
+      if (Line->origin_line == NULL)
+        return;
     }
-  while (*Line == '\0');
+  while (*Line->origin_line == '\0');
 
-  ClearColor (Line);
-  ClearSpace (Line);
+  Line->clean_line = strdup(Line->origin_line);
 
-  return Line;
+  ClearColor (Line->clean_line);
+  ClearSpace (Line->clean_line);
 }

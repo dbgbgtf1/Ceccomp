@@ -10,6 +10,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -40,35 +41,36 @@ isStateTrue (uint32_t lval, uint32_t symidx, uint32_t rval)
 }
 
 bool
-ParseCondition (char *left_brace, reg_mem *reg, seccomp_data *data, char *Line)
+ParseCondition (char *left_brace, reg_mem *reg, seccomp_data *data,
+                char *origin_line)
 {
   char *lvar = left_brace + strlen ("(");
 
-  reg_set lvarset;
-  ParseReg (lvar, &lvarset, reg, Line);
-  uint8_t lvar_len = lvarset.reg_len;
-  uint32_t *reg_ptr = lvarset.reg_ptr;
+  reg_set lvar_set;
+  ParseReg (lvar, &lvar_set, reg, origin_line);
+  uint8_t lvar_len = lvar_set.reg_len;
+  uint32_t *reg_ptr = lvar_set.reg_ptr;
 
   char *sym = lvar + lvar_len;
-  uint8_t symset = ParseSym (sym, Line);
-  uint8_t symlen = GETSYMLEN (symset);
-  uint8_t symidx = GETSYMIDX (symset);
+  uint8_t sym_set = ParseSym (sym, origin_line);
+  uint8_t symlen = GETSYMLEN (sym_set);
+  uint8_t symidx = GETSYMIDX (sym_set);
 
   char *rvar = sym + symlen;
-  uint32_t rval = ParseVal (rvar, data->arch, Line);
+  uint32_t rval = ParseVal (rvar, data->arch, origin_line);
 
   printf (BLUE_LS, lvar_len, lvar);
   printf (" %.*s ", symlen, sym);
   printf (BLUE_LS, (uint32_t)(strchr (rvar, ')') - rvar), rvar);
 
-  return isStateTrue (*reg_ptr, GETSYMIDX (symset), rval);
+  return isStateTrue (*reg_ptr, GETSYMIDX (sym_set), rval);
 }
 
 uint32_t
-IfLine (char *Line, reg_mem *reg, seccomp_data *data)
+IfLine (line_set *Line, reg_mem *reg, seccomp_data *data)
 {
-  char *left_brace = Line + strlen ("if");
-  bool reverse = MaybeReverse (left_brace, Line);
+  char *left_brace = Line->clean_line + strlen ("if");
+  bool reverse = MaybeReverse (left_brace, Line->origin_line);
   if (reverse)
     {
       left_brace += 1;
@@ -79,14 +81,14 @@ IfLine (char *Line, reg_mem *reg, seccomp_data *data)
 
   char *right_brace = strchr (left_brace, ')');
   if (right_brace == NULL)
-    PEXIT ("use if( ) to wrap condition: %s", Line);
+    PEXIT ("use if( ) to wrap condition: %s", Line->origin_line);
 
   bool condition;
-  condition = ParseCondition (left_brace, reg, data, Line);
+  condition = ParseCondition (left_brace, reg, data, Line->origin_line);
 
-  uint32_t jmpset = ParseJmp (right_brace, Line);
-  uint16_t jf = GETJF (jmpset);
-  uint16_t jt = GETJT (jmpset);
+  uint32_t jmp_set = ParseJmp (right_brace, Line->origin_line);
+  uint16_t jf = GETJF (jmp_set);
+  uint16_t jt = GETJT (jmp_set);
 
   if (jf != 0)
     printf (") goto" FORMAT ", else goto " FORMAT "\n", jt, jf);
@@ -102,28 +104,31 @@ IfLine (char *Line, reg_mem *reg, seccomp_data *data)
 }
 
 void
-AssignLine (char *Line, reg_mem *reg, seccomp_data *data)
+AssignLine (line_set *Line, reg_mem *reg, seccomp_data *data)
 {
   reg_set lvar;
-  ParseReg (Line, &lvar, reg, Line);
+  ParseReg (Line->clean_line, &lvar, reg, Line->origin_line);
   uint8_t lvar_len = lvar.reg_len;
   uint32_t *lvar_ptr = lvar.reg_ptr;
 
-  if (*(Line + lvar_len) != '=')
-    PEXIT ("invalid operator in assign: %s", Line);
+  if (*(Line->clean_line + lvar_len) != '=')
+    PEXIT ("invalid operator in assign: %s", Line->origin_line);
 
-  char *rvar = Line + lvar_len + 1;
-  uint32_t rval = ParseVar (rvar, data, Line);
+  char *rvar = Line->clean_line + lvar_len + 1;
+  uint32_t rval = ParseVar (rvar, data, Line->origin_line);
 
   *lvar_ptr = rval;
-  printf (BLUE_LS " = " PURPLE_S "\n", lvar_len, Line, rvar);
+  printf (BLUE_LS " = " BLUE_S "\n", lvar_len, Line->clean_line, rvar);
 }
 
 void
-RetLine (char *Line)
+RetLine (line_set *Line)
 {
-  char *retval_str = STRAFTER (Line, "return");
+  char *retval_str = STRAFTER (Line->clean_line, "return");
   uint32_t retval = STR2RETVAL (retval_str);
+  if (retval == -1)
+    PEXIT ("invalid return value: %s", Line->origin_line);
+
   retval_str = RETVAL2STR (retval);
 
   printf ("return %s\n", retval_str);
@@ -132,33 +137,39 @@ RetLine (char *Line)
 void
 ResolveLines (FILE *fp, seccomp_data *data)
 {
-  char *Line = NULL;
+  line_set Line = { NULL, NULL };
   reg_mem *reg = malloc (sizeof (reg_mem));
 
   uint32_t read_idx = 0;
   uint32_t actual_idx = 0;
 
-  while ((Line = PreAsm (fp)) != NULL)
+  char *origin_line;
+  char *clean_line;
+  while (PreAsm(fp, &Line), Line.origin_line != NULL)
     {
+      origin_line = Line.origin_line;
+      clean_line = Line.clean_line;
+
       read_idx++;
       if (read_idx < actual_idx)
         {
-          LIGHTCOLORPRINTF (FORMAT ": %s", read_idx, Line);
+          LIGHTCOLORPRINTF (FORMAT ": %s", read_idx, origin_line);
+          free (clean_line);
           continue;
         }
       printf (FORMAT ": ", read_idx);
       actual_idx++;
 
-      if (STARTWITH (Line, "if"))
-        actual_idx = IfLine (Line, reg, data);
-      else if (STARTWITH (Line, "ret"))
-        RetLine (Line);
-      else if (*Line == '$')
-        AssignLine (Line, reg, data);
+      if (STARTWITH (clean_line, "if"))
+        actual_idx = IfLine (&Line, reg, data);
+      else if (STARTWITH (clean_line, "ret"))
+        RetLine (&Line);
+      else if (*clean_line == '$')
+        AssignLine (&Line, reg, data);
       else
-        PEXIT ("invalid Line: %s", Line);
-      // PreAsm return correct Lines
-      // if Line == '\0', it doesn't matter
+        PEXIT ("invalid Line: %s", origin_line);
+
+      free (clean_line);
     }
 
   free (reg);

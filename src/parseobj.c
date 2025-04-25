@@ -14,7 +14,7 @@
 // if ($A == write)
 // if ($A > 0xffffffff)
 uint32_t
-ParseVal (char *rval_str, uint32_t arch, char *Line)
+ParseVal (char *rval_str, uint32_t arch, char *origin_line)
 {
   uint32_t rval;
   if ((rval = STR2ARCH (rval_str)) != -1)
@@ -32,7 +32,7 @@ ParseVal (char *rval_str, uint32_t arch, char *Line)
       char *end;
       rval = strtol (rval_str, &end, 0);
       if (rval_str == end)
-        PEXIT ("invalid right value: %s", Line);
+        PEXIT ("invalid right value: %s", origin_line);
     }
   return rval;
 }
@@ -41,11 +41,11 @@ ParseVal (char *rval_str, uint32_t arch, char *Line)
 // $A = $low args[0]
 // $A = $syscall_nr
 uint32_t
-ParseVar (char *rvar_str, seccomp_data *data, char *Line)
+ParseVar (char *rvar_str, seccomp_data *data, char *origin_line)
 {
   uint32_t data_offset;
   if ((data_offset = STR2ABS (rvar_str)) == -1)
-    PEXIT ("invalid right variable: %s", Line);
+    PEXIT ("invalid right variable: %s", origin_line);
   return *(uint32_t *)((char *)data + data_offset);
 }
 
@@ -53,11 +53,11 @@ ParseVar (char *rvar_str, seccomp_data *data, char *Line)
 // $A
 // $mem[0x0]
 void
-ParseReg (char *reg_str, reg_set *reg_set, reg_mem *reg_ptr, char *Line)
+ParseReg (char *reg_str, reg_set *reg_set, reg_mem *reg_ptr, char *origin_line)
 {
   uint32_t reg_offset = STR2REG (reg_str);
   if (reg_offset == -1)
-    PEXIT ("invalid left variable: %s", Line);
+    PEXIT ("invalid left variable: %s", origin_line);
 
   if (reg_offset > offsetof (reg_mem, X))
     reg_set->reg_len = strlen ("$mem[0x0]");
@@ -68,7 +68,7 @@ ParseReg (char *reg_str, reg_set *reg_set, reg_mem *reg_ptr, char *Line)
 }
 
 uint32_t
-ParseSym (char *sym, char *Line)
+ParseSym (char *sym, char *origin_line)
 {
   if (!strncmp (sym, "==", 2))
     return SYM_EQ;
@@ -86,14 +86,14 @@ ParseSym (char *sym, char *Line)
   else if (!strncmp (sym, "<", 1))
     return SYM_LT;
 
-  PEXIT ("invalid operator: %s", Line);
+  PEXIT ("invalid operator: %s", origin_line);
 }
 
 uint32_t
-ParseJmp (char *right_brace, char *Line)
+ParseJmp (char *right_brace, char *origin_line)
 {
   if (!STARTWITH (right_brace, ")goto"))
-    PEXIT ("use 'goto' after ( ): %s", Line);
+    PEXIT ("use 'goto' after ( ): %s", origin_line);
 
   char *jt_str = right_brace + strlen (")goto");
   char *jf_str = NULL;
@@ -102,30 +102,30 @@ ParseJmp (char *right_brace, char *Line)
 
   jt = strtol (jt_str, &jf_str, 10);
   if (jt == 0)
-    PEXIT ("line num to go after goto: %s", Line);
+    PEXIT ("line num to go after goto: %s", origin_line);
 
   if (STARTWITH (jf_str, ",elsegoto"))
     {
       jf_str += strlen (",elsegoto");
       jf = strtol (jf_str, NULL, 10);
       if (jf == 0)
-        PEXIT ("line num to go after else goto: %s", Line);
+        PEXIT ("line num to go after else goto: %s", origin_line);
     }
 
   return JMPSET (jt, jf);
 }
 
 bool
-MaybeReverse (char *after_if, char *Line)
+MaybeReverse (char *after_if, char *origin_line)
 {
   if (*after_if == '!')
     {
       if (*(after_if + 1) == '(')
         return true;
-      PEXIT ("use if!( ) to reverse the condition: %s", Line);
+      PEXIT ("use if!( ) to reverse the condition: %s", origin_line);
     }
   else if (*after_if == '(')
     return false;
   else
-    PEXIT ("use if( ) to wrap condition : %s", Line);
+    PEXIT ("use if( ) to wrap condition : %s", origin_line);
 }
