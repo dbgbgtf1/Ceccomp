@@ -32,7 +32,7 @@ install_filter ()
 
     /* [1] Jump forward 5 instructions if architecture does not
            match 't_arch'. */
-    BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, AUDIT_ARCH_X86_64, 0, 5),
+    BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, AUDIT_ARCH_X86_64, 0, 9),
 
     /* [2] Load system call number from 'seccomp_data' buffer into
            accumulator. */
@@ -41,11 +41,21 @@ install_filter ()
     /* [3] Check ABI - only needed for x86-64 in deny-list use
            cases.  Use BPF_JGT instead of checking against the bit
            mask to avoid having to reload the syscall number. */
-    BPF_JUMP (BPF_JMP | BPF_JGT | BPF_K, upper_nr_limit, 3, 0),
+    BPF_JUMP (BPF_JMP | BPF_JGT | BPF_K, upper_nr_limit, 6, 0),
 
     /* [4] Jump forward 1 instruction if system call number
            does not match 'syscall_nr'. */
-    BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, syscall_nr, 0, 1),
+    BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, syscall_nr, 0, 6),
+
+    BPF_STMT (BPF_LD | BPF_W | BPF_ABS,
+              (offsetof (struct seccomp_data, args[0]))),
+
+    BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, 5, 4, 3),
+
+    BPF_STMT (BPF_LD | BPF_W | BPF_ABS,
+              (offsetof (struct seccomp_data, args[0]) + 4)),
+
+    BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, 2, 0, 2),
 
     /* [5] Matching architecture and system call: don't execute
        the system call, and return 'f_errno' in 'errno'. */
