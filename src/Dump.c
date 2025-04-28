@@ -18,7 +18,7 @@
 
 #define LOADED 0x8
 
-void
+static void
 Strict ()
 {
   printf ("---------------------------------\n");
@@ -27,7 +27,7 @@ Strict ()
   printf ("---------------------------------\n");
 }
 
-uint64_t
+static uint64_t
 CheckSCMP (syscall_info *Info, int pid, fprog *prog)
 {
   uint64_t seccomp_mode = false;
@@ -62,7 +62,7 @@ CheckSCMP (syscall_info *Info, int pid, fprog *prog)
   return seccomp_mode;
 }
 
-void
+static void
 DumpFilter (syscall_info *Info, int pid, fprog *prog)
 {
   size_t *sFilter = (size_t *)prog->filter;
@@ -76,7 +76,7 @@ DumpFilter (syscall_info *Info, int pid, fprog *prog)
     sFilter[i] = ptrace (PTRACE_PEEKDATA, pid, &cFilter[i], 0);
 }
 
-void
+static void
 Filter (syscall_info *Info, int pid, fprog *prog)
 {
   prog->filter = malloc (prog->len * sizeof (filter));
@@ -85,7 +85,7 @@ Filter (syscall_info *Info, int pid, fprog *prog)
   free (prog->filter);
 }
 
-void
+static void
 Child (char *argv[])
 {
   close (STDOUT_FILENO);
@@ -99,7 +99,7 @@ Child (char *argv[])
   // argv should start with program name
 }
 
-void
+static void
 Parent (int pid)
 {
   syscall_info *Info = malloc (sizeof (syscall_info));

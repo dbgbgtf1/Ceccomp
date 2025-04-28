@@ -5,6 +5,8 @@
 #include "transfer.h"
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
 
 void
 disasm (int argc, char *argv[])

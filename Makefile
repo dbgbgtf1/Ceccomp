@@ -10,7 +10,7 @@ BUILD_DIR := ./build
 SRC_DIR := ./src
 INC_DIRS := ./include/
 
-SRCS := ./src/Dump.c ./src/Disasm.c ./src/parsefilter.cpp ./src/Emu.c ./src/transfer.c ./src/preasm.c ./src/parseobj.c
+SRCS := ./src/Asm.c ./src/Dump.c ./src/Disasm.c ./src/parsefilter.cpp ./src/Emu.c ./src/transfer.c ./src/preasm.c ./src/parseobj.c
 C_SRCS := $(filter %.c, $(SRCS))
 CPP_SRCS := $(filter %.cpp, $(SRCS))
 

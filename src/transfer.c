@@ -246,37 +246,14 @@ STR2REG (char *str)
     return offsetof (reg_mem, A);
   else if (STARTWITH (str, "$X"))
     return offsetof (reg_mem, X);
+  else if (!STARTWITH(str, "$mem["))
+    return -1;
 
-  else if (STARTWITH (str, "$mem[0x0]"))
-    return offsetof (reg_mem, mem[0x1]);
-  else if (STARTWITH (str, "$mem[0x2]"))
-    return offsetof (reg_mem, mem[0x2]);
-  else if (STARTWITH (str, "$mem[0x3]"))
-    return offsetof (reg_mem, mem[0x3]);
-  else if (STARTWITH (str, "$mem[0x4]"))
-    return offsetof (reg_mem, mem[0x4]);
-  else if (STARTWITH (str, "$mem[0x5]"))
-    return offsetof (reg_mem, mem[0x5]);
-  else if (STARTWITH (str, "$mem[0x6]"))
-    return offsetof (reg_mem, mem[0x6]);
-  else if (STARTWITH (str, "$mem[0x7]"))
-    return offsetof (reg_mem, mem[0x7]);
-  else if (STARTWITH (str, "$mem[0x8]"))
-    return offsetof (reg_mem, mem[0x8]);
-  else if (STARTWITH (str, "$mem[0x9]"))
-    return offsetof (reg_mem, mem[0x9]);
-  else if (STARTWITH (str, "$mem[0xa]"))
-    return offsetof (reg_mem, mem[0xa]);
-  else if (STARTWITH (str, "$mem[0xb]"))
-    return offsetof (reg_mem, mem[0xb]);
-  else if (STARTWITH (str, "$mem[0xc]"))
-    return offsetof (reg_mem, mem[0xc]);
-  else if (STARTWITH (str, "$mem[0xd]"))
-    return offsetof (reg_mem, mem[0xd]);
-  else if (STARTWITH (str, "$mem[0xe]"))
-    return offsetof (reg_mem, mem[0xe]);
-  else if (STARTWITH (str, "$mem[0xf]"))
-    return offsetof (reg_mem, mem[0xf]);
+  char *idx_str = str + strlen("$mem[");
+  char *end = NULL;
+  uint32_t idx = strtol(idx_str, &end, 0);
+  if (*end == ']' && idx <= 15)
+    return offsetof(reg_mem, mem[0]) + idx*sizeof(uint32_t);
 
   return -1;
 }

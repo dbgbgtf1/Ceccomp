@@ -1,13 +1,15 @@
 #include "preasm.h"
 #include "Main.h"
 #include "error.h"
+#include <fcntl.h>
 #include <seccomp.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 
-bool
+static bool
 isEtc (char *Line)
 {
   if (STARTWITH (Line, "---------------------------------"))
@@ -18,8 +20,9 @@ isEtc (char *Line)
     return true;
   return false;
 }
-char *
-RetLines (FILE *fp)
+
+static char *
+GetLines (FILE *fp)
 {
   char *Line = NULL;
   size_t read = 0;
@@ -51,7 +54,7 @@ RetLines (FILE *fp)
   return NULL;
 }
 
-void
+static void
 ClearColor (char *Line)
 {
   char *colorstart = NULL;
@@ -64,7 +67,7 @@ ClearColor (char *Line)
     }
 }
 
-void
+static void
 ClearSpace (char *Line)
 {
   char *space = NULL;
@@ -84,13 +87,13 @@ PreAsm (FILE *fp, line_set *Line)
 {
   do
     {
-      Line->origin_line = RetLines (fp);
+      Line->origin_line = GetLines (fp);
       if (Line->origin_line == NULL)
         return;
     }
   while (*Line->origin_line == '\0');
 
-  Line->clean_line = strdup(Line->origin_line);
+  Line->clean_line = strdup (Line->origin_line);
 
   ClearColor (Line->clean_line);
   ClearSpace (Line->clean_line);

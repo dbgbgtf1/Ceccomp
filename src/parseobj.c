@@ -1,24 +1,29 @@
 #include "parseobj.h"
 #include "Main.h"
+#include "emu.h"
 #include "error.h"
 #include "transfer.h"
 #include <seccomp.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <stdio.h>
 
 // this is used in if line
 // if ($A == X86_64)
 // if ($A == write)
 // if ($A > 0xffffffff)
+// if ($A > $X)
 uint32_t
-ParseVal (char *rval_str, uint32_t arch, char *origin_line)
+ParseVal (char *rval_str, reg_mem *reg, uint32_t arch, char *origin_line)
 {
   uint32_t rval;
   if ((rval = STR2ARCH (rval_str)) != -1)
     return rval;
+
   char *syscall_name = strndup (rval_str, strchr (rval_str, ')') - rval_str);
   if ((rval = seccomp_syscall_resolve_name_arch (arch, syscall_name))
       != __NR_SCMP_ERROR)
@@ -26,32 +31,44 @@ ParseVal (char *rval_str, uint32_t arch, char *origin_line)
       free (syscall_name);
       return rval;
     }
+  free (syscall_name);
+  if (STARTWITH (rval_str, "$X"))
+    return reg->X;
 
-  else
-    {
-      char *end;
-      rval = strtol (rval_str, &end, 0);
-      if (rval_str == end)
-        PEXIT ("invalid right value: %s", origin_line);
-    }
+  char *end;
+  rval = strtol (rval_str, &end, 0);
+  if (rval_str == end)
+    PEXIT ("invalid right value: %s", origin_line);
   return rval;
 }
 
-// this is used in assign line
+// this is used in assign line, right value only
 // $A = $low args[0]
 // $A = $syscall_nr
+// $A = $mem[0x0]
+// $A = $mem[0]
+// $A = 0x100
 uint32_t
-ParseVar (char *rvar_str, seccomp_data *data, char *origin_line)
+ParseVar (char *rvar_str, seccomp_data *data, reg_mem *reg_ptr,
+          char *origin_line)
 {
-  uint32_t data_offset;
-  if ((data_offset = STR2ABS (rvar_str)) == -1)
-    PEXIT ("invalid right variable: %s", origin_line);
-  return *(uint32_t *)((char *)data + data_offset);
+  uint32_t offset;
+  if ((offset = STR2ABS (rvar_str)) != -1)
+    return *(uint32_t *)((char *)data + offset);
+  else if ((offset = STR2REG (rvar_str)) != -1)
+    return *(uint32_t *)((char *)reg_ptr + offset);
+
+  char *end = NULL;
+  uint32_t rval = strtol (rvar_str, &end, 0);
+  if (end != rvar_str)
+    return rval;
+  PEXIT ("invalid right variable: %s", origin_line);
 }
 
-// this is used both in assign and if lines
+// this is used both in assign and if lines, left value only
 // $A
 // $mem[0x0]
+// $mem[0]
 void
 ParseReg (char *reg_str, reg_set *reg_set, reg_mem *reg_ptr, char *origin_line)
 {
@@ -60,14 +77,16 @@ ParseReg (char *reg_str, reg_set *reg_set, reg_mem *reg_ptr, char *origin_line)
     PEXIT ("invalid left variable: %s", origin_line);
 
   if (reg_offset > offsetof (reg_mem, X))
-    reg_set->reg_len = strlen ("$mem[0x0]");
+    reg_set->reg_len = (size_t)strchr (reg_str, ']') - (size_t)reg_str + 1;
   else
     reg_set->reg_len = strlen ("$A");
 
   reg_set->reg_ptr = (uint32_t *)((char *)reg_ptr + reg_offset);
 }
 
-uint32_t
+// return JMP ENUM, GETSYMLEN and GETSYMIDX to use it
+// take a look at JMP ENUM, GETSYMLEN and GETSYMIDX
+uint8_t
 ParseSym (char *sym, char *origin_line)
 {
   if (!strncmp (sym, "==", 2))
@@ -86,10 +105,10 @@ ParseSym (char *sym, char *origin_line)
   else if (!strncmp (sym, "<", 1))
     return SYM_LT;
 
-  PEXIT ("invalid operator: %s", origin_line);
+  PEXIT (INVALID_OPERATOR ": %s", origin_line);
 }
 
-uint32_t
+uint16_t
 ParseJmp (char *right_brace, char *origin_line)
 {
   if (!STARTWITH (right_brace, ")goto"))
@@ -115,17 +134,16 @@ ParseJmp (char *right_brace, char *origin_line)
   return JMPSET (jt, jf);
 }
 
+// this is used in jmp only
+// BPF JMP always compare other with $A
+// so make sure this startwith "if($A" or "if!($A"
 bool
-MaybeReverse (char *after_if, char *origin_line)
+MaybeReverse (char *clean_line, char *origin_line)
 {
-  if (*after_if == '!')
-    {
-      if (*(after_if + 1) == '(')
-        return true;
-      PEXIT ("use if!( ) to reverse the condition: %s", origin_line);
-    }
-  else if (*after_if == '(')
+  if (STARTWITH (clean_line, "if($A"))
+    return false;
+  else if (STARTWITH (clean_line, "if!($A"))
     return false;
   else
-    PEXIT ("use if( ) to wrap condition : %s", origin_line);
+    PEXIT (INVALID_IF ": %s", origin_line);
 }

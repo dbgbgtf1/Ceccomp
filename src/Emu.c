@@ -16,82 +16,73 @@
 
 #define LIGHTCOLORPRINTF(str, ...) printf (LIGHTCOLOR (str "\n"), __VA_ARGS__)
 
-bool
-isStateTrue (uint32_t lval, uint32_t symidx, uint32_t rval)
+static bool
+isStateTrue (uint32_t A, uint32_t sym_enum, uint32_t rval)
 {
-  switch (symidx)
+  switch (sym_enum)
     {
-    case GETSYMIDX (SYM_EQ):
-      return (lval == rval);
-    case GETSYMIDX (SYM_GT):
-      return (lval > rval);
-    case GETSYMIDX (SYM_GE):
-      return (lval >= rval);
-    case GETSYMIDX (SYM_LE):
-      return (lval <= rval);
-    case GETSYMIDX (SYM_AD):
-      return (lval & rval);
-    case GETSYMIDX (SYM_LT):
-      return (lval > rval);
-    case GETSYMIDX (SYM_NE):
-      return (lval != rval);
+    case SYM_EQ:
+      return (A == rval);
+    case SYM_GT:
+      return (A > rval);
+    case SYM_GE:
+      return (A >= rval);
+    case SYM_LE:
+      return (A <= rval);
+    case SYM_AD:
+      return (A & rval);
+    case SYM_LT:
+      return (A < rval);
+    case SYM_NE:
+      return (A != rval);
     default:
-      PEXIT ("unknown symidx: %d", symidx);
+      PEXIT (INVALID_SYMENUM ": %d", sym_enum);
     }
 }
 
-bool
-ParseCondition (char *left_brace, reg_mem *reg, seccomp_data *data,
+static bool
+ParseCondition (char *sym_str, reg_mem *reg, seccomp_data *data,
                 char *origin_line)
 {
-  char *lvar = left_brace + strlen ("(");
+  uint8_t sym_enum = ParseSym (sym_str, origin_line);
+  uint8_t symlen = GETSYMLEN (sym_enum);
 
-  reg_set lvar_set;
-  ParseReg (lvar, &lvar_set, reg, origin_line);
-  uint8_t lvar_len = lvar_set.reg_len;
-  uint32_t *reg_ptr = lvar_set.reg_ptr;
+  char *rvar = sym_str + symlen;
+  uint32_t rval = ParseVal (rvar, reg, data->arch, origin_line);
 
-  char *sym = lvar + lvar_len;
-  uint8_t sym_set = ParseSym (sym, origin_line);
-  uint8_t symlen = GETSYMLEN (sym_set);
-  uint8_t symidx = GETSYMIDX (sym_set);
-
-  char *rvar = sym + symlen;
-  uint32_t rval = ParseVal (rvar, data->arch, origin_line);
-
-  printf (BLUE_LS, lvar_len, lvar);
-  printf (" %.*s ", symlen, sym);
+  printf (BLUE_A);
+  printf (" %.*s ", symlen, sym_str);
   printf (BLUE_LS, (uint32_t)(strchr (rvar, ')') - rvar), rvar);
 
-  return isStateTrue (*reg_ptr, GETSYMIDX (sym_set), rval);
+  return isStateTrue (reg->A, sym_enum, rval);
 }
 
-uint32_t
+static uint32_t
 IfLine (line_set *Line, reg_mem *reg, seccomp_data *data)
 {
-  char *left_brace = Line->clean_line + strlen ("if");
-  bool reverse = MaybeReverse (left_brace, Line->origin_line);
-  if (reverse)
-    {
-      left_brace += 1;
-      printf ("%s", "if !(");
-    }
-  else
-    printf ("%s", "if (");
+  char *clean_line = Line->clean_line;
+  char *origin_line = Line->origin_line;
 
-  char *right_brace = strchr (left_brace, ')');
-  if (right_brace == NULL)
-    PEXIT ("use if( ) to wrap condition: %s", Line->origin_line);
+  char *sym_str;
+  bool reverse = MaybeReverse (clean_line, origin_line);
+  if (reverse)
+    sym_str = clean_line + strlen ("if!($A");
+  else
+    sym_str = clean_line + strlen ("if($A");
 
   bool condition;
-  condition = ParseCondition (left_brace, reg, data, Line->origin_line);
+  condition = ParseCondition (sym_str, reg, data, origin_line);
 
-  uint32_t jmp_set = ParseJmp (right_brace, Line->origin_line);
-  uint16_t jf = GETJF (jmp_set);
-  uint16_t jt = GETJT (jmp_set);
+  char *right_brace = strchr (sym_str, ')');
+  if (right_brace == NULL)
+    PEXIT ("use if( ) to wrap condition: %s", origin_line);
+
+  uint32_t jmp_set = ParseJmp (right_brace, origin_line);
+  uint8_t jf = GETJF (jmp_set);
+  uint8_t jt = GETJT (jmp_set);
 
   if (jf != 0)
-    printf (") goto" FORMAT ", else goto " FORMAT "\n", jt, jf);
+    printf (") goto " FORMAT ", else goto " FORMAT "\n", jt, jf);
   else
     printf (") goto " FORMAT "\n", jt);
 
@@ -103,25 +94,28 @@ IfLine (line_set *Line, reg_mem *reg, seccomp_data *data)
     return jt;
 }
 
-void
+static void
 AssignLine (line_set *Line, reg_mem *reg, seccomp_data *data)
 {
+  char *clean_line = Line->clean_line;
+  char *origin_line = Line->origin_line;
+
   reg_set lvar;
-  ParseReg (Line->clean_line, &lvar, reg, Line->origin_line);
+  ParseReg (clean_line, &lvar, reg, origin_line);
   uint8_t lvar_len = lvar.reg_len;
   uint32_t *lvar_ptr = lvar.reg_ptr;
 
-  if (*(Line->clean_line + lvar_len) != '=')
-    PEXIT ("invalid operator in assign: %s", Line->origin_line);
+  if (*(clean_line + lvar_len) != '=')
+    PEXIT ("invalid operator in assign: %s", origin_line);
 
-  char *rvar = Line->clean_line + lvar_len + 1;
-  uint32_t rval = ParseVar (rvar, data, Line->origin_line);
+  char *rvar = clean_line + lvar_len + 1;
+  uint32_t rval = ParseVar (rvar, data, reg, origin_line);
 
   *lvar_ptr = rval;
-  printf (BLUE_LS " = " BLUE_S "\n", lvar_len, Line->clean_line, rvar);
+  printf (BLUE_LS " = " BLUE_S "\n", lvar_len, clean_line, rvar);
 }
 
-uint32_t
+static uint32_t
 RetLine (line_set *Line)
 {
   char *retval_str = STRAFTER (Line->clean_line, "return");
@@ -136,23 +130,20 @@ RetLine (line_set *Line)
   return 0xffffffff;
 }
 
-void
-ResolveLines (FILE *fp, seccomp_data *data)
+static void
+ParseLines (FILE *fp, seccomp_data *data)
 {
   line_set Line = { NULL, NULL };
   reg_mem *reg = malloc (sizeof (reg_mem));
 
-  uint32_t read_idx = 0;
-  uint32_t actual_idx = 0;
-
   char *origin_line;
   char *clean_line;
-  while (PreAsm(fp, &Line), Line.origin_line != NULL)
+  for (uint32_t read_idx = 1, actual_idx = 1;
+       PreAsm (fp, &Line), Line.origin_line != NULL; read_idx++)
     {
       origin_line = Line.origin_line;
       clean_line = Line.clean_line;
 
-      read_idx++;
       if (read_idx < actual_idx)
         {
           LIGHTCOLORPRINTF (FORMAT ": %s", read_idx, origin_line);
@@ -164,7 +155,7 @@ ResolveLines (FILE *fp, seccomp_data *data)
 
       if (STARTWITH (clean_line, "if"))
         actual_idx = IfLine (&Line, reg, data);
-      else if (STARTWITH (clean_line, "ret"))
+      else if (STARTWITH (clean_line, "return"))
         actual_idx = RetLine (&Line);
       else if (*clean_line == '$')
         AssignLine (&Line, reg, data);
@@ -192,7 +183,7 @@ emu (int argc, char *argv[])
         "argv[5] ] (default as 0)");
 
   FILE *fp = fopen (argv[0], "r");
-  if (!fp)
+  if (fp == NULL)
     PEXIT ("unable to open result file: %s", argv[0]);
 
   seccomp_data *data = malloc (sizeof (seccomp_data));
@@ -220,7 +211,7 @@ emu (int argc, char *argv[])
         PEXIT ("invaild syscall args: %s", argv[i]);
     }
 
-  ResolveLines (fp, data);
+  ParseLines (fp, data);
 
   free (data);
 }

@@ -1,5 +1,322 @@
-void Asm()
-{
-  // Ceccomp asm result 
+#include "asm.h"
+#include "Main.h"
+#include "error.h"
+#include "parseobj.h"
+#include "preasm.h"
+#include "transfer.h"
+#include <linux/bpf_common.h>
+#include <linux/filter.h>
+#include <seccomp.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/ptrace.h>
 
+static filter
+MISC_TXA ()
+{
+  return (filter)BPF_STMT (BPF_MISC | BPF_TXA, 0);
+}
+
+static filter
+MISC_TAX ()
+{
+  return (filter)BPF_STMT (BPF_MISC | BPF_TAX, 0);
+}
+
+// comparing the sym
+// also EQ and NE can be the same thing
+// only you have to reverse
+static uint16_t
+JmpMode (uint8_t sym_enum, bool *reverse, char *origin_line)
+{
+  switch (sym_enum)
+    {
+    case SYM_NE:
+      *reverse = !*reverse;
+    case SYM_EQ:
+      return BPF_JEQ;
+
+    case SYM_LT:
+      *reverse = !*reverse;
+    case SYM_GT:
+      return BPF_JGT;
+
+    case SYM_LE:
+      *reverse = !*reverse;
+    case SYM_GE:
+      return BPF_JGE;
+
+    case SYM_AD:
+      return BPF_JSET;
+    default:
+      PEXIT (INVALID_SYMENUM ": %d", sym_enum);
+    }
+}
+
+static void
+JmpSrc (char *rvar, filter *f_ptr, uint32_t arch, char *origin_line)
+{
+  f_ptr->k = STR2ARCH (rvar);
+  if (f_ptr->k != -1)
+    {
+      f_ptr->code |= BPF_K;
+      return;
+    }
+
+  char *syscall_name = strndup (rvar, strchr (rvar, ')') - rvar);
+  f_ptr->k = seccomp_syscall_resolve_name_arch (arch, syscall_name);
+  if (f_ptr->k != __NR_SCMP_ERROR)
+    {
+      free (syscall_name);
+      f_ptr->code |= BPF_K;
+      return;
+    }
+  free (syscall_name);
+
+  char *end;
+  f_ptr->k = strtol (rvar, &end, 0);
+  if (rvar != end)
+    {
+      f_ptr->code |= BPF_K;
+      return;
+    }
+
+  if (!STARTWITH (rvar, "$X"))
+    PEXIT (INVALID_RIGHT ": %s", origin_line);
+
+  f_ptr->code |= BPF_X;
+}
+
+static filter
+JMP (line_set *Line, uint32_t idx, uint32_t arch)
+{
+  char *clean_line = Line->clean_line;
+  char *origin_line = Line->origin_line;
+  filter filter = BPF_JUMP (BPF_JMP, 0, 0, 0);
+
+  bool reverse = MaybeReverse (clean_line, origin_line);
+  char *sym_str;
+  if (reverse)
+    sym_str = clean_line + strlen ("if!($A");
+  else
+    sym_str = clean_line + strlen ("if($A");
+
+  uint8_t sym_enum = ParseSym (sym_str, origin_line);
+  uint8_t sym_len = GETSYMLEN (sym_enum);
+
+  filter.code |= JmpMode (sym_enum, &reverse, origin_line);
+
+  char *rvar = sym_str + sym_len;
+  JmpSrc (rvar, &filter, arch, origin_line);
+
+  char *right_brace = strchr (rvar, ')');
+  uint16_t jmpset = ParseJmp (right_brace, origin_line);
+
+  uint8_t jt = GETJT(jmpset);
+  uint8_t jf = GETJF(jmpset);
+
+  if (reverse)
+    {
+      filter.jt = jt ? (jt - idx - 1) : 0;
+      filter.jf = jf ? (jf - idx - 1) : 0;
+    }
+  else
+    {
+      filter.jt = jf ? (jf - idx - 1) : 0;
+      filter.jf = jt ? (jt - idx - 1) : 0;
+    }
+
+  return filter;
+}
+
+static bool
+LD_LDX_ABS (char *rvar, filter *f_ptr)
+{
+  uint32_t offset = STR2ABS (rvar);
+  if (offset == -1)
+    return false;
+
+  f_ptr->code |= (BPF_W | BPF_ABS);
+  f_ptr->k = offset;
+  return true;
+}
+
+static bool
+LD_LDX_MEM (char *rvar, filter *f_ptr, char *origin_line)
+{
+  char *end;
+  if (!STARTWITH (rvar, "$mem["))
+    return false;
+
+  rvar += strlen ("$mem[");
+  uint32_t mem_idx = strtol (rvar, &end, 0);
+
+  if (*end != ']')
+    PEXIT (INVALID_MEM ": %s", origin_line);
+  if (mem_idx > 15)
+    PEXIT (INVALID_MEM_IDX ": %s", origin_line);
+
+  f_ptr->code |= BPF_MEM;
+  f_ptr->k = mem_idx;
+  return true;
+}
+
+static bool
+LD_LDX_IMM (char *rvar, filter *f_ptr, uint32_t arch, char *origin_line)
+{
+  char *end;
+  f_ptr->code |= BPF_IMM;
+  f_ptr->k = seccomp_syscall_resolve_name_arch (arch, rvar);
+  if (f_ptr->k != __NR_SCMP_ERROR)
+    return true;
+
+  f_ptr->k = strtol (rvar, &end, 0);
+  if (end == rvar)
+    return false;
+  return true;
+}
+
+static filter
+LD_LDX (line_set *Line, uint32_t arch)
+{
+  char *clean_line = Line->clean_line;
+  char *origin_line = Line->origin_line;
+
+  filter filter = { 0, 0, 0, 0 };
+  if (*(clean_line + 1) == 'A')
+    filter.code |= BPF_LD;
+  else if (*(clean_line + 1) == 'X')
+    filter.code |= BPF_LDX;
+  else
+    PEXIT (INVALID_LEFT_VAR ": %s", origin_line);
+
+  if (*(clean_line + 2) != '=')
+    PEXIT (INVALID_OPERATOR ": %s", origin_line);
+
+  char *rvar = clean_line + 3;
+  if (LD_LDX_ABS (rvar, &filter))
+    return filter;
+  else if (LD_LDX_MEM (rvar, &filter, origin_line))
+    return filter;
+  else if (LD_LDX_IMM (rvar, &filter, arch, origin_line))
+    return filter;
+  PEXIT (INVALID_RIGHT ": %s", origin_line);
+}
+
+static filter
+RET (line_set *Line)
+{
+  char *clean_line = Line->clean_line;
+  char *origin_line = Line->origin_line;
+  filter filter = { BPF_RET, 0, 0, 0 };
+
+  char *retval_str = STRAFTER (clean_line, "return");
+
+  uint32_t retval = STR2RETVAL (retval_str);
+  if (retval != -1)
+    {
+      filter.code |= BPF_K;
+      filter.k |= retval;
+    }
+  else if (STARTWITH (retval_str, "$A"))
+    filter.code |= BPF_A;
+  else
+    PEXIT (INVALID_RET ": %s", origin_line);
+
+  return filter;
+}
+
+static filter
+ST_STX (line_set *Line)
+{
+  char *clean_line = Line->clean_line;
+  char *origin_line = Line->origin_line;
+  filter filter = { 0, 0, 0, 0 };
+
+  char *idx_str = STRAFTER (clean_line, "$mem[");
+  char *end;
+  uint32_t idx = strtol (idx_str, &end, 0);
+  if (*end != ']')
+    PEXIT (INVALID_MEM ": %s", origin_line);
+  if (*(end + 1) != '=')
+    PEXIT (INVALID_OPERATOR ": %s", origin_line);
+  if (idx > 15)
+    PEXIT (INVALID_MEM_IDX ": %s", origin_line);
+
+  filter.k = idx;
+
+  if (*(end + 2) != '$')
+    PEXIT (INVALID_RIGHT_VAR ": %s", origin_line);
+  if (*(end + 3) == 'A')
+    filter.code |= BPF_A;
+  if (*(end + 3) == 'X')
+    filter.code |= BPF_X;
+  else
+    PEXIT (INVALID_RIGHT_VAR ": %s", origin_line);
+
+  return filter;
+}
+
+static void
+AsmLines (FILE *fp, unsigned arch)
+{
+  line_set Line;
+  fprog *prog = malloc (sizeof (fprog));
+  prog->len = 1;
+  prog->filter = malloc (sizeof (filter) * 0x100);
+
+  while (PreAsm (fp, &Line), Line.origin_line != NULL)
+    {
+      filter f_current;
+      char *clean_line = Line.clean_line;
+      char *origin_line = Line.origin_line;
+
+      if (!strcmp (clean_line, "$A=$X"))
+        f_current = MISC_TXA ();
+      else if (!strcmp (clean_line, "$X=$A"))
+        f_current = MISC_TAX ();
+      else if (STARTWITH (clean_line, "if"))
+        f_current = JMP (&Line, prog->len, arch);
+      else if (STARTWITH (clean_line, "return"))
+        f_current = RET (&Line);
+      else if (STARTWITH (clean_line, "$mem["))
+        f_current = ST_STX (&Line);
+      else if (STARTWITH (clean_line, "$"))
+        f_current = LD_LDX (&Line, arch);
+
+      prog->filter[prog->len] = f_current;
+      prog->len++;
+    }
+
+  for (int i = 1; i < prog->len; i++)
+    {
+      filter filter = prog->filter[i];
+      printf ("%04x %02x %02x %08x\n", filter.code, filter.jf,
+              filter.jt, filter.k);
+    }
+
+  free (prog->filter);
+  free (prog);
+}
+
+void
+assemble (int argc, char *argv[])
+{
+  // Ceccomp asm arch asmcodefile
+  if (argc < 2)
+    PEXIT ("%s", "not enough args\nusage: Ceccomp asm arch asmcodefile")
+
+  uint32_t arch = STR2ARCH (argv[0]);
+  if (arch == -1)
+    PEXIT (INVALID_ARCH ": %s\n" SUPPORT_ARCH, argv[1]);
+
+  FILE *fp = fopen (argv[1], "r");
+  if (fp == NULL)
+    PEXIT (UNABLE_OPEN_FILE ": %s\n", argv[0]);
+
+  AsmLines (fp, arch);
 }

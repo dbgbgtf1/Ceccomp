@@ -5,11 +5,13 @@
 #include "transfer.h"
 #include <inttypes.h>
 #include <linux/bpf_common.h>
+#include <seccomp.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <seccomp.h>
 
 #define unknownoffset "unknown offset of seccomp_data: "
 
@@ -103,7 +105,7 @@ private:
 
   uint32_t RET (filter *f_ptr);
 
-  void RETWrap (filter *f_ptr);
+  void RetWrap (filter *f_ptr);
 
   void MISC (filter *f_ptr);
 
@@ -362,7 +364,7 @@ Parser::JMP (filter *f_ptr, const char *syms[4])
   switch (jmode | src)
     {
     case BPF_JA | BPF_X:
-      printf ("goto " FORMAT, atoi(X.m_str));
+      printf ("goto " FORMAT, atoi (X.m_str));
       return false;
     case BPF_JA | BPF_K:
       printf ("goto " FORMAT, k);
@@ -427,7 +429,8 @@ Parser::JmpWrap (filter *f_ptr, int pc)
   else
     {
       if (JMP (f_ptr, True))
-        printf ("goto " FORMAT ", else goto " FORMAT, pc + jt + 2, pc + jf + 2);
+        printf ("goto " FORMAT ", else goto " FORMAT, pc + jt + 2,
+                pc + jf + 2);
     }
 }
 
@@ -435,11 +438,17 @@ uint32_t
 Parser::RET (filter *f_ptr)
 {
   uint16_t ret = BPF_RVAL (f_ptr->code);
+  char *end;
+  uint32_t retval;
 
   switch (ret)
     {
     case BPF_A:
-      return atoi (A.m_str);
+      retval = strtol (A.m_str, &end, 0);
+      if (A.m_str != end)
+        return retval;
+      else
+        return -1;
     case BPF_K:
       return f_ptr->k;
     default:
@@ -449,7 +458,7 @@ Parser::RET (filter *f_ptr)
 }
 
 void
-Parser::RETWrap (filter *f_ptr)
+Parser::RetWrap (filter *f_ptr)
 {
   uint32_t retval = RET (f_ptr);
   char *retstr = RETVAL2STR (retval);
@@ -507,7 +516,7 @@ Parser::CLASS (int idx)
       JmpWrap (f_ptr, idx);
       return;
     case BPF_RET:
-      RETWrap (f_ptr);
+      RetWrap (f_ptr);
       return;
     case BPF_MISC:
       MISC (f_ptr);
@@ -530,8 +539,8 @@ extern "C"
     for (uint32_t i = 0; i < len; i++)
       {
         filter *f_ptr = &prog->filter[i];
-        printf (" " FORMAT ": 0x%02x 0x%02x 0x%02x 0x%08x ", i + 1, f_ptr->code,
-                f_ptr->jt, f_ptr->jf, f_ptr->k);
+        printf (" " FORMAT ": 0x%02x 0x%02x 0x%02x 0x%08x ", i + 1,
+                f_ptr->code, f_ptr->jt, f_ptr->jf, f_ptr->k);
         parser.CLASS (i);
         printf ("\n");
       }

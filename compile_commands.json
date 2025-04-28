@@ -6,6 +6,20 @@
       "-c",
       "-g",
       "-o",
+      "build/Asm.c.o",
+      "src/Asm.c"
+    ],
+    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
+    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/Asm.c",
+    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/Asm.c.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-I./include/",
+      "-c",
+      "-g",
+      "-o",
       "build/Dump.c.o",
       "src/Dump.c"
     ],

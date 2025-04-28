@@ -5,6 +5,7 @@
 #include "emu.h"
 #include <stdbool.h>
 #include <stdint.h>
+#include <sys/types.h>
 
 typedef struct
 {
@@ -17,7 +18,6 @@ typedef struct
 #define JMPSET(jt, jf) ((jt << 8) | jf)
 
 #define GETSYMLEN(symset) ((symset & 0xf0) >> 4)
-#define GETSYMIDX(symset) (symset & 0xf)
 
 typedef enum
 {
@@ -31,17 +31,19 @@ typedef enum
   SYM_GE = 0x26,
 } Sym;
 
-uint32_t ParseVal (char *val_str, uint32_t arch, char *Line);
+uint32_t ParseVal (char *val_str, reg_mem *reg, uint32_t arch,
+                   char *origin_line);
 
-uint32_t ParseVar (char *rvar_str, seccomp_data *data, char *Line);
+uint32_t ParseVar (char *rvar_str, seccomp_data *data, reg_mem *reg_ptr,
+                   char *origin_line);
 
 void ParseReg (char *reg_str, reg_set *reg_len_ptr, reg_mem *reg_ptr,
-               char *Line);
+               char *origin_line);
 
-uint32_t ParseSym (char *sym, char *Line);
+uint8_t ParseSym (char *sym, char *origin_line);
 
-uint32_t ParseJmp (char *right_brace, char *Line);
+uint16_t ParseJmp (char *right_brace, char *origin_line);
 
-bool MaybeReverse (char *after_if, char *Line);
+bool MaybeReverse (char *clean_line, char *origin_line);
 
 #endif

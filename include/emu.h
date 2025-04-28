@@ -1,7 +1,7 @@
 #ifndef EMU
 #define EMU
 
-#include "Main.h"
+#include <linux/filter.h>
 #include <stdint.h>
 
 typedef struct
