@@ -1,23 +1,29 @@
 # Ceccomp
 A tool to resolve seccomp just like seccomp-tools, written in c
-(Havn't finish yet)
+All functions are done.
+Yet, still need to test.
 
 ## Code to be done
 - [x] dump
-- [ ] emu
+- [x] emu
 - [x] disasm
-- [ ] asm
+- [x] asm
 
 ## cnDoc
-to do
+
+still to do
 
 ## Doc
 
-> Ceccomp disasm arch xxx.bpf
-
 > Ceccomp dump program program-args
 
-to do
+> Ceccomp emu dump-result arch nr [ argv[0] - argv[5] ] (default as 0)
+
+> Ceccomp disasm arch xxx.bpf
+
+> Ceccomp asm arch asmcodefile
+
+still to do
 
 ## Supported architecture
 - X86
