@@ -16,12 +16,12 @@ Yet, still need to test.
 
 Kernel load the raw `bpf` to enable seccomp
 Raw `bpf` might look like this
-![raw_bpf](./assets/raw_bpf.png)
+![raw_bpf](assets/raw_bpf.png)
 
 After Ceccomp resolve the `bpf`
 Ceccomp will print it to `human readable text`
 Might look like this
-![text](./assets/text.png)
+![text](assets/text.png)
 
 I will call the `human readable text` with `text` later
 
@@ -36,7 +36,7 @@ And print it out to `text`
 
 #### what dump looks like
 
-![dump](./assets/dump.png)
+![dump](assets/dump.png)
 
 #### dump usages
 
@@ -56,7 +56,7 @@ It can be great when you don't want to read `text`
 
 #### what emu looks like
 
-![emu](./assets/emu.png)
+![emu](assets/emu.png)
 
 #### emu usages
 
@@ -71,7 +71,7 @@ Disasm can transfer `bpf` to text
 
 #### what disasm looks like
 
-![disasm](./assets/disasm.png)
+![disasm](assets/disasm.png)
 
 #### disasm usages
 
@@ -97,7 +97,7 @@ yeah, it might look too simple
 I designed asm this way
 So copy `bpf` will be easier
 
-![asm](./assets/asm.png)
+![asm](assets/asm.png)
 
 #### asm usages
 
