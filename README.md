@@ -67,7 +67,7 @@ Note that the Line Code JT JF K are not necessary part of `text`, I just decided
 
 **So be sure to understand what `text` and `bpf` means**
 
-### Ceccomp dump program [ program-args ]
+### Dump
 
 #### what dump does
 
@@ -102,9 +102,9 @@ child process status: 159
 
 Find a program that will load seccomp
 
-Do `Ceccomp dump program [ program-args ]`, add program-args if necessary
+`Ceccomp dump program [ program-args ]`, add program-args if necessary
 
-### Ceccomp emu text arch nr [ argv[0] - argv[5] ] (default as 0)
+### Emulate
 
 #### what emu does
 
@@ -124,7 +124,9 @@ plz click this link, a code block won't show color, so take a look at the pictur
 
 Otherwise the Ceccomp can't transfer something like `write` to its syscallnr
 
-## Ceccomp disasm arch xxx.bpf
+`Ceccomp emu text arch nr [ argv[0] - argv[5] ] (default as 0)`
+
+## Disasm
 
 #### what disasm does
 
@@ -176,13 +178,13 @@ So you can use gdb to get the raw `bpf` manualy, Disasm will do the rest for you
 
 #### disasm usages
 
-> Ceccomp disasm arch xxx.bpf
+`Ceccomp disasm arch xxx.bpf`
 
 Just like emu, arch must be specified
 
 Then just add the `bpf` you want to resolve
 
-## Ceccomp asm arch asmcodefile
+## Asm
 
 #### what asm does
 
