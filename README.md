@@ -1,6 +1,6 @@
 # Ceccomp
 
-A tool to resolve seccomp just like seccomp-tools, written in c
+A tool to resolve seccomp just like seccomp-tools, written in c  
 All functions are done，yet a lot still need to be tested
 
 ## What Ceccomp can do
