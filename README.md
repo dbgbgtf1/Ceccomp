@@ -1,9 +1,11 @@
 # Ceccomp
 A tool to resolve seccomp just like seccomp-tools, written in c
-All functions are done.
-Yet, still need to test.
 
-## Code to be done
+All functions are done
+
+Yet, still need to test
+
+## Functions
 
 - [x] dump
 - [x] emu
@@ -15,11 +17,15 @@ Yet, still need to test.
 > some concept to be clear
 
 Kernel load the raw `bpf` to enable seccomp
+
 Raw `bpf` might look like this
+
 ![raw_bpf](assets/raw_bpf.png)
 
 After Ceccomp resolve the `bpf`
+
 Ceccomp will print it to `human readable text`
+
 Might look like this
 ![text](assets/text.png)
 
@@ -32,6 +38,7 @@ I will call the `human readable text` with `text` later
 #### what dump does
 
 Dump mode can dump program `bpf` out
+
 And print it out to `text`
 
 #### what dump looks like
@@ -41,6 +48,7 @@ And print it out to `text`
 #### dump usages
 
 Find a program that will load seccomp
+
 Do `Ceccomp dump program`
 
 Add program-args if necessary
@@ -50,6 +58,7 @@ Add program-args if necessary
 #### what emu does
 
 Emulate what will happen if `syscall (nr, args ...)` were called
+
 Result file are human readable text(from dump mode or disasm mode)
 
 It can be great when you don't want to read `text`
@@ -61,6 +70,7 @@ It can be great when you don't want to read `text`
 #### emu usages
 
 `arch` must be specified
+
 Otherwise the Ceccomp can't transfer something like `write` to its syscallnr
 
 ## Ceccomp disasm arch xxx.bpf
@@ -82,7 +92,9 @@ Just like emu, arch must be specified
 Then just add the `bpf` you want to resolve
 
 It can be usefule when the program don't load seccomp at once
+
 And you will have to use gdb to get the raw `bpf` manualy
+
 Disasm will do the rest for you
 
 ## Ceccomp asm arch asmcodefile
@@ -94,7 +106,9 @@ Asm the `bpf` from `text`
 #### what asm looks like
 
 yeah, it might look too simple
+
 I designed asm this way
+
 So copy `bpf` will be easier
 
 ![asm](assets/asm.png)
@@ -106,10 +120,14 @@ So copy `bpf` will be easier
 Just like disasm, emu, `arch` must be specified
 
 Then add the `text`, you can write you own `text`
+
 And asm will transfer `text` to `bpf`
 
+
 It could be useful when you need to write your own seccomp
+
 (but make sure you write the asm in correct way
+
 I might write a simple guide about what you can write and what you cann't)
 
 ## Supported architecture
