@@ -4,7 +4,6 @@ CC := gcc
 CXX := g++
 
 CFLAGS := -lseccomp
-# CXXFLAGS := -DDEBUG
 
 BUILD_DIR := ./build
 BUILD_UTILS_DIR = ./build/utils
@@ -24,10 +23,10 @@ OBJS := $(C_OBJS) $(CPP_OBJS)
 CECCOMP_MAIN := $(BUILD_DIR)/main.c.o
 TEST_MAIN := $(BUILD_DIR)/test.c.o
 
-Ceccomp: $(OBJS) $(CECCOMP_MAIN)
+ceccomp: $(OBJS) $(CECCOMP_MAIN)
 	$(CXX) $(CFLAGS) $^ -g -o $@
 
-Test: $(OBJS) $(TEST_MAIN)
+test: $(OBJS) $(TEST_MAIN)
 	$(CXX) $(CFLAGS) $^ -g -o $@
 
 $(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c | $(BUILD_DIR)

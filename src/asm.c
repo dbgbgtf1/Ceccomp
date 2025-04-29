@@ -1,5 +1,6 @@
 #include "asm.h"
 #include "error.h"
+#include "main.h"
 #include "parseobj.h"
 #include "transfer.h"
 #include <linux/bpf_common.h>
@@ -302,9 +303,8 @@ asm_lines (FILE *fp, unsigned arch)
 void
 assemble (int argc, char *argv[])
 {
-  // Ceccomp asm arch asmcodefile
   if (argc < 2)
-    PEXIT ("%s", "not enough args\nusage: Ceccomp asm arch asmcodefile")
+    PEXIT ("%s\n%s\n", NOT_ENOUGH_ARGS, ASM_HINT);
 
   uint32_t arch = STR2ARCH (argv[0]);
   if (arch == -1)

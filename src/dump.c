@@ -139,12 +139,9 @@ parent (int pid)
 void
 dump (int argc, char *argv[])
 {
-  // argv[0] = program name
-  // dump need these args to run at least
-
-  if (argc <= 0)
-    PEXIT ("%s",
-           "No enough args\nusage: Ceccomp dump program [ prgram-args ]");
+  if (argc < 1)
+    PEXIT ("%s\n%s\n",
+           NOT_ENOUGH_ARGS, DUMP_HINT);
 
   int pid = fork ();
   if (pid == 0)

@@ -191,42 +191,32 @@ emu_lines (FILE *fp, seccomp_data *data)
 void
 emu (int argc, char *argv[])
 {
-  // argv[0] = text
-  // argv[1] = arch
-  // argv[2] = nr
-  // emu need these args to run at least
-
   if (argc < 3)
-    PEXIT ("%s", "No enough args\nusage: Ceccomp emu text arch nr [ argv[0] - "
-                 "argv[5] ] (default as 0)");
-
-  FILE *fp = fopen (argv[0], "r");
-  if (fp == NULL)
-    PEXIT ("unable to open result file: %s", argv[0]);
+    PEXIT ("%s\n%s\n", NOT_ENOUGH_ARGS, EMU_HINT);
 
   seccomp_data *data = malloc (sizeof (seccomp_data));
-
-  data->arch = STR2ARCH (argv[1]);
+  data->arch = STR2ARCH (argv[0]);
   if (data->arch == -1)
-    PEXIT ("invalid arch: %s\nsupport arch: X86 X86_64 X32 ARM AARCH64 MIPS "
-           "MIPSEL MIPSEL64 MIPSEL64N32 PARISC PARISC64 PPC PPC64 PPC64LE "
-           "S390 S390X RISCV64",
-           argv[1]);
+    PEXIT("%s\n%s\n", INVALID_ARCH, SUPPORT_ARCH);
+
+  FILE *fp = fopen (argv[1], "r");
+  if (fp == NULL)
+    PEXIT ("unable to open result file: %s", argv[0]);
 
   char *end = NULL;
   data->nr = seccomp_syscall_resolve_name_arch (data->arch, argv[2]);
   if (data->nr == __NR_SCMP_ERROR)
     {
       data->nr = strtol (argv[2], &end, 0);
-      if ((data->nr == 0) && (argv[2] == end))
-        PEXIT ("invalid syscall nr: %s", argv[2]);
+      if (argv[2] == end)
+        PEXIT (INVALID_SYSNR ": %s\n", argv[2]);
     }
 
   for (int i = 3; i < argc; i++)
     {
       data->args[i] = strtol (argv[i], &end, 0);
-      if ((data->args[i]) && (argv[i] == end))
-        PEXIT ("invaild syscall args: %s", argv[i]);
+      if (argv[i] == end)
+        PEXIT (INVALID_SYS_ARGS ": %s\n", argv[i]);
     }
 
   emu_lines (fp, data);
