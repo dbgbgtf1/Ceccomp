@@ -1,8 +1,9 @@
 #define UNABLE_OPEN_FILE "unable to open file"
 #define INVALID_ARCH "invalid arch"
-#define SUPPORT_ARCH "X86 X86_64 X32 ARM AARCH64 MIPS MIPSEL MIPSEL64" \
-                     "MIPSEL64N32 PARSIC PARSIC64 PPC PPC64 PPC64LE " \
-                     "S390 S390X RISCV64"
+#define SUPPORT_ARCH                                                          \
+  "X86 X86_64 X32 ARM AARCH64 MIPS MIPSEL MIPSEL64"                           \
+  "MIPSEL64N32 PARSIC PARSIC64 PPC PPC64 PPC64LE "                            \
+  "S390 S390X RISCV64"
 
 #define INVALID_OPERATOR "invalid operator"
 #define INVALID_SYMENUM "invalid sym enum"
@@ -16,12 +17,8 @@
 #define INVALID_MEM_IDX "invalid idx of $mem"
 #define INVALID_MEM "invalid $mem"
 
-
-
-
 #define INVALID_IF "invalid if line"
 #define INVALID_RET "invalid ret line"
-
 
 #define PEXIT(str, ...)                                                       \
   {                                                                           \

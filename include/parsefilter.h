@@ -1,7 +1,7 @@
 #ifndef PARSEFILTER
 #define PARSEFILTER
 
-#include "Main.h"
+#include "main.h"
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -9,7 +9,7 @@ extern "C"
 {
 #endif
 
-  void ParseFilter (uint32_t arch, fprog *prog);
+  void parse_filter (uint32_t arch, fprog *prog);
 
 #ifdef __cplusplus
 }

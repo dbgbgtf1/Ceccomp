@@ -1,4 +1,4 @@
-#include "Main.h"
+#include "main.h"
 #include "asm.h"
 #include "disasm.h"
 #include "dump.h"
@@ -13,8 +13,7 @@ help ()
   printf ("Example as follows\n");
   printf ("Ceccomp dump program program-args\n");
   printf ("Ceccomp disasm xxx.bpf\n");
-  printf (
-      "Ceccomp emu text arch nr [ argv[0] - argv[5] ] (default as 0)");
+  printf ("Ceccomp emu text arch nr [ argv[0] - argv[5] ] (default as 0)");
   printf ("Ceccomp asm arch asmcodefile\n");
 }
 

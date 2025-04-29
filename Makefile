@@ -7,10 +7,13 @@ CFLAGS := -lseccomp
 # CXXFLAGS := -DDEBUG
 
 BUILD_DIR := ./build
+BUILD_UTILS_DIR = ./build/utils
+
 SRC_DIR := ./src
 INC_DIRS := ./include/
 
-SRCS := ./src/Asm.c ./src/Dump.c ./src/Disasm.c ./src/parsefilter.cpp ./src/Emu.c ./src/transfer.c ./src/preasm.c ./src/parseobj.c
+SRCS := ./src/asm.c ./src/disasm.c ./src/dump.c ./src/emu.c ./src/utils/parsefilter.cpp ./src/utils/parseobj.c ./src/utils/preasm.c ./src/utils/transfer.c
+
 C_SRCS := $(filter %.c, $(SRCS))
 CPP_SRCS := $(filter %.cpp, $(SRCS))
 
@@ -18,7 +21,7 @@ C_OBJS := $(patsubst $(SRC_DIR)/%.c, $(BUILD_DIR)/%.c.o, $(C_SRCS))
 CPP_OBJS := $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.cpp.o, $(CPP_SRCS))
 
 OBJS := $(C_OBJS) $(CPP_OBJS)
-CECCOMP_MAIN := $(BUILD_DIR)/Main.c.o
+CECCOMP_MAIN := $(BUILD_DIR)/main.c.o
 TEST_MAIN := $(BUILD_DIR)/test.c.o
 
 Ceccomp: $(OBJS) $(CECCOMP_MAIN)
@@ -34,7 +37,7 @@ $(BUILD_DIR)/%.cpp.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 	$(CXX) -I$(INC_DIRS) $(CXXFLAGS) -c $< -g -o $@
 
 $(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+	mkdir -p $(BUILD_DIR) $(BUILD_UTILS_DIR)
 
 .PHONY: clean
 clean:

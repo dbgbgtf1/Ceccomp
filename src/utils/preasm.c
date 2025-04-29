@@ -1,16 +1,16 @@
 #include "preasm.h"
-#include "Main.h"
 #include "error.h"
+#include "main.h"
 #include <fcntl.h>
 #include <seccomp.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 static bool
-isEtc (char *Line)
+is_etc (char *Line)
 {
   if (STARTWITH (Line, "---------------------------------"))
     return true;
@@ -22,31 +22,31 @@ isEtc (char *Line)
 }
 
 static char *
-PreGetLines (FILE *fp)
+pre_get_lines (FILE *fp)
 {
-  char *Line = NULL;
+  char *origin_line = NULL;
   size_t read = 0;
   size_t len = 0;
 
-  read = getline (&Line, &len, fp);
+  read = getline (&origin_line, &len, fp);
 
   if (read != -1)
     {
-      if (Line[read - 1] == '\n')
-        Line[read - 1] = '\0';
+      if (origin_line[read - 1] == '\n')
+        origin_line[read - 1] = '\0';
 
       char *start = NULL;
-      if ((start = strstr (Line, "if")) != NULL)
+      if ((start = strstr (origin_line, "if")) != NULL)
         return start;
 
-      else if ((start = strstr (Line, "ret")) != NULL)
+      else if ((start = strstr (origin_line, "ret")) != NULL)
         return start;
 
-      else if ((start = strchr (Line, '$')) != NULL)
+      else if ((start = strchr (origin_line, '$')) != NULL)
         return start;
 
-      else if (!isEtc (Line))
-        PEXIT ("Error Line: %s", Line);
+      else if (!is_etc (origin_line))
+        PEXIT ("Error Line: %s", origin_line);
 
       return "";
     }
@@ -55,12 +55,12 @@ PreGetLines (FILE *fp)
 }
 
 static void
-PreClearColor (char *Line)
+pre_clear_color (char *clean_line)
 {
   char *colorstart = NULL;
   char *colorend = NULL;
 
-  while ((colorstart = strchr (Line, '\e')) != NULL)
+  while ((colorstart = strchr (clean_line, '\e')) != NULL)
     {
       colorend = strchr (colorstart, 'm');
       memset (colorstart, ' ', colorend - colorstart + 1);
@@ -68,12 +68,12 @@ PreClearColor (char *Line)
 }
 
 static void
-PreClearSpace (char *Line)
+pre_clear_space (char *clean_line)
 {
   char *space = NULL;
   char *spaceend = NULL;
 
-  while ((space = strchr (Line, ' ')) != NULL)
+  while ((space = strchr (clean_line, ' ')) != NULL)
     {
       spaceend = space;
       while (*spaceend == ' ')
@@ -83,11 +83,11 @@ PreClearSpace (char *Line)
 }
 
 void
-PreAsm (FILE *fp, line_set *Line)
+pre_asm (FILE *fp, line_set *Line)
 {
   do
     {
-      Line->origin_line = PreGetLines (fp);
+      Line->origin_line = pre_get_lines (fp);
       if (Line->origin_line == NULL)
         return;
     }
@@ -95,6 +95,6 @@ PreAsm (FILE *fp, line_set *Line)
 
   Line->clean_line = strdup (Line->origin_line);
 
-  PreClearColor (Line->clean_line);
-  PreClearSpace (Line->clean_line);
+  pre_clear_color (Line->clean_line);
+  pre_clear_space (Line->clean_line);
 }

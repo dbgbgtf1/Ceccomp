@@ -1,21 +1,21 @@
 #ifndef DUMP
 #define DUMP
 
-#include "Main.h"
+#include "main.h"
 #include <stdint.h>
 
-static void Strict ();
+static void strict_mode ();
 
-static uint64_t CheckSCMP (syscall_info *Info, int pid, fprog *prog);
+static uint64_t check_scmp_mode (syscall_info *Info, int pid, fprog *prog);
 
-static void DumpFilter (syscall_info *Info, int pid, fprog *prog);
+static void dump_filter (syscall_info *Info, int pid, fprog *prog);
 
-static void Filter (syscall_info *Info, int pid, fprog *prog);
+static void filter_mode (syscall_info *Info, int pid, fprog *prog);
 
-static void Child (char *argv[]);
+static void child (char *argv[]);
 
-static void Parent (int pid);
+static void parent (int pid);
 
-void dump (int argc, char *argv[]);
+extern void dump (int argc, char *argv[]);
 
 #endif

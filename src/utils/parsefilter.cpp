@@ -1,5 +1,4 @@
 #include "parsefilter.h"
-#include "Main.h"
 #include "color.h"
 #include "error.h"
 #include "transfer.h"
@@ -8,7 +7,6 @@
 #include <seccomp.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -23,31 +21,31 @@ struct Reg
   Reg () { m_str = (char *)malloc (0x100); }
 
   void
-  SetVal (uint32_t val)
+  set_val (uint32_t val)
   {
     snprintf (m_str, 0x100, "0x%x", val);
   }
 
   void
-  SetVal (char *str)
+  set_val (char *str)
   {
     snprintf (m_str, 0x100, "%s", str);
   }
 
   char *
-  retSameType (char *str)
+  ret_same_type (char *str)
   {
     uint32_t val = atoi (str);
-    return retSameType (val);
+    return ret_same_type (val);
   }
 
-  char *retSameType (uint32_t val);
+  char *ret_same_type (uint32_t val);
 
-  char *TryTransfer (uint32_t val);
+  char *try_transfer (uint32_t val);
 };
 
 char *
-Reg::TryTransfer (uint32_t val)
+Reg::try_transfer (uint32_t val)
 {
   char *ret = NULL;
   if (!strcmp (m_str, syscall_nr))
@@ -62,11 +60,11 @@ Reg::TryTransfer (uint32_t val)
 }
 
 char *
-Reg::retSameType (uint32_t val)
+Reg::ret_same_type (uint32_t val)
 {
   char *ret = NULL;
   if (m_str != NULL)
-    ret = TryTransfer (val);
+    ret = try_transfer (val);
   // if ret == NULL, the transfer failed or it doesn't need transfer
   // so just transfer the val to str
   if (ret == NULL)
@@ -130,23 +128,23 @@ Parser::LD (filter *f_ptr)
     {
     case BPF_IMM:
       printf (BLUE_A " = " BLUE_H, k);
-      A.SetVal (k);
+      A.set_val (k);
       return;
     case BPF_ABS:
       if (!ABS2STR (k))
         PEXIT (unknownoffset BLUE_H, k);
       printf (BLUE_A " = " BLUE_S, ABS2STR (k));
-      A.SetVal (ABS2STR (k));
+      A.set_val (ABS2STR (k));
       return;
     case BPF_IND:
       return;
     case BPF_MEM:
       printf (BLUE_A " = " BLUE_M, k);
-      A.SetVal (mem[k].m_str);
+      A.set_val (mem[k].m_str);
       return;
     case BPF_LEN:
       printf (BLUE_A " = " BLUE_H, (uint32_t)sizeof (seccomp_data));
-      A.SetVal (sizeof (seccomp_data));
+      A.set_val (sizeof (seccomp_data));
       return;
     case BPF_MSH:
       return;
@@ -165,23 +163,23 @@ Parser::LDX (filter *f_ptr)
     {
     case BPF_IMM:
       printf (BLUE_X " = " BLUE_H, k);
-      X.SetVal (k);
+      X.set_val (k);
       return;
     case BPF_ABS:
       if (!ABS2STR (k))
         PEXIT (unknownoffset BLUE_H, k);
       printf (BLUE_X " = " BLUE_S, ABS2STR (k));
-      X.SetVal (ABS2STR (k));
+      X.set_val (ABS2STR (k));
       return;
     case BPF_IND:
       return;
     case BPF_MEM:
       printf (BLUE_X " = " BLUE_M, k);
-      X.SetVal (mem[k].m_str);
+      X.set_val (mem[k].m_str);
       return;
     case BPF_LEN:
       printf (BLUE_X " = " BLUE_H, (uint32_t)sizeof (seccomp_data));
-      X.SetVal (sizeof (seccomp_data));
+      X.set_val (sizeof (seccomp_data));
       return;
     case BPF_MSH:
       return;
@@ -194,14 +192,14 @@ void
 Parser::ST (filter *f_ptr)
 {
   printf (BLUE_M " = " BLUE_A, f_ptr->k);
-  mem[f_ptr->k].SetVal (A.m_str);
+  mem[f_ptr->k].set_val (A.m_str);
 }
 
 void
 Parser::STX (filter *f_ptr)
 {
   printf (BLUE_M " = " BLUE_X, f_ptr->k);
-  mem[f_ptr->k].SetVal (X.m_str);
+  mem[f_ptr->k].set_val (X.m_str);
 }
 
 void
@@ -220,60 +218,60 @@ Parser::ALU (filter *f_ptr)
         case BPF_ADD:
           snprintf (tmp, 0x100, "(%s += 0x%x)", A.m_str, k);
           printf (BLUE_A " += " BLUE_H, k);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
         case BPF_SUB:
           snprintf (tmp, 0x100, "(%s -= 0x%x)", A.m_str, k);
           printf (BLUE_A " -= " BLUE_H, k);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
         case BPF_MUL:
           snprintf (tmp, 0x100, "(%s *= 0x%x)", A.m_str, k);
           printf (BLUE_A " *= " BLUE_H, k);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
         case BPF_DIV:
           snprintf (tmp, 0x100, "(%s /= 0x%x)", A.m_str, k);
           printf (BLUE_A " /= " BLUE_H " ", k);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
         case BPF_AND:
           snprintf (tmp, 0x100, "(%s &= 0x%x)", A.m_str, k);
           printf (BLUE_A " &= " BLUE_H, k);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
         case BPF_OR:
           snprintf (tmp, 0x100, "(%s |= 0x%x)", A.m_str, k);
           printf (BLUE_A " |= " BLUE_H, k);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
         case BPF_XOR:
           snprintf (tmp, 0x100, "(%s ^= 0x%x)", A.m_str, k);
           printf (BLUE_A " ^= " BLUE_H, k);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
         case BPF_MOD:
           snprintf (tmp, 0x100, "(%s %%= 0x%x)", A.m_str, k);
           printf (BLUE_A " %%= " BLUE_H, k);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
         case BPF_LSH:
           snprintf (tmp, 0x100, "(%s <<= 0x%x)", A.m_str, k);
           printf (BLUE_A " <<= " BLUE_H, k);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
         case BPF_RSH:
           snprintf (tmp, 0x100, "(%s >>= 0x%x)", A.m_str, k);
           printf (BLUE_A " >>= " BLUE_H, k);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
           // NEG don't need BPF_K or BPF_X
@@ -281,7 +279,7 @@ Parser::ALU (filter *f_ptr)
         case BPF_NEG:
           snprintf (tmp, 0x100, "(-%s)", A.m_str);
           printf (BLUE_A " = " BLUE ("-A"));
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
         default:
@@ -294,58 +292,58 @@ Parser::ALU (filter *f_ptr)
         case BPF_ADD:
           snprintf (tmp, 0x100, "(%s += %s)", A.m_str, X.m_str);
           printf (BLUE_A " += " BLUE_S, X.m_str);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
         case BPF_SUB:
           snprintf (tmp, 0x100, "(%s -= %s)", A.m_str, X.m_str);
           printf (BLUE_A " -= " BLUE_S, X.m_str);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
         case BPF_MUL:
           snprintf (tmp, 0x100, "(%s *= %s)", A.m_str, X.m_str);
           printf (BLUE_A " *= " BLUE_S, X.m_str);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
         case BPF_DIV:
           snprintf (tmp, 0x100, "(%s /= %s)", A.m_str, X.m_str);
           printf (BLUE_A " /= " BLUE_S, X.m_str);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
         case BPF_AND:
           snprintf (tmp, 0x100, "(%s &= %s)", A.m_str, X.m_str);
           printf (BLUE_A " &= " BLUE_S, X.m_str);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
         case BPF_OR:
           snprintf (tmp, 0x100, "(%s |= %s)", A.m_str, X.m_str);
           printf (BLUE_A " |= " BLUE_S, X.m_str);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
         case BPF_XOR:
           snprintf (tmp, 0x100, "(%s ^= %s)", A.m_str, X.m_str);
           printf (BLUE_A " ^= " BLUE_S, X.m_str);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
         case BPF_MOD:
           snprintf (tmp, 0x100, "(%s %%= %s)", A.m_str, X.m_str);
           printf (BLUE_A " %%= " BLUE_S, X.m_str);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
         case BPF_LSH:
           printf (BLUE_A " <<= " BLUE_S, X.m_str);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
         case BPF_RSH:
           snprintf (tmp, 0x100, "(%s >>= %s)", A.m_str, X.m_str);
           printf (BLUE_A " >>= " BLUE_S, X.m_str);
-          A.SetVal (tmp);
+          A.set_val (tmp);
           return;
 
         default:
@@ -371,31 +369,31 @@ Parser::JMP (filter *f_ptr, const char *syms[4])
       return false;
 
     case BPF_JEQ | BPF_X:
-      printf (syms[0], A.retSameType (X.m_str));
+      printf (syms[0], A.ret_same_type (X.m_str));
       return true;
     case BPF_JEQ | BPF_K:
-      printf (syms[0], A.retSameType (k));
+      printf (syms[0], A.ret_same_type (k));
       return true;
 
     case BPF_JGT | BPF_X:
-      printf (syms[1], A.retSameType (X.m_str));
+      printf (syms[1], A.ret_same_type (X.m_str));
       return true;
     case BPF_JGT | BPF_K:
-      printf (syms[1], A.retSameType (k));
+      printf (syms[1], A.ret_same_type (k));
       return true;
 
     case BPF_JGE | BPF_X:
-      printf (syms[2], A.retSameType (X.m_str));
+      printf (syms[2], A.ret_same_type (X.m_str));
       return true;
     case BPF_JGE | BPF_K:
-      printf (syms[2], A.retSameType (k));
+      printf (syms[2], A.ret_same_type (k));
       return true;
 
     case BPF_JSET | BPF_X:
-      printf (syms[3], A.retSameType (X.m_str));
+      printf (syms[3], A.ret_same_type (X.m_str));
       return true;
     case BPF_JSET | BPF_K:
-      printf (syms[3], A.retSameType (k));
+      printf (syms[3], A.ret_same_type (k));
       return true;
     default:
       printf ("unknown jmp: jmode: 0x%x, src: 0x%x", jmode, src);
@@ -478,11 +476,11 @@ Parser::MISC (filter *f_ptr)
     {
     case BPF_TAX:
       printf (BLUE_A " = " BLUE_X);
-      X.SetVal (A.m_str);
+      X.set_val (A.m_str);
       return;
     case BPF_TXA:
       printf (BLUE_A " = " BLUE_X);
-      A.SetVal (1);
+      A.set_val (1);
       return;
     default:
       printf ("unknown mode: 0x%x", mode);
@@ -529,7 +527,7 @@ Parser::CLASS (int idx)
 extern "C"
 {
   void
-  ParseFilter (uint32_t arch, fprog *prog)
+  parse_filter (uint32_t arch, fprog *prog)
   {
     Parser parser (arch, prog);
     uint32_t len = prog->len;

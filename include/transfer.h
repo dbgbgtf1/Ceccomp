@@ -25,21 +25,21 @@ extern "C"
 {
 #endif
 
-  char *ARCH2STR (uint32_t token);
+  extern char *ARCH2STR (uint32_t token);
 
-  uint32_t STR2ARCH (char *);
+  extern uint32_t STR2ARCH (char *);
 
-  char *ABS2STR (uint32_t offset);
+  extern char *ABS2STR (uint32_t offset);
 
-  uint32_t STR2ABS (char *str);
+  extern uint32_t STR2ABS (char *str);
 
-  char *RETVAL2STR (uint32_t retval);
+  extern char *RETVAL2STR (uint32_t retval);
 
-  uint32_t STR2RETVAL (char *str);
+  extern uint32_t STR2RETVAL (char *str);
 
-  uint32_t STR2REG (char *str);
+  extern uint32_t STR2REG (char *str);
 
-  char *REG2STR (uint32_t offset);
+  extern char *REG2STR (uint32_t offset);
 
 #ifdef __cplusplus
 }

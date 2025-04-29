@@ -1,12 +1,12 @@
 #include "disasm.h"
-#include "Main.h"
 #include "error.h"
+#include "main.h"
 #include "parsefilter.h"
 #include "transfer.h"
 #include <fcntl.h>
-#include <unistd.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 void
 disasm (int argc, char *argv[])
@@ -36,5 +36,5 @@ disasm (int argc, char *argv[])
   prog->len = (len / sizeof (filter));
   prog->filter = bpf;
 
-  ParseFilter (arch, prog);
+  parse_filter (arch, prog);
 }

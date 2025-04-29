@@ -1,6 +1,6 @@
 // clang-format off
 #include "dump.h"
-#include "Main.h"
+#include "main.h"
 #include "parsefilter.h"
 #include "color.h"
 #include "error.h"
@@ -19,7 +19,7 @@
 #define LOADED 0x8
 
 static void
-Strict ()
+strict_mode ()
 {
   printf ("---------------------------------\n");
   printf (RED ("Strict Mode Detected?!\n"));
@@ -28,7 +28,7 @@ Strict ()
 }
 
 static uint64_t
-CheckSCMP (syscall_info *Info, int pid, fprog *prog)
+check_scmp_mode (syscall_info *Info, int pid, fprog *prog)
 {
   uint64_t seccomp_mode = false;
   uint32_t arch = Info->arch;
@@ -63,30 +63,31 @@ CheckSCMP (syscall_info *Info, int pid, fprog *prog)
 }
 
 static void
-DumpFilter (syscall_info *Info, int pid, fprog *prog)
+dump_filter (syscall_info *Info, int pid, fprog *prog)
 {
-  size_t *sFilter = (size_t *)prog->filter;
+  size_t *filters = (size_t *)prog->filter;
   uint32_t offset = offsetof (fprog, filter);
   uint64_t args2 = Info->entry.args[2];
-  size_t *cFilter = (size_t *)ptrace (PTRACE_PEEKDATA, pid, args2 + offset, 0);
+  size_t *filter_adr
+      = (size_t *)ptrace (PTRACE_PEEKDATA, pid, args2 + offset, 0);
 
   // use size_t so that it can work in both 64 and 32 bits
 
   for (int i = 0; i * sizeof (size_t) < prog->len * sizeof (filter); i++)
-    sFilter[i] = ptrace (PTRACE_PEEKDATA, pid, &cFilter[i], 0);
+    filters[i] = ptrace (PTRACE_PEEKDATA, pid, &filter_adr[i], 0);
 }
 
 static void
-Filter (syscall_info *Info, int pid, fprog *prog)
+filter_mode (syscall_info *Info, int pid, fprog *prog)
 {
   prog->filter = malloc (prog->len * sizeof (filter));
-  DumpFilter (Info, pid, prog);
-  ParseFilter (Info->arch, prog);
+  dump_filter (Info, pid, prog);
+  parse_filter (Info->arch, prog);
   free (prog->filter);
 }
 
 static void
-Child (char *argv[])
+child (char *argv[])
 {
   close (STDOUT_FILENO);
 
@@ -100,7 +101,7 @@ Child (char *argv[])
 }
 
 static void
-Parent (int pid)
+parent (int pid)
 {
   syscall_info *Info = malloc (sizeof (syscall_info));
   fprog *prog = malloc (sizeof (fprog));
@@ -123,12 +124,12 @@ Parent (int pid)
         continue;
       // Assuming nothing important happened
 
-      seccomp_mode = CheckSCMP (Info, pid, prog);
+      seccomp_mode = check_scmp_mode (Info, pid, prog);
 
       if (seccomp_mode == (SECCOMP_SET_MODE_STRICT | LOADED))
-        Strict ();
+        strict_mode ();
       else if (seccomp_mode == (SECCOMP_SET_MODE_FILTER | LOADED))
-        Filter (Info, pid, prog);
+        filter_mode (Info, pid, prog);
     }
 
   free (Info);
@@ -147,7 +148,7 @@ dump (int argc, char *argv[])
 
   int pid = fork ();
   if (pid == 0)
-    Child (argv);
+    child (argv);
   else
-    Parent (pid);
+    parent (pid);
 }

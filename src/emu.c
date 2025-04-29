@@ -1,7 +1,7 @@
 #include "emu.h"
-#include "Main.h"
 #include "color.h"
 #include "error.h"
+#include "main.h"
 #include "parseobj.h"
 #include "preasm.h"
 #include "transfer.h"
@@ -17,7 +17,7 @@
 #define LIGHTCOLORPRINTF(str, ...) printf (LIGHTCOLOR (str "\n"), __VA_ARGS__)
 
 static bool
-isStateTrue (uint32_t A, uint32_t sym_enum, uint32_t rval)
+is_state_true (uint32_t A, uint32_t sym_enum, uint32_t rval)
 {
   switch (sym_enum)
     {
@@ -41,30 +41,30 @@ isStateTrue (uint32_t A, uint32_t sym_enum, uint32_t rval)
 }
 
 static bool
-ParseCondition (char *sym_str, reg_mem *reg, seccomp_data *data,
-                char *origin_line)
+emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data,
+               char *origin_line)
 {
-  uint8_t sym_enum = ParseSym (sym_str, origin_line);
+  uint8_t sym_enum = parse_compare_sym (sym_str, origin_line);
   uint8_t symlen = GETSYMLEN (sym_enum);
 
   char *rvar = sym_str + symlen;
-  uint32_t rval = ParseVal (rvar, reg, data->arch, origin_line);
+  uint32_t rval = right_val_ifline (rvar, reg, data->arch, origin_line);
 
   printf (BLUE_A);
   printf (" %.*s ", symlen, sym_str);
   printf (BLUE_LS, (uint32_t)(strchr (rvar, ')') - rvar), rvar);
 
-  return isStateTrue (reg->A, sym_enum, rval);
+  return is_state_true (reg->A, sym_enum, rval);
 }
 
 static uint32_t
-IfLine (line_set *Line, reg_mem *reg, seccomp_data *data)
+emu_if_line (line_set *Line, reg_mem *reg, seccomp_data *data)
 {
   char *clean_line = Line->clean_line;
   char *origin_line = Line->origin_line;
 
   char *sym_str;
-  bool reverse = MaybeReverse (clean_line, origin_line);
+  bool reverse = maybe_reverse (clean_line, origin_line);
   if (reverse)
     {
       sym_str = clean_line + strlen ("if!($A");
@@ -77,13 +77,13 @@ IfLine (line_set *Line, reg_mem *reg, seccomp_data *data)
     }
 
   bool condition;
-  condition = ParseCondition (sym_str, reg, data, origin_line);
+  condition = emu_condition (sym_str, reg, data, origin_line);
 
   char *right_brace = strchr (sym_str, ')');
   if (right_brace == NULL)
     PEXIT ("use if( ) to wrap condition: %s", origin_line);
 
-  uint32_t jmp_set = ParseJmp (right_brace, origin_line);
+  uint32_t jmp_set = parse_goto (right_brace, origin_line);
   uint8_t jf = GETJF (jmp_set);
   uint8_t jt = GETJT (jmp_set);
 
@@ -101,13 +101,13 @@ IfLine (line_set *Line, reg_mem *reg, seccomp_data *data)
 }
 
 static void
-AssignLine (line_set *Line, reg_mem *reg, seccomp_data *data)
+emu_assign_line (line_set *Line, reg_mem *reg, seccomp_data *data)
 {
   char *clean_line = Line->clean_line;
   char *origin_line = Line->origin_line;
 
   reg_set lvar;
-  ParseReg (clean_line, &lvar, reg, origin_line);
+  left_var_assignline (clean_line, &lvar, reg, origin_line);
   uint8_t lvar_len = lvar.reg_len;
   uint32_t *lvar_ptr = lvar.reg_ptr;
 
@@ -115,14 +115,14 @@ AssignLine (line_set *Line, reg_mem *reg, seccomp_data *data)
     PEXIT ("invalid operator in assign: %s", origin_line);
 
   char *rvar = clean_line + lvar_len + 1;
-  uint32_t rval = ParseVar (rvar, data, reg, origin_line);
+  uint32_t rval = right_var_assignline (rvar, data, reg, origin_line);
 
   *lvar_ptr = rval;
   printf (BLUE_LS " = " BLUE_S "\n", lvar_len, clean_line, rvar);
 }
 
 static uint32_t
-RetLine (line_set *Line)
+emu_ret_line (line_set *Line)
 {
   char *retval_str = STRAFTER (Line->clean_line, "return");
   uint32_t retval = STR2RETVAL (retval_str);
@@ -150,7 +150,7 @@ clear_color (char *origin_line)
 }
 
 static void
-ParseLines (FILE *fp, seccomp_data *data)
+emu_lines (FILE *fp, seccomp_data *data)
 {
   line_set Line = { NULL, NULL };
   reg_mem *reg = malloc (sizeof (reg_mem));
@@ -158,7 +158,7 @@ ParseLines (FILE *fp, seccomp_data *data)
   char *origin_line;
   char *clean_line;
   for (uint32_t read_idx = 1, actual_idx = 1;
-       PreAsm (fp, &Line), Line.origin_line != NULL; read_idx++)
+       pre_asm (fp, &Line), Line.origin_line != NULL; read_idx++)
     {
       origin_line = Line.origin_line;
       clean_line = Line.clean_line;
@@ -174,11 +174,11 @@ ParseLines (FILE *fp, seccomp_data *data)
       actual_idx++;
 
       if (STARTWITH (clean_line, "if"))
-        actual_idx = IfLine (&Line, reg, data);
+        actual_idx = emu_if_line (&Line, reg, data);
       else if (STARTWITH (clean_line, "return"))
-        actual_idx = RetLine (&Line);
+        actual_idx = emu_ret_line (&Line);
       else if (*clean_line == '$')
-        AssignLine (&Line, reg, data);
+        emu_assign_line (&Line, reg, data);
       else
         PEXIT ("invalid Line: %s", origin_line);
 
@@ -229,7 +229,7 @@ emu (int argc, char *argv[])
         PEXIT ("invaild syscall args: %s", argv[i]);
     }
 
-  ParseLines (fp, data);
+  emu_lines (fp, data);
 
   free (data);
 }

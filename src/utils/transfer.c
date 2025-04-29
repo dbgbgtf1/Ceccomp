@@ -1,7 +1,7 @@
 #include "transfer.h"
-#include "Main.h"
 #include "color.h"
 #include "emu.h"
+#include "main.h"
 #include <seccomp.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -246,14 +246,14 @@ STR2REG (char *str)
     return offsetof (reg_mem, A);
   else if (STARTWITH (str, "$X"))
     return offsetof (reg_mem, X);
-  else if (!STARTWITH(str, "$mem["))
+  else if (!STARTWITH (str, "$mem["))
     return -1;
 
-  char *idx_str = str + strlen("$mem[");
+  char *idx_str = str + strlen ("$mem[");
   char *end = NULL;
-  uint32_t idx = strtol(idx_str, &end, 0);
+  uint32_t idx = strtol (idx_str, &end, 0);
   if (*end == ']' && idx <= 15)
-    return offsetof(reg_mem, mem[0]) + idx*sizeof(uint32_t);
+    return offsetof (reg_mem, mem[0]) + idx * sizeof (uint32_t);
 
   return -1;
 }

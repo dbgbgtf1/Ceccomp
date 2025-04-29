@@ -1,15 +1,11 @@
 #include "asm.h"
-#include "Main.h"
 #include "error.h"
 #include "parseobj.h"
-#include "preasm.h"
 #include "transfer.h"
 #include <linux/bpf_common.h>
 #include <linux/filter.h>
 #include <seccomp.h>
-#include <stdbool.h>
 #include <stddef.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,7 +27,7 @@ MISC_TAX ()
 // also EQ and NE can be the same thing
 // only you have to reverse
 static uint16_t
-JmpMode (uint8_t sym_enum, bool *reverse, char *origin_line)
+jmp_mode (uint8_t sym_enum, bool *reverse, char *origin_line)
 {
   switch (sym_enum)
     {
@@ -58,16 +54,16 @@ JmpMode (uint8_t sym_enum, bool *reverse, char *origin_line)
 }
 
 static void
-JmpSrc (char *rvar, filter *f_ptr, uint32_t arch, char *origin_line)
+jmp_src (char *rval, filter *f_ptr, uint32_t arch, char *origin_line)
 {
-  f_ptr->k = STR2ARCH (rvar);
+  f_ptr->k = STR2ARCH (rval);
   if (f_ptr->k != -1)
     {
       f_ptr->code |= BPF_K;
       return;
     }
 
-  char *syscall_name = strndup (rvar, strchr (rvar, ')') - rvar);
+  char *syscall_name = strndup (rval, strchr (rval, ')') - rval);
   f_ptr->k = seccomp_syscall_resolve_name_arch (arch, syscall_name);
   if (f_ptr->k != __NR_SCMP_ERROR)
     {
@@ -78,56 +74,56 @@ JmpSrc (char *rvar, filter *f_ptr, uint32_t arch, char *origin_line)
   free (syscall_name);
 
   char *end;
-  f_ptr->k = strtol (rvar, &end, 0);
-  if (rvar != end)
+  f_ptr->k = strtol (rval, &end, 0);
+  if (rval != end)
     {
       f_ptr->code |= BPF_K;
       return;
     }
 
-  if (!STARTWITH (rvar, "$X"))
+  if (!STARTWITH (rval, "$X"))
     PEXIT (INVALID_RIGHT ": %s", origin_line);
 
   f_ptr->code |= BPF_X;
 }
 
 static filter
-JMP (line_set *Line, uint32_t idx, uint32_t arch)
+JMP (line_set *Line, uint32_t pc, uint32_t arch)
 {
   char *clean_line = Line->clean_line;
   char *origin_line = Line->origin_line;
   filter filter = BPF_JUMP (BPF_JMP, 0, 0, 0);
 
-  bool reverse = MaybeReverse (clean_line, origin_line);
+  bool reverse = maybe_reverse (clean_line, origin_line);
   char *sym_str;
   if (reverse)
     sym_str = clean_line + strlen ("if!($A");
   else
     sym_str = clean_line + strlen ("if($A");
 
-  uint8_t sym_enum = ParseSym (sym_str, origin_line);
+  uint8_t sym_enum = parse_compare_sym (sym_str, origin_line);
   uint8_t sym_len = GETSYMLEN (sym_enum);
 
-  filter.code |= JmpMode (sym_enum, &reverse, origin_line);
+  filter.code |= jmp_mode (sym_enum, &reverse, origin_line);
 
-  char *rvar = sym_str + sym_len;
-  JmpSrc (rvar, &filter, arch, origin_line);
+  char *rval = sym_str + sym_len;
+  jmp_src (rval, &filter, arch, origin_line);
 
-  char *right_brace = strchr (rvar, ')');
-  uint16_t jmpset = ParseJmp (right_brace, origin_line);
+  char *right_brace = strchr (rval, ')');
+  uint16_t jmpset = parse_goto (right_brace, origin_line);
 
-  uint8_t jt = GETJT(jmpset);
-  uint8_t jf = GETJF(jmpset);
+  uint8_t jt = GETJT (jmpset);
+  uint8_t jf = GETJF (jmpset);
 
   if (reverse)
     {
-      filter.jt = jt ? (jt - idx - 1) : 0;
-      filter.jf = jf ? (jf - idx - 1) : 0;
+      filter.jt = jt ? (jt - pc - 1) : 0;
+      filter.jf = jf ? (jf - pc - 1) : 0;
     }
   else
     {
-      filter.jt = jf ? (jf - idx - 1) : 0;
-      filter.jf = jt ? (jt - idx - 1) : 0;
+      filter.jt = jf ? (jf - pc - 1) : 0;
+      filter.jf = jt ? (jt - pc - 1) : 0;
     }
 
   return filter;
@@ -262,14 +258,14 @@ ST_STX (line_set *Line)
 }
 
 static void
-AsmLines (FILE *fp, unsigned arch)
+asm_lines (FILE *fp, unsigned arch)
 {
   line_set Line;
   fprog *prog = malloc (sizeof (fprog));
   prog->len = 1;
   prog->filter = malloc (sizeof (filter) * 0x100);
 
-  while (PreAsm (fp, &Line), Line.origin_line != NULL)
+  while (pre_asm (fp, &Line), Line.origin_line != NULL)
     {
       filter f_current;
       char *clean_line = Line.clean_line;
@@ -295,8 +291,8 @@ AsmLines (FILE *fp, unsigned arch)
   for (int i = 1; i < prog->len; i++)
     {
       filter filter = prog->filter[i];
-      printf ("%04x %02x %02x %08x\n", filter.code, filter.jf,
-              filter.jt, filter.k);
+      printf ("%04x %02x %02x %08x\n", filter.code, filter.jf, filter.jt,
+              filter.k);
     }
 
   free (prog->filter);
@@ -318,5 +314,5 @@ assemble (int argc, char *argv[])
   if (fp == NULL)
     PEXIT (UNABLE_OPEN_FILE ": %s\n", argv[0]);
 
-  AsmLines (fp, arch);
+  asm_lines (fp, arch);
 }

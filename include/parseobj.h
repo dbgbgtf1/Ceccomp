@@ -1,11 +1,10 @@
 #ifndef PARSEOBJ
 #define PARSEOBJ
 
-#include "Main.h"
 #include "emu.h"
+#include "main.h"
 #include <stdbool.h>
 #include <stdint.h>
-#include <sys/types.h>
 
 typedef struct
 {
@@ -31,19 +30,19 @@ typedef enum
   SYM_GE = 0x26,
 } Sym;
 
-uint32_t ParseVal (char *val_str, reg_mem *reg, uint32_t arch,
-                   char *origin_line);
+extern uint32_t right_val_ifline (char *val_str, reg_mem *reg, uint32_t arch,
+                                  char *origin_line);
 
-uint32_t ParseVar (char *rvar_str, seccomp_data *data, reg_mem *reg_ptr,
-                   char *origin_line);
+extern uint32_t right_var_assignline (char *rvar_str, seccomp_data *data,
+                                      reg_mem *reg_ptr, char *origin_line);
 
-void ParseReg (char *reg_str, reg_set *reg_len_ptr, reg_mem *reg_ptr,
-               char *origin_line);
+extern void left_var_assignline (char *lvar_str, reg_set *reg_len_ptr,
+                                 reg_mem *reg_ptr, char *origin_line);
 
-uint8_t ParseSym (char *sym, char *origin_line);
+extern uint8_t parse_compare_sym (char *sym_str, char *origin_line);
 
-uint16_t ParseJmp (char *right_brace, char *origin_line);
+extern uint16_t parse_goto (char *right_brace, char *origin_line);
 
-bool MaybeReverse (char *clean_line, char *origin_line);
+extern bool maybe_reverse (char *clean_line, char *origin_line);
 
 #endif

@@ -11,14 +11,14 @@ typedef struct
   char *origin_line;
 } line_set;
 
-static bool isEtc (char *Line);
+static bool is_etc (char *origin_line);
 
-static char *PreGetLines (FILE *fp);
+static char *pre_get_lines (FILE *fp);
 
-static void PreClearColor (char *Line);
+static void pre_clear_color (char *clean_line);
 
-static void PreClearSpace (char *Line);
+static void pre_clear_space (char *clean_line);
 
-void PreAsm (FILE *fp, line_set *Line);
+extern void pre_asm (FILE *fp, line_set *Line);
 
 #endif
