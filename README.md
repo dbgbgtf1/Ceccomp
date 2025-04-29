@@ -100,9 +100,9 @@ child process status: 159
 
 #### dump usages
 
-Find a program that will load seccomp
-
 `Ceccomp dump program [ program-args ]`, add program-args if necessary
+
+Find a program that will load seccomp
 
 ### Emulate
 
@@ -120,11 +120,11 @@ plz click this link, a code block won't show color, so take a look at the pictur
 
 #### emu usages
 
+`Ceccomp emu text arch nr [ argv[0] - argv[5] ] (default as 0)`
+
 `arch` must be specified
 
 Otherwise the Ceccomp can't transfer something like `write` to its syscallnr
-
-`Ceccomp emu text arch nr [ argv[0] - argv[5] ] (default as 0)`
 
 ## Disasm
 
@@ -248,7 +248,7 @@ I designed asm this way, copying `bpf` will be easier
 
 #### asm usages
 
-> Ceccomp asm arch text
+`Ceccomp asm arch text`
 
 Just like disasm, emu, `arch` must be specified
 
