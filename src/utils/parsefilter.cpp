@@ -11,8 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define unknownoffset "unknown offset of seccomp_data: "
-
 struct Reg
 {
   uint32_t m_arch;
@@ -132,7 +130,7 @@ Parser::LD (filter *f_ptr)
       return;
     case BPF_ABS:
       if (!ABS2STR (k))
-        PEXIT (unknownoffset BLUE_H, k);
+        PEXIT (UNKNOWN_OFFSET_ABS ": " BLUE_H, k);
       printf (BLUE_A " = " BLUE_S, ABS2STR (k));
       A.set_val (ABS2STR (k));
       return;
@@ -167,7 +165,7 @@ Parser::LDX (filter *f_ptr)
       return;
     case BPF_ABS:
       if (!ABS2STR (k))
-        PEXIT (unknownoffset BLUE_H, k);
+        PEXIT (UNKNOWN_OFFSET_ABS ": " BLUE_H, k);
       printf (BLUE_X " = " BLUE_S, ABS2STR (k));
       X.set_val (ABS2STR (k));
       return;

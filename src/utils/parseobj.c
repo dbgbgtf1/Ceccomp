@@ -35,7 +35,7 @@ right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch,
   char *end;
   rval = strtol (rval_str, &end, 0);
   if (rval_str == end)
-    PEXIT ("invalid right value: %s", origin_line);
+    PEXIT (INVALID_RIGHT ": %s", origin_line);
   return rval;
 }
 
@@ -59,7 +59,7 @@ right_var_assignline (char *rvar_str, seccomp_data *data, reg_mem *reg_ptr,
   uint32_t rval = strtol (rvar_str, &end, 0);
   if (end != rvar_str)
     return rval;
-  PEXIT ("invalid right variable: %s", origin_line);
+  PEXIT (INVALID_RIGHT ": %s", origin_line);
 }
 
 // this is used in assign line, left value only
@@ -72,7 +72,7 @@ left_var_assignline (char *lvar_str, reg_set *reg_set, reg_mem *reg_ptr,
 {
   uint32_t reg_offset = STR2REG (lvar_str);
   if (reg_offset == -1)
-    PEXIT ("invalid left variable: %s", origin_line);
+    PEXIT (INVALID_LEFT_VAR ": %s", origin_line);
 
   if (reg_offset > offsetof (reg_mem, X))
     reg_set->reg_len = (size_t)strchr (lvar_str, ']') - (size_t)lvar_str + 1;
@@ -110,7 +110,7 @@ uint16_t
 parse_goto (char *right_brace, char *origin_line)
 {
   if (!STARTWITH (right_brace, ")goto"))
-    PEXIT ("use 'goto' after ( ): %s", origin_line);
+    PEXIT (GOTO_AFTER_CONDITION ": %s", origin_line);
 
   char *jt_str = right_brace + strlen (")goto");
   char *jf_str = NULL;
@@ -119,14 +119,14 @@ parse_goto (char *right_brace, char *origin_line)
 
   jt = strtol (jt_str, &jf_str, 10);
   if (jt == 0)
-    PEXIT ("line num to go after goto: %s", origin_line);
+    PEXIT (LINE_NR_AFTER_GOTO ": %s", origin_line);
 
   if (STARTWITH (jf_str, ",elsegoto"))
     {
       jf_str += strlen (",elsegoto");
       jf = strtol (jf_str, NULL, 10);
       if (jf == 0)
-        PEXIT ("line num to go after else goto: %s", origin_line);
+        PEXIT (LINE_NR_AFTER_ELSE ": %s", origin_line);
     }
 
   return JMPSET (jt, jf);

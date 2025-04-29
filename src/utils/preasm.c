@@ -46,7 +46,7 @@ pre_get_lines (FILE *fp)
         return start;
 
       else if (!is_etc (origin_line))
-        PEXIT ("Error Line: %s", origin_line);
+        PEXIT (INVALID_ASM_CODE ": %s", origin_line);
 
       return "";
     }
