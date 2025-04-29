@@ -22,7 +22,7 @@ isEtc (char *Line)
 }
 
 static char *
-GetLines (FILE *fp)
+PreGetLines (FILE *fp)
 {
   char *Line = NULL;
   size_t read = 0;
@@ -55,7 +55,7 @@ GetLines (FILE *fp)
 }
 
 static void
-ClearColor (char *Line)
+PreClearColor (char *Line)
 {
   char *colorstart = NULL;
   char *colorend = NULL;
@@ -68,7 +68,7 @@ ClearColor (char *Line)
 }
 
 static void
-ClearSpace (char *Line)
+PreClearSpace (char *Line)
 {
   char *space = NULL;
   char *spaceend = NULL;
@@ -87,7 +87,7 @@ PreAsm (FILE *fp, line_set *Line)
 {
   do
     {
-      Line->origin_line = GetLines (fp);
+      Line->origin_line = PreGetLines (fp);
       if (Line->origin_line == NULL)
         return;
     }
@@ -95,6 +95,6 @@ PreAsm (FILE *fp, line_set *Line)
 
   Line->clean_line = strdup (Line->origin_line);
 
-  ClearColor (Line->clean_line);
-  ClearSpace (Line->clean_line);
+  PreClearColor (Line->clean_line);
+  PreClearSpace (Line->clean_line);
 }

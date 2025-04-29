@@ -13,11 +13,11 @@ typedef struct
 
 static bool isEtc (char *Line);
 
-static char *GetLines (FILE *fp);
+static char *PreGetLines (FILE *fp);
 
-static void ClearColor (char *Line);
+static void PreClearColor (char *Line);
 
-static void ClearSpace (char *Line);
+static void PreClearSpace (char *Line);
 
 void PreAsm (FILE *fp, line_set *Line);
 

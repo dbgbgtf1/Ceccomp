@@ -66,9 +66,15 @@ IfLine (line_set *Line, reg_mem *reg, seccomp_data *data)
   char *sym_str;
   bool reverse = MaybeReverse (clean_line, origin_line);
   if (reverse)
-    sym_str = clean_line + strlen ("if!($A");
+    {
+      sym_str = clean_line + strlen ("if!($A");
+      printf ("if!(");
+    }
   else
-    sym_str = clean_line + strlen ("if($A");
+    {
+      sym_str = clean_line + strlen ("if($A");
+      printf ("if!(");
+    }
 
   bool condition;
   condition = ParseCondition (sym_str, reg, data, origin_line);
@@ -131,6 +137,19 @@ RetLine (line_set *Line)
 }
 
 static void
+clear_color (char *origin_line)
+{
+  char *color_start = NULL;
+  char *color_end = NULL;
+
+  while ((color_start = strchr (origin_line, '\e')) != NULL)
+    {
+      color_end = strchr (color_start, 'm');
+      sprintf (color_start, "%s", color_end + 1);
+    }
+}
+
+static void
 ParseLines (FILE *fp, seccomp_data *data)
 {
   line_set Line = { NULL, NULL };
@@ -146,6 +165,7 @@ ParseLines (FILE *fp, seccomp_data *data)
 
       if (read_idx < actual_idx)
         {
+          clear_color (origin_line);
           LIGHTCOLORPRINTF (FORMAT ": %s", read_idx, origin_line);
           free (clean_line);
           continue;
@@ -171,16 +191,14 @@ ParseLines (FILE *fp, seccomp_data *data)
 void
 emu (int argc, char *argv[])
 {
-  // argv[0] = dump-result
+  // argv[0] = text
   // argv[1] = arch
   // argv[2] = nr
   // emu need these args to run at least
 
   if (argc < 3)
-    PEXIT (
-        "%s",
-        "No enough args\nusage: Ceccomp emu dump-result arch nr [ argv[0] - "
-        "argv[5] ] (default as 0)");
+    PEXIT ("%s", "No enough args\nusage: Ceccomp emu text arch nr [ argv[0] - "
+                 "argv[5] ] (default as 0)");
 
   FILE *fp = fopen (argv[0], "r");
   if (fp == NULL)

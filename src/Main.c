@@ -14,7 +14,7 @@ help ()
   printf ("Ceccomp dump program program-args\n");
   printf ("Ceccomp disasm xxx.bpf\n");
   printf (
-      "Ceccomp emu dump-result arch nr [ argv[0] - argv[5] ] (default as 0)");
+      "Ceccomp emu text arch nr [ argv[0] - argv[5] ] (default as 0)");
   printf ("Ceccomp asm arch asmcodefile\n");
 }
 
@@ -30,7 +30,7 @@ main (int argc, char *argv[], char *env[])
 
   else if (!strcmp (argv[1], "emu"))
     emu (argc - 2, &argv[2]);
-  // Ceccomp emu dump-result arch nr [ argv[0] - argv[5] ] (default as 0)
+  // Ceccomp emu text arch nr [ argv[0] - argv[5] ] (default as 0)
 
   else if (!strcmp (argv[1], "disasm"))
     disasm (argc - 2, &argv[2]);
