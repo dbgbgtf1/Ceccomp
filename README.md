@@ -1,6 +1,6 @@
 # Ceccomp
-A tool to resolve seccomp just like seccomp-tools, written in c
 
+A tool to resolve seccomp just like seccomp-tools, written in c  
 All functions are done，yet a lot still need to be tested
 
 ## What Ceccomp can do
@@ -14,9 +14,8 @@ All functions are done，yet a lot still need to be tested
 
 > some concept to be clear
 
-Kernel load the seccomp with raw `bpf`
-
-raw `bpf` might look like this
+Kernel load the seccomp with raw `bpf`  
+raw `bpf` might look like this  
 ![raw_bpf](assets/raw_bpf.png)
 ```
 ❯ xxd bpf/twctf-2016-diary.bpf
@@ -31,9 +30,8 @@ raw `bpf` might look like this
 00000080: 0600 0000 0000 0000 0600 0000 0000 ff7f  ................
 ```
 
-After Ceccomp resolve the `bpf`, it can print it to `human readable text`
-
-Might look like this
+After Ceccomp resolve the `bpf`, it can print it to `human readable text`  
+Might look like this  
 ![text.png](assets/text.png)
 ```
 ❯ ./Ceccomp disasm X86_64 bpf/DEF-CON-2020-bdooos.bpf
@@ -61,8 +59,7 @@ Might look like this
 ---------------------------------
 ```
 
-I will call the `human readable text` with `text` later
-
+I will call the `human readable text` with `text` later  
 Note that the Line Code JT JF K are not necessary part of `text`, I just decided to print it
 
 **So be sure to understand what `text` and `bpf` means**
@@ -114,7 +111,7 @@ Emulate what will happen if `syscall (nr, args ...)` were called
 
 #### what emu looks like
 
-plz click this link, a code block won't show color, so take a look at the picture
+A code block won't show color, so take a look at the picture
 
 ![emu](assets/emu.png)
 
@@ -122,8 +119,7 @@ plz click this link, a code block won't show color, so take a look at the pictur
 
 `Ceccomp emu text arch nr [ argv[0] - argv[5] ] (default as 0)`
 
-`arch` must be specified
-
+`arch` must be specified  
 Otherwise the Ceccomp can't transfer something like `write` to its syscallnr
 
 ## Disasm
@@ -180,8 +176,7 @@ So you can use gdb to get the raw `bpf` manualy, Disasm will do the rest for you
 
 `Ceccomp disasm arch xxx.bpf`
 
-Just like emu, arch must be specified
-
+Just like emu, arch must be specified  
 Then just add the `bpf` you want to resolve
 
 ## Asm
@@ -198,8 +193,7 @@ I might write a simple guide about the basic rules)
 
 #### what asm looks like
 
-yeah, it might look too simple
-
+It might look too simple  
 I designed asm this way, copying `bpf` will be easier
 
 ![asm](assets/asm.png)
@@ -250,11 +244,8 @@ I designed asm this way, copying `bpf` will be easier
 
 `Ceccomp asm arch text`
 
-Just like disasm, emu, `arch` must be specified
-
-Then add the `text`, you can write you own `text`
-
-And asm will transfer `text` to `bpf`
+Just like disasm, emu, `arch` must be specified, then add the `text`  
+And you can write you own `text`, asm will asm `text` to `bpf`
 
 ## Supported architecture
 - X86
