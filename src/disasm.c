@@ -16,11 +16,11 @@ disasm (int argc, char *argv[])
 
   uint32_t arch = STR2ARCH (argv[0]);
   if (arch == -1)
-    PEXIT("%s\n%s\n", INVALID_ARCH, SUPPORT_ARCH);
+    PEXIT(INVALID_ARCH ": %s\n" SUPPORT_ARCH "\n", argv[0]);
 
   int fd = open (argv[1], O_RDONLY);
   if (fd == -1)
-    PEXIT ("unable to open %s", argv[1]);
+    PEXIT (UNABLE_OPEN_FILE ": %s\n", argv[1]);
 
   filter *bpf = malloc (0x1000);
   int len = read (fd, bpf, 0x1000);

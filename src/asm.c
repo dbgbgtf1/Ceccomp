@@ -308,11 +308,11 @@ assemble (int argc, char *argv[])
 
   uint32_t arch = STR2ARCH (argv[0]);
   if (arch == -1)
-    PEXIT (INVALID_ARCH ": %s\n" SUPPORT_ARCH, argv[1]);
+    PEXIT (INVALID_ARCH ": %s\n" SUPPORT_ARCH "\n", argv[0]);
 
   FILE *fp = fopen (argv[1], "r");
   if (fp == NULL)
-    PEXIT (UNABLE_OPEN_FILE ": %s\n", argv[0]);
+    PEXIT (UNABLE_OPEN_FILE ": %s\n", argv[1]);
 
   asm_lines (fp, arch);
 }

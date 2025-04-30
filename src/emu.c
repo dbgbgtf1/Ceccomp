@@ -81,7 +81,7 @@ emu_if_line (line_set *Line, reg_mem *reg, seccomp_data *data)
 
   char *right_brace = strchr (sym_str, ')');
   if (right_brace == NULL)
-    PEXIT ("use if( ) to wrap condition: %s", origin_line);
+    PEXIT (BRACE_WRAP_CONDITION ": %s", origin_line);
 
   uint32_t jmp_set = parse_goto (right_brace, origin_line);
   uint8_t jf = GETJF (jmp_set);
@@ -112,7 +112,7 @@ emu_assign_line (line_set *Line, reg_mem *reg, seccomp_data *data)
   uint32_t *lvar_ptr = lvar.reg_ptr;
 
   if (*(clean_line + lvar_len) != '=')
-    PEXIT ("invalid operator in assign: %s", origin_line);
+    PEXIT (INVALID_OPERATOR ": %s", origin_line);
 
   char *rvar = clean_line + lvar_len + 1;
   uint32_t rval = right_var_assignline (rvar, data, reg, origin_line);
@@ -127,7 +127,7 @@ emu_ret_line (line_set *Line)
   char *retval_str = STRAFTER (Line->clean_line, "return");
   uint32_t retval = STR2RETVAL (retval_str);
   if (retval == -1)
-    PEXIT ("invalid return value: %s", Line->origin_line);
+    PEXIT (INVALID_RET_VAL ": %s", Line->origin_line);
 
   retval_str = RETVAL2STR (retval);
 
@@ -180,7 +180,7 @@ emu_lines (FILE *fp, seccomp_data *data)
       else if (*clean_line == '$')
         emu_assign_line (&Line, reg, data);
       else
-        PEXIT ("invalid Line: %s", origin_line);
+        PEXIT (INVALID_ASM_CODE ": %s", origin_line);
 
       free (clean_line);
     }
@@ -201,7 +201,7 @@ emu (int argc, char *argv[])
 
   FILE *fp = fopen (argv[1], "r");
   if (fp == NULL)
-    PEXIT ("unable to open result file: %s", argv[0]);
+    PEXIT (UNABLE_OPEN_FILE ": %s", argv[1]);
 
   char *end = NULL;
   data->nr = seccomp_syscall_resolve_name_arch (data->arch, argv[2]);
@@ -222,4 +222,4 @@ emu (int argc, char *argv[])
   emu_lines (fp, data);
 
   free (data);
-}
+} 

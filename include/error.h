@@ -28,11 +28,14 @@
 #define INVALID_IF "invalid if line"
 #define INVALID_RET "invalid ret line"
 
+#define BRACE_WRAP_CONDITION "use (condition) to wrap condition"
 #define GOTO_AFTER_CONDITION "use 'goto' after (condition)"
 #define LINE_NR_AFTER_GOTO "line number to go after 'goto'"
 #define LINE_NR_AFTER_ELSE "line number to go after ',else goto'"
 
 #define INVALID_ASM_CODE "invalid asm code"
+
+#define INVALID_RET_VAL "invalid ret value"
 
 // bpf->text- error macros
 #define UNKNOWN_OFFSET_ABS "unknown offset of seccomp_data"
