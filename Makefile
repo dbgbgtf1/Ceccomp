@@ -40,20 +40,22 @@ ZSH_SRC := ./completion-zsh
 all: $(BUILD_DIR)/ceccomp
 
 install: bin_install zsh_cmp_install
-	echo "install success"
+	@echo "install success"
 
 bin_install: ceccomp
-	cp $< $(BIN_DIR)/$<
+	mkdir -p $(BIN_DIR)
+	cp $(BUILD_DIR)/$< $(BIN_DIR)/$<
 
 zsh_cmp_install: $(ZSH_SRC)/_ceccomp
-	cp $< $(ZSH_DST)/$<
+	mkdir -p $(ZSH_DST)
+	cp $< $(ZSH_DST)/_ceccomp
 
 ceccomp: $(OBJS) $(CECCOMP_MAIN)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(LDFLAGS) $(CXXFLAGS) $^ -o $@
 	mv $@ $(BUILD_DIR)
 
 test: $(OBJS) $(TEST_MAIN)
-	$(CXX) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(LDFLAGS) $(CXXFLAGS) $^ -o $@
 	mv $@ $(BUILD_DIR)
 
 $(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c | $(BUILD_DIR)

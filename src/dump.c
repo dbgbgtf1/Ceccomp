@@ -4,6 +4,7 @@
 #include "parsefilter.h"
 #include "color.h"
 #include "error.h"
+#include <linux/seccomp.h>
 #include <sys/prctl.h>
 #include <seccomp.h>
 #include <sys/wait.h>
@@ -16,7 +17,8 @@
 #include <unistd.h>
 // clang-format on
 
-#define LOADED 0x8
+#define LOAD_SUCCESS 0x0
+#define LOAD_FAIL 0x80000000
 
 static void
 strict_mode ()
@@ -30,17 +32,25 @@ strict_mode ()
 static uint64_t
 check_scmp_mode (syscall_info *Info, int pid, fprog *prog)
 {
-  uint64_t seccomp_mode = false;
+  uint64_t seccomp_mode = LOAD_FAIL;
   uint32_t arch = Info->arch;
   uint64_t nr = Info->entry.nr;
   uint64_t arg0 = Info->entry.args[0];
   uint64_t arg1 = Info->entry.args[1];
 
   if (nr == seccomp_syscall_resolve_name_arch (arch, "seccomp"))
-    seccomp_mode = arg0 | LOADED;
+    seccomp_mode = arg0 | LOAD_SUCCESS;
   else if (nr == seccomp_syscall_resolve_name_arch (arch, "prctl")
            && arg0 == PR_SET_SECCOMP)
-    seccomp_mode = arg1 | LOADED;
+  {
+    if (arg1 == SECCOMP_MODE_STRICT)
+      arg1 = SECCOMP_SET_MODE_STRICT;
+    else if (arg1 == SECCOMP_MODE_FILTER)
+      arg1 = SECCOMP_SET_MODE_FILTER;
+    // prctl use different macros
+    // transfer it to seccomp macros
+    seccomp_mode = arg1 | LOAD_SUCCESS;
+  }
   else
     return seccomp_mode;
 
@@ -56,7 +66,7 @@ check_scmp_mode (syscall_info *Info, int pid, fprog *prog)
   waitpid (pid, NULL, 0);
   ptrace (PTRACE_GETREGS, pid, 0, exitRegs);
   if (exitRegs->rax != 0)
-    seccomp_mode = false;
+    seccomp_mode = LOAD_FAIL;
   // seccomp set failed, nothing happened
 
   return seccomp_mode;
@@ -89,8 +99,6 @@ filter_mode (syscall_info *Info, int pid, fprog *prog)
 static void
 child (char *argv[])
 {
-  close (STDOUT_FILENO);
-
   ptrace (PTRACE_TRACEME, 0, 0, 0);
   raise (SIGSTOP);
 
@@ -126,9 +134,11 @@ parent (int pid)
 
       seccomp_mode = check_scmp_mode (Info, pid, prog);
 
-      if (seccomp_mode == (SECCOMP_SET_MODE_STRICT | LOADED))
+      if ((seccomp_mode & LOAD_FAIL) != 0)
+        continue;
+      if (seccomp_mode == (SECCOMP_SET_MODE_STRICT | LOAD_SUCCESS))
         strict_mode ();
-      else if (seccomp_mode == (SECCOMP_SET_MODE_FILTER | LOADED))
+      else if (seccomp_mode == (SECCOMP_SET_MODE_FILTER | LOAD_SUCCESS))
         filter_mode (Info, pid, prog);
     }
 
@@ -140,8 +150,7 @@ void
 dump (int argc, char *argv[])
 {
   if (argc < 1)
-    PEXIT ("%s\n%s\n",
-           NOT_ENOUGH_ARGS, DUMP_HINT);
+    PEXIT ("%s\n%s\n", NOT_ENOUGH_ARGS, DUMP_HINT);
 
   int pid = fork ();
   if (pid == 0)
