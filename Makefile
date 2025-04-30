@@ -18,19 +18,43 @@ TEST_MAIN := $(BUILD_DIR)/test.c.o
 CC := gcc
 CXX := g++
 
-CFLAGS := -lseccomp
-CXXFLAGS := -lseccomp
+CFLAGS := 
+CXXFLAGS := 
+LDFLAGS := -lseccomp
 
 ifdef DEBUG
 	CFLAGS += -g
 	CXXFLAGS += -g
+	LDFLAGS += -g
 else
 	CFLAGS += -O3
 	CXXFLAGS += -O3
+	LDFLAGS += -O3
 endif
 
-$(BUILD_DIR)/ceccomp: $(OBJS) $(CECCOMP_MAIN)
+PREFIX ?= /usr/local
+BIN_DIR ?= $(PREFIX)/bin
+ZSH_DST ?= $(PREFIX)/share/zsh/site-functions
+ZSH_SRC := ./completion-zsh
+
+all: $(BUILD_DIR)/ceccomp
+
+install: bin_install zsh_cmp_install
+	echo "install success"
+
+bin_install: ceccomp
+	cp $< $(BIN_DIR)/$<
+
+zsh_cmp_install: $(ZSH_SRC)/_ceccomp
+	cp $< $(ZSH_DST)/$<
+
+ceccomp: $(OBJS) $(CECCOMP_MAIN)
 	$(CXX) $(CXXFLAGS) $^ -o $@
+	mv $@ $(BUILD_DIR)
+
+test: $(OBJS) $(TEST_MAIN)
+	$(CXX) $(CXXFLAGS) $^ -o $@
+	mv $@ $(BUILD_DIR)
 
 $(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) -I$(INC_DIR) $(CFLAGS) $< -c -o $@
@@ -40,6 +64,6 @@ $(BUILD_DIR)/%.cpp.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR) $(BUILD_UTIL)
 
-.PHONY: clean
+.PHONY: clean all
 clean:
 	rm -rf $(BUILD_DIR)
