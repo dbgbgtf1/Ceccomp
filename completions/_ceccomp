@@ -1,0 +1,90 @@
+#compdef _ceccomp
+# Zsh completion script for ceccomp
+local -a subcmd options
+local state
+
+local archs=('x86_64' 'i386' 'x32' 'aarch64' 'arm' 'loongarch64' 'm68k' 'mips' 'mipsel'
+    'mips64' 'mipsel64' 'mips64n32' 'mipsel64n32' 'parisc' 'parisc64' 'ppc64' 'ppc64le'
+    'ppc' 's390x' 's390' 'riscv64'
+)
+local arch_compstr="--arch=[Target BPF architecture]:ARCH:($archs)"
+
+if (( CURRENT == 2 )) {
+    subcmd=(
+        "asm:Assemble bpf text to raw bytes"
+        "disasm:Disassemble raw bytes to bpf text"
+        "trace:Run program and extract bpf filter in runtime"
+        "emu:Emulate bpf program with given syscall and bpf text"
+        "help:Display ceccomp help information"
+        "version:Display ceccomp version"
+    )
+    _describe "subcmd" subcmd
+    return
+} elif (( CURRENT > 2 )) {
+    case $words[2] {
+        (asm)
+            _arguments \
+                $arch_compstr \
+                "--fmt=[Output format of BPF]:FMT:(raw hexline hexfmt)" \
+                "2:BPF:_files" \
+                "*: :"
+            ;;
+        (disasm)
+            _arguments \
+                $arch_compstr \
+                "2:RAW:_files" \
+                "*: :"
+            ;;
+        (trace)
+            _arguments -C \
+                "2:command name:_command_names -e" \
+                "*:arguments:_files"
+                # pid not available
+                # "--pid=[Attach to which process to extract its filters]:PID:->getpid" \
+            if [[ $state == "getpid" ]] {
+                _values $(ps -Ao pid=)
+            }
+            ;;
+        (emu)
+            _arguments -C \
+                $arch_compstr \
+                "2:BPF:_files" \
+                ":NR:(read write open)" \
+                ":ARGV0:->argv0" \
+                ":ARGV1:->argv1" \
+                ":ARGV2:->argv2" \
+                ":ARGV3:->argv3" \
+                ":ARGV4:->argv4" \
+                ":ARGV5:->argv5" \
+                ":PC:->pc" \
+                "*: :"
+            case $state {
+                (argv0)
+                    _message -r "Hint: u64 for argv[0]"
+                    ;;
+                (argv1)
+                    _message -r "Hint: u64 for argv[1]"
+                    ;;
+                (argv2)
+                    _message -r "Hint: u64 for argv[2]"
+                    ;;
+                (argv3)
+                    _message -r "Hint: u64 for argv[3]"
+                    ;;
+                (argv4)
+                    _message -r "Hint: u64 for argv[4]"
+                    ;;
+                (argv5)
+                    _message -r "Hint: u64 for argv[5]"
+                    ;;
+                (pc)
+                    _message -r "Hint: u64 for program counter"
+                    ;;
+                }
+            ;;
+        (*)
+            # help and version has no completion available
+            return
+            ;;
+        }
+}
