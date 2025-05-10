@@ -35,7 +35,7 @@ endif
 PREFIX ?= /usr/local
 BIN_DIR ?= $(PREFIX)/bin
 ZSH_DST ?= $(PREFIX)/share/zsh/site-functions
-ZSH_SRC := ./completion-zsh
+ZSH_SRC := ./completions
 
 all: $(BUILD_DIR)/ceccomp
 

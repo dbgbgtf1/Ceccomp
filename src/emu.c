@@ -218,7 +218,7 @@ emu (int argc, char *argv[])
         PEXIT ("%s", INVALID_SYS_ARGS);
     }
 
-  if (argc > 9)
+  if (argc > 10)
     {
       char *pc = get_arg (argc, argv);
       data.instruction_pointer = strtol (pc, &end, 0);

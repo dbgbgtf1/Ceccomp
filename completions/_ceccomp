@@ -78,7 +78,7 @@ if (( CURRENT == 2 )) {
                     _message -r "Hint: u64 for argv[5]"
                     ;;
                 (pc)
-                    _message -r "Hint: u64 for program counter"
+                    _message -r "Hint: u64 for instruction pointer"
                     ;;
                 }
             ;;
