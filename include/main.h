@@ -14,14 +14,15 @@
 #define ASM_HINT "ceccomp asm [ --arch= ] [ --fmt= ] bpftext"
 #define DISASM_HINT "ceccomp disasm [ --arch= ] bpftext"
 #define TRACE_HINT "ceccomp trace PROGRAM [ program-args ]"
-#define EMU_HINT "ceccomp emu [ --arch= ] bpftext syscall_nr [ args[0-5] instruction pointer ]"
+#define EMU_HINT "ceccomp emu [ --arch= ] bpftext syscall_nr [ args[0-5] ip ]"
 #define OPTION_HINT                                                           \
   "Options:\n"                                                                \
-  "\t--arch=(i386|x86_64|aarch64|arm|...; default as your arch)\n"            \
-  "\t--fmt=(hexline|hexfmt|raw; default as hexline)\n"                        \
-  "\targs[0-5] default as 0"
-#define HELP_HINT "show help message"
-#define VERSION "show ceccomp version message"
+  "\t--arch=(i386|x86_64|aarch64|arm|...) default as your arch\n"             \
+  "\t--fmt=(hexline|hexfmt|raw)           default as hexline\n"               \
+  "\targs[0-5]                            default as 0\n"                     \
+  "\tip                                   instruction pointer, default as 0"
+#define HELP_HINT "ceccomp show"
+#define VERSION "ceccomp version"
 
 typedef struct ptrace_syscall_info syscall_info;
 typedef struct sock_fprog fprog;

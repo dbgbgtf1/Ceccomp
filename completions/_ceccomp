@@ -56,7 +56,7 @@ if (( CURRENT == 2 )) {
                 ":ARGV3:->argv3" \
                 ":ARGV4:->argv4" \
                 ":ARGV5:->argv5" \
-                ":PC:->pc" \
+                ":IP:->ip" \
                 "*: :"
             case $state {
                 (argv0)
@@ -77,7 +77,7 @@ if (( CURRENT == 2 )) {
                 (argv5)
                     _message -r "Hint: u64 for argv[5]"
                     ;;
-                (pc)
+                (ip)
                     _message -r "Hint: u64 for instruction pointer"
                     ;;
                 }
