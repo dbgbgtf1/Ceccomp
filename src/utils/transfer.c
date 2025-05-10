@@ -15,43 +15,50 @@ ARCH2STR (uint32_t token)
   switch (token)
     {
     case SCMP_ARCH_X86:
-      return "X86";
+      return STR_ARCH_X86;
     case SCMP_ARCH_X86_64:
-      return "X86_64";
+      return STR_ARCH_X86_64;
+
     case SCMP_ARCH_X32:
-      return "X32";
+      return STR_ARCH_X32;
+
     case SCMP_ARCH_ARM:
-      return "ARM";
+      return STR_ARCH_ARM;
     case SCMP_ARCH_AARCH64:
-      return "AARCH64";
+      return STR_ARCH_AARCH64;
+
     case SCMP_ARCH_MIPS:
-      return "MIPS";
+      return STR_ARCH_MIPS;
     case SCMP_ARCH_MIPSEL:
-      return "MIPSEL";
+      return STR_ARCH_MIPSEL;
     case SCMP_ARCH_MIPS64:
-      return "MIPS64";
+      return STR_ARCH_MIPS64;
     case SCMP_ARCH_MIPSEL64:
-      return "MIPSEL64";
+      return STR_ARCH_MIPSEL64;
     case SCMP_ARCH_MIPS64N32:
-      return "MIPS64N32";
+      return STR_ARCH_MIPS64N32;
     case SCMP_ARCH_MIPSEL64N32:
-      return "MIPSEL64N32";
+      return STR_ARCH_MIPSEL64N32;
+      
     case SCMP_ARCH_PARISC:
-      return "PARISC";
+      return STR_ARCH_PARISC;
     case SCMP_ARCH_PARISC64:
-      return "PARISC64";
+      return STR_ARCH_PARISC64;
+
     case SCMP_ARCH_PPC:
-      return "PPC";
+      return STR_ARCH_PPC;
     case SCMP_ARCH_PPC64:
-      return "PPC64";
+      return STR_ARCH_PPC64;
     case SCMP_ARCH_PPC64LE:
-      return "PPC64LE";
+      return STR_ARCH_PPC64LE;
+
     case SCMP_ARCH_S390:
-      return "S390";
+      return STR_ARCH_S390;
     case SCMP_ARCH_S390X:
-      return "S390X";
+      return STR_ARCH_S390X;
+
     case SCMP_ARCH_RISCV64:
-      return "RISCV64";
+      return STR_ARCH_RISCV64;
     default:
       return NULL;
     }
@@ -60,43 +67,50 @@ ARCH2STR (uint32_t token)
 uint32_t
 STR2ARCH (char *arch)
 {
-  if (STARTWITH (arch, "X86_64"))
-    return SCMP_ARCH_X86_64;
-  else if (STARTWITH (arch, "X86"))
+  if (STARTWITH (arch, STR_ARCH_X86))
     return SCMP_ARCH_X86;
-  else if (STARTWITH (arch, "X32"))
+  else if (STARTWITH (arch, STR_ARCH_X86))
+    return SCMP_ARCH_X86;
+
+  else if (STARTWITH (arch, STR_ARCH_X32))
     return SCMP_ARCH_X32;
-  else if (STARTWITH (arch, "ARM"))
+
+  else if (STARTWITH (arch, STR_ARCH_ARM))
     return SCMP_ARCH_ARM;
-  else if (STARTWITH (arch, "AARCH64"))
+  else if (STARTWITH (arch, STR_ARCH_AARCH64))
     return SCMP_ARCH_AARCH64;
-  else if (STARTWITH (arch, "MIPS"))
+
+  else if (STARTWITH (arch, STR_ARCH_MIPS))
     return SCMP_ARCH_MIPS;
-  else if (STARTWITH (arch, "MIPSEL"))
+  else if (STARTWITH (arch, STR_ARCH_MIPSEL))
     return SCMP_ARCH_MIPSEL;
-  else if (STARTWITH (arch, "MIPS64"))
+  else if (STARTWITH (arch, STR_ARCH_MIPS64))
     return SCMP_ARCH_MIPS64;
-  else if (STARTWITH (arch, "MIPSEL64"))
+  else if (STARTWITH (arch, STR_ARCH_MIPSEL64))
     return SCMP_ARCH_MIPSEL64;
-  else if (STARTWITH (arch, "MIPS64N32"))
+  else if (STARTWITH (arch, STR_ARCH_MIPS64N32))
     return SCMP_ARCH_MIPS64N32;
-  else if (STARTWITH (arch, "MIPSEL64N32"))
+  else if (STARTWITH (arch, STR_ARCH_MIPSEL64N32))
     return SCMP_ARCH_MIPSEL64N32;
-  else if (STARTWITH (arch, "PARISC"))
+
+  else if (STARTWITH (arch, STR_ARCH_PARISC))
     return SCMP_ARCH_PARISC;
-  else if (STARTWITH (arch, "PARISC64"))
+  else if (STARTWITH (arch, STR_ARCH_PARISC64))
     return SCMP_ARCH_PARISC64;
-  else if (STARTWITH (arch, "PPC"))
+
+  else if (STARTWITH (arch, STR_ARCH_PPC))
     return SCMP_ARCH_PPC;
-  else if (STARTWITH (arch, "PPC64"))
+  else if (STARTWITH (arch, STR_ARCH_PPC64))
     return SCMP_ARCH_PPC64;
-  else if (STARTWITH (arch, "PPC64LE"))
+  else if (STARTWITH (arch, STR_ARCH_PPC64LE))
     return SCMP_ARCH_PPC64LE;
-  else if (STARTWITH (arch, "S390"))
+
+  else if (STARTWITH (arch, STR_ARCH_S390))
     return SCMP_ARCH_S390;
-  else if (STARTWITH (arch, "S390X"))
+  else if (STARTWITH (arch, STR_ARCH_S390X))
     return SCMP_ARCH_S390X;
-  else if (STARTWITH (arch, "RISCV64"))
+
+  else if (STARTWITH (arch, STR_ARCH_RISCV64))
     return SCMP_ARCH_RISCV64;
   else
     return -1;

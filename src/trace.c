@@ -1,5 +1,5 @@
 // clang-format off
-#include "dump.h"
+#include "trace.h"
 #include "main.h"
 #include "parsefilter.h"
 #include "color.h"
@@ -147,10 +147,10 @@ parent (int pid)
 }
 
 void
-dump (int argc, char *argv[])
+trace (int argc, char *argv[])
 {
   if (argc < 1)
-    PEXIT ("%s\n%s\n", NOT_ENOUGH_ARGS, DUMP_HINT);
+    PEXIT ("%s\n%s\n", NOT_ENOUGH_ARGS, TRACE_HINT);
 
   int pid = fork ();
   if (pid == 0)

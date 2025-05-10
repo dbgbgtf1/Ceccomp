@@ -1,23 +1,18 @@
-#compdef ceccomp
+# compdef ceccomp
 
-_ceccomp() {
-    local context state state_descr line
-    typeset -A opt_args
+_arguments -C \
+  '1:command:(( \
+  asm:"assemble text into raw bpf" \
+  disasm:"disasm raw bpf into text" \
+  trace:"trace program bpf out and print text" \
+  emu:"emulate a syscall with args" \
+  help:"show help" \
+  version:"show version"))' \
+  '*:: :->args' 
 
-    _arguments \
-        '--asm[assemble text into raw bpf]:ceccomp --asm arch text' \
-        '--disasm[disasm raw bpf into text]:ceccomp --disasm arch text' \
-        '--dump[dump program bpf out and print text]:ceccomp --dump program [ program-args ]' \
-        '--emu[emulate what will happen if syscall_nr was called based on text file]:ceccomp --emu arch text syscall_nr [ 0-6 args ](default as 0)]' \
-        '--help[ceccomp --help]' \
-        '*:: :->args'
+case $state in
+  args)
+    _files
+    ;;
+esac
 
-    case $state in
-        (args)
-            _message ""
-            _files
-            ;;
-    esac
-}
-
-compdef _ceccomp ceccomp

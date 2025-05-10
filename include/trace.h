@@ -1,5 +1,5 @@
-#ifndef DUMP
-#define DUMP
+#ifndef TRACE
+#define TRACE
 
 #include "main.h"
 #include <stdint.h>
@@ -16,6 +16,6 @@ static void child (char *argv[]);
 
 static void parent (int pid);
 
-extern void dump (int argc, char *argv[]);
+extern void trace (int argc, char *argv[]);
 
 #endif

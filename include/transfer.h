@@ -20,6 +20,28 @@
 #define high_arg4 "$high_args[4]"
 #define high_arg5 "$high_args[5]"
 
+#define STR_ARCH_X86 "x86"
+#define STR_ARCH_X86_64 "x86_64"
+#define STR_ARCH_X32 "x32"
+#define STR_ARCH_ARM "arm"
+#define STR_ARCH_AARCH64 "aarch64"
+#define STR_ARCH_LOONGARCH64 "loongarch64"
+#define STR_ARCH_M68K "m68k"
+#define STR_ARCH_MIPS "mips"
+#define STR_ARCH_MIPSEL "mipsel"
+#define STR_ARCH_MIPS64 "mips64"
+#define STR_ARCH_MIPSEL64 "mipsel64"
+#define STR_ARCH_MIPS64N32 "mips64n32"
+#define STR_ARCH_MIPSEL64N32 "mipsel64n32"
+#define STR_ARCH_PARISC "parisc"
+#define STR_ARCH_PARISC64 "parisc64"
+#define STR_ARCH_PPC64 "ppc64"
+#define STR_ARCH_PPC64LE "ppc64le"
+#define STR_ARCH_PPC "ppc"
+#define STR_ARCH_S390X "s390x"
+#define STR_ARCH_S390 "s390"
+#define STR_ARCH_RISCV64 "riscv64"
+
 #ifdef __cplusplus
 extern "C"
 {

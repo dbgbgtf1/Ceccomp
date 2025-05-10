@@ -5,7 +5,7 @@ INC_DIR := ./include
 BUILD_DIR := ./build
 BUILD_UTIL := ./build/utils
 
-C_SRCS := $(shell find $(SRC_DIR) -name '*.c' -or -name '*.s' ! -name 'ceccomp.c' ! -name 'test.c')
+C_SRCS := $(shell find ./src ! -name 'ceccomp.c' ! -name 'test.c' -name '*.c' -or -name '*.s')
 CXX_SRCS := $(shell find $(SRC_DIR) -name '*.cpp')
 
 C_OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.c.o,$(C_SRCS))
@@ -15,8 +15,8 @@ OBJS := $(C_OBJS) $(CXX_OBJS)
 CECCOMP_MAIN := $(BUILD_DIR)/ceccomp.c.o
 TEST_MAIN := $(BUILD_DIR)/test.c.o
 
-CC := gcc
-CXX := g++
+CC ?= gcc
+CXX ?= g++
 
 CFLAGS := 
 CXXFLAGS := 
@@ -55,6 +55,7 @@ ceccomp: $(OBJS) $(CECCOMP_MAIN)
 	mv $@ $(BUILD_DIR)
 
 test: $(OBJS) $(TEST_MAIN)
+	echo $(C_SRCS)
 	$(CXX) $(LDFLAGS) $(CXXFLAGS) $^ -o $@
 	mv $@ $(BUILD_DIR)
 
