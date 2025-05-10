@@ -150,7 +150,7 @@ void
 trace (int argc, char *argv[])
 {
   if (argc < 1)
-    PEXIT ("%s\n%s\n", NOT_ENOUGH_ARGS, TRACE_HINT);
+    PEXIT ("%s\n%s", NOT_ENOUGH_ARGS, TRACE_HINT);
 
   int pid = fork ();
   if (pid == 0)

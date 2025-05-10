@@ -3,14 +3,17 @@
 
 // preprocess error macros
 #define NOT_ENOUGH_ARGS "not enough args"
+#define INVALID_ARG "invalid arg"
 #define UNABLE_OPEN_FILE "unable to open file"
 #define INVALID_ARCH "invalid arch"
+#define INVALID_PRINT_MODE "invalid print mode"
 #define SUPPORT_ARCH                                                          \
   "X86 X86_64 X32 ARM AARCH64 MIPS MIPSEL MIPSEL64"                           \
   "MIPSEL64N32 PARSIC PARSIC64 PPC PPC64 PPC64LE "                            \
   "S390 S390X RISCV64"
 #define INVALID_SYSNR "invalid syscall nr"
 #define INVALID_SYS_ARGS "invalid syscall args"
+#define INVALID_PC "invalid instruction pointer"
 
 // text->bpf error macros
 #define INVALID_OPERATOR "invalid operator"

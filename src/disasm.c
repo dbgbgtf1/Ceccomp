@@ -1,6 +1,7 @@
 #include "disasm.h"
 #include "error.h"
 #include "main.h"
+#include "parseargs.h"
 #include "parsefilter.h"
 #include "transfer.h"
 #include <fcntl.h>
@@ -11,23 +12,22 @@
 void
 disasm (int argc, char *argv[])
 {
-  if (argc < 2)
-    PEXIT ("%s\n%s\n", NOT_ENOUGH_ARGS, DISASM_HINT);
-
-  uint32_t arch = STR2ARCH (argv[0]);
+  char *arch_str = parse_option (argc, argv, "arch");
+  uint32_t arch = STR2ARCH (arch_str);
   if (arch == -1)
-    PEXIT(INVALID_ARCH ": %s\n" SUPPORT_ARCH "\n", argv[0]);
+    PEXIT (INVALID_ARCH ": %s\n" SUPPORT_ARCH, arch_str);
 
-  int fd = open (argv[1], O_RDONLY);
+  char *filename = get_arg (argc, argv);
+
+  int fd = open (filename, O_RDONLY);
   if (fd == -1)
-    PEXIT (UNABLE_OPEN_FILE ": %s\n", argv[1]);
+    PEXIT (UNABLE_OPEN_FILE ": %s", filename);
 
-  filter *bpf = malloc (0x1000);
-  int len = read (fd, bpf, 0x1000);
+  fprog prog;
+  filter buf[0x100];
+  prog.filter = buf;
 
-  fprog *prog = malloc (sizeof (fprog));
-  prog->len = (len / sizeof (filter));
-  prog->filter = bpf;
+  prog.len = (read (fd, buf, 0x100 * sizeof (filter))) / sizeof(filter);
 
-  parse_filter (arch, prog);
+  parse_filter (arch, &prog);
 }

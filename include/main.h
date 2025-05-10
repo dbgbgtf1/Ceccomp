@@ -2,6 +2,7 @@
 #define MAIN
 
 // clang-format off
+#include <stdint.h>
 #include <sys/ptrace.h>
 #include <linux/filter.h>
 #include <linux/ptrace.h>
@@ -10,11 +11,16 @@
 #include <sys/user.h>
 // clang-format on
 
-#define ASM_HINT "ceccomp asm arch text"
-#define DISASM_HINT "ceccomp disasm arch text"
-#define TRACE_HINT "ceccomp trace program [ program-args ]"
-#define EMU_HINT "ceccomp emu arch text syscall_nr [ 0-6 args ] (default as 0)"
-#define HELP "show help message"
+#define ASM_HINT "ceccomp asm [ --arch= ] [ --fmt= ] bpftext"
+#define DISASM_HINT "ceccomp disasm [ --arch= ] bpftext"
+#define TRACE_HINT "ceccomp trace PROGRAM [ program-args ]"
+#define EMU_HINT "ceccomp emu [ --arch= ] bpftext syscall_nr [ args[0-5] instruction pointer ]"
+#define OPTION_HINT                                                           \
+  "Options:\n"                                                                \
+  "\t--arch=(i386|x86_64|aarch64|arm|...; default as your arch)\n"            \
+  "\t--fmt=(hexline|hexfmt|raw; default as hexline)\n"                        \
+  "\targs[0-5] default as 0"
+#define HELP_HINT "show help message"
 #define VERSION "show ceccomp version message"
 
 typedef struct ptrace_syscall_info syscall_info;

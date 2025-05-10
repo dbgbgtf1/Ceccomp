@@ -1,16 +1,20 @@
 #include "asm.h"
 #include "error.h"
 #include "main.h"
+#include "parseargs.h"
 #include "parseobj.h"
 #include "transfer.h"
+#include <fcntl.h>
 #include <linux/bpf_common.h>
 #include <linux/filter.h>
 #include <seccomp.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/ptrace.h>
+#include <sys/types.h>
 
 static filter
 MISC_TXA ()
@@ -259,7 +263,46 @@ ST_STX (line_set *Line)
 }
 
 static void
-asm_lines (FILE *fp, unsigned arch)
+rawbytes (filter filter)
+{
+  uint16_t code = filter.code;
+  uint8_t jf = filter.jf;
+  uint8_t jt = filter.jt;
+  uint32_t k = filter.k;
+
+  printf ("%c%c%c%c", code & 0xff00, code & 0xff, jf, jt);
+  printf ("%c%c%c%c", (k & 0xff000000) / 0x1000000, (k & 0xff0000) / 0x10000,
+          (k & 0xff00) / 0x100, k & 0xff);
+}
+
+static void
+hexline (filter filter)
+{
+  uint16_t code = filter.code;
+  uint8_t jf = filter.jf;
+  uint8_t jt = filter.jt;
+  uint32_t k = filter.k;
+
+  printf ("\\x%02x\\x%02x\\x%02x\\x%02x", code & 0xff00, code & 0xff, jf, jt);
+  printf ("\\x%02x\\x%02x\\x%02x\\x%02x", (k & 0xff000000) / 0x1000000,
+          (k & 0xff0000) / 0x10000, (k & 0xff00) / 0x100, k & 0xff);
+}
+
+static void
+hexfmt (filter filter)
+{
+  uint16_t code = filter.code;
+  uint8_t jf = filter.jf;
+  uint8_t jt = filter.jt;
+  uint32_t k = filter.k;
+
+  printf ("\\x%02x\\x%02x\\x%02x\\x%02x", code & 0xff00, code & 0xff, jf, jt);
+  printf ("\\x%02x\\x%02x\\x%02x\\x%02x\n", (k & 0xff000000) / 0x1000000,
+          (k & 0xff0000) / 0x10000, (k & 0xff00) / 0x100, k & 0xff);
+}
+
+static void
+asm_lines (FILE *fp, unsigned arch, uint32_t print_mode)
 {
   line_set Line;
   fprog *prog = malloc (sizeof (fprog));
@@ -289,12 +332,15 @@ asm_lines (FILE *fp, unsigned arch)
       prog->len++;
     }
 
-  for (int i = 1; i < prog->len; i++)
-    {
-      filter filter = prog->filter[i];
-      printf ("%04x %02x %02x %08x\n", filter.code, filter.jf, filter.jt,
-              filter.k);
-    }
+  if (print_mode == HEXFMT)
+    for (int i = 1; i < prog->len; i++)
+      hexfmt (prog->filter[i]);
+  else if (print_mode == HEXLINE)
+    for (int i = 1; i < prog->len; i++)
+      hexline (prog->filter[i]);
+  else if (print_mode == RAW)
+    for (int i = 1; i < prog->len; i++)
+      rawbytes (prog->filter[i]);
 
   free (prog->filter);
   free (prog);
@@ -303,16 +349,26 @@ asm_lines (FILE *fp, unsigned arch)
 void
 assemble (int argc, char *argv[])
 {
-  if (argc < 2)
-    PEXIT ("%s\n%s\n", NOT_ENOUGH_ARGS, ASM_HINT);
-
-  uint32_t arch = STR2ARCH (argv[0]);
-  if (arch == -1)
-    PEXIT (INVALID_ARCH ": %s\n" SUPPORT_ARCH "\n", argv[0]);
-
-  FILE *fp = fopen (argv[1], "r");
+  char *filename = get_arg (argc, argv);
+  FILE *fp = fopen (filename, "r");
   if (fp == NULL)
-    PEXIT (UNABLE_OPEN_FILE ": %s\n", argv[1]);
+    PEXIT (UNABLE_OPEN_FILE ": %s", filename);
 
-  asm_lines (fp, arch);
+  char *arch_str = parse_option (argc, argv, "arch");
+  uint32_t arch = STR2ARCH (arch_str);
+  if (arch == -1)
+    PEXIT (INVALID_ARCH ": %s\n" SUPPORT_ARCH, arch_str);
+
+  char *print_mode_str = parse_option (argc, argv, "fmt");
+  uint32_t print_mode;
+  if (print_mode_str == NULL || !strcmp (print_mode_str, "hexline"))
+    print_mode = HEXLINE;
+  else if (!strcmp (print_mode_str, "hexfmt"))
+    print_mode = HEXFMT;
+  else if (!strcmp (print_mode_str, "raw"))
+    print_mode = RAW;
+  else
+    PEXIT (INVALID_PRINT_MODE ": %s", print_mode_str);
+
+  asm_lines (fp, arch, print_mode);
 }

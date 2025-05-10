@@ -6,6 +6,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+typedef enum
+{
+  HEXLINE = 0,
+  HEXFMT = 1,
+  RAW = 2
+} print_mode;
+
 static filter MISC_TXA ();
 
 static filter MISC_TAX ();
@@ -30,7 +37,7 @@ static filter RET (line_set *Line);
 
 static filter ST_STX (line_set *Line);
 
-static void asm_lines (FILE *fp, unsigned arch);
+static void asm_lines (FILE *fp, unsigned arch, uint32_t print_mode);
 
 extern void assemble (int argc, char *argv[]);
 

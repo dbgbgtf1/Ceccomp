@@ -2,6 +2,7 @@
 #include "color.h"
 #include "error.h"
 #include "main.h"
+#include "parseargs.h"
 #include "parseobj.h"
 #include "preasm.h"
 #include "transfer.h"
@@ -191,35 +192,39 @@ emu_lines (FILE *fp, seccomp_data *data)
 void
 emu (int argc, char *argv[])
 {
-  if (argc < 3)
-    PEXIT ("%s\n%s\n", NOT_ENOUGH_ARGS, EMU_HINT);
+  seccomp_data data;
 
-  seccomp_data *data = malloc (sizeof (seccomp_data));
-  data->arch = STR2ARCH (argv[0]);
-  if (data->arch == -1)
-    PEXIT("%s\n%s\n", INVALID_ARCH, SUPPORT_ARCH);
+  char *arch_str = parse_option (argc, argv, "arch");
+  data.arch = STR2ARCH (arch_str);
+  if (data.arch == -1)
+    PEXIT (INVALID_ARCH ": %s\n" SUPPORT_ARCH "\n", arch_str);
 
-  FILE *fp = fopen (argv[1], "r");
+  char *filename = get_arg (argc, argv);
+  FILE *fp = fopen (filename, "r");
   if (fp == NULL)
-    PEXIT (UNABLE_OPEN_FILE ": %s", argv[1]);
+    PEXIT (UNABLE_OPEN_FILE ": %s", filename);
 
-  char *end = NULL;
-  data->nr = seccomp_syscall_resolve_name_arch (data->arch, argv[2]);
-  if (data->nr == __NR_SCMP_ERROR)
-    {
-      data->nr = strtol (argv[2], &end, 0);
-      if (argv[2] == end)
-        PEXIT (INVALID_SYSNR ": %s\n", argv[2]);
-    }
+  char *sys_nr = get_arg (argc, argv);
+  char *end;
+  data.nr = strtol (sys_nr, &end, 0);
+  if (sys_nr != end)
+    PEXIT ("%s", INVALID_SYSNR);
 
   for (int i = 3; i < argc; i++)
     {
-      data->args[i] = strtol (argv[i], &end, 0);
-      if (argv[i] == end)
-        PEXIT (INVALID_SYS_ARGS ": %s\n", argv[i]);
+      char *arg = get_arg (argc, argv);
+      data.args[i] = strtol (arg, &end, 0);
+      if (arg == end)
+        PEXIT ("%s", INVALID_SYS_ARGS);
     }
 
-  emu_lines (fp, data);
+  if (argc > 9)
+    {
+      char *pc = get_arg (argc, argv);
+      data.instruction_pointer = strtol (pc, &end, 0);
+      if (pc == end)
+        PEXIT ("%s", INVALID_PC);
+    }
 
-  free (data);
-} 
+  emu_lines (fp, &data);
+}
