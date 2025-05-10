@@ -64,6 +64,7 @@ right_var_assignline (char *rvar_str, seccomp_data *data, reg_mem *reg_ptr,
 
 // this is used in assign line, left value only
 // $A
+// $X
 // $mem[0x0]
 // $mem[0]
 void

@@ -52,7 +52,7 @@ zsh_cmp_install: $(ZSH_SRC)/_ceccomp
 
 ceccomp: $(OBJS) $(CECCOMP_MAIN)
 	$(CXX) $(LDFLAGS) $(CXXFLAGS) $^ -o $@
-	mv $@ $(BUILD_DIR)
+	mv -f $@ $(BUILD_DIR)
 
 test: $(OBJS) $(TEST_MAIN)
 	echo $(C_SRCS)

@@ -14,6 +14,8 @@
 #define DISASM_HINT "ceccomp disasm arch text"
 #define TRACE_HINT "ceccomp trace program [ program-args ]"
 #define EMU_HINT "ceccomp emu arch text syscall_nr [ 0-6 args ] (default as 0)"
+#define HELP "show help message"
+#define VERSION "show ceccomp version message"
 
 typedef struct ptrace_syscall_info syscall_info;
 typedef struct sock_fprog fprog;

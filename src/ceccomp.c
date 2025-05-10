@@ -20,6 +20,8 @@ help ()
   printf ("%s\n", DISASM_HINT);
   printf ("%s\n", TRACE_HINT);
   printf ("%s\n", EMU_HINT);
+  printf ("%s\n", HELP);
+  printf ("%s\n", VERSION);
   exit (0);
 }
 
@@ -39,11 +41,11 @@ set_local_arch (int *argc, char *argv[])
   struct utsname uname_ptr;
   uname (&uname_ptr);
 
-  char **argv_cpy = malloc (sizeof (size_t) * (*argc + 1));
+  char **argv_cpy = malloc (sizeof (char *) * (*argc + 1));
   argv_cpy[0] = argv[0];
   argv_cpy[1] = argv[1];
-  argv_cpy[2] = uname_ptr.machine;
-  memcpy (&argv_cpy[3], &argv[2], sizeof (size_t) * (*argc - 2));
+  argv_cpy[2] = strdup(uname_ptr.machine);
+  memcpy (&argv_cpy[3], &argv[2], sizeof (char *) * (*argc - 2));
 
   *argc += 1;
   return argv_cpy;

@@ -73,7 +73,7 @@ emu_if_line (line_set *Line, reg_mem *reg, seccomp_data *data)
   else
     {
       sym_str = clean_line + strlen ("if($A");
-      printf ("if!(");
+      printf ("if(");
     }
 
   bool condition;
