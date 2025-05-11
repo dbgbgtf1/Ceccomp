@@ -18,9 +18,9 @@ TEST_MAIN := $(BUILD_DIR)/test.c.o
 CC := gcc
 CXX := g++
 
-CFLAGS := 
-CXXFLAGS := 
-LDFLAGS := -lseccomp
+CFLAGS := -fpie -fstack-protector
+CXXFLAGS := -fpie -fstack-protector
+LDFLAGS := -lseccomp -z now -z noexecstack -fpie -fstack-protector
 
 ifdef DEBUG
 	ifeq ($(DEBUG),1)
