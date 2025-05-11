@@ -1,94 +1,10 @@
 [
   {
     "arguments": [
-      "/usr/bin/gcc",
-      "-I./include/",
-      "-c",
+      "/usr/bin/cc",
+      "-I./include",
       "-g",
-      "-o",
-      "build/asm.c.o",
-      "src/asm.c"
-    ],
-    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
-    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/asm.c",
-    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/asm.c.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-I./include/",
       "-c",
-      "-g",
-      "-o",
-      "build/disasm.c.o",
-      "src/disasm.c"
-    ],
-    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
-    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/disasm.c",
-    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/disasm.c.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-I./include/",
-      "-c",
-      "-g",
-      "-o",
-      "build/dump.c.o",
-      "src/dump.c"
-    ],
-    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
-    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/dump.c",
-    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/dump.c.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-I./include/",
-      "-c",
-      "-g",
-      "-o",
-      "build/emu.c.o",
-      "src/emu.c"
-    ],
-    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
-    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/emu.c",
-    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/emu.c.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-I./include/",
-      "-c",
-      "-g",
-      "-o",
-      "build/utils/parseobj.c.o",
-      "src/utils/parseobj.c"
-    ],
-    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
-    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/utils/parseobj.c",
-    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/utils/parseobj.c.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-I./include/",
-      "-c",
-      "-g",
-      "-o",
-      "build/utils/preasm.c.o",
-      "src/utils/preasm.c"
-    ],
-    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
-    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/utils/preasm.c",
-    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/utils/preasm.c.o"
-  },
-  {
-    "arguments": [
-      "/usr/bin/gcc",
-      "-I./include/",
-      "-c",
-      "-g",
       "-o",
       "build/utils/transfer.c.o",
       "src/utils/transfer.c"
@@ -99,10 +15,108 @@
   },
   {
     "arguments": [
-      "/usr/bin/g++",
-      "-I./include/",
-      "-c",
+      "/usr/bin/cc",
+      "-I./include",
       "-g",
+      "-c",
+      "-o",
+      "build/utils/parseobj.c.o",
+      "src/utils/parseobj.c"
+    ],
+    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
+    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/utils/parseobj.c",
+    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/utils/parseobj.c.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/cc",
+      "-I./include",
+      "-g",
+      "-c",
+      "-o",
+      "build/utils/parseargs.c.o",
+      "src/utils/parseargs.c"
+    ],
+    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
+    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/utils/parseargs.c",
+    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/utils/parseargs.c.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/cc",
+      "-I./include",
+      "-g",
+      "-c",
+      "-o",
+      "build/utils/preasm.c.o",
+      "src/utils/preasm.c"
+    ],
+    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
+    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/utils/preasm.c",
+    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/utils/preasm.c.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/cc",
+      "-I./include",
+      "-g",
+      "-c",
+      "-o",
+      "build/trace.c.o",
+      "src/trace.c"
+    ],
+    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
+    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/trace.c",
+    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/trace.c.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/cc",
+      "-I./include",
+      "-g",
+      "-c",
+      "-o",
+      "build/disasm.c.o",
+      "src/disasm.c"
+    ],
+    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
+    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/disasm.c",
+    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/disasm.c.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/cc",
+      "-I./include",
+      "-g",
+      "-c",
+      "-o",
+      "build/emu.c.o",
+      "src/emu.c"
+    ],
+    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
+    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/emu.c",
+    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/emu.c.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/cc",
+      "-I./include",
+      "-g",
+      "-c",
+      "-o",
+      "build/asm.c.o",
+      "src/asm.c"
+    ],
+    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
+    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/asm.c",
+    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/asm.c.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/g++",
+      "-I./include",
+      "-g",
+      "-c",
       "-o",
       "build/utils/parsefilter.cpp.o",
       "src/utils/parsefilter.cpp"
@@ -113,16 +127,16 @@
   },
   {
     "arguments": [
-      "/usr/bin/gcc",
-      "-I./include/",
-      "-c",
+      "/usr/bin/cc",
+      "-I./include",
       "-g",
+      "-c",
       "-o",
-      "build/main.c.o",
-      "src/main.c"
+      "build/ceccomp.c.o",
+      "src/ceccomp.c"
     ],
     "directory": "/home/dbgbgtf/Main/work/Ceccomp",
-    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/main.c",
-    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/main.c.o"
+    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/ceccomp.c",
+    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/ceccomp.c.o"
   }
 ]

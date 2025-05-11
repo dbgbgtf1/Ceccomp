@@ -69,8 +69,8 @@ STR2ARCH (char *arch)
 {
   if (STARTWITH (arch, STR_ARCH_X86))
     return SCMP_ARCH_X86;
-  else if (STARTWITH (arch, STR_ARCH_X86))
-    return SCMP_ARCH_X86;
+  else if (STARTWITH (arch, STR_ARCH_X86_64))
+    return SCMP_ARCH_X86_64;
 
   else if (STARTWITH (arch, STR_ARCH_X32))
     return SCMP_ARCH_X32;

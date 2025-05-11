@@ -336,8 +336,11 @@ asm_lines (FILE *fp, unsigned arch, uint32_t print_mode)
     for (int i = 1; i < prog->len; i++)
       hexfmt (prog->filter[i]);
   else if (print_mode == HEXLINE)
+  {
     for (int i = 1; i < prog->len; i++)
       hexline (prog->filter[i]);
+    printf("\n");
+  }
   else if (print_mode == RAW)
     for (int i = 1; i < prog->len; i++)
       rawbytes (prog->filter[i]);

@@ -13,10 +13,12 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 
+#define CECCOMP_VERSION "ceccomp 1.1"
+
 void
 help ()
 {
-  printf ("ceccomp: usage [subcommand] [args]\n");
+  printf ("usage: ceccomp [subcommand] [args] [options]\n");
   printf ("\n");
   printf ("%s\n", ASM_HINT);
   printf ("%s\n", DISASM_HINT);
@@ -32,7 +34,7 @@ help ()
 void
 version ()
 {
-  printf ("ceccomp 1.0\n");
+  printf (CECCOMP_VERSION "\n");
   exit (0);
 }
 

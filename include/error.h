@@ -1,6 +1,8 @@
 #ifndef ERROR
 #define ERROR
 
+#include "transfer.h"
+
 // preprocess error macros
 #define NOT_ENOUGH_ARGS "not enough args"
 #define INVALID_ARG "invalid arg"
@@ -8,9 +10,15 @@
 #define INVALID_ARCH "invalid arch"
 #define INVALID_PRINT_MODE "invalid print mode"
 #define SUPPORT_ARCH                                                          \
-  "X86 X86_64 X32 ARM AARCH64 MIPS MIPSEL MIPSEL64"                           \
-  "MIPSEL64N32 PARSIC PARSIC64 PPC PPC64 PPC64LE "                            \
-  "S390 S390X RISCV64"
+  STR_ARCH_X86                                                                \
+  " " STR_ARCH_X86_64 " " STR_ARCH_X32 " " STR_ARCH_ARM " " STR_ARCH_AARCH64  \
+  " " STR_ARCH_LOONGARCH64 " " STR_ARCH_M68K " " STR_ARCH_MIPS                \
+  " " STR_ARCH_MIPSEL " " STR_ARCH_MIPS64 " " STR_ARCH_MIPSEL64               \
+  " " STR_ARCH_MIPS64N32 " " STR_ARCH_MIPSEL64N32 " " STR_ARCH_PARISC         \
+  " " STR_ARCH_PARISC64 " " STR_ARCH_PPC64 " " STR_ARCH_PPC                   \
+  " " STR_ARCH_PPC64LE " " STR_ARCH_S390X " " STR_ARCH_S390                   \
+  " " STR_ARCH_RISCV64
+
 #define INVALID_SYSNR "invalid syscall nr"
 #define INVALID_SYS_ARGS "invalid syscall args"
 #define INVALID_PC "invalid instruction pointer"
