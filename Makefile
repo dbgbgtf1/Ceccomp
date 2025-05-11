@@ -38,7 +38,8 @@ else
 	LDFLAGS += -O3
 endif
 
-PREFIX ?= /usr/local
+DEST_DIR ?= 
+PREFIX ?= $(DEST_DIR)/usr
 BIN_DIR ?= $(PREFIX)/bin
 ZSH_DST ?= $(PREFIX)/share/zsh/site-functions
 ZSH_SRC := ./completions
