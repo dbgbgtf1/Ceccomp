@@ -1,7 +1,6 @@
 build/
 compile_commands.json
 a.out
-Ceccomp
 Test
 result
 *.gdb_history

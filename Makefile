@@ -15,17 +15,23 @@ OBJS := $(C_OBJS) $(CXX_OBJS)
 CECCOMP_MAIN := $(BUILD_DIR)/ceccomp.c.o
 TEST_MAIN := $(BUILD_DIR)/test.c.o
 
-CC ?= gcc
-CXX ?= g++
+CC := gcc
+CXX := g++
 
 CFLAGS := 
 CXXFLAGS := 
 LDFLAGS := -lseccomp
 
 ifdef DEBUG
-	CFLAGS += -g
-	CXXFLAGS += -g
-	LDFLAGS += -g
+	ifeq ($(DEBUG),1)
+		CFLAGS += -g -O3
+		CXXFLAGS += -g -O3
+		LDFLAGS += -g -O3
+	else ifeq ($(DEBUG),2)
+		CFLAGS += -g
+		CXXFLAGS += -g 
+		LDFLAGS += -g
+	endif
 else
 	CFLAGS += -O3
 	CXXFLAGS += -O3
@@ -51,12 +57,12 @@ zsh_cmp_install: $(ZSH_SRC)/_ceccomp
 	cp $< $(ZSH_DST)/_ceccomp
 
 ceccomp: $(OBJS) $(CECCOMP_MAIN)
-	$(CXX) $(LDFLAGS) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(LDFLAGS) $^ -o $@
 	mv -f $@ $(BUILD_DIR)
 
 test: $(OBJS) $(TEST_MAIN)
 	echo $(C_SRCS)
-	$(CXX) $(LDFLAGS) $(CXXFLAGS) $^ -o $@
+	$(CXX) $(LDFLAGS) $^ -o $@
 	mv $@ $(BUILD_DIR)
 
 $(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
