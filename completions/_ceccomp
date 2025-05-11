@@ -1,4 +1,4 @@
-#compdef _ceccomp
+#compdef ceccomp
 # Zsh completion script for ceccomp
 local -a subcmd options
 local state
