@@ -37,10 +37,8 @@ if (( CURRENT == 2 )) {
             ;;
         (trace)
             _arguments -C \
-                "2:command name:_command_names -e" \
+                "--pid=[Attach to which process to extract its filters]:PID:->getpid" \
                 "*:arguments:_files"
-                # pid not available
-                # "--pid=[Attach to which process to extract its filters]:PID:->getpid" \
             if [[ $state == "getpid" ]] {
                 _values $(ps -Ao pid=)
             }
@@ -49,7 +47,7 @@ if (( CURRENT == 2 )) {
             _arguments -C \
                 $arch_compstr \
                 "2:BPF:_files" \
-                ":NR:(read write open)" \
+                ":NR:->syscall_nr" \
                 ":ARGV0:->argv0" \
                 ":ARGV1:->argv1" \
                 ":ARGV2:->argv2" \
@@ -59,6 +57,10 @@ if (( CURRENT == 2 )) {
                 ":IP:->ip" \
                 "*: :"
             case $state {
+                (syscall_nr)
+                    _message -r "Hint: syscall_nr or syscall_name"
+                    _values SYSCALL "open" "read" "write"
+                    ;;
                 (argv0)
                     _message -r "Hint: u64 for argv[0]"
                     ;;

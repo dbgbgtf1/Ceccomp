@@ -4,9 +4,16 @@
 #include "parsefilter.h"
 #include "color.h"
 #include "error.h"
+#include <asm-generic/errno.h>
+#include <errno.h>
+#include <errno.h>
+#include <linux/ptrace.h>
 #include <linux/seccomp.h>
+#include <stdint.h>
 #include <sys/prctl.h>
 #include <seccomp.h>
+#include <sys/ptrace.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
 #include <stdbool.h>
@@ -42,15 +49,15 @@ check_scmp_mode (syscall_info *Info, int pid, fprog *prog)
     seccomp_mode = arg0 | LOAD_SUCCESS;
   else if (nr == seccomp_syscall_resolve_name_arch (arch, "prctl")
            && arg0 == PR_SET_SECCOMP)
-  {
-    if (arg1 == SECCOMP_MODE_STRICT)
-      arg1 = SECCOMP_SET_MODE_STRICT;
-    else if (arg1 == SECCOMP_MODE_FILTER)
-      arg1 = SECCOMP_SET_MODE_FILTER;
-    // prctl use different macros
-    // transfer it to seccomp macros
-    seccomp_mode = arg1 | LOAD_SUCCESS;
-  }
+    {
+      if (arg1 == SECCOMP_MODE_STRICT)
+        arg1 = SECCOMP_SET_MODE_STRICT;
+      else if (arg1 == SECCOMP_MODE_FILTER)
+        arg1 = SECCOMP_SET_MODE_FILTER;
+      // prctl use different macros
+      // transfer it to seccomp macros
+      seccomp_mode = arg1 | LOAD_SUCCESS;
+    }
   else
     return seccomp_mode;
 
@@ -144,6 +151,49 @@ parent (int pid)
 
   free (Info);
   free (prog);
+}
+
+void
+pid_trace (int pid, uint32_t arch)
+{
+  int status;
+  fprog prog;
+  prog.filter = malloc (sizeof (filter) * 1024);
+  int prog_idx = 0;
+
+  ptrace (PTRACE_ATTACH, pid, 0, 0);
+  waitpid (pid, &status, 0);
+
+  do
+    {
+      prog.len
+          = ptrace (PTRACE_SECCOMP_GET_FILTER, pid, prog_idx, prog.filter);
+      prog_idx++;
+
+      if (prog.len == (unsigned short)-1)
+        {
+          switch (errno)
+            {
+            case EACCES:
+              PEXIT ("%s", RUN_WITH_SYS_ADMIN);
+            case EMEDIUMTYPE:
+              printf (BLUE (NOT_AN_CBPF));
+              continue;
+            case ENOENT:
+              goto detach;
+            default:
+              perror("ptrace pid unknown error");
+              exit(1);
+            }
+        }
+
+      parse_filter (arch, &prog);
+    }
+  while (true);
+
+detach:
+  ptrace(PTRACE_DETACH, pid, 0, 0);
+  free (prog.filter);
 }
 
 void

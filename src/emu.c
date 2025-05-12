@@ -204,11 +204,16 @@ emu (int argc, char *argv[])
   if (fp == NULL)
     PEXIT (UNABLE_OPEN_FILE ": %s", filename);
 
-  char *sys_nr = get_arg (argc, argv);
+  char *sys_nr_str = get_arg (argc, argv);
   char *end;
-  data.nr = strtol (sys_nr, &end, 0);
-  if (sys_nr != end)
-    PEXIT ("%s", INVALID_SYSNR);
+  int sys_nr = seccomp_syscall_resolve_name_arch(data.arch, sys_nr_str);
+  if (sys_nr == -1)
+    {
+      sys_nr = strtol (sys_nr_str, &end, 0);
+      if (sys_nr_str == end)
+        PEXIT ("%s", INVALID_SYSNR);
+    }
+  data.nr = sys_nr;
 
   for (int i = 3; i < argc; i++)
     {

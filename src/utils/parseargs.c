@@ -35,10 +35,10 @@ get_arg (int argc, char *argv[])
 {
   static int i = 0;
   for (; i < argc; i++)
-  {
-    if (STARTWITH(argv[i], "--"))
-      continue;
-    return argv[i++];
-  }
-  PEXIT("%s\n", NOT_ENOUGH_ARGS);
+    {
+      if (STARTWITH (argv[i], "--"))
+        continue;
+      return argv[i++];
+    }
+  PEXIT ("%s\n", NOT_ENOUGH_ARGS);
 }

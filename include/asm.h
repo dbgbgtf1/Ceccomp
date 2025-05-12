@@ -37,6 +37,12 @@ static filter RET (line_set *Line);
 
 static filter ST_STX (line_set *Line);
 
+static void rawbytes (filter filter);
+
+static void hexline (filter filter);
+
+static void hexfmt (filter filter);
+
 static void asm_lines (FILE *fp, unsigned arch, uint32_t print_mode);
 
 extern void assemble (int argc, char *argv[]);

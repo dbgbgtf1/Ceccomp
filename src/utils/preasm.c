@@ -78,7 +78,9 @@ pre_clear_space (char *clean_line)
       spaceend = space;
       while (*spaceend == ' ')
         spaceend = spaceend + 1;
-      sprintf (space, "%s", spaceend);
+      char *copy = strdup (spaceend);
+      strcpy (space, copy);
+      free (copy);
     }
 }
 

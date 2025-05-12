@@ -27,7 +27,7 @@ disasm (int argc, char *argv[])
   filter buf[0x100];
   prog.filter = buf;
 
-  prog.len = (read (fd, buf, 0x100 * sizeof (filter))) / sizeof(filter);
+  prog.len = (read (fd, buf, 0x100 * sizeof (filter))) / sizeof (filter);
 
   parse_filter (arch, &prog);
 }

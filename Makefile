@@ -44,7 +44,7 @@ BIN_DIR ?= $(PREFIX)/bin
 ZSH_DST ?= $(PREFIX)/share/zsh/site-functions
 ZSH_SRC := ./completions
 
-all: $(BUILD_DIR)/ceccomp
+all: ceccomp test
 
 install: bin_install zsh_cmp_install
 	@echo "install success"
@@ -62,7 +62,6 @@ ceccomp: $(OBJS) $(CECCOMP_MAIN)
 	mv -f $@ $(BUILD_DIR)
 
 test: $(OBJS) $(TEST_MAIN)
-	echo $(C_SRCS)
 	$(CXX) $(LDFLAGS) $^ -o $@
 	mv $@ $(BUILD_DIR)
 

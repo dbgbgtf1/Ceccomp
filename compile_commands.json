@@ -1,8 +1,10 @@
 [
   {
     "arguments": [
-      "/usr/bin/cc",
+      "/usr/bin/gcc",
       "-I./include",
+      "-fpie",
+      "-fstack-protector",
       "-g",
       "-c",
       "-o",
@@ -15,8 +17,10 @@
   },
   {
     "arguments": [
-      "/usr/bin/cc",
+      "/usr/bin/gcc",
       "-I./include",
+      "-fpie",
+      "-fstack-protector",
       "-g",
       "-c",
       "-o",
@@ -29,8 +33,10 @@
   },
   {
     "arguments": [
-      "/usr/bin/cc",
+      "/usr/bin/gcc",
       "-I./include",
+      "-fpie",
+      "-fstack-protector",
       "-g",
       "-c",
       "-o",
@@ -43,8 +49,10 @@
   },
   {
     "arguments": [
-      "/usr/bin/cc",
+      "/usr/bin/gcc",
       "-I./include",
+      "-fpie",
+      "-fstack-protector",
       "-g",
       "-c",
       "-o",
@@ -57,8 +65,10 @@
   },
   {
     "arguments": [
-      "/usr/bin/cc",
+      "/usr/bin/gcc",
       "-I./include",
+      "-fpie",
+      "-fstack-protector",
       "-g",
       "-c",
       "-o",
@@ -71,8 +81,10 @@
   },
   {
     "arguments": [
-      "/usr/bin/cc",
+      "/usr/bin/gcc",
       "-I./include",
+      "-fpie",
+      "-fstack-protector",
       "-g",
       "-c",
       "-o",
@@ -85,8 +97,10 @@
   },
   {
     "arguments": [
-      "/usr/bin/cc",
+      "/usr/bin/gcc",
       "-I./include",
+      "-fpie",
+      "-fstack-protector",
       "-g",
       "-c",
       "-o",
@@ -99,8 +113,10 @@
   },
   {
     "arguments": [
-      "/usr/bin/cc",
+      "/usr/bin/gcc",
       "-I./include",
+      "-fpie",
+      "-fstack-protector",
       "-g",
       "-c",
       "-o",
@@ -115,6 +131,8 @@
     "arguments": [
       "/usr/bin/g++",
       "-I./include",
+      "-fpie",
+      "-fstack-protector",
       "-g",
       "-c",
       "-o",
@@ -127,8 +145,10 @@
   },
   {
     "arguments": [
-      "/usr/bin/cc",
+      "/usr/bin/gcc",
       "-I./include",
+      "-fpie",
+      "-fstack-protector",
       "-g",
       "-c",
       "-o",
@@ -138,5 +158,21 @@
     "directory": "/home/dbgbgtf/Main/work/Ceccomp",
     "file": "/home/dbgbgtf/Main/work/Ceccomp/src/ceccomp.c",
     "output": "/home/dbgbgtf/Main/work/Ceccomp/build/ceccomp.c.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-I./include",
+      "-fpie",
+      "-fstack-protector",
+      "-g",
+      "-c",
+      "-o",
+      "build/test.c.o",
+      "src/test.c"
+    ],
+    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
+    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/test.c",
+    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/test.c.o"
   }
 ]

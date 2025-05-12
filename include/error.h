@@ -51,6 +51,9 @@
 // bpf->text- error macros
 #define UNKNOWN_OFFSET_ABS "unknown offset of seccomp_data"
 
+#define RUN_WITH_SYS_ADMIN "run with CAP_SYS_ADMIN capability when trace pid"
+#define NOT_AN_CBPF "non-cbpf found, can't resolve, but continue"
+
 #define PEXIT(str, ...)                                                       \
   {                                                                           \
     printf (str "\n", __VA_ARGS__);                                           \
