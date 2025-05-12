@@ -173,7 +173,7 @@ pid_trace (int pid, uint32_t arch)
       switch (errno)
         {
         case EPERM:
-          PEXIT ("%s", RUN_WITH_SYS_ADMIN);
+          PEXIT ("%s", SYS_ADMIN_OR_KERNEL);
         default:
           PERROR ("ptrace seize error");
         }
