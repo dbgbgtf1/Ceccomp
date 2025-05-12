@@ -39,8 +39,15 @@ if (( CURRENT == 2 )) {
             _arguments -C \
                 "--pid=[Attach to which process to extract its filters]:PID:->getpid" \
                 "*:arguments:_files"
+            # complete non-kernel pids like kill
             if [[ $state == "getpid" ]] {
-                _values $(ps -Ao pid=)
+                local line pids lines
+                pids=()
+                lines=("${(@f)$(ps --ppid 2 -p 2 -N -o pid=,tty=,user=,comm=)}")
+                for line ($lines) {
+                    pids+=${line[(w)1]}
+                }
+                compadd -V nonk_pids -l -d lines -a pids
             }
             ;;
         (emu)
