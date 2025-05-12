@@ -46,13 +46,13 @@ emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data,
                char *origin_line)
 {
   uint8_t sym_enum = parse_compare_sym (sym_str, origin_line);
-  uint8_t symlen = GETSYMLEN (sym_enum);
+  uint8_t sym_len = GETSYMLEN (sym_enum);
 
-  char *rvar = sym_str + symlen;
+  char *rvar = sym_str + sym_len;
   uint32_t rval = right_val_ifline (rvar, reg, data->arch, origin_line);
 
   printf (BLUE_A);
-  printf (" %.*s ", symlen, sym_str);
+  printf (" %.*s ", sym_len, sym_str);
   printf (BLUE_LS, (uint32_t)(strchr (rvar, ')') - rvar), rvar);
 
   return is_state_true (reg->A, sym_enum, rval);
@@ -84,9 +84,9 @@ emu_if_line (line_set *Line, reg_mem *reg, seccomp_data *data)
   if (right_brace == NULL)
     PEXIT (BRACE_WRAP_CONDITION ": %s", origin_line);
 
-  uint32_t jmp_set = parse_goto (right_brace, origin_line);
-  uint8_t jf = GETJF (jmp_set);
-  uint8_t jt = GETJT (jmp_set);
+  uint32_t jmp_set = parse_goto (right_brace+1, origin_line);
+  uint16_t jf = GETJF (jmp_set);
+  uint16_t jt = GETJT (jmp_set);
 
   if (jf != 0)
     printf (") goto " FORMAT ", else goto " FORMAT "\n", jt, jf);
@@ -137,6 +137,21 @@ emu_ret_line (line_set *Line)
   return 0xffffffff;
 }
 
+static uint32_t
+emu_goto_line (line_set *Line)
+{
+  char *clean_line = Line->clean_line;
+  char *origin_line = Line->origin_line;
+  char *end;
+  uint32_t jmp_to = strtol(STRAFTER(clean_line, "goto"), &end, 10);
+
+  if (clean_line == end)
+    PEXIT(INVALID_NR_AFTER_GOTO ": %s", origin_line);
+
+  printf("goto %04d\n", jmp_to);
+  return jmp_to;
+}
+
 static void
 clear_color (char *origin_line)
 {
@@ -178,6 +193,8 @@ emu_lines (FILE *fp, seccomp_data *data)
         actual_idx = emu_if_line (&Line, reg, data);
       else if (STARTWITH (clean_line, "return"))
         actual_idx = emu_ret_line (&Line);
+      else if (STARTWITH(clean_line, "goto"))
+        actual_idx += emu_goto_line (&Line);
       else if (*clean_line == '$')
         emu_assign_line (&Line, reg, data);
       else

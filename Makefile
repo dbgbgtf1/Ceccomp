@@ -2,6 +2,7 @@ TARGET := ceccomp test
 
 SRC_DIR := ./src
 INC_DIR := ./include
+TEST_DIR := ./test
 BUILD_DIR := ./build
 BUILD_UTIL := ./build/utils
 
@@ -62,16 +63,17 @@ ceccomp: $(OBJS) $(CECCOMP_MAIN)
 	mv -f $@ $(BUILD_DIR)
 
 test: $(OBJS) $(TEST_MAIN)
-	$(CXX) $(LDFLAGS) $^ -o $@
-	mv $@ $(BUILD_DIR)
+	$(CXX) $(LDFLAGS) $^ -o $(BUILD_DIR)/$@
 
 $(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) -I$(INC_DIR) $(CFLAGS) $< -c -o $@
 $(BUILD_DIR)/%.cpp.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 	$(CXX) -I$(INC_DIR) $(CXXFLAGS) $< -c -o $@
+$(BUILD_DIR)/%.c.o: $(TEST_DIR)/%.c | $(BUILD_DIR)
+	$(CC) -I$(INC_DIR) $(CFLAGS) $< -c -o $@
 
 $(BUILD_DIR):
-	mkdir -p $(BUILD_DIR) $(BUILD_UTIL)
+	mkdir -p $(BUILD_DIR) $(BUILD_UTIL) $(BUILD_TEST)
 
 .PHONY: clean all
 clean:

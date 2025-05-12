@@ -7,10 +7,10 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/prctl.h>
 #include <sys/syscall.h>
 #include <unistd.h>
-#include <stdlib.h>
 
 #define ARRAY_SIZE(arr) (sizeof (arr) / sizeof (arr[0]))
 
@@ -69,6 +69,12 @@ load_filter (uint32_t t_arch)
       exit (1);
     }
 
+  if (syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, 0, &prog))
+    {
+      perror ("seccomp");
+      exit (1);
+    }
+
   char buf[0x10];
   read (0, buf, 0x10);
 }
@@ -79,6 +85,6 @@ main ()
   uint32_t arch = STR2ARCH ("x86_64");
   int pid;
 
-  pid_trace(68318, arch);
-  // load_filter (arch);
+  // pid_trace(68318, arch);
+  load_filter (arch);
 }

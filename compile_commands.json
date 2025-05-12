@@ -169,10 +169,10 @@
       "-c",
       "-o",
       "build/test.c.o",
-      "src/test.c"
+      "test/test.c"
     ],
     "directory": "/home/dbgbgtf/Main/work/Ceccomp",
-    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/test.c",
+    "file": "/home/dbgbgtf/Main/work/Ceccomp/test/test.c",
     "output": "/home/dbgbgtf/Main/work/Ceccomp/build/test.c.o"
   }
 ]

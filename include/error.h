@@ -2,6 +2,8 @@
 #define ERROR
 
 #include "transfer.h"
+#include <stdio.h>
+#include <stdlib.h>
 
 // preprocess error macros
 #define NOT_ENOUGH_ARGS "not enough args"
@@ -43,6 +45,7 @@
 #define GOTO_AFTER_CONDITION "use 'goto' after (condition)"
 #define LINE_NR_AFTER_GOTO "line number to go after 'goto'"
 #define LINE_NR_AFTER_ELSE "line number to go after ',else goto'"
+#define INVALID_NR_AFTER_GOTO "invalid number after goto"
 
 #define INVALID_ASM_CODE "invalid asm code"
 
@@ -57,6 +60,12 @@
 #define PEXIT(str, ...)                                                       \
   {                                                                           \
     printf (str "\n", __VA_ARGS__);                                           \
+    exit (0);                                                                 \
+  }
+
+#define PERROR(str)                                                           \
+  {                                                                           \
+    perror (str);                                                        \
     exit (0);                                                                 \
   }
 

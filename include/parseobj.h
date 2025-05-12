@@ -12,9 +12,9 @@ typedef struct
   uint32_t *reg_ptr;
 } reg_set;
 
-#define GETJT(jmpset) ((jmpset & 0xff00) >> 8)
-#define GETJF(jmpset) (jmpset & 0x00ff)
-#define JMPSET(jt, jf) ((jt << 8) | jf)
+#define GETJT(jmpset) ((jmpset & 0xffff0000) >> 16)
+#define GETJF(jmpset) (jmpset & 0x0000ffff)
+#define JMPSET(jt, jf) ((jt << 16) | jf)
 
 #define GETSYMLEN(symset) ((symset & 0xf0) >> 4)
 
@@ -41,7 +41,7 @@ extern void left_var_assignline (char *lvar_str, reg_set *reg_len_ptr,
 
 extern uint8_t parse_compare_sym (char *sym_str, char *origin_line);
 
-extern uint16_t parse_goto (char *right_brace, char *origin_line);
+extern uint32_t parse_goto (char *right_brace, char *origin_line);
 
 extern bool maybe_reverse (char *clean_line, char *origin_line);
 

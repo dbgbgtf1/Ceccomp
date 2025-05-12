@@ -2,7 +2,9 @@
 #include "error.h"
 #include "transfer.h"
 #include <seccomp.h>
+#include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -107,26 +109,26 @@ parse_compare_sym (char *sym_str, char *origin_line)
   PEXIT (INVALID_OPERATOR ": %s", origin_line);
 }
 
-uint16_t
-parse_goto (char *right_brace, char *origin_line)
+uint32_t
+parse_goto (char *goto_str, char *origin_line)
 {
-  if (!STARTWITH (right_brace, ")goto"))
+  if (!STARTWITH (goto_str, "goto"))
     PEXIT (GOTO_AFTER_CONDITION ": %s", origin_line);
 
-  char *jt_str = right_brace + strlen (")goto");
+  char *jt_str = goto_str + strlen ("goto");
   char *jf_str = NULL;
-  uint8_t jt = 0;
-  uint8_t jf = 0;
+  uint16_t jt = 0;
+  uint16_t jf = 0;
 
   jt = strtol (jt_str, &jf_str, 10);
-  if (jt == 0)
+  if (jf_str == jt_str)
     PEXIT (LINE_NR_AFTER_GOTO ": %s", origin_line);
 
   if (STARTWITH (jf_str, ",elsegoto"))
     {
       jf_str += strlen (",elsegoto");
-      jf = strtol (jf_str, NULL, 10);
-      if (jf == 0)
+      jf = strtol (jf_str, &jt_str, 10);
+      if (jt_str == jf_str)
         PEXIT (LINE_NR_AFTER_ELSE ": %s", origin_line);
     }
 
@@ -142,7 +144,7 @@ maybe_reverse (char *clean_line, char *origin_line)
   if (STARTWITH (clean_line, "if($A"))
     return false;
   else if (STARTWITH (clean_line, "if!($A"))
-    return false;
+    return true;
   else
     PEXIT (INVALID_IF ": %s", origin_line);
 }

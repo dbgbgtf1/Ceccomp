@@ -3,6 +3,7 @@
 #include "main.h"
 #include "parseargs.h"
 #include "parseobj.h"
+#include "preasm.h"
 #include "transfer.h"
 #include <fcntl.h>
 #include <linux/bpf_common.h>
@@ -93,11 +94,27 @@ jmp_src (char *rval, filter *f_ptr, uint32_t arch, char *origin_line)
 }
 
 static filter
+jmp_goto (line_set *Line)
+{
+  filter filter = BPF_JUMP(BPF_JA, 0, 0, 0);
+  char *end;
+  filter.k = strtol(Line->clean_line, &end, 10);
+
+  if (Line->clean_line == end)
+    PEXIT(INVALID_NR_AFTER_GOTO ": %s", Line->origin_line);
+
+  return filter;
+}
+
+static filter
 JMP (line_set *Line, uint32_t pc, uint32_t arch)
 {
   char *clean_line = Line->clean_line;
   char *origin_line = Line->origin_line;
   filter filter = BPF_JUMP (BPF_JMP, 0, 0, 0);
+
+  if (STARTWITH (clean_line, "goto"))
+    jmp_goto (Line);
 
   bool reverse = maybe_reverse (clean_line, origin_line);
   char *sym_str;
@@ -115,10 +132,12 @@ JMP (line_set *Line, uint32_t pc, uint32_t arch)
   jmp_src (rval, &filter, arch, origin_line);
 
   char *right_brace = strchr (rval, ')');
-  uint16_t jmpset = parse_goto (right_brace, origin_line);
+  if (right_brace == NULL)
+    PEXIT (BRACE_WRAP_CONDITION ": %s", origin_line);
 
-  uint8_t jt = GETJT (jmpset);
-  uint8_t jf = GETJF (jmpset);
+  uint16_t jmp_set = parse_goto (right_brace + 1, origin_line);
+  uint8_t jt = GETJT (jmp_set);
+  uint8_t jf = GETJF (jmp_set);
 
   if (reverse)
     {
@@ -336,11 +355,11 @@ asm_lines (FILE *fp, unsigned arch, uint32_t print_mode)
     for (int i = 1; i < prog->len; i++)
       hexfmt (prog->filter[i]);
   else if (print_mode == HEXLINE)
-  {
-    for (int i = 1; i < prog->len; i++)
-      hexline (prog->filter[i]);
-    printf("\n");
-  }
+    {
+      for (int i = 1; i < prog->len; i++)
+        hexline (prog->filter[i]);
+      printf ("\n");
+    }
   else if (print_mode == RAW)
     for (int i = 1; i < prog->len; i++)
       rawbytes (prog->filter[i]);

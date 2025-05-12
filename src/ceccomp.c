@@ -81,12 +81,6 @@ main (int argc, char *argv[], char *env[])
       return 0;
     }
 
-  if (!strcmp (argv[1], "trace"))
-    {
-      trace (argc - 2, &argv[2]);
-      return 0;
-    }
-
   argv = set_local_arch (&argc, argv);
   // make sure argv have --arch now;
 
@@ -98,6 +92,9 @@ main (int argc, char *argv[], char *env[])
 
   else if (!strcmp (argv[1], "emu"))
     emu (argc - 2, &argv[2]);
+
+  else if (!strcmp (argv[1], "trace"))
+    trace (argc - 2, &argv[2]);
 
   else
     help ();

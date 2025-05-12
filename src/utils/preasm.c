@@ -42,6 +42,9 @@ pre_get_lines (FILE *fp)
       else if ((start = strstr (origin_line, "ret")) != NULL)
         return start;
 
+      else if ((start = strstr(origin_line, "goto")) != NULL)
+        return start;
+
       else if ((start = strchr (origin_line, '$')) != NULL)
         return start;
 
