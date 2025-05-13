@@ -27,13 +27,14 @@
 
 // text->bpf error macros
 #define INVALID_OPERATOR "invalid operator"
-#define INVALID_SYMENUM "invalid sym enum"
+#define INVALID_CMPENUM "invalid cmp sym enum"
+#define INVALID_ALUENUM "invalid alu sym enum"
 
 #define INVALID_RIGHT_VALUE "invalid right value"
-#define INVALID_RIGHT_VAR "invalid right variable"
+#define INVALID_RIGHT_VAR "invalid right valiable"
 #define INVALID_RIGHT INVALID_RIGHT_VALUE " or " INVALID_RIGHT_VAR
 
-#define INVALID_LEFT_VAR "invalid left variable"
+#define INVALID_LEFT_VAR "invalid left valiable"
 
 #define INVALID_MEM_IDX "invalid idx of $mem"
 #define INVALID_MEM "invalid $mem"

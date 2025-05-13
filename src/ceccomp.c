@@ -1,10 +1,12 @@
 #include "asm.h"
 #include "disasm.h"
 #include "emu.h"
+#include "error.h"
 #include "main.h"
 #include "parseargs.h"
 #include "trace.h"
 #include "transfer.h"
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -41,13 +43,6 @@ version ()
 char **
 set_local_arch (int *argc, char *argv[])
 {
-  char *arch_str = parse_option ((*argc - 2), &argv[2], "arch");
-  if (arch_str != NULL)
-    {
-      uint32_t token = STR2ARCH (arch_str);
-      if (token != -1)
-        return argv;
-    }
 
   struct utsname uts_name;
   uname (&uts_name);
@@ -69,6 +64,8 @@ set_local_arch (int *argc, char *argv[])
 int
 main (int argc, char *argv[], char *env[])
 {
+  setbuf (stdout, NULL);
+
   if (argc < 2)
     {
       help ();
@@ -81,7 +78,19 @@ main (int argc, char *argv[], char *env[])
       return 0;
     }
 
-  argv = set_local_arch (&argc, argv);
+  char *arch_str = parse_option ((argc - 2), &argv[2], "arch");
+  bool need_to_free_argv = false;
+  if (arch_str != NULL)
+    {
+      uint32_t token = STR2ARCH (arch_str);
+      if (token == -1)
+        PEXIT (INVALID_ARCH ": %s\n" SUPPORT_ARCH, arch_str);
+    }
+  else
+    {
+      argv = set_local_arch (&argc, argv);
+      need_to_free_argv = true;
+    }
   // make sure argv have --arch now;
 
   if (!strcmp (argv[1], "asm"))
@@ -98,4 +107,10 @@ main (int argc, char *argv[], char *env[])
 
   else
     help ();
+
+  if (!need_to_free_argv)
+    return 0;
+
+  free (argv[2]);
+  free (argv);
 }

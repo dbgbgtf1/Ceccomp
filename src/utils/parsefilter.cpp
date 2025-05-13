@@ -406,8 +406,8 @@ Parser::JmpWrap (filter *f_ptr, int pc)
       = { "if (" BLUE_A " == " BLUE_S ") ", "if (" BLUE_A " > " BLUE_S ") ",
           "if (" BLUE_A " >= " BLUE_S ") ", "if (" BLUE_A " & " BLUE_S ") " };
   const char *False[4]
-      = { "if (" BLUE_A " != " BLUE_S ") ", "if (" BLUE_A " <= " BLUE_S ") ",
-          "if (" BLUE_A " < " BLUE_S ") ", "if !(" BLUE_A "& " BLUE_S ") " };
+      = { "if (" BLUE_A " != " BLUE_S ") ", "if (" BLUE_A " < " BLUE_S ") ",
+          "if (" BLUE_A " <= " BLUE_S ") ", "if !(" BLUE_A " & " BLUE_S ") " };
 
   uint8_t jt = f_ptr->jt;
   uint8_t jf = f_ptr->jf;

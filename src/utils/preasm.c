@@ -9,6 +9,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+static bool is_etc (char *origin_line);
+
+static char *pre_get_lines (FILE *fp);
+
+static void pre_clear_color (char *clean_line);
+
+static void pre_clear_space (char *clean_line);
+
 static bool
 is_etc (char *Line)
 {
@@ -39,19 +47,19 @@ pre_get_lines (FILE *fp)
       if ((start = strstr (origin_line, "if")) != NULL)
         return start;
 
-      else if ((start = strstr (origin_line, "ret")) != NULL)
+      else if ((start = strstr (origin_line, "return")) != NULL)
         return start;
 
-      else if ((start = strstr(origin_line, "goto")) != NULL)
+      else if ((start = strstr (origin_line, "goto")) != NULL)
         return start;
 
       else if ((start = strchr (origin_line, '$')) != NULL)
         return start;
 
-      else if (!is_etc (origin_line))
-        PEXIT (INVALID_ASM_CODE ": %s", origin_line);
+      else if (is_etc (origin_line))
+        return "";
 
-      return "";
+      PEXIT (INVALID_ASM_CODE ": %s", origin_line);
     }
 
   return NULL;

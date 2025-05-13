@@ -30,6 +30,18 @@
 #define LOAD_SUCCESS 0x0
 #define LOAD_FAIL 0x80000000
 
+static void strict_mode ();
+
+static uint64_t check_scmp_mode (syscall_info *Info, int pid, fprog *prog);
+
+static void dump_filter (syscall_info *Info, int pid, fprog *prog);
+
+static void filter_mode (syscall_info *Info, int pid, fprog *prog);
+
+static void child (char *argv[]);
+
+static void parent (int pid);
+
 static void
 strict_mode ()
 {
@@ -79,6 +91,7 @@ check_scmp_mode (syscall_info *Info, int pid, fprog *prog)
     seccomp_mode = LOAD_FAIL;
   // seccomp set failed, nothing happened
 
+  free(exitRegs);
   return seccomp_mode;
 }
 
@@ -230,8 +243,6 @@ trace (int argc, char *argv[])
         PEXIT ("unknown pid: %s", pid_str);
       arch_str = parse_option (argc, argv, "arch");
       arch = STR2ARCH (arch_str);
-      if (arch == -1)
-        PEXIT ("unknown architecture: %s", arch_str);
 
       pid_trace (pid, arch);
     }

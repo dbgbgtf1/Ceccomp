@@ -17,27 +17,42 @@
 
 #define LIGHTCOLORPRINTF(str, ...) printf (LIGHTCOLOR (str "\n"), __VA_ARGS__)
 
+static bool is_state_true (uint32_t A, uint32_t sym_enum, uint32_t rval);
+
+static bool emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data,
+                           char *origin_line);
+
+static void emu_assign_line (line_set *Line, reg_mem *reg, seccomp_data *data);
+
+static uint32_t emu_ret_line (line_set *Line);
+
+static uint32_t emu_if_line (line_set *Line, reg_mem *reg, seccomp_data *data);
+
+static void clear_color (char *origin_line);
+
+static void emu_lines (FILE *fp, seccomp_data *data);
+
 static bool
-is_state_true (uint32_t A, uint32_t sym_enum, uint32_t rval)
+is_state_true (uint32_t A, uint32_t cmp_enum, uint32_t rval)
 {
-  switch (sym_enum)
+  switch (cmp_enum)
     {
-    case SYM_EQ:
+    case CMP_EQ:
       return (A == rval);
-    case SYM_GT:
+    case CMP_GT:
       return (A > rval);
-    case SYM_GE:
+    case CMP_GE:
       return (A >= rval);
-    case SYM_LE:
+    case CMP_LE:
       return (A <= rval);
-    case SYM_AD:
+    case CMP_AD:
       return (A & rval);
-    case SYM_LT:
+    case CMP_LT:
       return (A < rval);
-    case SYM_NE:
+    case CMP_NE:
       return (A != rval);
     default:
-      PEXIT (INVALID_SYMENUM ": %d", sym_enum);
+      PEXIT (INVALID_CMPENUM ": %d", cmp_enum);
     }
 }
 
@@ -45,15 +60,15 @@ static bool
 emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data,
                char *origin_line)
 {
-  uint8_t sym_enum = parse_compare_sym (sym_str, origin_line);
+  uint8_t sym_enum = parse_cmp_sym (sym_str, origin_line);
   uint8_t sym_len = GETSYMLEN (sym_enum);
 
-  char *rvar = sym_str + sym_len;
-  uint32_t rval = right_val_ifline (rvar, reg, data->arch, origin_line);
+  char *rval_str = sym_str + sym_len;
+  uint32_t rval = right_val_ifline (rval_str, reg, data->arch, origin_line);
 
   printf (BLUE_A);
   printf (" %.*s ", sym_len, sym_str);
-  printf (BLUE_LS, (uint32_t)(strchr (rvar, ')') - rvar), rvar);
+  printf (BLUE_LS, (uint32_t)(strchr (rval_str, ')') - rval_str), rval_str);
 
   return is_state_true (reg->A, sym_enum, rval);
 }
@@ -84,7 +99,7 @@ emu_if_line (line_set *Line, reg_mem *reg, seccomp_data *data)
   if (right_brace == NULL)
     PEXIT (BRACE_WRAP_CONDITION ": %s", origin_line);
 
-  uint32_t jmp_set = parse_goto (right_brace+1, origin_line);
+  uint32_t jmp_set = parse_goto (right_brace + 1, origin_line);
   uint16_t jf = GETJF (jmp_set);
   uint16_t jt = GETJT (jmp_set);
 
@@ -107,19 +122,19 @@ emu_assign_line (line_set *Line, reg_mem *reg, seccomp_data *data)
   char *clean_line = Line->clean_line;
   char *origin_line = Line->origin_line;
 
-  reg_set lvar;
-  left_var_assignline (clean_line, &lvar, reg, origin_line);
-  uint8_t lvar_len = lvar.reg_len;
-  uint32_t *lvar_ptr = lvar.reg_ptr;
+  reg_set lval;
+  left_val_assignline (clean_line, &lval, reg, origin_line);
+  uint8_t lval_len = lval.reg_len;
+  uint32_t *lval_ptr = lval.reg_ptr;
 
-  if (*(clean_line + lvar_len) != '=')
+  if (*(clean_line + lval_len) != '=')
     PEXIT (INVALID_OPERATOR ": %s", origin_line);
 
-  char *rvar = clean_line + lvar_len + 1;
-  uint32_t rval = right_var_assignline (rvar, data, reg, origin_line);
+  char *rval_str = clean_line + lval_len + 1;
+  uint32_t rval = right_val_assignline (rval_str, data, reg, origin_line);
 
-  *lvar_ptr = rval;
-  printf (BLUE_LS " = " BLUE_S "\n", lvar_len, clean_line, rvar);
+  *lval_ptr = rval;
+  printf (BLUE_LS " = " BLUE_S "\n", lval_len, clean_line, rval_str);
 }
 
 static uint32_t
@@ -143,13 +158,76 @@ emu_goto_line (line_set *Line)
   char *clean_line = Line->clean_line;
   char *origin_line = Line->origin_line;
   char *end;
-  uint32_t jmp_to = strtol(STRAFTER(clean_line, "goto"), &end, 10);
+  uint32_t jmp_to = strtol (STRAFTER (clean_line, "goto"), &end, 10);
 
   if (clean_line == end)
-    PEXIT(INVALID_NR_AFTER_GOTO ": %s", origin_line);
+    PEXIT (INVALID_NR_AFTER_GOTO ": %s", origin_line);
 
-  printf("goto %04d\n", jmp_to);
+  printf ("goto %04d\n", jmp_to);
   return jmp_to;
+}
+
+static void
+emu_do_alu (uint32_t *A_ptr, uint8_t alu_enum, uint32_t rval)
+{
+  switch (alu_enum)
+    {
+    case ALU_AN:
+      *A_ptr &= rval;
+    case ALU_AD:
+      *A_ptr += rval;
+      return;
+    case ALU_SU:
+      *A_ptr -= rval;
+      return;
+    case ALU_ML:
+      *A_ptr -= rval;
+      return;
+    case ALU_DV:
+      *A_ptr -= rval;
+      return;
+    case ALU_OR:
+      *A_ptr -= rval;
+      return;
+    case ALU_NG:
+      *A_ptr -= rval;
+      return;
+    case ALU_LS:
+      *A_ptr -= rval;
+      return;
+    case ALU_RS:
+      *A_ptr -= rval;
+      return;
+    default:
+      PEXIT (INVALID_ALUENUM ": %d\n", alu_enum)
+    }
+}
+
+static void
+emu_alu_line (line_set *Line, reg_mem *reg)
+{
+  char *clean_line = Line->clean_line;
+  char *origin_line = Line->origin_line;
+
+  char *sym_str = clean_line + strlen ("$A");
+  uint8_t sym_enum = parse_alu_sym (sym_str, origin_line);
+  uint8_t sym_len = GETSYMLEN (sym_len);
+
+  uint32_t *A_ptr = &reg->A;
+
+  char *rval_str = sym_str + sym_len;
+  uint32_t rval;
+  char *end;
+  if (!strcmp (rval_str, "$X"))
+    rval = reg->X;
+  else
+    {
+      rval = strtol (rval_str, &end, 0);
+      if (rval_str == end)
+        PEXIT (INVALID_RIGHT ": %s", origin_line);
+    }
+
+  emu_do_alu (A_ptr, sym_enum, rval);
 }
 
 static void
@@ -193,8 +271,10 @@ emu_lines (FILE *fp, seccomp_data *data)
         actual_idx = emu_if_line (&Line, reg, data);
       else if (STARTWITH (clean_line, "return"))
         actual_idx = emu_ret_line (&Line);
-      else if (STARTWITH(clean_line, "goto"))
+      else if (STARTWITH (clean_line, "goto"))
         actual_idx += emu_goto_line (&Line);
+      else if (STARTWITH (clean_line, "$A") && *(clean_line + 4) == '=')
+        emu_alu_line (&Line, reg);
       else if (*clean_line == '$')
         emu_assign_line (&Line, reg, data);
       else
@@ -213,8 +293,6 @@ emu (int argc, char *argv[])
 
   char *arch_str = parse_option (argc, argv, "arch");
   data.arch = STR2ARCH (arch_str);
-  if (data.arch == -1)
-    PEXIT (INVALID_ARCH ": %s\n" SUPPORT_ARCH "\n", arch_str);
 
   char *filename = get_arg (argc, argv);
   FILE *fp = fopen (filename, "r");
@@ -223,7 +301,7 @@ emu (int argc, char *argv[])
 
   char *sys_nr_str = get_arg (argc, argv);
   char *end;
-  int sys_nr = seccomp_syscall_resolve_name_arch(data.arch, sys_nr_str);
+  int sys_nr = seccomp_syscall_resolve_name_arch (data.arch, sys_nr_str);
   if (sys_nr == -1)
     {
       sys_nr = strtol (sys_nr_str, &end, 0);

@@ -1,5 +1,6 @@
 #include "parseobj.h"
 #include "error.h"
+#include "main.h"
 #include "transfer.h"
 #include <seccomp.h>
 #include <stdbool.h>
@@ -12,9 +13,9 @@
 
 // this is used in if line, right value only
 // if ($A == X86_64)
+// if ($A > $X)
 // if ($A == write)
 // if ($A > 0xffffffff)
-// if ($A > $X)
 uint32_t
 right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch,
                   char *origin_line)
@@ -23,22 +24,21 @@ right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch,
   if ((rval = STR2ARCH (rval_str)) != -1)
     return rval;
 
-  char *syscall_name = strndup (rval_str, strchr (rval_str, ')') - rval_str);
-  if ((rval = seccomp_syscall_resolve_name_arch (arch, syscall_name))
-      != __NR_SCMP_ERROR)
-    {
-      free (syscall_name);
-      return rval;
-    }
-  free (syscall_name);
   if (STARTWITH (rval_str, "$X"))
     return reg->X;
 
+  char *syscall_name = strndup (rval_str, strchr (rval_str, ')') - rval_str);
+  rval = seccomp_syscall_resolve_name_arch (arch, syscall_name);
+  free (syscall_name);
+  if (rval != __NR_SCMP_ERROR)
+    return rval;
+
   char *end;
   rval = strtol (rval_str, &end, 0);
-  if (rval_str == end)
-    PEXIT (INVALID_RIGHT ": %s", origin_line);
-  return rval;
+  if (rval_str != end)
+    return rval;
+
+  PEXIT (INVALID_RIGHT ": %s", origin_line);
 }
 
 // this is used in assign line, right value only
@@ -48,19 +48,21 @@ right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch,
 // $A = $mem[0]
 // $A = 0x100
 uint32_t
-right_var_assignline (char *rvar_str, seccomp_data *data, reg_mem *reg_ptr,
+right_val_assignline (char *rval_str, seccomp_data *data, reg_mem *reg_ptr,
                       char *origin_line)
 {
   uint32_t offset;
-  if ((offset = STR2ABS (rvar_str)) != -1)
+  if ((offset = STR2ABS (rval_str)) != -1)
     return *(uint32_t *)((char *)data + offset);
-  else if ((offset = STR2REG (rvar_str)) != -1)
+
+  else if ((offset = STR2REG (rval_str)) != -1)
     return *(uint32_t *)((char *)reg_ptr + offset);
 
   char *end = NULL;
-  uint32_t rval = strtol (rvar_str, &end, 0);
-  if (end != rvar_str)
+  uint32_t rval = strtol (rval_str, &end, 0);
+  if (end != rval_str)
     return rval;
+
   PEXIT (INVALID_RIGHT ": %s", origin_line);
 }
 
@@ -70,15 +72,15 @@ right_var_assignline (char *rvar_str, seccomp_data *data, reg_mem *reg_ptr,
 // $mem[0x0]
 // $mem[0]
 void
-left_var_assignline (char *lvar_str, reg_set *reg_set, reg_mem *reg_ptr,
+left_val_assignline (char *lval_str, reg_set *reg_set, reg_mem *reg_ptr,
                      char *origin_line)
 {
-  uint32_t reg_offset = STR2REG (lvar_str);
+  uint32_t reg_offset = STR2REG (lval_str);
   if (reg_offset == -1)
     PEXIT (INVALID_LEFT_VAR ": %s", origin_line);
 
   if (reg_offset > offsetof (reg_mem, X))
-    reg_set->reg_len = (size_t)strchr (lvar_str, ']') - (size_t)lvar_str + 1;
+    reg_set->reg_len = (size_t)strchr (lval_str, ']') - (size_t)lval_str + 1;
   else
     reg_set->reg_len = strlen ("$A");
 
@@ -88,23 +90,48 @@ left_var_assignline (char *lvar_str, reg_set *reg_set, reg_mem *reg_ptr,
 // return JMP ENUM, GETSYMLEN and GETSYMIDX to use it
 // take a look at JMP ENUM, GETSYMLEN and GETSYMIDX
 uint8_t
-parse_compare_sym (char *sym_str, char *origin_line)
+parse_cmp_sym (char *sym_str, char *origin_line)
 {
   if (!strncmp (sym_str, "==", 2))
-    return SYM_EQ;
+    return CMP_EQ;
   else if (!strncmp (sym_str, ">=", 2))
-    return SYM_GE;
+    return CMP_GE;
   else if (!strncmp (sym_str, ">", 1))
-    return SYM_GT;
+    return CMP_GT;
   else if (!strncmp (sym_str, "&", 1))
-    return SYM_AD;
+    return CMP_AD;
 
   else if (!strncmp (sym_str, "!=", 2))
-    return SYM_NE;
+    return CMP_NE;
   else if (!strncmp (sym_str, "<=", 2))
-    return SYM_LE;
+    return CMP_LE;
   else if (!strncmp (sym_str, "<", 1))
-    return SYM_LT;
+    return CMP_LT;
+
+  PEXIT (INVALID_OPERATOR ": %s", origin_line);
+}
+
+uint8_t
+parse_alu_sym (char *cmp_str, char *origin_line)
+{
+  if (!strncmp (cmp_str, "&=", 2))
+    return ALU_AN;
+  else if (!strncmp (cmp_str, "+=", 2))
+    return ALU_AD;
+  else if (!strncmp (cmp_str, "-=", 2))
+    return ALU_SU;
+  else if (!strncmp (cmp_str, "*=", 2))
+    return ALU_ML;
+  else if (!strncmp (cmp_str, "/=", 2))
+    return ALU_DV;
+  else if (!strncmp (cmp_str, "|=", 2))
+    return ALU_OR;
+  else if (!strncmp (cmp_str, "=-", 2))
+    return ALU_NG;
+  else if (!strncmp (cmp_str, "<<=", 3))
+    return ALU_LS;
+  else if (!strncmp (cmp_str, ">>=", 3))
+    return ALU_RS;
 
   PEXIT (INVALID_OPERATOR ": %s", origin_line);
 }
