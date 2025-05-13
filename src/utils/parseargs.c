@@ -6,21 +6,37 @@
 #include <stdlib.h>
 #include <string.h>
 
-char *
-parse_option (int argc, char *argv[], char *token)
+bool
+parse_option_enable (int argc, char *argv[], char *token)
 {
   for (int i = 0; i < argc; i++)
     {
-      bool is_arg = STARTWITH (argv[i], "--");
-      if (!is_arg)
-        continue;
-
       char *arg = STRAFTER (argv[i], "--");
-      bool is_token = STARTWITH (arg, token);
-      if (!is_token)
+      if (arg == NULL)
         continue;
 
       arg = STRAFTER (arg, token);
+      if (arg == NULL)
+        continue;
+
+      return true;
+    }
+  return false;
+}
+
+char *
+parse_option_mode (int argc, char *argv[], char *token)
+{
+  for (int i = 0; i < argc; i++)
+    {
+      char *arg = STRAFTER (argv[i], "--");
+      if (arg == NULL)
+        continue;
+
+      arg = STRAFTER (arg, token);
+      if (arg == NULL)
+        continue;
+
       if (*arg != '=')
         PEXIT (INVALID_ARG ":%s", argv[i]);
 

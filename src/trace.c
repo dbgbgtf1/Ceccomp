@@ -231,7 +231,7 @@ trace (int argc, char *argv[])
   if (argc < 1)
     PEXIT ("%s\n%s", NOT_ENOUGH_ARGS, TRACE_HINT);
 
-  char *pid_str = parse_option (argc, argv, "pid");
+  char *pid_str = parse_option_mode (argc, argv, "pid");
   int pid;
   char *end;
   char *arch_str;
@@ -241,7 +241,7 @@ trace (int argc, char *argv[])
       pid = strtol (pid_str, &end, 10);
       if (pid_str == end)
         PEXIT ("unknown pid: %s", pid_str);
-      arch_str = parse_option (argc, argv, "arch");
+      arch_str = parse_option_mode (argc, argv, "arch");
       arch = STR2ARCH (arch_str);
 
       pid_trace (pid, arch);
@@ -251,7 +251,7 @@ trace (int argc, char *argv[])
     {
       pid = fork ();
       if (pid == 0)
-        child (argv);
+        child (&argv[1]);
       else
         parent (pid);
     }

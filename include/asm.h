@@ -1,8 +1,6 @@
 #ifndef ASM
 #define ASM
 
-#include "main.h"
-#include "preasm.h"
 #include <stdbool.h>
 #include <stdint.h>
 

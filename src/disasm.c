@@ -12,7 +12,7 @@
 void
 disasm (int argc, char *argv[])
 {
-  char *arch_str = parse_option (argc, argv, "arch");
+  char *arch_str = parse_option_mode (argc, argv, "arch");
   uint32_t arch = STR2ARCH (arch_str);
 
   char *filename = get_arg (argc, argv);

@@ -97,7 +97,7 @@ static filter
 JMP_GOTO (line_set *Line)
 {
   char *clean_line = Line->clean_line;
-  char *jmp_nr = STRAFTER(clean_line, "goto");
+  char *jmp_nr = clean_line + strlen ("goto");
 
   filter filter = BPF_JUMP (BPF_JMP | BPF_JA, 0, 0, 0);
   char *end;
@@ -237,7 +237,7 @@ RET (line_set *Line)
   char *origin_line = Line->origin_line;
   filter filter = { BPF_RET, 0, 0, 0 };
 
-  char *retval_str = STRAFTER (clean_line, "return");
+  char *retval_str = clean_line + strlen ("return");
 
   uint32_t retval = STR2RETVAL (retval_str);
   if (retval != -1)
@@ -260,7 +260,7 @@ ST_STX (line_set *Line)
   char *origin_line = Line->origin_line;
   filter filter = { 0, 0, 0, 0 };
 
-  char *idx_str = STRAFTER (clean_line, "$mem[");
+  char *idx_str = clean_line + strlen ("$mem[");
   char *end;
   uint32_t idx = strtol (idx_str, &end, 0);
   if (*end != ']')
@@ -438,10 +438,10 @@ assemble (int argc, char *argv[])
   if (fp == NULL)
     PEXIT (UNABLE_OPEN_FILE ": %s", filename);
 
-  char *arch_str = parse_option (argc, argv, "arch");
+  char *arch_str = parse_option_mode (argc, argv, "arch");
   uint32_t arch = STR2ARCH (arch_str);
 
-  char *print_mode_str = parse_option (argc, argv, "fmt");
+  char *print_mode_str = parse_option_mode (argc, argv, "fmt");
   uint32_t print_mode;
   if (print_mode_str == NULL || !strcmp (print_mode_str, "hexline"))
     print_mode = HEXLINE;

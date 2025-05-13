@@ -140,13 +140,12 @@ emu_assign_line (line_set *Line, reg_mem *reg, seccomp_data *data)
 static uint32_t
 emu_ret_line (line_set *Line)
 {
-  char *retval_str = STRAFTER (Line->clean_line, "return");
+  char *retval_str = Line->clean_line + strlen ("return");
   uint32_t retval = STR2RETVAL (retval_str);
   if (retval == -1)
     PEXIT (INVALID_RET_VAL ": %s", Line->origin_line);
 
   retval_str = RETVAL2STR (retval);
-
   printf ("return %s\n", retval_str);
 
   return 0xffffffff;
@@ -158,7 +157,7 @@ emu_goto_line (line_set *Line)
   char *clean_line = Line->clean_line;
   char *origin_line = Line->origin_line;
   char *end;
-  uint32_t jmp_to = strtol (STRAFTER (clean_line, "goto"), &end, 10);
+  uint32_t jmp_to = strtol (clean_line + strlen ("goto"), &end, 10);
 
   if (clean_line == end)
     PEXIT (INVALID_NR_AFTER_GOTO ": %s", origin_line);
@@ -291,7 +290,7 @@ emu (int argc, char *argv[])
 {
   seccomp_data data;
 
-  char *arch_str = parse_option (argc, argv, "arch");
+  char *arch_str = parse_option_mode (argc, argv, "arch");
   data.arch = STR2ARCH (arch_str);
 
   char *filename = get_arg (argc, argv);

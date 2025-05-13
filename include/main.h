@@ -13,7 +13,7 @@
 
 #define ASM_HINT "ceccomp asm [ --arch= ] [ --fmt= ] bpftext"
 #define DISASM_HINT "ceccomp disasm [ --arch= ] bpftext"
-#define TRACE_HINT "ceccomp trace [ PROGRAM [ program-args ] ]|[ --pid= ]"
+#define TRACE_HINT "ceccomp trace [ PROGRAM [ program-args ] ]|[ --pid= [ --arch= ] ]"
 #define EMU_HINT "ceccomp emu [ --arch= ] bpftext syscall_nr [ args[0-5] ip ]"
 #define OPTION_HINT                                                           \
   "Options:\n"                                                                \

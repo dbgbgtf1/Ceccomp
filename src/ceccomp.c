@@ -78,7 +78,7 @@ main (int argc, char *argv[], char *env[])
       return 0;
     }
 
-  char *arch_str = parse_option ((argc - 2), &argv[2], "arch");
+  char *arch_str = parse_option_mode ((argc - 2), &argv[2], "arch");
   bool need_to_free_argv = false;
   if (arch_str != NULL)
     {
