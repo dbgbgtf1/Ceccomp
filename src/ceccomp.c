@@ -16,7 +16,7 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 
-#define CECCOMP_VERSION "ceccomp 1.3"
+#define CECCOMP_VERSION "ceccomp 1.4"
 
 void
 help ()
