@@ -3,11 +3,18 @@
 local -a subcmd options
 local state
 
-local archs=('x86_64' 'i386' 'x32' 'aarch64' 'arm' 'loongarch64' 'm68k' 'mips' 'mipsel'
+local archs=(
+    'x86_64' 'i386' 'x32' 'aarch64' 'arm' 'loongarch64' 'm68k' 'mips' 'mipsel'
     'mips64' 'mipsel64' 'mips64n32' 'mipsel64n32' 'parisc' 'parisc64' 'ppc64' 'ppc64le'
     'ppc' 's390x' 's390' 'riscv64'
 )
 local arch_compstr="--arch=[Target BPF architecture]:ARCH:($archs)"
+local syscalls=(
+    'open' 'read' 'write' 'close' 'mmap' 'mprotect' 'execve' 'execveat' 'pread64'
+    'readv' 'writev' 'preadv' 'preadv2' 'openat' 'openat2' 'sendfile64' 'send'
+    'sendto' 'sendmsg' 'recv' 'recvfrom' 'recvmsg' 'io_uring_setup' 'io_uring_enter'
+    'io_uring_register' 'ptrace'
+)
 
 if (( CURRENT == 2 )) {
     subcmd=(
@@ -53,6 +60,7 @@ if (( CURRENT == 2 )) {
         (emu)
             _arguments -C \
                 $arch_compstr \
+                "--quiet[Print return value only]" \
                 "2:BPF:_files" \
                 ":NR:->syscall_nr" \
                 ":ARGV0:->argv0" \
@@ -65,8 +73,8 @@ if (( CURRENT == 2 )) {
                 "*: :"
             case $state {
                 (syscall_nr)
-                    _message -r "Hint: syscall_nr or syscall_name"
-                    _values SYSCALL "open" "read" "write"
+                    _message -r "Hint: syscall_nr or syscall_name (to name but a few)"
+                    _values SYSCALL $syscalls
                     ;;
                 (argv0)
                     _message -r "Hint: u64 for argv[0]"
