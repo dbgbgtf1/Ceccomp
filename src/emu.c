@@ -385,5 +385,5 @@ emu (int argc, char *argv[])
 
   if (stdout_backup)
     end_quiet (stdout_backup);
-  printf ("return " BLUE_S, retval_str);
+  printf ("return " BLUE_S "\n", retval_str);
 }

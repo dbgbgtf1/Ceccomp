@@ -128,7 +128,7 @@ child (char *argv[])
   int err = execv (argv[0], argv);
   if (err)
     {
-      printf ("execv failed executed: %s", argv[0]);
+      printf ("execv failed executed: %s\n", argv[0]);
       perror ("execv");
       exit (0);
     }
