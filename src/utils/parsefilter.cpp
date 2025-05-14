@@ -95,7 +95,7 @@ private:
 
   void ALU (filter *f_ptr);
 
-  bool JMP (filter *f_ptr, const char *syms[4]);
+  bool JMP (filter *f_ptr, const char *syms[4], int pc);
 
   void JmpWrap (filter *f_ptr, int pc);
 
@@ -351,7 +351,7 @@ Parser::ALU (filter *f_ptr)
 }
 
 bool
-Parser::JMP (filter *f_ptr, const char *syms[4])
+Parser::JMP (filter *f_ptr, const char *syms[4], int pc)
 {
   uint16_t jmode = BPF_OP (f_ptr->code);
   uint16_t src = BPF_SRC (f_ptr->code);
@@ -360,10 +360,10 @@ Parser::JMP (filter *f_ptr, const char *syms[4])
   switch (jmode | src)
     {
     case BPF_JA | BPF_X:
-      printf ("goto " FORMAT, atoi (X.m_str));
+      printf ("goto " FORMAT, pc + atoi (X.m_str) + 2);
       return false;
     case BPF_JA | BPF_K:
-      printf ("goto " FORMAT, k);
+      printf ("goto " FORMAT, pc + k + 2);
       return false;
 
     case BPF_JEQ | BPF_X:
@@ -414,17 +414,17 @@ Parser::JmpWrap (filter *f_ptr, int pc)
 
   if (jt == 0 && jf != 0)
     {
-      if (JMP (f_ptr, False))
+      if (JMP (f_ptr, False, pc))
         printf ("goto " FORMAT, pc + jf + 2);
     }
   else if (jf == 0 && jt != 0)
     {
-      if (JMP (f_ptr, True))
+      if (JMP (f_ptr, True, pc))
         printf ("goto " FORMAT, pc + jt + 2);
     }
   else
     {
-      if (JMP (f_ptr, True))
+      if (JMP (f_ptr, True, pc))
         printf ("goto " FORMAT ", else goto " FORMAT, pc + jt + 2,
                 pc + jf + 2);
     }

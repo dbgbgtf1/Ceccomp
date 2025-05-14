@@ -275,7 +275,7 @@ emu_lines (FILE *fp, seccomp_data *data)
       else if (STARTWITH (clean_line, "return"))
         return emu_ret_line (&Line);
       else if (STARTWITH (clean_line, "goto"))
-        actual_idx += emu_goto_line (&Line);
+        actual_idx = emu_goto_line (&Line);
       else if (STARTWITH (clean_line, "$A") && *(clean_line + 4) == '=')
         emu_alu_line (&Line, reg);
       else if (*clean_line == '$')
