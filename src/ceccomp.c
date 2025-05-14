@@ -1,10 +1,11 @@
 #include "asm.h"
 #include "disasm.h"
 #include "emu.h"
+#include "probe.h"
+#include "trace.h"
 #include "error.h"
 #include "main.h"
 #include "parseargs.h"
-#include "trace.h"
 #include "transfer.h"
 #include <stdbool.h>
 #include <stddef.h>
@@ -26,6 +27,7 @@ help ()
   printf ("%s\n", DISASM_HINT);
   printf ("%s\n", TRACE_HINT);
   printf ("%s\n", EMU_HINT);
+  printf ("%s\n", PROBE_HINT);
   printf ("%s\n", HELP_HINT);
   printf ("%s\n", VERSION);
 
@@ -104,6 +106,9 @@ main (int argc, char *argv[], char *env[])
 
   else if (!strcmp (argv[1], "trace"))
     trace (argc - 2, &argv[2]);
+
+  else if (!strcmp (argv[1], "probe"))
+    probe (argc - 2, &argv[2]);
 
   else
     help ();

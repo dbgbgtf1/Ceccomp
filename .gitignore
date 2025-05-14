@@ -2,6 +2,6 @@ build/
 compile_commands.json
 a.out
 Test
-result.*
+result*
 *.gdb_history
 *.cache/

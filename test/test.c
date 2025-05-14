@@ -69,12 +69,6 @@ load_filter (uint32_t t_arch)
       exit (1);
     }
 
-  if (syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, 0, &prog))
-    {
-      perror ("seccomp");
-      exit (1);
-    }
-
   char buf[0x10];
   read (0, buf, 0x10);
 }

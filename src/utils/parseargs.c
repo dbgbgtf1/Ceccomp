@@ -47,7 +47,7 @@ parse_option_mode (int argc, char *argv[], char *token)
 }
 
 char *
-get_arg (int argc, char *argv[])
+try_get_arg (int argc, char *argv[])
 {
   static int i = 0;
   for (; i < argc; i++)
@@ -56,5 +56,14 @@ get_arg (int argc, char *argv[])
         continue;
       return argv[i++];
     }
+  return NULL;
+}
+
+char *
+get_arg (int argc, char *argv[])
+{
+  char *arg = try_get_arg (argc, argv);
+  if (arg != NULL)
+    return arg;
   PEXIT ("%s\n", NOT_ENOUGH_ARGS);
 }

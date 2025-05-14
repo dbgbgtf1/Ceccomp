@@ -14,6 +14,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define LIGHTCOLORPRINTF(str, ...) printf (LIGHTCOLOR (str "\n"), __VA_ARGS__)
 
@@ -24,13 +26,17 @@ static bool emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data,
 
 static void emu_assign_line (line_set *Line, reg_mem *reg, seccomp_data *data);
 
-static uint32_t emu_ret_line (line_set *Line);
+static char *emu_ret_line (line_set *Line);
 
 static uint32_t emu_if_line (line_set *Line, reg_mem *reg, seccomp_data *data);
 
 static void clear_color (char *origin_line);
 
-static void emu_lines (FILE *fp, seccomp_data *data);
+static char *emu_lines (FILE *fp, seccomp_data *data);
+
+static int start_quiet ();
+
+static void end_quiet (int stdout_backup);
 
 static bool
 is_state_true (uint32_t A, uint32_t cmp_enum, uint32_t rval)
@@ -137,7 +143,7 @@ emu_assign_line (line_set *Line, reg_mem *reg, seccomp_data *data)
   printf (BLUE_LS " = " BLUE_S "\n", lval_len, clean_line, rval_str);
 }
 
-static uint32_t
+static char *
 emu_ret_line (line_set *Line)
 {
   char *retval_str = Line->clean_line + strlen ("return");
@@ -146,9 +152,7 @@ emu_ret_line (line_set *Line)
     PEXIT (INVALID_RET_VAL ": %s", Line->origin_line);
 
   retval_str = RETVAL2STR (retval);
-  printf ("return %s\n", retval_str);
-
-  return 0xffffffff;
+  return retval_str;
 }
 
 static uint32_t
@@ -237,12 +241,12 @@ clear_color (char *origin_line)
 
   while ((color_start = strchr (origin_line, '\e')) != NULL)
     {
-      color_end = strchr (color_start, 'm');
-      sprintf (color_start, "%s", color_end + 1);
+      color_end = strchr (color_start, 'm') + 1;
+      safe_strcpy (color_start, color_end);
     }
 }
 
-static void
+static char *
 emu_lines (FILE *fp, seccomp_data *data)
 {
   line_set Line = { NULL, NULL };
@@ -269,7 +273,7 @@ emu_lines (FILE *fp, seccomp_data *data)
       if (STARTWITH (clean_line, "if"))
         actual_idx = emu_if_line (&Line, reg, data);
       else if (STARTWITH (clean_line, "return"))
-        actual_idx = emu_ret_line (&Line);
+        return emu_ret_line (&Line);
       else if (STARTWITH (clean_line, "goto"))
         actual_idx += emu_goto_line (&Line);
       else if (STARTWITH (clean_line, "$A") && *(clean_line + 4) == '=')
@@ -283,12 +287,79 @@ emu_lines (FILE *fp, seccomp_data *data)
     }
 
   free (reg);
+  return NULL;
+}
+
+void
+get_sysnr_arg (int argc, char *argv[], seccomp_data *data)
+{
+  char *sys_nr_str = get_arg (argc, argv);
+  char *end;
+  data->nr = seccomp_syscall_resolve_name_arch (data->arch, sys_nr_str);
+
+  if (data->nr != __NR_SCMP_ERROR)
+    return;
+
+  data->nr = strtol (sys_nr_str, &end, 0);
+  if (sys_nr_str == end)
+    PEXIT ("%s", INVALID_SYSNR);
+}
+
+void
+get_rest_args (int argc, char *argv[], seccomp_data *data)
+{
+  char *arg;
+  int arg_idx = 0;
+  char *end;
+
+  while ((arg = try_get_arg (argc, argv)) != NULL)
+    {
+      if (arg_idx > 5)
+        break;
+      data->args[arg_idx++] = strtol (arg, &end, 0);
+      if (arg == end)
+        PEXIT ("%s", INVALID_SYS_ARGS);
+    }
+
+  if (arg == NULL)
+    return;
+
+  data->instruction_pointer = strtol (arg, &end, 0);
+  if (arg == end)
+    PEXIT ("%s", INVALID_PC);
+}
+
+int
+start_quiet ()
+{
+  int stdout_backup = dup (fileno (stdout));
+  if (stdout_backup == -1)
+    PERROR ("dup");
+
+  int dev_null = open ("/dev/null", O_WRONLY);
+  if (dev_null == -1)
+    PERROR ("dup");
+
+  if (dup2 (dev_null, fileno (stdout)) == -1)
+    PERROR ("start_quiet dup2");
+
+  close (dev_null);
+
+  return stdout_backup;
+}
+
+void
+end_quiet (int stdout_backup)
+{
+  if (dup2 (stdout_backup, fileno (stdout)) == -1)
+    PERROR ("end_quiet dup2")
+  close (stdout_backup);
 }
 
 void
 emu (int argc, char *argv[])
 {
-  seccomp_data data;
+  seccomp_data data = { 0, 0, 0, { 0, 0, 0, 0, 0, 0 } };
 
   char *arch_str = parse_option_mode (argc, argv, "arch");
   data.arch = STR2ARCH (arch_str);
@@ -298,32 +369,17 @@ emu (int argc, char *argv[])
   if (fp == NULL)
     PEXIT (UNABLE_OPEN_FILE ": %s", filename);
 
-  char *sys_nr_str = get_arg (argc, argv);
-  char *end;
-  int sys_nr = seccomp_syscall_resolve_name_arch (data.arch, sys_nr_str);
-  if (sys_nr == -1)
-    {
-      sys_nr = strtol (sys_nr_str, &end, 0);
-      if (sys_nr_str == end)
-        PEXIT ("%s", INVALID_SYSNR);
-    }
-  data.nr = sys_nr;
+  get_sysnr_arg (argc, argv, &data);
+  get_rest_args (argc, argv, &data);
+  // get syscall_nr, args and instruction_pointer
 
-  for (int i = 3; i < argc; i++)
-    {
-      char *arg = get_arg (argc, argv);
-      data.args[i] = strtol (arg, &end, 0);
-      if (arg == end)
-        PEXIT ("%s", INVALID_SYS_ARGS);
-    }
+  int stdout_backup = 0;
+  if (parse_option_enable (argc, argv, "quiet"))
+    stdout_backup = start_quiet ();
 
-  if (argc > 10)
-    {
-      char *pc = get_arg (argc, argv);
-      data.instruction_pointer = strtol (pc, &end, 0);
-      if (pc == end)
-        PEXIT ("%s", INVALID_PC);
-    }
+  char *retval_str = emu_lines (fp, &data);
 
-  emu_lines (fp, &data);
+  if (stdout_backup)
+    end_quiet (stdout_backup);
+  printf ("return " BLUE_S, retval_str);
 }

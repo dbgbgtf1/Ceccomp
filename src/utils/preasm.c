@@ -17,6 +17,20 @@ static void pre_clear_color (char *clean_line);
 
 static void pre_clear_space (char *clean_line);
 
+// glibc strcpy will copy str in 8 bytes
+// I don't want that to happen some times
+void
+safe_strcpy (char *dest, char *src)
+{
+  while (*src != '\0')
+    {
+      *dest = *src;
+      dest++;
+      src++;
+    }
+  *dest = *src;
+}
+
 static bool
 is_etc (char *Line)
 {
@@ -89,9 +103,7 @@ pre_clear_space (char *clean_line)
       spaceend = space;
       while (*spaceend == ' ')
         spaceend = spaceend + 1;
-      char *copy = strdup (spaceend);
-      strcpy (space, copy);
-      free (copy);
+      safe_strcpy (space, spaceend);
     }
 }
 

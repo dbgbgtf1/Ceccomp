@@ -72,6 +72,22 @@
       "-g",
       "-c",
       "-o",
+      "build/probe.c.o",
+      "src/probe.c"
+    ],
+    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
+    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/probe.c",
+    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/probe.c.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-I./include",
+      "-fpie",
+      "-fstack-protector",
+      "-g",
+      "-c",
+      "-o",
       "build/trace.c.o",
       "src/trace.c"
     ],
