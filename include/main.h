@@ -14,7 +14,7 @@
 #define ASM_HINT "ceccomp asm [ --arch= ] [ --fmt= ] bpftext"
 #define DISASM_HINT "ceccomp disasm [ --arch= ] bpftext"
 #define EMU_HINT                                                              \
-  "ceccomp emu [ --arch= ] [ --quiet ] bpftext syscall_nr [ args[0-5] ip]"
+  "ceccomp emu [ --arch= ] [ --quiet ] bpftext syscall_nr [ args[0-5] ip ]"
 #define TRACE_HINT                                                            \
   "ceccomp trace [ PROGRAM [ program-args ] ] | [ [ --arch= ] --pid= ]"
 #define PROBE_HINT "ceccomp probe [ --arch= ] PROGRAM [ program-args ]"
@@ -27,7 +27,7 @@
   "\t--pid=system process id              print the bpftext of pid\n"         \
   "\targs[0-5]                            default as 0\n"                     \
   "\tip                                   instruction pointer, default as 0"
-#define HELP_HINT "ceccomp show help message"
+#define HELP_HINT "ceccomp help"
 #define VERSION "ceccomp version"
 
 typedef struct ptrace_syscall_info syscall_info;
