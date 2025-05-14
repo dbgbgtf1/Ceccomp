@@ -34,7 +34,7 @@ right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch,
     return rval;
 
   char *end;
-  rval = strtol (rval_str, &end, 0);
+  rval = strtoul (rval_str, &end, 0);
   if (rval_str != end)
     return rval;
 
@@ -59,7 +59,7 @@ right_val_assignline (char *rval_str, seccomp_data *data, reg_mem *reg_ptr,
     return *(uint32_t *)((char *)reg_ptr + offset);
 
   char *end = NULL;
-  uint32_t rval = strtol (rval_str, &end, 0);
+  uint32_t rval = strtoul (rval_str, &end, 0);
   if (end != rval_str)
     return rval;
 
@@ -147,14 +147,14 @@ parse_goto (char *goto_str, char *origin_line)
   uint16_t jt = 0;
   uint16_t jf = 0;
 
-  jt = strtol (jt_str, &jf_str, 10);
+  jt = strtoul (jt_str, &jf_str, 10);
   if (jf_str == jt_str)
     PEXIT (LINE_NR_AFTER_GOTO ": %s", origin_line);
 
   if (STARTWITH (jf_str, ",elsegoto"))
     {
       jf_str += strlen (",elsegoto");
-      jf = strtol (jf_str, &jt_str, 10);
+      jf = strtoul (jf_str, &jt_str, 10);
       if (jt_str == jf_str)
         PEXIT (LINE_NR_AFTER_ELSE ": %s", origin_line);
     }

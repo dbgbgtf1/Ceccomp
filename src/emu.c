@@ -34,6 +34,10 @@ static void clear_color (char *origin_line);
 
 static char *emu_lines (FILE *fp, seccomp_data *data);
 
+void get_sysnr_arg (int argc, char *argv[], seccomp_data *data);
+
+void get_rest_args (int argc, char *argv[], seccomp_data *data);
+
 static int start_quiet ();
 
 static void end_quiet (int stdout_backup);
@@ -161,7 +165,7 @@ emu_goto_line (line_set *Line)
   char *clean_line = Line->clean_line;
   char *origin_line = Line->origin_line;
   char *end;
-  uint32_t jmp_to = strtol (clean_line + strlen ("goto"), &end, 10);
+  uint32_t jmp_to = strtoul (clean_line + strlen ("goto"), &end, 10);
 
   if (clean_line == end)
     PEXIT (INVALID_NR_AFTER_GOTO ": %s", origin_line);
@@ -225,7 +229,7 @@ emu_alu_line (line_set *Line, reg_mem *reg)
     rval = reg->X;
   else
     {
-      rval = strtol (rval_str, &end, 0);
+      rval = strtoul (rval_str, &end, 0);
       if (rval_str == end)
         PEXIT (INVALID_RIGHT ": %s", origin_line);
     }
@@ -300,7 +304,7 @@ get_sysnr_arg (int argc, char *argv[], seccomp_data *data)
   if (data->nr != __NR_SCMP_ERROR)
     return;
 
-  data->nr = strtol (sys_nr_str, &end, 0);
+  data->nr = strtoul (sys_nr_str, &end, 0);
   if (sys_nr_str == end)
     PEXIT ("%s", INVALID_SYSNR);
 }
@@ -316,7 +320,7 @@ get_rest_args (int argc, char *argv[], seccomp_data *data)
     {
       if (arg_idx > 5)
         break;
-      data->args[arg_idx++] = strtol (arg, &end, 0);
+      data->args[arg_idx++] = strtoull (arg, &end, 0);
       if (arg == end)
         PEXIT ("%s", INVALID_SYS_ARGS);
     }
@@ -324,7 +328,7 @@ get_rest_args (int argc, char *argv[], seccomp_data *data)
   if (arg == NULL)
     return;
 
-  data->instruction_pointer = strtol (arg, &end, 0);
+  data->instruction_pointer = strtoull (arg, &end, 0);
   if (arg == end)
     PEXIT ("%s", INVALID_PC);
 }

@@ -27,7 +27,7 @@
   "\t--pid=system process id              print the bpftext of pid\n"         \
   "\targs[0-5]                            default as 0\n"                     \
   "\tip                                   instruction pointer, default as 0"
-#define HELP_HINT "ceccomp show"
+#define HELP_HINT "ceccomp show help message"
 #define VERSION "ceccomp version"
 
 typedef struct ptrace_syscall_info syscall_info;

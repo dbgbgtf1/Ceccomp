@@ -440,7 +440,7 @@ Parser::RET (filter *f_ptr)
   switch (ret)
     {
     case BPF_A:
-      retval = strtol (A.m_str, &end, 0);
+      retval = strtoul (A.m_str, &end, 0);
       if (A.m_str != end)
         return retval;
       else
