@@ -36,19 +36,18 @@ static uint64_t check_scmp_mode (syscall_info *Info, int pid, fprog *prog);
 
 static void dump_filter (syscall_info *Info, int pid, fprog *prog);
 
-static void filter_mode (syscall_info *Info, int pid, fprog *prog);
+static void filter_mode (syscall_info *Info, int pid, fprog *prog, FILE *fp);
 
 static void child (char *argv[]);
 
-static void parent (int pid);
+static void parent (int pid, FILE *fp, bool oneshot);
+
+static void pid_trace (int pid, uint32_t arch);
 
 static void
 strict_mode ()
 {
-  printf ("---------------------------------\n");
-  printf (RED ("Strict Mode Detected?!\n"));
-  printf (RED ("Only read, write, _exit!\n"));
-  printf ("---------------------------------\n");
+  printf (STRICT_MODE);
 }
 
 static uint64_t
@@ -75,7 +74,6 @@ check_scmp_mode (syscall_info *Info, int pid, fprog *prog)
     }
   else
     return seccomp_mode;
-
   // get seccomp_mode
   // prctl (PR_SET_SECCOMP, seccomp_mode, &prog);
   // seccomp (seccomp_mode, 0, &prog);
@@ -83,15 +81,17 @@ check_scmp_mode (syscall_info *Info, int pid, fprog *prog)
   prog->len = ptrace (PTRACE_PEEKDATA, pid, Info->entry.args[2], 0);
   // also get filter len, maybe we need to dump it if the seccomp succeed
 
-  regs *exitRegs = malloc (sizeof (regs));
+  regs exitRegs;
+  memset (&exitRegs, '\0', sizeof (regs));
+
   ptrace (PTRACE_SINGLESTEP, pid, 0, 0);
   waitpid (pid, NULL, 0);
   ptrace (PTRACE_GETREGS, pid, 0, exitRegs);
-  if (exitRegs->rax != 0)
+
+  if (exitRegs.rax != 0)
     seccomp_mode = LOAD_FAIL;
   // seccomp set failed, nothing happened
 
-  free(exitRegs);
   return seccomp_mode;
 }
 
@@ -111,11 +111,11 @@ dump_filter (syscall_info *Info, int pid, fprog *prog)
 }
 
 static void
-filter_mode (syscall_info *Info, int pid, fprog *prog)
+filter_mode (syscall_info *Info, int pid, fprog *prog, FILE *fp)
 {
   prog->filter = malloc (prog->len * sizeof (filter));
   dump_filter (Info, pid, prog);
-  parse_filter (Info->arch, prog);
+  parse_filter (Info->arch, prog, fp);
   free (prog->filter);
 }
 
@@ -129,17 +129,16 @@ child (char *argv[])
   if (err)
     {
       printf ("execv failed executed: %s\n", argv[0]);
-      perror ("execv");
-      exit (0);
+      PERROR ("execv");
     }
   // argv should start with program name
 }
 
 static void
-parent (int pid)
+parent (int pid, FILE *fp, bool oneshot)
 {
-  syscall_info *Info = malloc (sizeof (syscall_info));
-  fprog *prog = malloc (sizeof (fprog));
+  syscall_info Info;
+  fprog prog;
   uint32_t seccomp_mode;
   int status;
 
@@ -153,27 +152,44 @@ parent (int pid)
       if (!WIFSTOPPED (status))
         PEXIT ("child process status: %d", status);
 
-      ptrace (PTRACE_GET_SYSCALL_INFO, pid, sizeof (syscall_info), Info);
+      ptrace (PTRACE_GET_SYSCALL_INFO, pid, sizeof (syscall_info), &Info);
 
-      if (Info->op != PTRACE_SYSCALL_INFO_ENTRY)
+      if (Info.op != PTRACE_SYSCALL_INFO_ENTRY)
         continue;
       // Assuming nothing important happened
 
-      seccomp_mode = check_scmp_mode (Info, pid, prog);
+      seccomp_mode = check_scmp_mode (&Info, pid, &prog);
 
       if ((seccomp_mode & LOAD_FAIL) != 0)
         continue;
       if (seccomp_mode == (SECCOMP_SET_MODE_STRICT | LOAD_SUCCESS))
         strict_mode ();
       else if (seccomp_mode == (SECCOMP_SET_MODE_FILTER | LOAD_SUCCESS))
-        filter_mode (Info, pid, prog);
-    }
+        filter_mode (&Info, pid, &prog, fp);
 
-  free (Info);
-  free (prog);
+      if (oneshot)
+        return;
+    }
 }
 
 void
+program_trace (int argc, char *argv[], FILE *fp, bool oneshot)
+{
+  if (argc < 1)
+    PEXIT ("%s", NOT_ENOUGH_ARGS);
+
+  int pid;
+  if (parse_option_mode (argc, argv, "arch"))
+    PEXIT ("%s", NO_ARCH_AFTER_PROGRAM);
+
+  pid = fork ();
+  if (pid == 0)
+    child (argv);
+  else
+    parent (pid, fp, oneshot);
+}
+
+static void
 pid_trace (int pid, uint32_t arch)
 {
   int status;
@@ -201,22 +217,19 @@ pid_trace (int pid, uint32_t arch)
           = ptrace (PTRACE_SECCOMP_GET_FILTER, pid, prog_idx, prog.filter);
       prog_idx++;
 
-      if (prog.len == (unsigned short)-1)
-        {
-          switch (errno)
-            {
-            case EMEDIUMTYPE:
-              printf (BLUE (NOT_AN_CBPF));
-              continue;
-            case ENOENT:
-            case EINVAL:
-              goto detach;
-            default:
-              PERROR ("ptrace get filter error");
-            }
-        }
+      if (prog.len != (unsigned short)-1)
+        parse_filter (arch, &prog, stdout);
 
-      parse_filter (arch, &prog);
+      switch (errno)
+        {
+        case ENOENT:
+        case EINVAL:
+          goto detach;
+        default:
+          PERROR ("ptrace get filter error");
+        case EMEDIUMTYPE:
+          printf (BLUE (NOT_AN_CBPF));
+        }
     }
   while (true);
 
@@ -228,31 +241,25 @@ detach:
 void
 trace (int argc, char *argv[])
 {
-  if (argc < 1)
-    PEXIT ("%s\n%s", NOT_ENOUGH_ARGS, TRACE_HINT);
-
   char *pid_str = parse_option_mode (argc, argv, "pid");
   int pid;
   char *end;
-  char *arch_str;
-  uint32_t arch;
   if (pid_str != NULL)
     {
       pid = strtol (pid_str, &end, 10);
       if (pid_str == end)
         PEXIT ("unknown pid: %s", pid_str);
+
+      char *arch_str;
       arch_str = parse_option_mode (argc, argv, "arch");
+      uint32_t arch;
       arch = STR2ARCH (arch_str);
+      if (arch == -1)
+        PEXIT (INVALID_ARCH ": %s", arch_str);
 
       pid_trace (pid, arch);
+      return;
     }
 
-  else
-    {
-      pid = fork ();
-      if (pid == 0)
-        child (&argv[1]);
-      else
-        parent (pid);
-    }
+  program_trace (argc - 1, &argv[1], stdout, false);
 }

@@ -43,11 +43,7 @@ static filter RET (line_set *Line);
 
 static filter ST_STX (line_set *Line);
 
-static void rawbytes (filter filter);
-
-static void hexline (filter filter);
-
-static void hexfmt (filter filter);
+static void format_print (filter filter, char *format);
 
 static void asm_lines (FILE *fp, unsigned arch, uint32_t print_mode);
 
@@ -147,13 +143,13 @@ JMP (line_set *Line, uint32_t pc, uint32_t arch)
 
   if (reverse)
     {
-      filter.jt = jt ? (jt - pc - 1) : 0;
-      filter.jf = jf ? (jf - pc - 1) : 0;
+      filter.jt = jf ? (jf - pc - 1) : 0;
+      filter.jf = jt ? (jt - pc - 1) : 0;
     }
   else
     {
-      filter.jt = jf ? (jf - pc - 1) : 0;
-      filter.jf = jt ? (jt - pc - 1) : 0;
+      filter.jt = jt ? (jt - pc - 1) : 0;
+      filter.jf = jf ? (jf - pc - 1) : 0;
     }
 
   return filter;
@@ -340,42 +336,18 @@ ALU (line_set *Line)
 }
 
 static void
-rawbytes (filter filter)
+format_print (filter filter, char *format)
 {
-  uint16_t code = filter.code;
-  uint8_t jf = filter.jf;
+  uint8_t low_code = filter.code & 0xff;
+  uint8_t high_code = (filter.code & 0xff00) / 0x100;
   uint8_t jt = filter.jt;
-  uint32_t k = filter.k;
-
-  printf ("%c%c%c%c", code & 0xff, code & 0xff00, jf, jt);
-  printf ("%c%c%c%c", k & 0xff, (k & 0xff00) / 0x100, (k & 0xff0000) / 0x10000,
-          (k & 0xff000000) / 0x1000000);
-}
-
-static void
-hexline (filter filter)
-{
-  uint16_t code = filter.code;
   uint8_t jf = filter.jf;
-  uint8_t jt = filter.jt;
-  uint32_t k = filter.k;
+  uint8_t k_0 = filter.k & 0xff;
+  uint8_t k_1 = (filter.k & ~0xff) / 0x100;
+  uint8_t k_2 = (filter.k & ~0xffff) / 0x10000;
+  uint8_t k_3 = (filter.k & ~0xffffff) / 0x1000000;
 
-  printf ("\\x%02x\\x%02x\\x%02x\\x%02x", code & 0xff00, code & 0xff, jf, jt);
-  printf ("\\x%02x\\x%02x\\x%02x\\x%02x", (k & 0xff000000) / 0x1000000,
-          (k & 0xff0000) / 0x10000, (k & 0xff00) / 0x100, k & 0xff);
-}
-
-static void
-hexfmt (filter filter)
-{
-  uint16_t code = filter.code;
-  uint8_t jf = filter.jf;
-  uint8_t jt = filter.jt;
-  uint32_t k = filter.k;
-
-  printf ("\\x%02x\\x%02x\\x%02x\\x%02x", code & 0xff00, code & 0xff, jf, jt);
-  printf ("\\x%02x\\x%02x\\x%02x\\x%02x\n", (k & 0xff000000) / 0x1000000,
-          (k & 0xff0000) / 0x10000, (k & 0xff00) / 0x100, k & 0xff);
+  printf (format, low_code, high_code, jt, jf, k_0, k_1, k_2, k_3);
 }
 
 static void
@@ -415,17 +387,19 @@ asm_lines (FILE *fp, unsigned arch, uint32_t print_mode)
 
   if (print_mode == HEXFMT)
     for (int i = 1; i < prog->len; i++)
-      hexfmt (prog->filter[i]);
+      format_print (
+          prog->filter[i],
+          "\"\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\",\n");
   else if (print_mode == HEXLINE)
-    {
-      for (int i = 1; i < prog->len; i++)
-        hexline (prog->filter[i]);
-      printf ("\n");
-    }
+    for (int i = 1; i < prog->len; i++)
+      format_print (
+          prog->filter[i],
+          "\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x");
   else if (print_mode == RAW)
     for (int i = 1; i < prog->len; i++)
-      rawbytes (prog->filter[i]);
+      format_print (prog->filter[i], "%c%c%c%c%c%c%c%c");
 
+  printf ("\n");
   free (prog->filter);
   free (prog);
 }

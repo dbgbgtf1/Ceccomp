@@ -3,13 +3,14 @@
 
 #include "main.h"
 #include <stdint.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-  void parse_filter (uint32_t arch, fprog *prog);
+  void parse_filter (uint32_t arch, fprog *prog, FILE* fp);
 
 #ifdef __cplusplus
 }

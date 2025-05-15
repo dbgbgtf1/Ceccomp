@@ -22,6 +22,7 @@ if (( CURRENT == 2 )) {
         "disasm:Disassemble raw bytes to bpf text"
         "trace:Run program, extract bpf filter and then print to text"
         "emu:Emulate bpf program with given syscall and bpf text"
+        "probe:Trace the program, and emulate on the common syscalls"
         "help:Display ceccomp help information"
         "version:Display ceccomp version"
     )
@@ -56,6 +57,12 @@ if (( CURRENT == 2 )) {
                 }
                 compadd -V nonk_pids -l -d lines -a pids
             }
+            ;;
+        (probe)
+            _arguments -C \
+                $arch_compstr \
+                "2:BPF:_files" \
+                "*: :" 
             ;;
         (emu)
             _arguments -C \

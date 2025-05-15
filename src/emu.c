@@ -32,15 +32,9 @@ static uint32_t emu_if_line (line_set *Line, reg_mem *reg, seccomp_data *data);
 
 static void clear_color (char *origin_line);
 
-static char *emu_lines (FILE *fp, seccomp_data *data);
-
 void get_sysnr_arg (int argc, char *argv[], seccomp_data *data);
 
 void get_rest_args (int argc, char *argv[], seccomp_data *data);
-
-static int start_quiet ();
-
-static void end_quiet (int stdout_backup);
 
 static bool
 is_state_true (uint32_t A, uint32_t cmp_enum, uint32_t rval)
@@ -94,12 +88,12 @@ emu_if_line (line_set *Line, reg_mem *reg, seccomp_data *data)
   if (reverse)
     {
       sym_str = clean_line + strlen ("if!($A");
-      printf ("if!(");
+      printf ("if !(");
     }
   else
     {
       sym_str = clean_line + strlen ("if($A");
-      printf ("if(");
+      printf ("if (");
     }
 
   bool condition;
@@ -250,7 +244,7 @@ clear_color (char *origin_line)
     }
 }
 
-static char *
+char *
 emu_lines (FILE *fp, seccomp_data *data)
 {
   line_set Line = { NULL, NULL };
@@ -342,7 +336,7 @@ start_quiet ()
 
   int dev_null = open ("/dev/null", O_WRONLY);
   if (dev_null == -1)
-    PERROR ("dup");
+    PERROR ("open");
 
   if (dup2 (dev_null, fileno (stdout)) == -1)
     PERROR ("start_quiet dup2");

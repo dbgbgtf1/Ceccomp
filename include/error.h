@@ -2,11 +2,10 @@
 #define ERROR
 
 #include "transfer.h"
-#include <stdio.h>
-#include <stdlib.h>
 
 // preprocess error macros
 #define NOT_ENOUGH_ARGS "not enough args"
+#define NO_ARCH_AFTER_PROGRAM "no --arch= after trace program "
 #define INVALID_ARG "invalid arg"
 #define UNABLE_OPEN_FILE "unable to open file"
 #define INVALID_ARCH "invalid arch"
@@ -55,7 +54,9 @@
 // bpf->text- error macros
 #define UNKNOWN_OFFSET_ABS "unknown offset of seccomp_data"
 
-#define SYS_ADMIN_OR_KERNEL "run with CAP_SYS_ADMIN capability when trace pid\nand kernel pid can't be trace"
+#define SYS_ADMIN_OR_KERNEL                                                   \
+  "run with CAP_SYS_ADMIN capability when trace pid\nand kernel pid can't "   \
+  "be trace"
 #define NOT_AN_CBPF "non-cbpf found, can't resolve, but continue"
 
 #define PEXIT(str, ...)                                                       \
@@ -66,7 +67,7 @@
 
 #define PERROR(str)                                                           \
   {                                                                           \
-    perror (str);                                                        \
+    perror (str);                                                             \
     exit (0);                                                                 \
   }
 

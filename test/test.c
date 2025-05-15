@@ -1,5 +1,6 @@
 // this is for separately function testing
-#include "trace.h"
+// #include "main.h"
+#include "main.h"
 #include "transfer.h"
 #include <linux/audit.h>
 #include <linux/filter.h>
@@ -7,7 +8,6 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <sys/prctl.h>
 #include <sys/syscall.h>
 #include <unistd.h>
@@ -23,51 +23,26 @@ load_filter (uint32_t t_arch)
      (in the x32 ABI, all system calls have bit 30 set in the
      'nr' field, meaning the numbers are >= X32_SYSCALL_BIT). */
 
-  struct sock_filter filter[] = {
-    /* [0] Load architecture from 'seccomp_data' buffer into
-           accumulator. */
-    BPF_STMT (BPF_LD | BPF_W | BPF_ABS,
-              (offsetof (struct seccomp_data, arch))),
+  char f[][8]
+      = { "\x20\x00\x00\x00\x04\x00\x00\x00",
+          "\x15\x00\x00\x05\x3e\x00\x00\xc0",
+          "\x20\x00\x00\x00\x00\x00\x00\x00",
+          "\x15\x00\x03\x00\x02\x00\x00\x00",
+          "\x15\x00\x02\x00\x3b\x00\x00\x00",
+          "\x15\x00\x01\x00\x42\x01\x00\x00",
+          "\x06\x00\x00\x00\x00\x00\xff\x7f",
+          "\x06\x00\x00\x00\x00\x00\x00\x00",
+        };
 
-    /* [1] Jump forward 5 instructions if architecture does not
-           match 't_arch'. */
-    BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, t_arch, 0, 5),
+  struct sock_fprog prog
+      = {
+          .len = ARRAY_SIZE (f),
+          .filter = (filter *)f
+        };
 
-    /* [2] Load system call number from 'seccomp_data' buffer into
-           accumulator. */
-    BPF_STMT (BPF_LD | BPF_W | BPF_ABS, (offsetof (struct seccomp_data, nr))),
+  syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, 0, &prog);
 
-    /* [3] Check ABI - only needed for x86-64 in deny-list use
-           cases.  Use BPF_JGT instead of checking against the bit
-           mask to avoid having to reload the syscall number. */
-    BPF_JUMP (BPF_JMP | BPF_JGT | BPF_K, upper_nr_limit, 3, 0),
-
-    /* [4] Jump forward 1 instruction if system call number
-           does not match 'syscall_nr'. */
-    BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, 0x100, 0, 1),
-
-    /* [5] Matching architecture and system call: don't execute
-       the system call, and return 'f_errno' in 'errno'. */
-    BPF_STMT (BPF_RET | BPF_K, SECCOMP_RET_ERRNO | (0 & SECCOMP_RET_DATA)),
-
-    /* [6] Destination of system call number mismatch: allow other
-           system calls. */
-    BPF_STMT (BPF_RET | BPF_K, SECCOMP_RET_ALLOW),
-
-    /* [7] Destination of architecture mismatch: kill process. */
-    BPF_STMT (BPF_RET | BPF_K, SECCOMP_RET_KILL_PROCESS),
-  };
-
-  struct sock_fprog prog = {
-    .len = ARRAY_SIZE (filter),
-    .filter = filter,
-  };
-
-  if (syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, 0, &prog))
-    {
-      perror ("seccomp");
-      exit (1);
-    }
+  syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, 0, &prog);
 
   char buf[0x10];
   read (0, buf, 0x10);

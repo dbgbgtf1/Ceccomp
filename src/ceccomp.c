@@ -16,7 +16,7 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 
-#define CECCOMP_VERSION "ceccomp 1.4"
+#define CECCOMP_VERSION "ceccomp 1.5"
 
 void
 help ()
@@ -27,7 +27,7 @@ help ()
   printf ("%s\n", DISASM_HINT);
   printf ("%s\n", TRACE_HINT);
   printf ("%s\n", EMU_HINT);
-  // printf ("%s\n", PROBE_HINT);
+  printf ("%s\n", PROBE_HINT);
   printf ("%s\n", HELP_HINT);
   printf ("%s\n", VERSION);
 
