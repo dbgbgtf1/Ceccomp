@@ -22,7 +22,7 @@ if (( CURRENT == 2 )) {
         "disasm:Disassemble raw bytes to bpf text"
         "trace:Run program, extract bpf filter and then print to text"
         "emu:Emulate bpf program with given syscall and bpf text"
-        "probe:Trace the program, and emulate on the common syscalls"
+        "probe:Trace the program for the first filter and emulate common syscalls"
         "help:Display ceccomp help information"
         "version:Display ceccomp version"
     )
@@ -61,8 +61,7 @@ if (( CURRENT == 2 )) {
         (probe)
             _arguments -C \
                 $arch_compstr \
-                "2:BPF:_files" \
-                "*: :" 
+                "*:arguments:_files"
             ;;
         (emu)
             _arguments -C \
