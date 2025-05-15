@@ -7,7 +7,7 @@
 #include <linux/seccomp.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
+#include <stdlib.h>
 #include <sys/prctl.h>
 #include <sys/syscall.h>
 #include <unistd.h>
@@ -23,29 +23,20 @@ load_filter (uint32_t t_arch)
      (in the x32 ABI, all system calls have bit 30 set in the
      'nr' field, meaning the numbers are >= X32_SYSCALL_BIT). */
 
-  char f[][8]
-      = { "\x20\x00\x00\x00\x04\x00\x00\x00",
-          "\x15\x00\x00\x05\x3e\x00\x00\xc0",
-          "\x20\x00\x00\x00\x00\x00\x00\x00",
-          "\x15\x00\x03\x00\x02\x00\x00\x00",
-          "\x15\x00\x02\x00\x3b\x00\x00\x00",
-          "\x15\x00\x01\x00\x42\x01\x00\x00",
-          "\x06\x00\x00\x00\x00\x00\xff\x7f",
-          "\x06\x00\x00\x00\x00\x00\x00\x00",
-        };
+  char f[][8] = {
+    "\x20\x00\x00\x00\x04\x00\x00\x00", "\x15\x00\x00\x05\x3e\x00\x00\xc0",
+    "\x20\x00\x00\x00\x00\x00\x00\x00", "\x15\x00\x03\x00\x02\x00\x00\x00",
+    "\x15\x00\x02\x00\x3b\x00\x00\x00", "\x15\x00\x01\x00\x42\x01\x00\x00",
+    "\x06\x00\x00\x00\x00\x00\xff\x7f", "\x06\x00\x00\x00\x00\x00\x00\x00",
+  };
 
-  struct sock_fprog prog
-      = {
-          .len = ARRAY_SIZE (f),
-          .filter = (filter *)f
-        };
+  struct sock_fprog prog = { .len = ARRAY_SIZE (f), .filter = (filter *)f };
 
-  syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, 0, &prog);
-
-  syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, 0, &prog);
+  syscall (SYS_seccomp, SECCOMP_SET_MODE_STRICT, SECCOMP_FILTER_FLAG_TSYNC, NULL);
 
   char buf[0x10];
   read (0, buf, 0x10);
+  exit(0);
 }
 
 int

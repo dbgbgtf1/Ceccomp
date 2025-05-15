@@ -82,11 +82,10 @@ check_scmp_mode (syscall_info *Info, int pid, fprog *prog)
   // also get filter len, maybe we need to dump it if the seccomp succeed
 
   regs exitRegs;
-  memset (&exitRegs, '\0', sizeof (regs));
 
   ptrace (PTRACE_SINGLESTEP, pid, 0, 0);
   waitpid (pid, NULL, 0);
-  ptrace (PTRACE_GETREGS, pid, 0, exitRegs);
+  ptrace (PTRACE_GETREGS, pid, 0, &exitRegs);
 
   if (exitRegs.rax != 0)
     seccomp_mode = LOAD_FAIL;

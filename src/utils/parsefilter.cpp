@@ -150,6 +150,7 @@ Parser::LD (filter *f_ptr)
       return;
     default:
       fprintf (fp, "unknown LD: mode: 0x%x", mode);
+      exit (0);
     }
 }
 
@@ -185,6 +186,7 @@ Parser::LDX (filter *f_ptr)
       return;
     default:
       fprintf (fp, "unknown LDX: mode: 0x%x", mode);
+      exit (0);
     }
 }
 
@@ -284,7 +286,7 @@ Parser::ALU (filter *f_ptr)
 
         default:
           printf ("unknown alu: op: 0x%x, src: 0x%x", op, src);
-          return;
+          exit (0);
         }
     case BPF_X:
       switch (op)
@@ -348,6 +350,7 @@ Parser::ALU (filter *f_ptr)
 
         default:
           fprintf (fp, "unknown alu: op: 0x%x, src: 0x%x", op, src);
+          exit (0);
         }
     }
 }
@@ -397,7 +400,7 @@ Parser::JMP (filter *f_ptr, const char *syms[4], int pc)
       return true;
     default:
       fprintf (fp, "unknown jmp: jmode: 0x%x, src: 0x%x", jmode, src);
-      return false;
+      exit (0);
     }
 }
 
@@ -451,7 +454,7 @@ Parser::RET (filter *f_ptr)
       return f_ptr->k;
     default:
       fprintf (fp, "unknown ret: 0x%x", ret);
-      return -1;
+      exit (0);
     }
 }
 
@@ -484,6 +487,7 @@ Parser::MISC (filter *f_ptr)
       return;
     default:
       fprintf (fp, "unknown mode: 0x%x", mode);
+      exit (0);
     }
 }
 
@@ -521,6 +525,7 @@ Parser::CLASS (int idx)
       return;
     default:
       fprintf (fp, "unknown class: 0x%x", cls);
+      exit (0);
     }
 }
 
