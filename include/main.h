@@ -11,22 +11,26 @@
 #include <sys/user.h>
 // clang-format on
 
-#define ASM_HINT "ceccomp asm [ --arch= ] [ --fmt= ] bpftext"
-#define DISASM_HINT "ceccomp disasm [ --arch= ] bpftext"
+#define ASM_HINT "ceccomp asm\t[ --arch= ] [ --fmt= ] bpftext"
+#define DISASM_HINT "ceccomp disasm\t[ --arch= ] bpftext"
 #define EMU_HINT                                                              \
-  "ceccomp emu [ --arch= ] [ --quiet ] bpftext syscall_nr [ args[0-5] ip ]"
+  "ceccomp emu\t[ --arch= ] [ --quiet ] bpftext syscall_nr [ args[0-5] ip ]"
 #define TRACE_HINT                                                            \
-  "ceccomp trace [ PROGRAM [ program-args ] ] | [ [ --arch= ] --pid= ]"
-#define PROBE_HINT "ceccomp probe [ --arch= ] PROGRAM [ program-args ]"
+  "ceccomp trace\t[ [ --output= ] PROGRAM [ program-args ] ] | [ [ --arch= "  \
+  "] "                                                                        \
+  "--pid= ]"
+#define PROBE_HINT "ceccomp probe\t[ --arch= ] PROGRAM [ program-args ]"
 
 #define OPTION_HINT                                                           \
   "Options:\n"                                                                \
-  "\t--arch=(i386|x86_64|aarch64|arm|...) default as your arch\n"             \
+  "\t--arch=(i386|x86_64|aarch64|...)     default as your arch\n"             \
   "\t--fmt=(hexline|hexfmt|raw)           default as hexline\n"               \
   "\t--quiet                              only print return val\n"            \
   "\t--pid=system process id              print the bpftext of pid\n"         \
-  "\targs[0-5]                            default as 0\n"                     \
-  "\tip                                   instruction pointer, default as 0"
+  "\t--output=file                        avoid bpftext output mixed with "   \
+  "program output\n"                                                          \
+  "\targs[0-5] ip                         args and ip(instruction "           \
+  "pointer)default as 0\n"
 #define HELP_HINT "ceccomp help"
 #define VERSION "ceccomp version"
 

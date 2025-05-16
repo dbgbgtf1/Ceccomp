@@ -25,18 +25,18 @@ LDFLAGS := -lseccomp -z now -z noexecstack -fpie -fstack-protector
 
 ifdef DEBUG
 	ifeq ($(DEBUG),1)
-		CFLAGS += -g -O3
-		CXXFLAGS += -g -O3
-		LDFLAGS += -g -O3
+		CFLAGS += -g -O2
+		CXXFLAGS += -g -O2
+		LDFLAGS += -g -O2
 	else ifeq ($(DEBUG),2)
 		CFLAGS += -g
 		CXXFLAGS += -g 
 		LDFLAGS += -g
 	endif
 else
-	CFLAGS += -O3
-	CXXFLAGS += -O3
-	LDFLAGS += -O3
+	CFLAGS += -O2
+	CXXFLAGS += -O2
+	LDFLAGS += -O2
 endif
 
 DEST_DIR ?= 

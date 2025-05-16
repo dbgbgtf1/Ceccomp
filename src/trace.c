@@ -177,11 +177,7 @@ program_trace (int argc, char *argv[], FILE *fp, bool oneshot)
   if (argc < 1)
     PEXIT ("%s", NOT_ENOUGH_ARGS);
 
-  int pid;
-  if (parse_option_mode (argc, argv, "arch"))
-    PEXIT ("%s", NO_ARCH_AFTER_PROGRAM);
-
-  pid = fork ();
+  int pid = fork ();
   if (pid == 0)
     child (argv);
   else
@@ -260,5 +256,13 @@ trace (int argc, char *argv[])
       return;
     }
 
-  program_trace (argc - 1, &argv[1], stdout, false);
+  char *filename = parse_option_mode (argc, argv, "output");
+  FILE *fp = stderr;
+  if (filename)
+    {
+      fp = fopen (filename, "w+");
+      program_trace (argc - 2, &argv[2], fp, false);
+    }
+
+  program_trace (argc - 1, &argv[1], fp, false);
 }

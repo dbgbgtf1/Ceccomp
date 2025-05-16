@@ -8,6 +8,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/prctl.h>
 #include <sys/syscall.h>
 #include <unistd.h>
@@ -32,10 +33,10 @@ load_filter (uint32_t t_arch)
 
   struct sock_fprog prog = { .len = ARRAY_SIZE (f), .filter = (filter *)f };
 
-  syscall (SYS_seccomp, SECCOMP_SET_MODE_STRICT, SECCOMP_FILTER_FLAG_TSYNC, NULL);
+  syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, NULL, &prog);
 
   char buf[0x10];
-  read (0, buf, 0x10);
+  write(1, "aaabbb\n", 0x7);
   exit(0);
 }
 
