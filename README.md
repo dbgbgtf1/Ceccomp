@@ -1,7 +1,6 @@
 # Ceccomp
 
-A tool to resolve seccomp just like seccomp-tools, written in c  
-All functions are done，yet a lot still need to be tested
+A tool to resolve seccomp just like seccomp-tools, written in c
 
 # Doc
 
@@ -9,7 +8,7 @@ https://dbgtf.org/ceccomp-doc/
 
 # CheatSheet
 
-![image](https://github.com/user-attachments/assets/14dc8113-a585-4f4c-9891-6fc193884e13)
+![image](https://github.com/user-attachments/assets/8905a70d-576a-494e-9948-b959f1cd125f)
 
 # License
 
