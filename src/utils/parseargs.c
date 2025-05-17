@@ -4,6 +4,7 @@
 #include "transfer.h"
 #include <argp.h>
 #include <linux/ptrace.h>
+#include <seccomp.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -100,8 +101,6 @@ void
 emu_args (ceccomp_args *args_ptr, char *arg)
 {
   static uint32_t arg_idx = 0;
-  if (arg_idx != 0)
-    return;
   arg_idx += 1;
 
   if (arg_idx == 1)
@@ -111,7 +110,7 @@ emu_args (ceccomp_args *args_ptr, char *arg)
         PEXIT (UNABLE_OPEN_FILE ": %s", arg);
     }
   else if (arg_idx == 2)
-    args_ptr->syscall_nr = strtoull_check (arg, 0, INVALID_SYSNR);
+    args_ptr->syscall_nr = arg;
   else if ((arg_idx > 2) && (arg_idx < 9))
     args_ptr->sys_args[arg_idx - 3]
         = strtoull_check (arg, 0, INVALID_SYS_ARGS);
@@ -144,6 +143,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
       if (key == ARGP_KEY_ARG)
         {
           args_ptr->mode = TRACE_PROG_MODE;
+          args_ptr->program_start = arg;
           return 0;
         }
       else if (key == 'p')
@@ -160,11 +160,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
     {
     case ARGP_KEY_ARG:
       if (state->arg_num == 0)
-        {
-          args_ptr->mode = parse_subcommand (arg);
-          if (args_ptr->mode == PROBE_MODE || args_ptr->mode == TRACE_MODE)
-            args_ptr->program_start = arg;
-        }
+        args_ptr->mode = parse_subcommand (arg);
       else if (args_ptr->mode == ASM_MODE || args_ptr->mode == DISASM_MODE)
         asm_disasm_args (args_ptr, arg);
       else if (args_ptr->mode == EMU_MODE)

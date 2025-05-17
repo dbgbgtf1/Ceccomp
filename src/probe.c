@@ -16,7 +16,7 @@ char *to_test_list[]
         "mprotect", "openat", "sendfile", "ptrace", "fork" };
 
 void
-probe (char *argv[], uint32_t arch_token, FILE *fp)
+probe (char *argv[], uint32_t arch_token, FILE *output_fp)
 {
   FILE *tmp_fp = tmpfile ();
   if (tmp_fp == NULL)
@@ -30,12 +30,12 @@ probe (char *argv[], uint32_t arch_token, FILE *fp)
 
       fseek (tmp_fp, 0, SEEK_SET);
       int stdout_backup = start_quiet ();
-      char *retval_str = emu_lines (fp, &data);
+      char *retval_str = emu_lines (tmp_fp, &data);
       end_quiet (stdout_backup);
 
       if (retval_str == NULL)
         continue;
 
-      printf ("%-10s-> %s\n", to_test_list[i], retval_str);
+      fprintf (output_fp, "%-10s-> %s\n", to_test_list[i], retval_str);
     }
 }

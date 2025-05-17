@@ -1,6 +1,7 @@
 #include "emu.h"
 #include "color.h"
 #include "error.h"
+#include "parseargs.h"
 #include "parseobj.h"
 #include "preasm.h"
 #include "transfer.h"
@@ -318,7 +319,12 @@ emulate (ceccomp_args *args)
 {
   seccomp_data data = { 0, 0, 0, { 0, 0, 0, 0, 0, 0 } };
 
-  data.nr = args->syscall_nr;
+  data.arch = args->arch_token;
+  
+  data.nr = seccomp_syscall_resolve_name_arch(args->arch_token, args->syscall_nr);
+  if (data.nr == __NR_SCMP_ERROR)
+    data.nr = strtoull_check(args->syscall_nr, 0, INVALID_SYSNR);
+
   for (int i = 0; i < 6; i++)
     data.args[i] = args->sys_args[i];
   data.instruction_pointer = args->ip;

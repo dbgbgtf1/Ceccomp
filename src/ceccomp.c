@@ -28,7 +28,7 @@ init (ceccomp_args *args)
   args->read_fp = stdin;
   args->fmt_mode = HEXLINE;
   args->quiet = false;
-  args->syscall_nr = (uint32_t)ARG_INIT_VAL;
+  args->syscall_nr = (char *)ARG_INIT_VAL;
   args->sys_args[0] = ARG_INIT_VAL;
   args->sys_args[1] = ARG_INIT_VAL;
   args->sys_args[2] = ARG_INIT_VAL;
@@ -48,6 +48,10 @@ static struct argp_option options[] = {
 int
 main (int argc, char **argv)
 {
+  setbuf(stdin, NULL);
+  setbuf(stdout, NULL);
+  setbuf(stderr, NULL);
+
   ceccomp_args args;
 
   init (&args);
@@ -56,7 +60,7 @@ main (int argc, char **argv)
 
   uint32_t program_start_idx;
   if (args.program_start != (char *)ARG_INIT_VAL)
-    program_start_idx = get_arg_idx (argc, argv, args.program_start) + 1;
+    program_start_idx = get_arg_idx (argc, argv, args.program_start);
 
   switch (args.mode)
     {

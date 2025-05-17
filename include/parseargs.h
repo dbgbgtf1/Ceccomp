@@ -35,7 +35,7 @@ struct ceccomp_args
   print_mode fmt_mode;
 
   bool quiet;
-  uint32_t syscall_nr;
+  char *syscall_nr;
   uint64_t sys_args[6];
   uint64_t ip;
 

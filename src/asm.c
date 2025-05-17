@@ -124,11 +124,11 @@ JMP (line_set *Line, uint32_t pc, uint32_t arch)
 
   char *rval = cmp_str + sym_len;
   if (STARTWITH (rval, "$X"))
-    filter.k |= BPF_X;
+    filter.code |= BPF_X;
   else
     {
-      filter.k |= right_val_ifline (rval, NULL, arch, origin_line);
       filter.code |= BPF_K;
+      filter.k |= right_val_ifline (rval, NULL, arch, origin_line);
     }
 
   char *right_brace = strchr (rval, ')');
