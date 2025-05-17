@@ -36,7 +36,7 @@ load_filter (uint32_t t_arch)
   syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, NULL, &prog);
 
   char buf[0x10];
-  write(1, "aaabbb\n", 0x7);
+  write(1, "this is program output\n", 24);
   exit(0);
 }
 

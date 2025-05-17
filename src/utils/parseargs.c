@@ -35,8 +35,8 @@ help ()
   printf ("%s\n", ASM_HINT);
   printf ("%s\n", DISASM_HINT);
   printf ("%s\n", EMU_HINT);
-  printf ("%s\n", TRACE_HINT);
   printf ("%s\n", PROBE_HINT);
+  printf ("%s\n", TRACE_HINT);
   printf ("%s\n", HELP_HINT);
   printf ("%s\n", VERSION);
 

@@ -5,11 +5,12 @@
 #define EMU_HINT                                                              \
   "ceccomp emu\t[ --arch= ] [ file ] [ --quiet ] syscall_nr [ args[0-5] ip ]"
 
-#define PROBE_HINT "ceccomp probe\t[ --arch= ] PROGRAM [ program-args ]"
+#define PROBE_HINT                                                            \
+  "ceccomp probe\t[ --output= ] [ --arch= ] PROGRAM [ program-args ]"
 
 #define TRACE_HINT                                                            \
-  "ceccomp trace\t[ --output= ] PROGRAM [ program-args ]\n"                   \
-  "ceccomp trace\t[ --arch= ] --pid="
+  "ceccomp trace\t[ --output= ] [ --arch= ] --pid=\n"                         \
+  "ceccomp trace\t[ --output= ] PROGRAM [ program-args ]\n"
 
 #define OPTION_HINT                                                           \
   "Options:\n" OPTION_ARCH_HINT OPTION_FMT_HINT OPTION_PID_HINT               \
