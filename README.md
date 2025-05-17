@@ -8,7 +8,7 @@ https://dbgtf.org/ceccomp-doc/
 
 # CheatSheet
 
-![image](https://github.com/user-attachments/assets/0d7b6766-144f-45cc-bf58-7e9d9fb46636)
+![image](https://github.com/user-attachments/assets/d0ccbf74-9817-4e83-850f-7d223bcb52f1)
 
 # License
 
