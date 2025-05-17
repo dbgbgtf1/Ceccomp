@@ -11,7 +11,7 @@
 
 static bool is_etc (char *origin_line);
 
-static char *pre_get_lines (FILE *fp);
+static char *pre_get_lines (FILE *read_fp);
 
 static void pre_clear_color (char *clean_line);
 
@@ -108,11 +108,11 @@ pre_clear_space (char *clean_line)
 }
 
 void
-pre_asm (FILE *fp, line_set *Line)
+pre_asm (FILE *read_fp, line_set *Line)
 {
   do
     {
-      Line->origin_line = pre_get_lines (fp);
+      Line->origin_line = pre_get_lines (read_fp);
       if (Line->origin_line == NULL)
         return;
     }

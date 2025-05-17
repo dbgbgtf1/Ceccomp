@@ -2,40 +2,33 @@
 #include "emu.h"
 #include "error.h"
 #include "main.h"
-#include "parseargs.h"
 #include "trace.h"
-#include "transfer.h"
+#include <stddef.h>
 #include <seccomp.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
 
-char *sysnr_tobe_test[]
+char *to_test_list[]
     = { "open",     "read",   "write",    "execve", "execveat", "mmap",
         "mprotect", "openat", "sendfile", "ptrace", "fork" };
 
 void
-probe (int argc, char *argv[])
+probe (char *argv[], uint32_t arch_token, FILE *fp)
 {
-  FILE *fp = tmpfile ();
-  if (fp == NULL)
-    PERROR ("tmpfile");
+  FILE *tmp_fp = tmpfile ();
+  if (tmp_fp == NULL)
+    PERROR ("tmpfile create failed");
+  program_trace (argv, tmp_fp, true);
 
-  program_trace (argc - 1, &argv[1], fp, true);
-  // oneshot mode to trace the program filter into tmpfile
-
-  char *arch_str = parse_option_mode (argc, argv, "arch");
-  uint32_t arch = STR2ARCH (arch_str);
-  // get arch
-
-  for (int i = 0; i < ARRAY_SIZE (sysnr_tobe_test); i++)
+  for (int i = 0; i < ARRAY_SIZE (to_test_list); i++)
     {
-      int nr = seccomp_syscall_resolve_name_arch (arch, sysnr_tobe_test[i]);
-      seccomp_data data = { nr, arch, 0, { 0, 0, 0, 0, 0, 0 } };
+      int nr = seccomp_syscall_resolve_name_arch (arch_token, to_test_list[i]);
+      seccomp_data data = { nr, arch_token, 0, { 0, 0, 0, 0, 0, 0 } };
 
-      fseek (fp, 0, SEEK_SET);
+      fseek (tmp_fp, 0, SEEK_SET);
       int stdout_backup = start_quiet ();
       char *retval_str = emu_lines (fp, &data);
       end_quiet (stdout_backup);
@@ -43,7 +36,6 @@ probe (int argc, char *argv[])
       if (retval_str == NULL)
         continue;
 
-      printf ("%-10s-> %s\n", sysnr_tobe_test[i], retval_str);
+      printf ("%-10s-> %s\n", to_test_list[i], retval_str);
     }
-  // loop to emulate syscall
 }

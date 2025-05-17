@@ -10,7 +10,7 @@ extern "C"
 {
 #endif
 
-  void parse_filter (uint32_t arch, fprog *prog, FILE* fp);
+  void parse_filter (uint32_t arch, fprog *prog, FILE* output_fileptr);
 
 #ifdef __cplusplus
 }

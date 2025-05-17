@@ -11,7 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-static FILE *fp;
+static FILE *output_fp;
 
 struct Reg
 {
@@ -48,13 +48,13 @@ char *
 Reg::try_transfer (uint32_t val)
 {
   char *ret = NULL;
-  if (!strcmp (m_str, syscall_nr))
+  if (!strcmp (m_str, SYSCALL_NR))
     ret = seccomp_syscall_resolve_num_arch (m_arch, val);
-  else if (!strcmp (m_str, architecture))
+  else if (!strcmp (m_str, ARCHITECTURE))
     {
       ret = ARCH2STR (val);
       if (ret == NULL)
-        fprintf (fp, "unknown or unsupported architecture: " BLUE_H, val);
+        fprintf (output_fp, "unknown or unsupported architecture: " BLUE_H, val);
     }
   return ret;
 }
@@ -127,29 +127,29 @@ Parser::LD (filter *f_ptr)
   switch (mode)
     {
     case BPF_IMM:
-      fprintf (fp, BLUE_A " = " BLUE_H, k);
+      fprintf (output_fp, BLUE_A " = " BLUE_H, k);
       A.set_val (k);
       return;
     case BPF_ABS:
       if (!ABS2STR (k))
         PEXIT (UNKNOWN_OFFSET_ABS ": " BLUE_H, k);
-      fprintf (fp, BLUE_A " = " BLUE_S, ABS2STR (k));
+      fprintf (output_fp, BLUE_A " = " BLUE_S, ABS2STR (k));
       A.set_val (ABS2STR (k));
       return;
     case BPF_IND:
       return;
     case BPF_MEM:
-      fprintf (fp, BLUE_A " = " BLUE_M, k);
+      fprintf (output_fp, BLUE_A " = " BLUE_M, k);
       A.set_val (mem[k].m_str);
       return;
     case BPF_LEN:
-      fprintf (fp, BLUE_A " = " BLUE_H, (uint32_t)sizeof (seccomp_data));
+      fprintf (output_fp, BLUE_A " = " BLUE_H, (uint32_t)sizeof (seccomp_data));
       A.set_val (sizeof (seccomp_data));
       return;
     case BPF_MSH:
       return;
     default:
-      fprintf (fp, "unknown LD: mode: 0x%x", mode);
+      fprintf (output_fp, "unknown LD: mode: 0x%x", mode);
       exit (0);
     }
 }
@@ -163,29 +163,29 @@ Parser::LDX (filter *f_ptr)
   switch (mode)
     {
     case BPF_IMM:
-      fprintf (fp, BLUE_X " = " BLUE_H, k);
+      fprintf (output_fp, BLUE_X " = " BLUE_H, k);
       X.set_val (k);
       return;
     case BPF_ABS:
       if (!ABS2STR (k))
         PEXIT (UNKNOWN_OFFSET_ABS ": " BLUE_H, k);
-      fprintf (fp, BLUE_X " = " BLUE_S, ABS2STR (k));
+      fprintf (output_fp, BLUE_X " = " BLUE_S, ABS2STR (k));
       X.set_val (ABS2STR (k));
       return;
     case BPF_IND:
       return;
     case BPF_MEM:
-      fprintf (fp, BLUE_X " = " BLUE_M, k);
+      fprintf (output_fp, BLUE_X " = " BLUE_M, k);
       X.set_val (mem[k].m_str);
       return;
     case BPF_LEN:
-      fprintf (fp, BLUE_X " = " BLUE_H, (uint32_t)sizeof (seccomp_data));
+      fprintf (output_fp, BLUE_X " = " BLUE_H, (uint32_t)sizeof (seccomp_data));
       X.set_val (sizeof (seccomp_data));
       return;
     case BPF_MSH:
       return;
     default:
-      fprintf (fp, "unknown LDX: mode: 0x%x", mode);
+      fprintf (output_fp, "unknown LDX: mode: 0x%x", mode);
       exit (0);
     }
 }
@@ -193,14 +193,14 @@ Parser::LDX (filter *f_ptr)
 void
 Parser::ST (filter *f_ptr)
 {
-  fprintf (fp, BLUE_M " = " BLUE_A, f_ptr->k);
+  fprintf (output_fp, BLUE_M " = " BLUE_A, f_ptr->k);
   mem[f_ptr->k].set_val (A.m_str);
 }
 
 void
 Parser::STX (filter *f_ptr)
 {
-  fprintf (fp, BLUE_M " = " BLUE_X, f_ptr->k);
+  fprintf (output_fp, BLUE_M " = " BLUE_X, f_ptr->k);
   mem[f_ptr->k].set_val (X.m_str);
 }
 
@@ -219,60 +219,60 @@ Parser::ALU (filter *f_ptr)
         {
         case BPF_ADD:
           snprintf (tmp, 0x100, "(%s += 0x%x)", A.m_str, k);
-          fprintf (fp, BLUE_A " += " BLUE_H, k);
+          fprintf (output_fp, BLUE_A " += " BLUE_H, k);
           A.set_val (tmp);
           return;
         case BPF_SUB:
           snprintf (tmp, 0x100, "(%s -= 0x%x)", A.m_str, k);
-          fprintf (fp, BLUE_A " -= " BLUE_H, k);
+          fprintf (output_fp, BLUE_A " -= " BLUE_H, k);
           A.set_val (tmp);
           return;
 
         case BPF_MUL:
           snprintf (tmp, 0x100, "(%s *= 0x%x)", A.m_str, k);
-          fprintf (fp, BLUE_A " *= " BLUE_H, k);
+          fprintf (output_fp, BLUE_A " *= " BLUE_H, k);
           A.set_val (tmp);
           return;
 
         case BPF_DIV:
           snprintf (tmp, 0x100, "(%s /= 0x%x)", A.m_str, k);
-          fprintf (fp, BLUE_A " /= " BLUE_H " ", k);
+          fprintf (output_fp, BLUE_A " /= " BLUE_H " ", k);
           A.set_val (tmp);
           return;
 
         case BPF_AND:
           snprintf (tmp, 0x100, "(%s &= 0x%x)", A.m_str, k);
-          fprintf (fp, BLUE_A " &= " BLUE_H, k);
+          fprintf (output_fp, BLUE_A " &= " BLUE_H, k);
           A.set_val (tmp);
           return;
 
         case BPF_OR:
           snprintf (tmp, 0x100, "(%s |= 0x%x)", A.m_str, k);
-          fprintf (fp, BLUE_A " |= " BLUE_H, k);
+          fprintf (output_fp, BLUE_A " |= " BLUE_H, k);
           A.set_val (tmp);
           return;
 
         case BPF_XOR:
           snprintf (tmp, 0x100, "(%s ^= 0x%x)", A.m_str, k);
-          fprintf (fp, BLUE_A " ^= " BLUE_H, k);
+          fprintf (output_fp, BLUE_A " ^= " BLUE_H, k);
           A.set_val (tmp);
           return;
 
         case BPF_MOD:
           snprintf (tmp, 0x100, "(%s %%= 0x%x)", A.m_str, k);
-          fprintf (fp, BLUE_A " %%= " BLUE_H, k);
+          fprintf (output_fp, BLUE_A " %%= " BLUE_H, k);
           A.set_val (tmp);
           return;
 
         case BPF_LSH:
           snprintf (tmp, 0x100, "(%s <<= 0x%x)", A.m_str, k);
-          fprintf (fp, BLUE_A " <<= " BLUE_H, k);
+          fprintf (output_fp, BLUE_A " <<= " BLUE_H, k);
           A.set_val (tmp);
           return;
 
         case BPF_RSH:
           snprintf (tmp, 0x100, "(%s >>= 0x%x)", A.m_str, k);
-          fprintf (fp, BLUE_A " >>= " BLUE_H, k);
+          fprintf (output_fp, BLUE_A " >>= " BLUE_H, k);
           A.set_val (tmp);
           return;
 
@@ -280,7 +280,7 @@ Parser::ALU (filter *f_ptr)
           // buf BPF_K = 0, so put it here
         case BPF_NEG:
           snprintf (tmp, 0x100, "(-%s)", A.m_str);
-          fprintf (fp, BLUE_A " = " BLUE ("-A"));
+          fprintf (output_fp, BLUE_A " = " BLUE ("-A"));
           A.set_val (tmp);
           return;
 
@@ -293,47 +293,47 @@ Parser::ALU (filter *f_ptr)
         {
         case BPF_ADD:
           snprintf (tmp, 0x100, "(%s += %s)", A.m_str, X.m_str);
-          fprintf (fp, BLUE_A " += " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " += " BLUE_S, X.m_str);
           A.set_val (tmp);
           return;
         case BPF_SUB:
           snprintf (tmp, 0x100, "(%s -= %s)", A.m_str, X.m_str);
-          fprintf (fp, BLUE_A " -= " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " -= " BLUE_S, X.m_str);
           A.set_val (tmp);
           return;
         case BPF_MUL:
           snprintf (tmp, 0x100, "(%s *= %s)", A.m_str, X.m_str);
-          fprintf (fp, BLUE_A " *= " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " *= " BLUE_S, X.m_str);
           A.set_val (tmp);
           return;
 
         case BPF_DIV:
           snprintf (tmp, 0x100, "(%s /= %s)", A.m_str, X.m_str);
-          fprintf (fp, BLUE_A " /= " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " /= " BLUE_S, X.m_str);
           A.set_val (tmp);
           return;
 
         case BPF_AND:
           snprintf (tmp, 0x100, "(%s &= %s)", A.m_str, X.m_str);
-          fprintf (fp, BLUE_A " &= " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " &= " BLUE_S, X.m_str);
           A.set_val (tmp);
           return;
 
         case BPF_OR:
           snprintf (tmp, 0x100, "(%s |= %s)", A.m_str, X.m_str);
-          fprintf (fp, BLUE_A " |= " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " |= " BLUE_S, X.m_str);
           A.set_val (tmp);
           return;
 
         case BPF_XOR:
           snprintf (tmp, 0x100, "(%s ^= %s)", A.m_str, X.m_str);
-          fprintf (fp, BLUE_A " ^= " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " ^= " BLUE_S, X.m_str);
           A.set_val (tmp);
           return;
 
         case BPF_MOD:
           snprintf (tmp, 0x100, "(%s %%= %s)", A.m_str, X.m_str);
-          fprintf (fp, BLUE_A " %%= " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " %%= " BLUE_S, X.m_str);
           A.set_val (tmp);
           return;
 
@@ -344,12 +344,12 @@ Parser::ALU (filter *f_ptr)
 
         case BPF_RSH:
           snprintf (tmp, 0x100, "(%s >>= %s)", A.m_str, X.m_str);
-          fprintf (fp, BLUE_A " >>= " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " >>= " BLUE_S, X.m_str);
           A.set_val (tmp);
           return;
 
         default:
-          fprintf (fp, "unknown alu: op: 0x%x, src: 0x%x", op, src);
+          fprintf (output_fp, "unknown alu: op: 0x%x, src: 0x%x", op, src);
           exit (0);
         }
     }
@@ -365,41 +365,41 @@ Parser::JMP (filter *f_ptr, const char *syms[4], int pc)
   switch (jmode | src)
     {
     case BPF_JA | BPF_X:
-      fprintf (fp, "goto " FORMAT, pc + atoi (X.m_str) + 2);
+      fprintf (output_fp, "goto " FORMAT, pc + atoi (X.m_str) + 2);
       return false;
     case BPF_JA | BPF_K:
-      fprintf (fp, "goto " FORMAT, pc + k + 2);
+      fprintf (output_fp, "goto " FORMAT, pc + k + 2);
       return false;
 
     case BPF_JEQ | BPF_X:
-      fprintf (fp, syms[0], A.ret_same_type (X.m_str));
+      fprintf (output_fp, syms[0], A.ret_same_type (X.m_str));
       return true;
     case BPF_JEQ | BPF_K:
-      fprintf (fp, syms[0], A.ret_same_type (k));
+      fprintf (output_fp, syms[0], A.ret_same_type (k));
       return true;
 
     case BPF_JGT | BPF_X:
-      fprintf (fp, syms[1], A.ret_same_type (X.m_str));
+      fprintf (output_fp, syms[1], A.ret_same_type (X.m_str));
       return true;
     case BPF_JGT | BPF_K:
-      fprintf (fp, syms[1], A.ret_same_type (k));
+      fprintf (output_fp, syms[1], A.ret_same_type (k));
       return true;
 
     case BPF_JGE | BPF_X:
-      fprintf (fp, syms[2], A.ret_same_type (X.m_str));
+      fprintf (output_fp, syms[2], A.ret_same_type (X.m_str));
       return true;
     case BPF_JGE | BPF_K:
-      fprintf (fp, syms[2], A.ret_same_type (k));
+      fprintf (output_fp, syms[2], A.ret_same_type (k));
       return true;
 
     case BPF_JSET | BPF_X:
-      fprintf (fp, syms[3], A.ret_same_type (X.m_str));
+      fprintf (output_fp, syms[3], A.ret_same_type (X.m_str));
       return true;
     case BPF_JSET | BPF_K:
-      fprintf (fp, syms[3], A.ret_same_type (k));
+      fprintf (output_fp, syms[3], A.ret_same_type (k));
       return true;
     default:
-      fprintf (fp, "unknown jmp: jmode: 0x%x, src: 0x%x", jmode, src);
+      fprintf (output_fp, "unknown jmp: jmode: 0x%x, src: 0x%x", jmode, src);
       exit (0);
     }
 }
@@ -420,17 +420,17 @@ Parser::JmpWrap (filter *f_ptr, int pc)
   if (jt == 0 && jf != 0)
     {
       if (JMP (f_ptr, False, pc))
-        fprintf (fp, "goto " FORMAT, pc + jf + 2);
+        fprintf (output_fp, "goto " FORMAT, pc + jf + 2);
     }
   else if (jf == 0 && jt != 0)
     {
       if (JMP (f_ptr, True, pc))
-        fprintf (fp, "goto " FORMAT, pc + jt + 2);
+        fprintf (output_fp, "goto " FORMAT, pc + jt + 2);
     }
   else
     {
       if (JMP (f_ptr, True, pc))
-        fprintf (fp, "goto " FORMAT ", else goto " FORMAT, pc + jt + 2,
+        fprintf (output_fp, "goto " FORMAT ", else goto " FORMAT, pc + jt + 2,
                  pc + jf + 2);
     }
 }
@@ -453,7 +453,7 @@ Parser::RET (filter *f_ptr)
     case BPF_K:
       return f_ptr->k;
     default:
-      fprintf (fp, "unknown ret: 0x%x", ret);
+      fprintf (output_fp, "unknown ret: 0x%x", ret);
       exit (0);
     }
 }
@@ -465,9 +465,9 @@ Parser::RetWrap (filter *f_ptr)
   char *retstr = RETVAL2STR (retval);
 
   if (retstr != NULL)
-    fprintf (fp, "return %s", retstr);
+    fprintf (output_fp, "return %s", retstr);
   else
-    fprintf (fp, "unknown retval: 0x%x", retval);
+    fprintf (output_fp, "unknown retval: 0x%x", retval);
 }
 
 void
@@ -478,15 +478,15 @@ Parser::MISC (filter *f_ptr)
   switch (mode)
     {
     case BPF_TAX:
-      fprintf (fp, BLUE_A " = " BLUE_X);
+      fprintf (output_fp, BLUE_A " = " BLUE_X);
       X.set_val (A.m_str);
       return;
     case BPF_TXA:
-      fprintf (fp, BLUE_A " = " BLUE_X);
+      fprintf (output_fp, BLUE_A " = " BLUE_X);
       A.set_val (1);
       return;
     default:
-      fprintf (fp, "unknown mode: 0x%x", mode);
+      fprintf (output_fp, "unknown mode: 0x%x", mode);
       exit (0);
     }
 }
@@ -524,7 +524,7 @@ Parser::CLASS (int idx)
       MISC (f_ptr);
       return;
     default:
-      fprintf (fp, "unknown class: 0x%x", cls);
+      fprintf (output_fp, "unknown class: 0x%x", cls);
       exit (0);
     }
 }
@@ -532,23 +532,23 @@ Parser::CLASS (int idx)
 extern "C"
 {
   void
-  parse_filter (uint32_t arch, fprog *prog, FILE *file_ptr)
+  parse_filter (uint32_t arch, fprog *prog, FILE *output_fileptr)
   {
-    fp = file_ptr;
+    output_fp = output_fileptr;
 
     Parser parser (arch, prog);
     uint32_t len = prog->len;
 
-    fprintf (file_ptr, " Line  CODE  JT   JF      K\n");
-    fprintf (file_ptr, "---------------------------------\n");
+    fprintf (output_fp, " Line  CODE  JT   JF      K\n");
+    fprintf (output_fp, "---------------------------------\n");
     for (uint32_t i = 0; i < len; i++)
       {
         filter *f_ptr = &prog->filter[i];
-        fprintf (file_ptr, " " FORMAT ": 0x%02x 0x%02x 0x%02x 0x%08x ", i + 1,
+        fprintf (output_fp, " " FORMAT ": 0x%02x 0x%02x 0x%02x 0x%08x ", i + 1,
                  f_ptr->code, f_ptr->jt, f_ptr->jf, f_ptr->k);
         parser.CLASS (i);
-        fprintf (file_ptr, "\n");
+        fprintf (output_fp, "\n");
       }
-    fprintf (file_ptr, "---------------------------------\n");
+    fprintf (output_fp, "---------------------------------\n");
   }
 }

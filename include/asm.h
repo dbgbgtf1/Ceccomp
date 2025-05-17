@@ -1,16 +1,10 @@
 #ifndef ASM
 #define ASM
 
-#include <stdbool.h>
+#include "parseargs.h"
 #include <stdint.h>
+#include <stdio.h>
 
-typedef enum
-{
-  HEXLINE = 0,
-  HEXFMT = 1,
-  RAW = 2
-} print_mode;
-
-extern void assemble (int argc, char *argv[]);
+extern void assemble (uint32_t arch_token, FILE *read_fp, print_mode mode);
 
 #endif

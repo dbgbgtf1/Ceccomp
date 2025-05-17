@@ -1,69 +1,195 @@
 #include "parseargs.h"
 #include "error.h"
 #include "main.h"
+#include "transfer.h"
+#include <argp.h>
+#include <linux/ptrace.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-bool
-parse_option_enable (int argc, char *argv[], char *token)
+static subcommand parse_subcommand (char *arg);
+
+static void asm_disasm_args (ceccomp_args *args_ptr, char *arg);
+
+static void emu_args (ceccomp_args *args_ptr, char *arg);
+
+uint64_t
+strtoull_check (char *num, int base, char *err)
 {
-  for (int i = 0; i < argc; i++)
-    {
-      char *arg = STRAFTER (argv[i], "--");
-      if (arg == NULL)
-        continue;
-
-      arg = STRAFTER (arg, token);
-      if (arg == NULL)
-        continue;
-
-      return true;
-    }
-  return false;
+  char *end;
+  uint64_t ret = strtoull (num, &end, base);
+  if (num == end)
+    PEXIT ("%s: %s", err, num);
+  return ret;
 }
 
-char *
-parse_option_mode (int argc, char *argv[], char *token)
+void
+help ()
 {
-  for (int i = 0; i < argc; i++)
-    {
-      char *arg = STRAFTER (argv[i], "--");
-      if (arg == NULL)
-        continue;
+  printf ("usage: ceccomp [subcommand] [args] [options]\n");
+  printf ("\n");
+  printf ("%s\n", ASM_HINT);
+  printf ("%s\n", DISASM_HINT);
+  printf ("%s\n", EMU_HINT);
+  printf ("%s\n", TRACE_HINT);
+  printf ("%s\n", PROBE_HINT);
+  printf ("%s\n", HELP_HINT);
+  printf ("%s\n", VERSION);
 
-      arg = STRAFTER (arg, token);
-      if (arg == NULL)
-        continue;
-
-      if (*arg != '=')
-        PEXIT (INVALID_ARG ":%s", argv[i]);
-
-      return (arg + 1);
-    }
-
-  return NULL;
+  printf ("\n%s\n", OPTION_HINT);
+  exit (0);
 }
 
-char *
-try_get_arg (int argc, char *argv[])
+void
+version ()
 {
-  static int i = 0;
-  for (; i < argc; i++)
-    {
-      if (STARTWITH (argv[i], "--"))
-        continue;
-      return argv[i++];
-    }
-  return NULL;
+  PEXIT ("%s", CECCOMP_VERSION);
 }
 
-char *
-get_arg (int argc, char *argv[])
+subcommand
+parse_subcommand (char *arg)
 {
-  char *arg = try_get_arg (argc, argv);
-  if (arg != NULL)
-    return arg;
-  PEXIT ("%s\n", NOT_ENOUGH_ARGS);
+  if (!strcmp (arg, "asm"))
+    return ASM_MODE;
+  else if (!strcmp (arg, "disasm"))
+    return DISASM_MODE;
+  else if (!strcmp (arg, "emu"))
+    return EMU_MODE;
+  else if (!strcmp (arg, "trace"))
+    return TRACE_MODE;
+  else if (!strcmp (arg, "probe"))
+    return PROBE_MODE;
+  else if (!strcmp (arg, "version"))
+    version ();
+  else
+    help ();
+  exit (0);
+}
+
+print_mode
+parse_print_mode (char *arg)
+{
+  if (!strcmp (arg, "hexline"))
+    return HEXLINE;
+  else if (!strcmp (arg, "hexfmt"))
+    return HEXFMT;
+  else if (!strcmp (arg, "raw"))
+    return RAW;
+  else
+    PEXIT (INVALID_PRINT_MODE ": %s", arg);
+}
+
+// asm and disasm share the same args logic
+void
+asm_disasm_args (ceccomp_args *args_ptr, char *arg)
+{
+  static uint32_t arg_idx = 0;
+  if (arg_idx != 0)
+    return;
+  arg_idx += 1;
+
+  args_ptr->read_fp = fopen (arg, "r");
+  if (args_ptr->read_fp == NULL)
+    PEXIT (UNABLE_OPEN_FILE ": %s", arg);
+}
+
+void
+emu_args (ceccomp_args *args_ptr, char *arg)
+{
+  static uint32_t arg_idx = 0;
+  if (arg_idx != 0)
+    return;
+  arg_idx += 1;
+
+  if (arg_idx == 1)
+    {
+      args_ptr->read_fp = fopen (arg, "r");
+      if (args_ptr->read_fp == NULL)
+        PEXIT (UNABLE_OPEN_FILE ": %s", arg);
+    }
+  else if (arg_idx == 2)
+    args_ptr->syscall_nr = strtoull_check (arg, 0, INVALID_SYSNR);
+  else if ((arg_idx > 2) && (arg_idx < 9))
+    args_ptr->sys_args[arg_idx - 3]
+        = strtoull_check (arg, 0, INVALID_SYS_ARGS);
+  else if (arg_idx == 9)
+    args_ptr->ip = strtoull_check (arg, 0, INVALID_IP);
+}
+
+uint32_t
+get_arg_idx (int argc, char *argv[], char *arg_to_find)
+{
+  uint32_t idx = 0;
+  while (idx++ < argc)
+    {
+      if (!strcmp (argv[idx], arg_to_find))
+        return idx;
+    }
+  return -1;
+}
+
+error_t
+parse_opt (int key, char *arg, struct argp_state *state)
+{
+  ceccomp_args *args_ptr = state->input;
+
+  if (args_ptr->mode == PROBE_MODE || args_ptr->mode == TRACE_PROG_MODE)
+    return 0;
+
+  if (args_ptr->mode == TRACE_MODE)
+    {
+      if (key == ARGP_KEY_ARG)
+        {
+          args_ptr->mode = TRACE_PROG_MODE;
+          return 0;
+        }
+      else if (key == 'p')
+        args_ptr->mode = TRACE_PID_MODE;
+
+      // we need to know whether it's trace-pid mode or trace-prog mode
+      // so if we found '--pid' first, we decide it's trace-pid mode
+      // else if we found arg first
+      // we decide it's the trace-prog mode and this arg is program
+      // whatever after this belongs to the program args, we don't parse them
+    }
+
+  switch (key)
+    {
+    case ARGP_KEY_ARG:
+      if (state->arg_num == 0)
+        {
+          args_ptr->mode = parse_subcommand (arg);
+          if (args_ptr->mode == PROBE_MODE || args_ptr->mode == TRACE_MODE)
+            args_ptr->program_start = arg;
+        }
+      else if (args_ptr->mode == ASM_MODE || args_ptr->mode == DISASM_MODE)
+        asm_disasm_args (args_ptr, arg);
+      else if (args_ptr->mode == EMU_MODE)
+        emu_args (args_ptr, arg);
+      return 0;
+    case 'q':
+      args_ptr->quiet = true;
+      return 0;
+    case 'o':
+      args_ptr->output_fp = fopen (arg, "w+");
+      if (args_ptr->output_fp == NULL)
+        PEXIT (UNABLE_OPEN_FILE ": %s", arg);
+      return 0;
+    case 'a':
+      args_ptr->arch_token = STR2ARCH (arg);
+      if (args_ptr->arch_token == -1)
+        PEXIT (INVALID_ARCH ": %s" SUPPORT_ARCH, arg);
+      return 0;
+    case 'p':
+      args_ptr->pid = strtoull_check (arg, 0, INVALID_PID);
+      return 0;
+    case 'f':
+      args_ptr->fmt_mode = parse_print_mode (arg);
+      return 0;
+    default:
+      return 0;
+    }
 }

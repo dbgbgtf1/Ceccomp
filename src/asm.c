@@ -26,9 +26,9 @@ static uint16_t jmp_mode (uint8_t sym_enum, bool *reverse, char *origin_line);
 static void jmp_src (char *rval, filter *f_ptr, uint32_t arch,
                      char *origin_line);
 
-static filter JMP_GOTO (line_set *Line);
+static filter JMP_GOTO (line_set *Line, uint32_t pc);
 
-static filter JMP (line_set *Line, uint32_t idx, uint32_t arch);
+static filter JMP (line_set *Line, uint32_t pc, uint32_t arch);
 
 static bool LD_LDX_ABS (char *rval, filter *f_ptr);
 
@@ -44,8 +44,6 @@ static filter RET (line_set *Line);
 static filter ST_STX (line_set *Line);
 
 static void format_print (filter filter, char *format);
-
-static void asm_lines (FILE *fp, unsigned arch, uint32_t print_mode);
 
 static filter
 MISC_TXA ()
@@ -90,14 +88,14 @@ jmp_mode (uint8_t cmp_enum, bool *reverse, char *origin_line)
 }
 
 static filter
-JMP_GOTO (line_set *Line)
+JMP_GOTO (line_set *Line, uint32_t pc)
 {
   char *clean_line = Line->clean_line;
   char *jmp_nr = clean_line + strlen ("goto");
 
   filter filter = BPF_JUMP (BPF_JMP | BPF_JA, 0, 0, 0);
   char *end;
-  filter.k = strtol (jmp_nr, &end, 10);
+  filter.k = strtol (jmp_nr, &end, 10) - pc - 1;
 
   if (jmp_nr == end)
     PEXIT (INVALID_NR_AFTER_GOTO ": %s", Line->origin_line);
@@ -350,15 +348,15 @@ format_print (filter filter, char *format)
   printf (format, low_code, high_code, jt, jf, k_0, k_1, k_2, k_3);
 }
 
-static void
-asm_lines (FILE *fp, unsigned arch, uint32_t print_mode)
+void
+assemble (uint32_t arch, FILE *read_fp, uint32_t print_mode)
 {
   line_set Line;
-  fprog *prog = malloc (sizeof (fprog));
-  prog->len = 1;
-  prog->filter = malloc (sizeof (filter) * 1024);
+  fprog prog;
+  prog.len = 1;
+  prog.filter = malloc (sizeof (filter) * 1024);
 
-  while (pre_asm (fp, &Line), Line.origin_line != NULL)
+  while (pre_asm (read_fp, &Line), Line.origin_line != NULL)
     {
       filter f_current;
       char *clean_line = Line.clean_line;
@@ -369,9 +367,9 @@ asm_lines (FILE *fp, unsigned arch, uint32_t print_mode)
       else if (!strcmp (clean_line, "$X=$A"))
         f_current = MISC_TAX ();
       else if (STARTWITH (clean_line, "if"))
-        f_current = JMP (&Line, prog->len, arch);
+        f_current = JMP (&Line, prog.len, arch);
       else if (STARTWITH (clean_line, "goto"))
-        f_current = JMP_GOTO (&Line);
+        f_current = JMP_GOTO (&Line, prog.len);
       else if (STARTWITH (clean_line, "return"))
         f_current = RET (&Line);
       else if (STARTWITH (clean_line, "$mem["))
@@ -381,50 +379,21 @@ asm_lines (FILE *fp, unsigned arch, uint32_t print_mode)
       else if (STARTWITH (clean_line, "$A"))
         f_current = ALU (&Line);
 
-      prog->filter[prog->len] = f_current;
-      prog->len++;
+      prog.filter[prog.len] = f_current;
+      prog.len++;
     }
 
+  char *format = NULL;
   if (print_mode == HEXFMT)
-    for (int i = 1; i < prog->len; i++)
-      format_print (
-          prog->filter[i],
-          "\"\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\",\n");
+    format = "\"\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\",\n";
   else if (print_mode == HEXLINE)
-    for (int i = 1; i < prog->len; i++)
-      format_print (
-          prog->filter[i],
-          "\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x");
+    format = "\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x";
   else if (print_mode == RAW)
-    for (int i = 1; i < prog->len; i++)
-      format_print (prog->filter[i], "%c%c%c%c%c%c%c%c");
+    format = "%c%c%c%c%c%c%c%c";
+
+  for (int i = 1; i < prog.len; i++)
+    format_print (prog.filter[i], format);
 
   printf ("\n");
-  free (prog->filter);
-  free (prog);
-}
-
-void
-assemble (int argc, char *argv[])
-{
-  char *filename = get_arg (argc, argv);
-  FILE *fp = fopen (filename, "r");
-  if (fp == NULL)
-    PEXIT (UNABLE_OPEN_FILE ": %s", filename);
-
-  char *arch_str = parse_option_mode (argc, argv, "arch");
-  uint32_t arch = STR2ARCH (arch_str);
-
-  char *print_mode_str = parse_option_mode (argc, argv, "fmt");
-  uint32_t print_mode;
-  if (print_mode_str == NULL || !strcmp (print_mode_str, "hexline"))
-    print_mode = HEXLINE;
-  else if (!strcmp (print_mode_str, "hexfmt"))
-    print_mode = HEXFMT;
-  else if (!strcmp (print_mode_str, "raw"))
-    print_mode = RAW;
-  else
-    PEXIT (INVALID_PRINT_MODE ": %s", print_mode_str);
-
-  asm_lines (fp, arch, print_mode);
+  free (prog.filter);
 }

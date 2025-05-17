@@ -61,9 +61,13 @@ zsh_cmp_install: $(ZSH_SRC)/_ceccomp
 ceccomp: $(OBJS) $(CECCOMP_MAIN)
 	$(CXX) $(LDFLAGS) $^ -o $@
 	mv -f $@ $(BUILD_DIR)
+	@echo "ceccomp is maked\n"
+	@echo ""
 
 test: $(OBJS) $(TEST_MAIN)
 	$(CXX) $(LDFLAGS) $^ -o $(BUILD_DIR)/$@
+	@echo "test is maked"
+	@echo ""
 
 $(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) -I$(INC_DIR) $(CFLAGS) $< -c -o $@

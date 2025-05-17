@@ -1,11 +1,8 @@
 #ifndef EMU
 #define EMU
 
-#include <linux/filter.h>
-#include <linux/seccomp.h>
-#include <stdint.h>
-#include <stdio.h>
 #include "main.h"
+#include "parseargs.h"
 
 typedef struct
 {
@@ -21,6 +18,6 @@ extern void end_quiet (int stdout_backup);
 
 extern char *emu_lines (FILE *fp, seccomp_data *data);
 
-extern void emu (int argc, char *argv[]);
+extern void emulate (ceccomp_args *args);
 
 #endif

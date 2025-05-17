@@ -1,8 +1,6 @@
 #include "emu.h"
 #include "color.h"
 #include "error.h"
-#include "main.h"
-#include "parseargs.h"
 #include "parseobj.h"
 #include "preasm.h"
 #include "transfer.h"
@@ -245,7 +243,7 @@ clear_color (char *origin_line)
 }
 
 char *
-emu_lines (FILE *fp, seccomp_data *data)
+emu_lines (FILE *read_fp, seccomp_data *data)
 {
   line_set Line = { NULL, NULL };
   reg_mem *reg = malloc (sizeof (reg_mem));
@@ -253,7 +251,7 @@ emu_lines (FILE *fp, seccomp_data *data)
   char *origin_line;
   char *clean_line;
   for (uint32_t read_idx = 1, actual_idx = 1;
-       pre_asm (fp, &Line), Line.origin_line != NULL; read_idx++)
+       pre_asm (read_fp, &Line), Line.origin_line != NULL; read_idx++)
     {
       origin_line = Line.origin_line;
       clean_line = Line.clean_line;
@@ -288,45 +286,6 @@ emu_lines (FILE *fp, seccomp_data *data)
   return NULL;
 }
 
-void
-get_sysnr_arg (int argc, char *argv[], seccomp_data *data)
-{
-  char *sys_nr_str = get_arg (argc, argv);
-  char *end;
-  data->nr = seccomp_syscall_resolve_name_arch (data->arch, sys_nr_str);
-
-  if (data->nr != __NR_SCMP_ERROR)
-    return;
-
-  data->nr = strtoul (sys_nr_str, &end, 0);
-  if (sys_nr_str == end)
-    PEXIT ("%s", INVALID_SYSNR);
-}
-
-void
-get_rest_args (int argc, char *argv[], seccomp_data *data)
-{
-  char *arg;
-  int arg_idx = 0;
-  char *end;
-
-  while ((arg = try_get_arg (argc, argv)) != NULL)
-    {
-      if (arg_idx > 5)
-        break;
-      data->args[arg_idx++] = strtoull (arg, &end, 0);
-      if (arg == end)
-        PEXIT ("%s", INVALID_SYS_ARGS);
-    }
-
-  if (arg == NULL)
-    return;
-
-  data->instruction_pointer = strtoull (arg, &end, 0);
-  if (arg == end)
-    PEXIT ("%s", INVALID_PC);
-}
-
 int
 start_quiet ()
 {
@@ -355,29 +314,24 @@ end_quiet (int stdout_backup)
 }
 
 void
-emu (int argc, char *argv[])
+emulate (ceccomp_args *args)
 {
   seccomp_data data = { 0, 0, 0, { 0, 0, 0, 0, 0, 0 } };
 
-  char *arch_str = parse_option_mode (argc, argv, "arch");
-  data.arch = STR2ARCH (arch_str);
-
-  char *filename = get_arg (argc, argv);
-  FILE *fp = fopen (filename, "r");
-  if (fp == NULL)
-    PEXIT (UNABLE_OPEN_FILE ": %s", filename);
-
-  get_sysnr_arg (argc, argv, &data);
-  get_rest_args (argc, argv, &data);
-  // get syscall_nr, args and instruction_pointer
+  data.nr = args->syscall_nr;
+  for (int i = 0; i < 6; i++)
+    data.args[i] = args->sys_args[i];
+  data.instruction_pointer = args->ip;
 
   int stdout_backup = 0;
-  if (parse_option_enable (argc, argv, "quiet"))
+  char *retval_str = NULL;
+  if (args->quiet)
     stdout_backup = start_quiet ();
 
-  char *retval_str = emu_lines (fp, &data);
+  retval_str = emu_lines (args->read_fp, &data);
 
-  if (stdout_backup)
+  if (stdout_backup != 0)
     end_quiet (stdout_backup);
+
   printf ("return " BLUE_S "\n", retval_str);
 }

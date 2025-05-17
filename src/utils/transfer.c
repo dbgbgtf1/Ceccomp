@@ -122,40 +122,40 @@ ABS2STR (uint32_t offset)
   switch (offset)
     {
     case offsetof (seccomp_data, nr):
-      return syscall_nr;
+      return SYSCALL_NR;
     case offsetof (seccomp_data, arch):
-      return architecture;
+      return ARCHITECTURE;
 
     case offsetof (seccomp_data, instruction_pointer):
-      return low_pc;
+      return LOW_PC;
     case offsetof (seccomp_data, instruction_pointer) + 4:
-      return high_pc;
+      return HIGH_PC;
 
     case offsetof (seccomp_data, args[0]):
-      return low_arg0;
+      return LOW_ARG0;
     case offsetof (seccomp_data, args[1]):
-      return low_arg1;
+      return LOW_ARG1;
     case offsetof (seccomp_data, args[2]):
-      return low_arg2;
+      return LOW_ARG2;
     case offsetof (seccomp_data, args[3]):
-      return low_arg3;
+      return LOW_ARG3;
     case offsetof (seccomp_data, args[4]):
-      return low_arg4;
+      return LOW_ARG4;
     case offsetof (seccomp_data, args[5]):
-      return low_arg5;
+      return LOW_ARG5;
 
     case offsetof (seccomp_data, args[0]) + 4:
-      return high_arg0;
+      return HIGH_ARG0;
     case offsetof (seccomp_data, args[1]) + 4:
-      return high_arg1;
+      return HIGH_ARG1;
     case offsetof (seccomp_data, args[2]) + 4:
-      return high_arg2;
+      return HIGH_ARG2;
     case offsetof (seccomp_data, args[3]) + 4:
-      return high_arg3;
+      return HIGH_ARG3;
     case offsetof (seccomp_data, args[4]) + 4:
-      return high_arg4;
+      return HIGH_ARG4;
     case offsetof (seccomp_data, args[5]) + 4:
-      return high_arg5;
+      return HIGH_ARG5;
 
     default:
       return NULL;
@@ -165,40 +165,40 @@ ABS2STR (uint32_t offset)
 uint32_t
 STR2ABS (char *str)
 {
-  if (STARTWITH (str, syscall_nr))
+  if (STARTWITH (str, SYSCALL_NR))
     return offsetof (seccomp_data, nr);
-  else if (STARTWITH (str, architecture))
+  else if (STARTWITH (str, ARCHITECTURE))
     return offsetof (seccomp_data, arch);
 
-  else if (STARTWITH (str, low_pc))
+  else if (STARTWITH (str, LOW_PC))
     return offsetof (seccomp_data, instruction_pointer);
-  else if (STARTWITH (str, high_pc))
+  else if (STARTWITH (str, HIGH_PC))
     return offsetof (seccomp_data, instruction_pointer) + 4;
 
-  else if (STARTWITH (str, low_arg0))
+  else if (STARTWITH (str, LOW_ARG0))
     return offsetof (seccomp_data, args[0]);
-  else if (STARTWITH (str, low_arg1))
+  else if (STARTWITH (str, LOW_ARG1))
     return offsetof (seccomp_data, args[1]);
-  else if (STARTWITH (str, low_arg2))
+  else if (STARTWITH (str, LOW_ARG2))
     return offsetof (seccomp_data, args[2]);
-  else if (STARTWITH (str, low_arg3))
+  else if (STARTWITH (str, LOW_ARG3))
     return offsetof (seccomp_data, args[3]);
-  else if (STARTWITH (str, low_arg4))
+  else if (STARTWITH (str, LOW_ARG4))
     return offsetof (seccomp_data, args[4]);
-  else if (STARTWITH (str, low_arg5))
+  else if (STARTWITH (str, LOW_ARG5))
     return offsetof (seccomp_data, args[5]);
 
-  else if (STARTWITH (str, high_arg0))
+  else if (STARTWITH (str, HIGH_ARG0))
     return offsetof (seccomp_data, args[0]) + 4;
-  else if (STARTWITH (str, high_arg1))
+  else if (STARTWITH (str, HIGH_ARG1))
     return offsetof (seccomp_data, args[1]) + 4;
-  else if (STARTWITH (str, high_arg2))
+  else if (STARTWITH (str, HIGH_ARG2))
     return offsetof (seccomp_data, args[2]) + 4;
-  else if (STARTWITH (str, high_arg3))
+  else if (STARTWITH (str, HIGH_ARG3))
     return offsetof (seccomp_data, args[3]) + 4;
-  else if (STARTWITH (str, high_arg4))
+  else if (STARTWITH (str, HIGH_ARG4))
     return offsetof (seccomp_data, args[4]) + 4;
-  else if (STARTWITH (str, high_arg5))
+  else if (STARTWITH (str, HIGH_ARG5))
     return offsetof (seccomp_data, args[5]) + 4;
   else
     return -1;

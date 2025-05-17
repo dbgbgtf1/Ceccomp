@@ -20,9 +20,11 @@
   " " STR_ARCH_PPC64LE " " STR_ARCH_S390X " " STR_ARCH_S390                   \
   " " STR_ARCH_RISCV64
 
+// invalid args
 #define INVALID_SYSNR "invalid syscall nr"
 #define INVALID_SYS_ARGS "invalid syscall args"
-#define INVALID_PC "invalid instruction pointer"
+#define INVALID_IP "invalid instruction pointer"
+#define INVALID_PID "invalid pid"
 
 // text->bpf error macros
 #define INVALID_OPERATOR "invalid operator"

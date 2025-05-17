@@ -1,6 +1,9 @@
 #ifndef DISASM
 #define DISASM
 
-extern void disasm (int argc, char *argv[]);
+#include <stdint.h>
+#include <stdio.h>
+
+extern void disasm (uint32_t arch_token, FILE *read_fp);
 
 #endif

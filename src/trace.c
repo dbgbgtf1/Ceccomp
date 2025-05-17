@@ -1,29 +1,18 @@
 // clang-format off
 #include "trace.h"
 #include "main.h"
-#include "parseargs.h"
 #include "parsefilter.h"
 #include "color.h"
 #include "error.h"
-#include "transfer.h"
 #include <asm-generic/errno.h>
 #include <errno.h>
-#include <linux/audit.h>
-#include <linux/ptrace.h>
-#include <linux/seccomp.h>
-#include <stdint.h>
-#include <string.h>
-#include <sys/prctl.h>
 #include <seccomp.h>
 #include <sys/ptrace.h>
-#include <sys/types.h>
+#include <sys/prctl.h>
 #include <sys/wait.h>
 #include <signal.h>
-#include <stdbool.h>
 #include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <sys/syscall.h>
 #include <unistd.h>
 // clang-format on
 
@@ -36,13 +25,11 @@ static uint64_t check_scmp_mode (syscall_info *Info, int pid, fprog *prog);
 
 static void dump_filter (syscall_info *Info, int pid, fprog *prog);
 
-static void filter_mode (syscall_info *Info, int pid, fprog *prog, FILE *fp);
+static void filter_mode (syscall_info *Info, int pid, fprog *prog, FILE *output_fp);
 
 static void child (char *argv[]);
 
-static void parent (int pid, FILE *fp, bool oneshot);
-
-static void pid_trace (int pid, uint32_t arch);
+static void parent (int pid, FILE *output_fp, bool oneshot);
 
 static void
 strict_mode ()
@@ -110,11 +97,11 @@ dump_filter (syscall_info *Info, int pid, fprog *prog)
 }
 
 static void
-filter_mode (syscall_info *Info, int pid, fprog *prog, FILE *fp)
+filter_mode (syscall_info *Info, int pid, fprog *prog, FILE *output_fp)
 {
   prog->filter = malloc (prog->len * sizeof (filter));
   dump_filter (Info, pid, prog);
-  parse_filter (Info->arch, prog, fp);
+  parse_filter (Info->arch, prog, output_fp);
   free (prog->filter);
 }
 
@@ -134,7 +121,7 @@ child (char *argv[])
 }
 
 static void
-parent (int pid, FILE *fp, bool oneshot)
+parent (int pid, FILE *output_fp, bool oneshot)
 {
   syscall_info Info;
   fprog prog;
@@ -164,7 +151,7 @@ parent (int pid, FILE *fp, bool oneshot)
       if (seccomp_mode == (SECCOMP_SET_MODE_STRICT | LOAD_SUCCESS))
         strict_mode ();
       else if (seccomp_mode == (SECCOMP_SET_MODE_FILTER | LOAD_SUCCESS))
-        filter_mode (&Info, pid, &prog, fp);
+        filter_mode (&Info, pid, &prog, output_fp);
 
       if (oneshot)
         return;
@@ -172,20 +159,17 @@ parent (int pid, FILE *fp, bool oneshot)
 }
 
 void
-program_trace (int argc, char *argv[], FILE *fp, bool oneshot)
+program_trace (char *argv[], FILE *output_fp, bool oneshot)
 {
-  if (argc < 1)
-    PEXIT ("%s", NOT_ENOUGH_ARGS);
-
   int pid = fork ();
   if (pid == 0)
     child (argv);
   else
-    parent (pid, fp, oneshot);
+    parent (pid, output_fp, oneshot);
 }
 
-static void
-pid_trace (int pid, uint32_t arch)
+void
+pid_trace (int pid, uint32_t arch, FILE *output_fp)
 {
   int status;
   fprog prog;
@@ -213,17 +197,20 @@ pid_trace (int pid, uint32_t arch)
       prog_idx++;
 
       if (prog.len != (unsigned short)-1)
-        parse_filter (arch, &prog, stdout);
+        {
+          parse_filter (arch, &prog, output_fp);
+          continue;
+        }
 
       switch (errno)
         {
         case ENOENT:
         case EINVAL:
           goto detach;
-        default:
-          PERROR ("ptrace get filter error");
         case EMEDIUMTYPE:
           printf (BLUE (NOT_AN_CBPF));
+        default:
+          PERROR ("ptrace get filter error");
         }
     }
   while (true);
@@ -231,38 +218,4 @@ pid_trace (int pid, uint32_t arch)
 detach:
   ptrace (PTRACE_DETACH, pid, 0, 0);
   free (prog.filter);
-}
-
-void
-trace (int argc, char *argv[])
-{
-  char *pid_str = parse_option_mode (argc, argv, "pid");
-  int pid;
-  char *end;
-  if (pid_str != NULL)
-    {
-      pid = strtol (pid_str, &end, 10);
-      if (pid_str == end)
-        PEXIT ("unknown pid: %s", pid_str);
-
-      char *arch_str;
-      arch_str = parse_option_mode (argc, argv, "arch");
-      uint32_t arch;
-      arch = STR2ARCH (arch_str);
-      if (arch == -1)
-        PEXIT (INVALID_ARCH ": %s", arch_str);
-
-      pid_trace (pid, arch);
-      return;
-    }
-
-  char *filename = parse_option_mode (argc, argv, "output");
-  FILE *fp = stderr;
-  if (filename)
-    {
-      fp = fopen (filename, "w+");
-      program_trace (argc - 2, &argv[2], fp, false);
-    }
-
-  program_trace (argc - 1, &argv[1], fp, false);
 }

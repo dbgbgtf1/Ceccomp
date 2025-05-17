@@ -1,14 +1,12 @@
+// this is for unit test
 #include "asm.h"
 #include "disasm.h"
 #include "emu.h"
+#include "parseargs.h"
 #include "probe.h"
 #include "trace.h"
-#include "error.h"
-#include "main.h"
-#include "parseargs.h"
 #include "transfer.h"
-#include <stdbool.h>
-#include <stddef.h>
+#include <argp.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,106 +14,71 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 
-#define CECCOMP_VERSION "ceccomp 1.5"
+static void init (ceccomp_args *args);
 
 void
-help ()
+init (ceccomp_args *args)
 {
-  printf ("usage: ceccomp [subcommand] [args] [options]\n");
-  printf ("\n");
-  printf ("%s\n", ASM_HINT);
-  printf ("%s\n", DISASM_HINT);
-  printf ("%s\n", TRACE_HINT);
-  printf ("%s\n", EMU_HINT);
-  printf ("%s\n", PROBE_HINT);
-  printf ("%s\n", HELP_HINT);
-  printf ("%s\n", VERSION);
-
-  printf ("\n%s\n", OPTION_HINT);
-  exit (0);
-}
-
-void
-version ()
-{
-  printf (CECCOMP_VERSION "\n");
-  exit (0);
-}
-
-char **
-set_local_arch (int *argc, char *argv[])
-{
-
   struct utsname uts_name;
   uname (&uts_name);
 
-  char **argv_cpy = malloc (sizeof (char *) * (*argc + 1));
-  argv_cpy[0] = argv[0];
-  argv_cpy[1] = argv[1];
-  argv_cpy[2] = malloc (strlen (uts_name.machine) + strlen ("--arch="));
-
-  strcpy (argv_cpy[2], "--arch=");
-  strcpy (argv_cpy[2] + strlen ("--arch="), uts_name.machine);
-
-  memcpy (&argv_cpy[3], &argv[2], sizeof (char *) * (*argc - 2));
-
-  *argc += 1;
-  return argv_cpy;
+  args->mode = (subcommand)ARG_INIT_VAL;
+  args->arch_token = STR2ARCH (uts_name.machine);
+  args->output_fp = stderr;
+  args->read_fp = stdin;
+  args->fmt_mode = HEXLINE;
+  args->quiet = false;
+  args->syscall_nr = (uint32_t)ARG_INIT_VAL;
+  args->sys_args[0] = ARG_INIT_VAL;
+  args->sys_args[1] = ARG_INIT_VAL;
+  args->sys_args[2] = ARG_INIT_VAL;
+  args->sys_args[3] = ARG_INIT_VAL;
+  args->sys_args[4] = ARG_INIT_VAL;
+  args->sys_args[5] = ARG_INIT_VAL;
+  args->program_start = (char *)ARG_INIT_VAL;
+  args->pid = (pid_t)ARG_INIT_VAL;
 }
 
+static struct argp_option options[] = {
+  { "quiet", 'q', 0, 0 },     { "output", 'o', "OUTPUT", 0 },
+  { "arch", 'a', "ARCH", 0 }, { "pid", 'p', "PID", 0 },
+  { "fmt", 'f', "FMT", 0 }, { "help", 'h', 0, 0 }, { "usage", 'u', 0, 0 },
+};
+
 int
-main (int argc, char *argv[], char *env[])
+main (int argc, char **argv)
 {
-  setbuf (stdout, NULL);
+  ceccomp_args args;
 
-  if (argc < 2)
+  init (&args);
+  static struct argp argp = { options, parse_opt, NULL, NULL };
+  argp_parse (&argp, argc, argv, ARGP_IN_ORDER, 0, &args);
+
+  uint32_t program_start_idx;
+  if (args.program_start != (char *)ARG_INIT_VAL)
+    program_start_idx = get_arg_idx (argc, argv, args.program_start) + 1;
+
+  switch (args.mode)
     {
+    case ASM_MODE:
+      assemble (args.arch_token, args.read_fp, args.fmt_mode);
+      return 0;
+    case DISASM_MODE:
+      disasm (args.arch_token, args.read_fp);
+      return 0;
+    case EMU_MODE:
+      emulate (&args);
+      return 0;
+    case PROBE_MODE:
+      probe (&argv[program_start_idx], args.arch_token, args.output_fp);
+      return 0;
+    case TRACE_PID_MODE:
+      pid_trace(args.pid, args.arch_token, args.output_fp);
+      return 0;
+    case TRACE_PROG_MODE:
+      program_trace(&argv[program_start_idx], args.output_fp, false);
+      return 0;
+    default:
       help ();
-      return 0;
     }
-
-  if (!strcmp (argv[1], "version"))
-    {
-      version ();
-      return 0;
-    }
-
-  char *arch_str = parse_option_mode ((argc - 2), &argv[2], "arch");
-  bool need_to_free_argv = false;
-  if (arch_str != NULL)
-    {
-      uint32_t token = STR2ARCH (arch_str);
-      if (token == -1)
-        PEXIT (INVALID_ARCH ": %s\n" SUPPORT_ARCH, arch_str);
-    }
-  else
-    {
-      argv = set_local_arch (&argc, argv);
-      need_to_free_argv = true;
-    }
-  // make sure argv have --arch now;
-
-  if (!strcmp (argv[1], "asm"))
-    assemble (argc - 2, &argv[2]);
-
-  else if (!strcmp (argv[1], "disasm"))
-    disasm (argc - 2, &argv[2]);
-
-  else if (!strcmp (argv[1], "emu"))
-    emu (argc - 2, &argv[2]);
-
-  else if (!strcmp (argv[1], "trace"))
-    trace (argc - 2, &argv[2]);
-
-  else if (!strcmp (argv[1], "probe"))
-    probe (argc - 2, &argv[2]);
-
-  else
-    help ();
-
-  if (!need_to_free_argv)
-    return 0;
-
-  free (argv[2]);
-  free (argv);
 }
