@@ -20,7 +20,7 @@ if (( CURRENT == 2 )) {
     subcmd=(
         "asm:Assemble bpf text to raw bytes"
         "disasm:Disassemble raw bytes to bpf text"
-        "trace:Run program, extract bpf filter and then print to text"
+        "trace:Run program or trace pid, extract bpf filter and then print to text"
         "emu:Emulate bpf program with given syscall and bpf text"
         "probe:Trace the program for the first filter and emulate common syscalls"
         "help:Display ceccomp help information"
