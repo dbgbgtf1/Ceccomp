@@ -7,36 +7,28 @@ BUILD_DIR := ./build
 BUILD_UTIL := ./build/utils
 
 C_SRCS := $(shell find $(SRC_DIR) ! -name 'ceccomp.c' -name '*.c' -or -name '*.s')
-CXX_SRCS := $(shell find $(SRC_DIR) -name '*.cpp')
 TEST_SRCS := $(shell find $(TEST_DIR) -name '*.c')
 
-C_OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.c.o,$(C_SRCS))
-CXX_OBJS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.cpp.o,$(CXX_SRCS))
+OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.c.o,$(C_SRCS))
 TEST_OBJS := $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.c.o,$(TEST_SRCS))
-OBJS := $(C_OBJS) $(CXX_OBJS)
 
 CECCOMP_MAIN := $(BUILD_DIR)/ceccomp.c.o
 
 CC := gcc
-CXX := g++
 
 CFLAGS := -fpie -fstack-protector -Wall -Wextra
-CXXFLAGS := -fpie -fstack-protector -Wall -Wextra
 LDFLAGS := -lseccomp -z now -z noexecstack -fpie -fstack-protector -Wall -Wextra
 
 ifdef DEBUG
 	ifeq ($(DEBUG),1)
 		CFLAGS += -g -O2
-		CXXFLAGS += -g -O2
 		LDFLAGS += -g -O2
 	else ifeq ($(DEBUG),2)
 		CFLAGS += -g
-		CXXFLAGS += -g 
 		LDFLAGS += -g
 	endif
 else
 	CFLAGS += -O2
-	CXXFLAGS += -O2
 	LDFLAGS += -O2
 endif
 
@@ -60,7 +52,7 @@ zsh_cmp_install: $(ZSH_SRC)/_ceccomp
 	cp $< $(ZSH_DST)/_ceccomp
 
 ceccomp: $(OBJS) $(CECCOMP_MAIN)
-	$(CXX) $(LDFLAGS) $^ -o $@
+	$(CC) $(LDFLAGS) $^ -o $@
 	mv -f $@ $(BUILD_DIR)
 	@echo "ceccomp is maked"
 	@echo ""
@@ -73,7 +65,7 @@ test: $(TEST_OBJS)
 $(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	$(CC) -I$(INC_DIR) $(CFLAGS) $< -c -o $@
 $(BUILD_DIR)/%.cpp.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
-	$(CXX) -I$(INC_DIR) $(CXXFLAGS) $< -c -o $@
+	$(CC) -I$(INC_DIR) $(CFLAGS) $< -c -o $@
 $(BUILD_DIR)/%.c.o: $(TEST_DIR)/%.c | $(BUILD_DIR)
 	$(CC) -I$(INC_DIR) $(CFLAGS) $< -c -o $@
 
