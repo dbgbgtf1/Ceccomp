@@ -3,7 +3,7 @@
 #include "error.h"
 #include "main.h"
 #include "trace.h"
-#include <stddef.h>
+#include <fcntl.h>
 #include <seccomp.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -23,15 +23,19 @@ probe (char *argv[], uint32_t arch_token, FILE *output_fp)
     PERROR ("tmpfile create failed");
   program_trace (argv, tmp_fp, true);
 
-  for (int i = 0; i < ARRAY_SIZE (to_test_list); i++)
+  for (size_t i = 0; i < ARRAY_SIZE (to_test_list); i++)
     {
       int nr = seccomp_syscall_resolve_name_arch (arch_token, to_test_list[i]);
       seccomp_data data = { nr, arch_token, 0, { 0, 0, 0, 0, 0, 0 } };
 
+      int null_fd = open ("/dev/null", O_WRONLY);
+      int stdout_backup = global_hide_stdout (null_fd);
+      close (null_fd);
+
       fseek (tmp_fp, 0, SEEK_SET);
-      int stdout_backup = start_quiet ();
       char *retval_str = emu_lines (tmp_fp, &data);
-      end_quiet (stdout_backup);
+
+      global_ret_stdout (stdout_backup);
 
       if (retval_str == NULL)
         continue;

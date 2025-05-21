@@ -20,8 +20,8 @@ uint32_t
 right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch,
                   char *origin_line)
 {
-  uint32_t rval;
-  if ((rval = STR2ARCH (rval_str)) != -1)
+  uint32_t rval = STR2ARCH (rval_str);
+  if (rval != (uint32_t)-1)
     return rval;
 
   if (STARTWITH (rval_str, "$X"))
@@ -30,7 +30,7 @@ right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch,
   char *syscall_name = strndup (rval_str, strchr (rval_str, ')') - rval_str);
   rval = seccomp_syscall_resolve_name_arch (arch, syscall_name);
   free (syscall_name);
-  if (rval != __NR_SCMP_ERROR)
+  if (rval != (uint32_t)__NR_SCMP_ERROR)
     return rval;
 
   char *end;
@@ -38,7 +38,7 @@ right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch,
   if (rval_str != end)
     return rval;
 
-  PEXIT (INVALID_RIGHT ": %s", origin_line);
+  PEXIT (INVALID_RIGHT_VAL ": %s", origin_line);
 }
 
 // this is used in assign line, right value only
@@ -51,11 +51,11 @@ uint32_t
 right_val_assignline (char *rval_str, seccomp_data *data, reg_mem *reg_ptr,
                       char *origin_line)
 {
-  uint32_t offset;
-  if ((offset = STR2ABS (rval_str)) != -1)
+  uint32_t offset = STR2ABS (rval_str);
+  if (offset != (uint32_t)-1)
     return *(uint32_t *)((char *)data + offset);
 
-  else if ((offset = STR2REG (rval_str)) != -1)
+  else if ((offset = STR2REG (rval_str)) != (uint32_t)-1)
     return *(uint32_t *)((char *)reg_ptr + offset);
 
   char *end = NULL;
@@ -63,7 +63,7 @@ right_val_assignline (char *rval_str, seccomp_data *data, reg_mem *reg_ptr,
   if (end != rval_str)
     return rval;
 
-  PEXIT (INVALID_RIGHT ": %s", origin_line);
+  PEXIT (INVALID_RIGHT_VAL ": %s", origin_line);
 }
 
 // this is used in assign line, left value only
@@ -76,7 +76,7 @@ left_val_assignline (char *lval_str, reg_set *reg_set, reg_mem *reg_ptr,
                      char *origin_line)
 {
   uint32_t reg_offset = STR2REG (lval_str);
-  if (reg_offset == -1)
+  if (reg_offset == (uint32_t)-1)
     PEXIT (INVALID_LEFT_VAR ": %s", origin_line);
 
   if (reg_offset > offsetof (reg_mem, X))

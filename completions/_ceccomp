@@ -45,7 +45,9 @@ if (( CURRENT == 2 )) {
             ;;
         (trace)
             _arguments -C \
+                $arch_compstr \
                 "--pid=[Attach to which process to extract its filters]:PID:->getpid" \
+                "--output=[Specify ceccomp output to avoid mixed with tracee program output]" \
                 "*:arguments:_files"
             # complete non-kernel pids like kill
             if [[ $state == "getpid" ]] {
@@ -61,6 +63,7 @@ if (( CURRENT == 2 )) {
         (probe)
             _arguments -C \
                 $arch_compstr \
+                "--output=[Specify ceccomp output to avoid mixed with tracee program output]" \
                 "*:arguments:_files"
             ;;
         (emu)

@@ -18,23 +18,6 @@
 
 #define LIGHTCOLORPRINTF(str, ...) printf (LIGHTCOLOR (str "\n"), __VA_ARGS__)
 
-static bool is_state_true (uint32_t A, uint32_t sym_enum, uint32_t rval);
-
-static bool emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data,
-                           char *origin_line);
-
-static void emu_assign_line (line_set *Line, reg_mem *reg, seccomp_data *data);
-
-static char *emu_ret_line (line_set *Line);
-
-static uint32_t emu_if_line (line_set *Line, reg_mem *reg, seccomp_data *data);
-
-static void clear_color (char *origin_line);
-
-void get_sysnr_arg (int argc, char *argv[], seccomp_data *data);
-
-void get_rest_args (int argc, char *argv[], seccomp_data *data);
-
 static bool
 is_state_true (uint32_t A, uint32_t cmp_enum, uint32_t rval)
 {
@@ -144,7 +127,7 @@ static char *
 emu_ret_line (line_set *Line)
 {
   char *retval_str = Line->clean_line + strlen ("return");
-  uint32_t retval = STR2RETVAL (retval_str);
+  int32_t retval = STR2RETVAL (retval_str);
   if (retval == -1)
     PEXIT (INVALID_RET_VAL ": %s", Line->origin_line);
 
@@ -174,6 +157,7 @@ emu_do_alu (uint32_t *A_ptr, uint8_t alu_enum, uint32_t rval)
     {
     case ALU_AN:
       *A_ptr &= rval;
+      return;
     case ALU_AD:
       *A_ptr += rval;
       return;
@@ -211,7 +195,7 @@ emu_alu_line (line_set *Line, reg_mem *reg)
 
   char *sym_str = clean_line + strlen ("$A");
   uint8_t sym_enum = parse_alu_sym (sym_str, origin_line);
-  uint8_t sym_len = GETSYMLEN (sym_len);
+  uint8_t sym_len = GETSYMLEN (sym_enum);
 
   uint32_t *A_ptr = &reg->A;
 
@@ -224,7 +208,7 @@ emu_alu_line (line_set *Line, reg_mem *reg)
     {
       rval = strtoul (rval_str, &end, 0);
       if (rval_str == end)
-        PEXIT (INVALID_RIGHT ": %s", origin_line);
+        PEXIT (INVALID_RIGHT_VAL ": %s", origin_line);
     }
 
   emu_do_alu (A_ptr, sym_enum, rval);
@@ -288,29 +272,23 @@ emu_lines (FILE *read_fp, seccomp_data *data)
 }
 
 int
-start_quiet ()
+global_hide_stdout (int filedup2)
 {
   int stdout_backup = dup (fileno (stdout));
   if (stdout_backup == -1)
     PERROR ("dup");
 
-  int dev_null = open ("/dev/null", O_WRONLY);
-  if (dev_null == -1)
-    PERROR ("open");
-
-  if (dup2 (dev_null, fileno (stdout)) == -1)
-    PERROR ("start_quiet dup2");
-
-  close (dev_null);
+  if (dup2 (filedup2, fileno (stdout)) == -1)
+    PERROR ("global_hide_stdout dup2");
 
   return stdout_backup;
 }
 
 void
-end_quiet (int stdout_backup)
+global_ret_stdout (int stdout_backup)
 {
   if (dup2 (stdout_backup, fileno (stdout)) == -1)
-    PERROR ("end_quiet dup2")
+    PERROR ("global_ret_stdout dup2")
   close (stdout_backup);
 }
 
@@ -320,10 +298,11 @@ emulate (ceccomp_args *args)
   seccomp_data data = { 0, 0, 0, { 0, 0, 0, 0, 0, 0 } };
 
   data.arch = args->arch_token;
-  
-  data.nr = seccomp_syscall_resolve_name_arch(args->arch_token, args->syscall_nr);
+
+  data.nr
+      = seccomp_syscall_resolve_name_arch (args->arch_token, args->syscall_nr);
   if (data.nr == __NR_SCMP_ERROR)
-    data.nr = strtoull_check(args->syscall_nr, 0, INVALID_SYSNR);
+    data.nr = strtoull_check (args->syscall_nr, 0, INVALID_SYSNR);
 
   for (int i = 0; i < 6; i++)
     data.args[i] = args->sys_args[i];
@@ -332,12 +311,16 @@ emulate (ceccomp_args *args)
   int stdout_backup = 0;
   char *retval_str = NULL;
   if (args->quiet)
-    stdout_backup = start_quiet ();
+  {
+    int null_fd = open ("/dev/null", O_WRONLY);
+    stdout_backup = global_hide_stdout (null_fd);
+    close (null_fd);
+  }
 
   retval_str = emu_lines (args->read_fp, &data);
 
   if (stdout_backup != 0)
-    end_quiet (stdout_backup);
+    global_ret_stdout (stdout_backup);
 
   printf ("return " BLUE_S "\n", retval_str);
 }

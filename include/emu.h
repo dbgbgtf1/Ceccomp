@@ -12,9 +12,9 @@ typedef struct
   uint32_t mem[BPF_MEMWORDS];
 } reg_mem;
 
-extern int start_quiet ();
+extern void global_ret_stdout (int stdout_backup);
 
-extern void end_quiet (int stdout_backup);
+extern int global_hide_stdout (int filedup2);
 
 extern char *emu_lines (FILE *fp, seccomp_data *data);
 

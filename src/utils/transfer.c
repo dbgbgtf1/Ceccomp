@@ -39,7 +39,7 @@ ARCH2STR (uint32_t token)
       return STR_ARCH_MIPS64N32;
     case SCMP_ARCH_MIPSEL64N32:
       return STR_ARCH_MIPSEL64N32;
-      
+
     case SCMP_ARCH_PARISC:
       return STR_ARCH_PARISC;
     case SCMP_ARCH_PARISC64:
@@ -230,7 +230,7 @@ RETVAL2STR (uint32_t retval)
     }
 }
 
-uint32_t
+int32_t
 STR2RETVAL (char *str)
 {
   if (strstr (str, "KILL"))
@@ -253,7 +253,7 @@ STR2RETVAL (char *str)
     return -1;
 }
 
-uint32_t
+int32_t
 STR2REG (char *str)
 {
   if (STARTWITH (str, "$A"))
@@ -275,8 +275,6 @@ STR2REG (char *str)
 char *
 REG2STR (uint32_t offset)
 {
-  uint32_t mem_offset = offsetof (reg_mem, mem[0]);
-
   switch (offset)
     {
     case offsetof (reg_mem, A):

@@ -57,9 +57,9 @@ extern "C"
 
   extern char *RETVAL2STR (uint32_t retval);
 
-  extern uint32_t STR2RETVAL (char *str);
+  extern int32_t STR2RETVAL (char *str);
 
-  extern uint32_t STR2REG (char *str);
+  extern int32_t STR2REG (char *str);
 
   extern char *REG2STR (uint32_t offset);
 

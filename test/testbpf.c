@@ -5,6 +5,7 @@
 #include <linux/audit.h>
 #include <linux/filter.h>
 #include <linux/seccomp.h>
+#include <seccomp.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -43,7 +44,7 @@ load_filter (uint32_t t_arch)
 int
 main ()
 {
-  uint32_t arch = STR2ARCH ("x86_64");
+  uint32_t arch = SCMP_ARCH_X86_64;
   int pid;
 
   // pid_trace(68318, arch);

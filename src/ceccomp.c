@@ -14,8 +14,6 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 
-static void init (ceccomp_args *args);
-
 void
 init (ceccomp_args *args)
 {
@@ -40,26 +38,28 @@ init (ceccomp_args *args)
 }
 
 static struct argp_option options[] = {
-  { "quiet", 'q', 0, 0 },     { "output", 'o', "OUTPUT", 0 },
-  { "arch", 'a', "ARCH", 0 }, { "pid", 'p', "PID", 0 },
-  { "fmt", 'f', "FMT", 0 }, { "help", 'h', 0, 0 }, { "usage", 'u', 0, 0 },
+  { "quiet", 'q', NULL, 0, NULL, 0 },  { "output", 'o', "OUTPUT", 0, NULL, 0 },
+  { "arch", 'a', "ARCH", 0, NULL, 0 }, { "pid", 'p', "PID", 0, NULL, 0 },
+  { "fmt", 'f', "FMT", 0, NULL, 0 },   { "help", 'h', NULL, 0, NULL, 0 },
+  { "usage", 'u', NULL, 0, NULL, 0 },
 };
 
 int
 main (int argc, char **argv)
 {
-  setbuf(stdin, NULL);
-  setbuf(stdout, NULL);
-  setbuf(stderr, NULL);
+  setbuf (stdin, NULL);
+  setbuf (stdout, NULL);
+  setbuf (stderr, NULL);
 
   ceccomp_args args;
 
   init (&args);
-  static struct argp argp = { options, parse_opt, NULL, NULL };
+  static struct argp argp
+      = { options, parse_opt, NULL, NULL, NULL, NULL, NULL };
   argp_parse (&argp, argc, argv, ARGP_IN_ORDER, 0, &args);
 
-  uint32_t program_start_idx;
-  if (args.program_start != (char *)ARG_INIT_VAL)
+  uint32_t program_start_idx = -1;
+  if (args.mode == TRACE_PROG_MODE || args.mode == PROBE_MODE)
     program_start_idx = get_arg_idx (argc, argv, args.program_start);
 
   switch (args.mode)
@@ -77,10 +77,10 @@ main (int argc, char **argv)
       probe (&argv[program_start_idx], args.arch_token, args.output_fp);
       return 0;
     case TRACE_PID_MODE:
-      pid_trace(args.pid, args.arch_token, args.output_fp);
+      pid_trace (args.pid, args.arch_token, args.output_fp);
       return 0;
     case TRACE_PROG_MODE:
-      program_trace(&argv[program_start_idx], args.output_fp, false);
+      program_trace (&argv[program_start_idx], args.output_fp, false);
       return 0;
     default:
       help ();

@@ -6,22 +6,23 @@ TEST_DIR := ./test
 BUILD_DIR := ./build
 BUILD_UTIL := ./build/utils
 
-C_SRCS := $(shell find ./src ! -name 'ceccomp.c' ! -name 'test.c' -name '*.c' -or -name '*.s')
+C_SRCS := $(shell find $(SRC_DIR) ! -name 'ceccomp.c' -name '*.c' -or -name '*.s')
 CXX_SRCS := $(shell find $(SRC_DIR) -name '*.cpp')
+TEST_SRCS := $(shell find $(TEST_DIR) -name '*.c')
 
 C_OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.c.o,$(C_SRCS))
 CXX_OBJS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.cpp.o,$(CXX_SRCS))
+TEST_OBJS := $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.c.o,$(TEST_SRCS))
 OBJS := $(C_OBJS) $(CXX_OBJS)
 
 CECCOMP_MAIN := $(BUILD_DIR)/ceccomp.c.o
-TEST_MAIN := $(BUILD_DIR)/test.c.o
 
 CC := gcc
 CXX := g++
 
-CFLAGS := -fpie -fstack-protector
-CXXFLAGS := -fpie -fstack-protector
-LDFLAGS := -lseccomp -z now -z noexecstack -fpie -fstack-protector
+CFLAGS := -fpie -fstack-protector -Wall -Wextra
+CXXFLAGS := -fpie -fstack-protector -Wall -Wextra
+LDFLAGS := -lseccomp -z now -z noexecstack -fpie -fstack-protector -Wall -Wextra
 
 ifdef DEBUG
 	ifeq ($(DEBUG),1)
@@ -61,11 +62,11 @@ zsh_cmp_install: $(ZSH_SRC)/_ceccomp
 ceccomp: $(OBJS) $(CECCOMP_MAIN)
 	$(CXX) $(LDFLAGS) $^ -o $@
 	mv -f $@ $(BUILD_DIR)
-	@echo "ceccomp is maked\n"
+	@echo "ceccomp is maked"
 	@echo ""
 
-test: $(OBJS) $(TEST_MAIN)
-	$(CXX) $(LDFLAGS) $^ -o $(BUILD_DIR)/$@
+test: $(TEST_OBJS)
+	$(CC) $(CFLAGS) $^ -o $(BUILD_DIR)/$@
 	@echo "test is maked"
 	@echo ""
 

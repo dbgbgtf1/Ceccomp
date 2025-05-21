@@ -10,7 +10,7 @@
 
 #define TRACE_HINT                                                            \
   "ceccomp trace\t[ --output= ] [ --arch= ] --pid=\n"                         \
-  "ceccomp trace\t[ --output= ] PROGRAM [ program-args ]\n"
+  "ceccomp trace\t[ --output= ] PROGRAM [ program-args ]"
 
 #define OPTION_HINT                                                           \
   "Options:\n" OPTION_ARCH_HINT OPTION_FMT_HINT OPTION_PID_HINT               \
@@ -26,7 +26,7 @@
   "-p, --pid=system process pid     trace the bpftext of the pid\n"
 #define OPTION_OUTPUT_HINT                                                    \
   "-o, --output=file                to avoid ceccomp output mixed with "      \
-  "program output, default as stderr\n"
+  "tracee program output, default as stderr\n"
 #define OPTION_QUIET_HINT                                                     \
   "-q, --quiet                      print only emulate result\n"
 #define OPTION_ARG_IP_HINT                                                    \

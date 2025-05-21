@@ -11,12 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static subcommand parse_subcommand (char *arg);
-
-static void asm_disasm_args (ceccomp_args *args_ptr, char *arg);
-
-static void emu_args (ceccomp_args *args_ptr, char *arg);
-
 uint64_t
 strtoull_check (char *num, int base, char *err)
 {
@@ -50,7 +44,7 @@ version ()
   PEXIT ("%s", CECCOMP_VERSION);
 }
 
-subcommand
+static subcommand
 parse_subcommand (char *arg)
 {
   if (!strcmp (arg, "asm"))
@@ -70,7 +64,7 @@ parse_subcommand (char *arg)
   exit (0);
 }
 
-print_mode
+static print_mode
 parse_print_mode (char *arg)
 {
   if (!strcmp (arg, "hexline"))
@@ -84,7 +78,7 @@ parse_print_mode (char *arg)
 }
 
 // asm and disasm share the same args logic
-void
+static void
 asm_disasm_args (ceccomp_args *args_ptr, char *arg)
 {
   static uint32_t arg_idx = 0;
@@ -97,7 +91,7 @@ asm_disasm_args (ceccomp_args *args_ptr, char *arg)
     PEXIT (UNABLE_OPEN_FILE ": %s", arg);
 }
 
-void
+static void
 emu_args (ceccomp_args *args_ptr, char *arg)
 {
   static uint32_t arg_idx = 0;
@@ -121,7 +115,7 @@ emu_args (ceccomp_args *args_ptr, char *arg)
 uint32_t
 get_arg_idx (int argc, char *argv[], char *arg_to_find)
 {
-  uint32_t idx = 0;
+  int32_t idx = 0;
   while (idx++ < argc)
     {
       if (!strcmp (argv[idx], arg_to_find))
@@ -135,7 +129,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
 {
   ceccomp_args *args_ptr = state->input;
 
-  if (args_ptr->mode == PROBE_MODE || args_ptr->mode == TRACE_PROG_MODE)
+  if (args_ptr->program_start != (char *)ARG_INIT_VAL)
     return 0;
 
   if (args_ptr->mode == TRACE_MODE)
@@ -153,7 +147,8 @@ parse_opt (int key, char *arg, struct argp_state *state)
       // so if we found '--pid' first, we decide it's trace-pid mode
       // else if we found arg first
       // we decide it's the trace-prog mode and this arg is program
-      // whatever after this belongs to the program args, we don't parse them
+      // whatever after this belongs to the tracee program args, we don't
+      // parse them
     }
 
   switch (key)
@@ -161,6 +156,8 @@ parse_opt (int key, char *arg, struct argp_state *state)
     case ARGP_KEY_ARG:
       if (state->arg_num == 0)
         args_ptr->mode = parse_subcommand (arg);
+      else if (args_ptr->mode == PROBE_MODE)
+        args_ptr->program_start = arg;
       else if (args_ptr->mode == ASM_MODE || args_ptr->mode == DISASM_MODE)
         asm_disasm_args (args_ptr, arg);
       else if (args_ptr->mode == EMU_MODE)
@@ -176,7 +173,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
       return 0;
     case 'a':
       args_ptr->arch_token = STR2ARCH (arg);
-      if (args_ptr->arch_token == -1)
+      if (args_ptr->arch_token == (uint32_t)-1)
         PEXIT (INVALID_ARCH ": %s" SUPPORT_ARCH, arg);
       return 0;
     case 'p':

@@ -7,6 +7,7 @@
 #include <asm-generic/errno.h>
 #include <errno.h>
 #include <seccomp.h>
+#include <stdint.h>
 #include <sys/ptrace.h>
 #include <sys/prctl.h>
 #include <sys/wait.h>
@@ -18,18 +19,6 @@
 
 #define LOAD_SUCCESS 0x0
 #define LOAD_FAIL 0x80000000
-
-static void strict_mode ();
-
-static uint64_t check_scmp_mode (syscall_info *Info, int pid, fprog *prog);
-
-static void dump_filter (syscall_info *Info, int pid, fprog *prog);
-
-static void filter_mode (syscall_info *Info, int pid, fprog *prog, FILE *output_fp);
-
-static void child (char *argv[]);
-
-static void parent (int pid, FILE *output_fp, bool oneshot);
 
 static void
 strict_mode ()
@@ -46,9 +35,9 @@ check_scmp_mode (syscall_info *Info, int pid, fprog *prog)
   uint64_t arg0 = Info->entry.args[0];
   uint64_t arg1 = Info->entry.args[1];
 
-  if (nr == seccomp_syscall_resolve_name_arch (arch, "seccomp"))
+  if (nr == (uint64_t)seccomp_syscall_resolve_name_arch (arch, "seccomp"))
     seccomp_mode = arg0 | LOAD_SUCCESS;
-  else if (nr == seccomp_syscall_resolve_name_arch (arch, "prctl")
+  else if (nr == (uint64_t)seccomp_syscall_resolve_name_arch (arch, "prctl")
            && arg0 == PR_SET_SECCOMP)
     {
       if (arg1 == SECCOMP_MODE_STRICT)
@@ -209,6 +198,7 @@ pid_trace (int pid, uint32_t arch, FILE *output_fp)
           goto detach;
         case EMEDIUMTYPE:
           printf (BLUE (NOT_AN_CBPF));
+          continue;
         default:
           PERROR ("ptrace get filter error");
         }

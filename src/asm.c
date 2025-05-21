@@ -17,34 +17,6 @@
 #include <sys/ptrace.h>
 #include <sys/types.h>
 
-static filter MISC_TXA ();
-
-static filter MISC_TAX ();
-
-static uint16_t jmp_mode (uint8_t sym_enum, bool *reverse, char *origin_line);
-
-static void jmp_src (char *rval, filter *f_ptr, uint32_t arch,
-                     char *origin_line);
-
-static filter JMP_GOTO (line_set *Line, uint32_t pc);
-
-static filter JMP (line_set *Line, uint32_t pc, uint32_t arch);
-
-static bool LD_LDX_ABS (char *rval, filter *f_ptr);
-
-static bool LD_LDX_MEM (char *rval, filter *f_ptr, char *origin_line);
-
-static bool LD_LDX_IMM (char *rval, filter *f_ptr, uint32_t arch,
-                        char *origin_line);
-
-static filter LD_LDX (line_set *Line, uint32_t arch);
-
-static filter RET (line_set *Line);
-
-static filter ST_STX (line_set *Line);
-
-static void format_print (filter filter, char *format);
-
 static filter
 MISC_TXA ()
 {
@@ -57,6 +29,8 @@ MISC_TAX ()
   return (filter)BPF_STMT (BPF_MISC | BPF_TAX, 0);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 // comparing the sym
 // also EQ and NE can be the same thing
 // only you have to reverse
@@ -86,6 +60,7 @@ jmp_mode (uint8_t cmp_enum, bool *reverse, char *origin_line)
       PEXIT (INVALID_CMPENUM ": %d\n: %s", cmp_enum, origin_line);
     }
 }
+#pragma GCC diagnostic pop
 
 static filter
 JMP_GOTO (line_set *Line, uint32_t pc)
@@ -157,7 +132,7 @@ static bool
 LD_LDX_ABS (char *rval, filter *f_ptr)
 {
   uint32_t offset = STR2ABS (rval);
-  if (offset == -1)
+  if (offset == (uint32_t)-1)
     return false;
 
   f_ptr->code |= (BPF_W | BPF_ABS);
@@ -177,6 +152,8 @@ LD_LDX_MEM (char *rval, filter *f_ptr, char *origin_line)
 
   if (*end != ']')
     PEXIT (INVALID_MEM ": %s", origin_line);
+  if (*(end + 1) != '=')
+    PEXIT (INVALID_OPERATOR ": %s", origin_line);
   if (mem_idx > 15)
     PEXIT (INVALID_MEM_IDX ": %s", origin_line);
 
@@ -186,12 +163,12 @@ LD_LDX_MEM (char *rval, filter *f_ptr, char *origin_line)
 }
 
 static bool
-LD_LDX_IMM (char *rval, filter *f_ptr, uint32_t arch, char *origin_line)
+LD_LDX_IMM (char *rval, filter *f_ptr, uint32_t arch)
 {
   char *end;
   f_ptr->code |= BPF_IMM;
   f_ptr->k = seccomp_syscall_resolve_name_arch (arch, rval);
-  if (f_ptr->k != __NR_SCMP_ERROR)
+  if (f_ptr->k != (uint32_t)__NR_SCMP_ERROR)
     return true;
 
   f_ptr->k = strtol (rval, &end, 0);
@@ -219,9 +196,9 @@ LD_LDX (line_set *Line, uint32_t arch)
     return filter;
   else if (LD_LDX_MEM (rval, &filter, origin_line))
     return filter;
-  else if (LD_LDX_IMM (rval, &filter, arch, origin_line))
+  else if (LD_LDX_IMM (rval, &filter, arch))
     return filter;
-  PEXIT (INVALID_RIGHT ": %s", origin_line);
+  PEXIT (INVALID_RIGHT_VAL ": %s", origin_line);
 }
 
 static filter
@@ -233,7 +210,7 @@ RET (line_set *Line)
 
   char *retval_str = clean_line + strlen ("return");
 
-  uint32_t retval = STR2RETVAL (retval_str);
+  int32_t retval = STR2RETVAL (retval_str);
   if (retval != -1)
     {
       filter.code |= BPF_K;
@@ -267,13 +244,13 @@ ST_STX (line_set *Line)
   filter.k = idx;
 
   if (*(end + 2) != '$')
-    PEXIT (INVALID_RIGHT ": %s", origin_line);
+    PEXIT (INVALID_RIGHT_VAL ": %s", origin_line);
   if (*(end + 3) == 'A')
     filter.code |= BPF_A;
   if (*(end + 3) == 'X')
     filter.code |= BPF_X;
   else
-    PEXIT (INVALID_RIGHT ": %s", origin_line);
+    PEXIT (INVALID_RIGHT_VAL ": %s", origin_line);
 
   return filter;
 }
@@ -329,7 +306,7 @@ ALU (line_set *Line)
   char *end;
   filter.k = strtol (rval_str, &end, 0);
   if (rval_str == end)
-    PEXIT (INVALID_RIGHT_VALUE ": %s", origin_line);
+    PEXIT (INVALID_RIGHT_VAL ": %s", origin_line);
   return filter;
 }
 
@@ -349,7 +326,7 @@ format_print (filter filter, char *format)
 }
 
 void
-assemble (uint32_t arch, FILE *read_fp, uint32_t print_mode)
+assemble (uint32_t arch, FILE *read_fp, print_mode p_mode)
 {
   line_set Line;
   fprog prog;
@@ -358,9 +335,8 @@ assemble (uint32_t arch, FILE *read_fp, uint32_t print_mode)
 
   while (pre_asm (read_fp, &Line), Line.origin_line != NULL)
     {
-      filter f_current;
+      filter f_current = { 0, 0, 0, 0 };
       char *clean_line = Line.clean_line;
-      char *origin_line = Line.origin_line;
 
       if (!strcmp (clean_line, "$A=$X"))
         f_current = MISC_TXA ();
@@ -384,11 +360,11 @@ assemble (uint32_t arch, FILE *read_fp, uint32_t print_mode)
     }
 
   char *format = NULL;
-  if (print_mode == HEXFMT)
+  if (p_mode == HEXFMT)
     format = "\"\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\",\n";
-  else if (print_mode == HEXLINE)
+  else if (p_mode == HEXLINE)
     format = "\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x";
-  else if (print_mode == RAW)
+  else if (p_mode == RAW)
     format = "%c%c%c%c%c%c%c%c";
 
   for (int i = 1; i < prog.len; i++)

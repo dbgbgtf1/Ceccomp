@@ -9,14 +9,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-static bool is_etc (char *origin_line);
-
-static char *pre_get_lines (FILE *read_fp);
-
-static void pre_clear_color (char *clean_line);
-
-static void pre_clear_space (char *clean_line);
-
 // glibc strcpy will copy str in 8 bytes
 // I don't want that to happen some times
 void
@@ -52,7 +44,7 @@ pre_get_lines (FILE *fp)
 
   read = getline (&origin_line, &len, fp);
 
-  if (read != -1)
+  if (read != (size_t)-1)
     {
       if (origin_line[read - 1] == '\n')
         origin_line[read - 1] = '\0';

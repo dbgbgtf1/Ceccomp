@@ -54,7 +54,8 @@ Reg::try_transfer (uint32_t val)
     {
       ret = ARCH2STR (val);
       if (ret == NULL)
-        fprintf (output_fp, "unknown or unsupported architecture: " BLUE_H, val);
+        fprintf (output_fp, "unknown or unsupported architecture: " BLUE_H,
+                 val);
     }
   return ret;
 }
@@ -70,7 +71,7 @@ Reg::ret_same_type (uint32_t val)
   if (ret == NULL)
     {
       ret = (char *)malloc (0x20);
-      snprintf ((char *)ret, 0x20, BLUE_H, val);
+      snprintf ((char *)ret, 0x20, "0x%x", val);
     }
   return ret;
 }
@@ -132,7 +133,7 @@ Parser::LD (filter *f_ptr)
       return;
     case BPF_ABS:
       if (!ABS2STR (k))
-        PEXIT (UNKNOWN_OFFSET_ABS ": " BLUE_H, k);
+        PEXIT (INVALID_OFFSET_ABS ": " BLUE_H, k);
       fprintf (output_fp, BLUE_A " = " BLUE_S, ABS2STR (k));
       A.set_val (ABS2STR (k));
       return;
@@ -143,7 +144,8 @@ Parser::LD (filter *f_ptr)
       A.set_val (mem[k].m_str);
       return;
     case BPF_LEN:
-      fprintf (output_fp, BLUE_A " = " BLUE_H, (uint32_t)sizeof (seccomp_data));
+      fprintf (output_fp, BLUE_A " = " BLUE_H,
+               (uint32_t)sizeof (seccomp_data));
       A.set_val (sizeof (seccomp_data));
       return;
     case BPF_MSH:
@@ -168,7 +170,7 @@ Parser::LDX (filter *f_ptr)
       return;
     case BPF_ABS:
       if (!ABS2STR (k))
-        PEXIT (UNKNOWN_OFFSET_ABS ": " BLUE_H, k);
+        PEXIT (INVALID_OFFSET_ABS ": " BLUE_H, k);
       fprintf (output_fp, BLUE_X " = " BLUE_S, ABS2STR (k));
       X.set_val (ABS2STR (k));
       return;
@@ -179,7 +181,8 @@ Parser::LDX (filter *f_ptr)
       X.set_val (mem[k].m_str);
       return;
     case BPF_LEN:
-      fprintf (output_fp, BLUE_X " = " BLUE_H, (uint32_t)sizeof (seccomp_data));
+      fprintf (output_fp, BLUE_X " = " BLUE_H,
+               (uint32_t)sizeof (seccomp_data));
       X.set_val (sizeof (seccomp_data));
       return;
     case BPF_MSH:
@@ -236,7 +239,7 @@ Parser::ALU (filter *f_ptr)
 
         case BPF_DIV:
           snprintf (tmp, 0x100, "(%s /= 0x%x)", A.m_str, k);
-          fprintf (output_fp, BLUE_A " /= " BLUE_H " ", k);
+          fprintf (output_fp, BLUE_A " /= " BLUE_H, k);
           A.set_val (tmp);
           return;
 
@@ -280,7 +283,7 @@ Parser::ALU (filter *f_ptr)
           // buf BPF_K = 0, so put it here
         case BPF_NEG:
           snprintf (tmp, 0x100, "(-%s)", A.m_str);
-          fprintf (output_fp, BLUE_A " = " BLUE ("-A"));
+          fprintf (output_fp, BLUE_A " = -" BLUE_A);
           A.set_val (tmp);
           return;
 
@@ -293,58 +296,59 @@ Parser::ALU (filter *f_ptr)
         {
         case BPF_ADD:
           snprintf (tmp, 0x100, "(%s += %s)", A.m_str, X.m_str);
-          fprintf (output_fp, BLUE_A " += " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " += " BLUE_S, "$X");
           A.set_val (tmp);
           return;
         case BPF_SUB:
           snprintf (tmp, 0x100, "(%s -= %s)", A.m_str, X.m_str);
-          fprintf (output_fp, BLUE_A " -= " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " -= " BLUE_S, "$X");
           A.set_val (tmp);
           return;
         case BPF_MUL:
           snprintf (tmp, 0x100, "(%s *= %s)", A.m_str, X.m_str);
-          fprintf (output_fp, BLUE_A " *= " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " *= " BLUE_S, "$X");
           A.set_val (tmp);
           return;
 
         case BPF_DIV:
           snprintf (tmp, 0x100, "(%s /= %s)", A.m_str, X.m_str);
-          fprintf (output_fp, BLUE_A " /= " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " /= " BLUE_S, "$X");
           A.set_val (tmp);
           return;
 
         case BPF_AND:
           snprintf (tmp, 0x100, "(%s &= %s)", A.m_str, X.m_str);
-          fprintf (output_fp, BLUE_A " &= " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " &= " BLUE_S, "$X");
           A.set_val (tmp);
           return;
 
         case BPF_OR:
           snprintf (tmp, 0x100, "(%s |= %s)", A.m_str, X.m_str);
-          fprintf (output_fp, BLUE_A " |= " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " |= " BLUE_S, "$X");
           A.set_val (tmp);
           return;
 
         case BPF_XOR:
           snprintf (tmp, 0x100, "(%s ^= %s)", A.m_str, X.m_str);
-          fprintf (output_fp, BLUE_A " ^= " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " ^= " BLUE_S, "$X");
           A.set_val (tmp);
           return;
 
         case BPF_MOD:
           snprintf (tmp, 0x100, "(%s %%= %s)", A.m_str, X.m_str);
-          fprintf (output_fp, BLUE_A " %%= " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " %%= " BLUE_S, "$X");
           A.set_val (tmp);
           return;
 
         case BPF_LSH:
-          printf (BLUE_A " <<= " BLUE_S, X.m_str);
+          snprintf (tmp, 0x100, "(%s >>= %s)", A.m_str, X.m_str);
+          fprintf (output_fp, BLUE_A " <<= " BLUE_S, "$X");
           A.set_val (tmp);
           return;
 
         case BPF_RSH:
           snprintf (tmp, 0x100, "(%s >>= %s)", A.m_str, X.m_str);
-          fprintf (output_fp, BLUE_A " >>= " BLUE_S, X.m_str);
+          fprintf (output_fp, BLUE_A " >>= " BLUE_S, "$X");
           A.set_val (tmp);
           return;
 
@@ -372,28 +376,28 @@ Parser::JMP (filter *f_ptr, const char *syms[4], int pc)
       return false;
 
     case BPF_JEQ | BPF_X:
-      fprintf (output_fp, syms[0], A.ret_same_type (X.m_str));
+      fprintf (output_fp, syms[0], "$X");
       return true;
     case BPF_JEQ | BPF_K:
       fprintf (output_fp, syms[0], A.ret_same_type (k));
       return true;
 
     case BPF_JGT | BPF_X:
-      fprintf (output_fp, syms[1], A.ret_same_type (X.m_str));
+      fprintf (output_fp, syms[1], "$X");
       return true;
     case BPF_JGT | BPF_K:
       fprintf (output_fp, syms[1], A.ret_same_type (k));
       return true;
 
     case BPF_JGE | BPF_X:
-      fprintf (output_fp, syms[2], A.ret_same_type (X.m_str));
+      fprintf (output_fp, syms[2], "$X");
       return true;
     case BPF_JGE | BPF_K:
       fprintf (output_fp, syms[2], A.ret_same_type (k));
       return true;
 
     case BPF_JSET | BPF_X:
-      fprintf (output_fp, syms[3], A.ret_same_type (X.m_str));
+      fprintf (output_fp, syms[3], "$X");
       return true;
     case BPF_JSET | BPF_K:
       fprintf (output_fp, syms[3], A.ret_same_type (k));
@@ -478,12 +482,12 @@ Parser::MISC (filter *f_ptr)
   switch (mode)
     {
     case BPF_TAX:
-      fprintf (output_fp, BLUE_A " = " BLUE_X);
+      fprintf (output_fp, BLUE_X " = " BLUE_A);
       X.set_val (A.m_str);
       return;
     case BPF_TXA:
       fprintf (output_fp, BLUE_A " = " BLUE_X);
-      A.set_val (1);
+      A.set_val (X.m_str);
       return;
     default:
       fprintf (output_fp, "unknown mode: 0x%x", mode);

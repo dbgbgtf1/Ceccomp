@@ -1,12 +1,7 @@
 #ifndef ERROR
 #define ERROR
 
-#include "transfer.h"
-
-// preprocess error macros
-#define NOT_ENOUGH_ARGS "not enough args"
-#define NO_ARCH_AFTER_PROGRAM "no --arch= after trace program "
-#define INVALID_ARG "invalid arg"
+// args err
 #define UNABLE_OPEN_FILE "unable to open file"
 #define INVALID_ARCH "invalid arch"
 #define INVALID_PRINT_MODE "invalid print mode"
@@ -19,22 +14,17 @@
   " " STR_ARCH_PARISC64 " " STR_ARCH_PPC64 " " STR_ARCH_PPC                   \
   " " STR_ARCH_PPC64LE " " STR_ARCH_S390X " " STR_ARCH_S390                   \
   " " STR_ARCH_RISCV64
-
-// invalid args
 #define INVALID_SYSNR "invalid syscall nr"
 #define INVALID_SYS_ARGS "invalid syscall args"
 #define INVALID_IP "invalid instruction pointer"
 #define INVALID_PID "invalid pid"
 
-// text->bpf error macros
+// text->raw err
 #define INVALID_OPERATOR "invalid operator"
 #define INVALID_CMPENUM "invalid cmp sym enum"
 #define INVALID_ALUENUM "invalid alu sym enum"
 
-#define INVALID_RIGHT_VALUE "invalid right value"
-#define INVALID_RIGHT_VAR "invalid right valiable"
-#define INVALID_RIGHT INVALID_RIGHT_VALUE " or " INVALID_RIGHT_VAR
-
+#define INVALID_RIGHT_VAL "invalid right value"
 #define INVALID_LEFT_VAR "invalid left valiable"
 
 #define INVALID_MEM_IDX "invalid idx of $mem"
@@ -53,9 +43,26 @@
 
 #define INVALID_RET_VAL "invalid ret value"
 
-// bpf->text- error macros
-#define UNKNOWN_OFFSET_ABS "unknown offset of seccomp_data"
+// text->raw
+#define INVALID_OFFSET_ABS "invalid offset of seccomp_data"
 
+#define INVALID_CLASS "invalid class"
+
+#define INVALID_REG_A_VAL "invalid reg A val"
+#define INVALID_REG_X_VAL "invalid reg X val"
+#define INVALID_REG_MEM_VAL(idx) "invalid reg mem" idx "val"
+#define INVALID_A_STATUS "invalid A status"
+
+#define INVALID_MISC_MODE "invalid misc mode"
+#define INVALID_RET_MODE "invalid ret mode"
+#define INVALID_JMP_MODE "invalid jmp mode"
+#define INVALID_JMP_SRC "invalid jmp src"
+#define INVALID_JT_JF "invalid jt and jf both 0"
+#define INVALID_ALU_OP "invalid alu operation"
+#define INVALID_ALU_SRC "invalid alu src"
+#define INVALID_LD_LDX_MODE "invalid ld or ldx mode"
+
+// trace err
 #define SYS_ADMIN_OR_KERNEL                                                   \
   "run with CAP_SYS_ADMIN capability when trace pid\nand kernel pid can't "   \
   "be trace"
