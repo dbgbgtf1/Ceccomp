@@ -24,7 +24,7 @@ strtoull_check (char *num, int base, char *err)
 void
 help ()
 {
-  printf ("usage: ceccomp [subcommand] [args] [options]\n");
+  printf ("usage: ceccomp <subcommand> <args> <options>\n");
   printf ("\n");
   printf ("%s\n", ASM_HINT);
   printf ("%s\n", DISASM_HINT);
