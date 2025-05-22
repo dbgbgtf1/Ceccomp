@@ -8,6 +8,7 @@
 #include <seccomp.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/prctl.h>
@@ -37,8 +38,8 @@ load_filter (uint32_t t_arch)
   syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, NULL, &prog);
 
   char buf[0x10];
-  write(1, "this is program output\n", 24);
-  exit(0);
+  write (1, "this is program output\n", 24);
+  exit (0);
 }
 
 int
@@ -48,5 +49,7 @@ main ()
   int pid;
 
   // pid_trace(68318, arch);
+  perror("this is stderr msg");
+  puts ("this is stdout msg");
   load_filter (arch);
 }

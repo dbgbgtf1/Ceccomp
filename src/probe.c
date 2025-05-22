@@ -42,4 +42,6 @@ probe (char *argv[], uint32_t arch_token, FILE *output_fp)
 
       fprintf (output_fp, "%-10s-> %s\n", to_test_list[i], retval_str);
     }
+
+  fclose (tmp_fp);
 }
