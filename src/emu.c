@@ -1,6 +1,7 @@
 #include "emu.h"
 #include "color.h"
 #include "error.h"
+#include "main.h"
 #include "parseargs.h"
 #include "parseobj.h"
 #include "preasm.h"
@@ -185,16 +186,18 @@ emu_do_alu (uint32_t *A_ptr, uint8_t alu_enum, uint32_t rval)
 }
 
 static void
+emu_alu_neg (reg_mem *reg)
+{
+  reg->A = -reg->A;
+  printf (BLUE_A " = -" BLUE_A "\n");
+  return;
+}
+
+static void
 emu_alu_line (line_set *Line, reg_mem *reg)
 {
   char *clean_line = Line->clean_line;
   char *origin_line = Line->origin_line;
-
-  if (STARTWITH(clean_line, "$A=-$A"))
-  {
-    reg->A = -reg->A;
-    printf ("");
-  }
 
   char *sym_str = clean_line + strlen ("$A");
   uint8_t sym_enum = parse_alu_sym (sym_str, origin_line);
@@ -215,6 +218,8 @@ emu_alu_line (line_set *Line, reg_mem *reg)
     }
 
   emu_do_alu (A_ptr, sym_enum, rval);
+
+  printf (BLUE_A " %.*s " BLUE_S "\n", sym_len, sym_str, rval_str);
 }
 
 static void
@@ -260,9 +265,12 @@ emu_lines (FILE *read_fp, seccomp_data *data)
         return emu_ret_line (&Line);
       else if (STARTWITH (clean_line, "goto"))
         actual_idx = emu_goto_line (&Line);
-      else if (STARTWITH (clean_line, "$A") && *(clean_line + 2) == '=')
+      else if (STARTWITH (clean_line, "$A=-$A"))
+        emu_alu_neg (reg);
+      else if ((STARTWITH (clean_line, "$") && *(clean_line + 2) == '=')
+               || (STARTWITH (clean_line, "$mem[")))
         emu_assign_line (&Line, reg, data);
-      else if (*clean_line == '$')
+      else if (STARTWITH (clean_line, "$A"))
         emu_alu_line (&Line, reg);
       else
         PEXIT (INVALID_ASM_CODE ": %s", origin_line);
@@ -277,11 +285,11 @@ emu_lines (FILE *read_fp, seccomp_data *data)
 int
 global_hide_stdout (int filedup2)
 {
-  int stdout_backup = dup (fileno (stdout));
+  int stdout_backup = dup (STDOUT_FILENO);
   if (stdout_backup == -1)
     PERROR ("dup");
 
-  if (dup2 (filedup2, fileno (stdout)) == -1)
+  if (dup2 (filedup2, STDOUT_FILENO) == -1)
     PERROR ("global_hide_stdout dup2");
 
   return stdout_backup;
@@ -290,7 +298,7 @@ global_hide_stdout (int filedup2)
 void
 global_ret_stdout (int stdout_backup)
 {
-  if (dup2 (stdout_backup, fileno (stdout)) == -1)
+  if (dup2 (stdout_backup, STDOUT_FILENO) == -1)
     PERROR ("global_ret_stdout dup2")
   close (stdout_backup);
 }
@@ -301,6 +309,9 @@ emulate (ceccomp_args *args)
   seccomp_data data = { 0, 0, 0, { 0, 0, 0, 0, 0, 0 } };
 
   data.arch = args->arch_token;
+
+  if (args->syscall_nr == (char *)ARG_INIT_VAL)
+    PEXIT ("%s", INPUT_SYS_NR);
 
   data.nr
       = seccomp_syscall_resolve_name_arch (args->arch_token, args->syscall_nr);

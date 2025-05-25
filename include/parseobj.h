@@ -35,7 +35,8 @@ typedef enum
   ALU_ML = 0x23,
   ALU_DV = 0x24,
   ALU_OR = 0x25,
-  ALU_NG = 0x26,
+  ALU_XO = 0x26,
+  ALU_NG = 0x27,
 
   ALU_LS = 0x30,
   ALU_RS = 0x31

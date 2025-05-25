@@ -126,8 +126,8 @@ parse_alu_sym (char *cmp_str, char *origin_line)
     return ALU_DV;
   else if (!strncmp (cmp_str, "|=", 2))
     return ALU_OR;
-  else if (!strncmp (cmp_str, "=-", 2))
-    return ALU_NG;
+  else if (!strncmp (cmp_str, "^=", 2))
+    return ALU_ML;
   else if (!strncmp (cmp_str, "<<=", 3))
     return ALU_LS;
   else if (!strncmp (cmp_str, ">>=", 3))
