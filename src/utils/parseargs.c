@@ -41,7 +41,8 @@ help ()
 void
 version ()
 {
-  PEXIT ("%s", CECCOMP_VERSION);
+  printf ("%s\n", CECCOMP_VERSION);
+  exit (0);
 }
 
 static subcommand
