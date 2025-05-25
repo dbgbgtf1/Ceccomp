@@ -165,22 +165,19 @@ emu_do_alu (uint32_t *A_ptr, uint8_t alu_enum, uint32_t rval)
       *A_ptr -= rval;
       return;
     case ALU_ML:
-      *A_ptr -= rval;
+      *A_ptr *= rval;
       return;
     case ALU_DV:
-      *A_ptr -= rval;
+      *A_ptr /= rval;
       return;
     case ALU_OR:
-      *A_ptr -= rval;
-      return;
-    case ALU_NG:
-      *A_ptr -= rval;
+      *A_ptr |= rval;
       return;
     case ALU_LS:
-      *A_ptr -= rval;
+      *A_ptr <<= rval;
       return;
     case ALU_RS:
-      *A_ptr -= rval;
+      *A_ptr >>= rval;
       return;
     default:
       PEXIT (INVALID_ALUENUM ": %d\n", alu_enum)
@@ -192,6 +189,12 @@ emu_alu_line (line_set *Line, reg_mem *reg)
 {
   char *clean_line = Line->clean_line;
   char *origin_line = Line->origin_line;
+
+  if (STARTWITH(clean_line, "$A=-$A"))
+  {
+    reg->A = -reg->A;
+    printf ("");
+  }
 
   char *sym_str = clean_line + strlen ("$A");
   uint8_t sym_enum = parse_alu_sym (sym_str, origin_line);
@@ -257,10 +260,10 @@ emu_lines (FILE *read_fp, seccomp_data *data)
         return emu_ret_line (&Line);
       else if (STARTWITH (clean_line, "goto"))
         actual_idx = emu_goto_line (&Line);
-      else if (STARTWITH (clean_line, "$A") && *(clean_line + 4) == '=')
-        emu_alu_line (&Line, reg);
-      else if (*clean_line == '$')
+      else if (STARTWITH (clean_line, "$A") && *(clean_line + 2) == '=')
         emu_assign_line (&Line, reg, data);
+      else if (*clean_line == '$')
+        emu_alu_line (&Line, reg);
       else
         PEXIT (INVALID_ASM_CODE ": %s", origin_line);
 
@@ -311,11 +314,11 @@ emulate (ceccomp_args *args)
   int stdout_backup = 0;
   char *retval_str = NULL;
   if (args->quiet)
-  {
-    int null_fd = open ("/dev/null", O_WRONLY);
-    stdout_backup = global_hide_stdout (null_fd);
-    close (null_fd);
-  }
+    {
+      int null_fd = open ("/dev/null", O_WRONLY);
+      stdout_backup = global_hide_stdout (null_fd);
+      close (null_fd);
+    }
 
   retval_str = emu_lines (args->read_fp, &data);
 

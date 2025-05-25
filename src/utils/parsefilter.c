@@ -78,7 +78,7 @@ LD (filter *f_ptr)
 {
   char *mode = load_reg (A, &A_status, f_ptr);
   if (mode == NULL)
-    printf ("unknown ld mode: bpf_msh or bpf_ind, plz open an issue:)");
+    printf ("!! Unknown ld mode: bpf_msh or bpf_ind, plz open an issue:) !!");
   else
     printf (BLUE_A " = " BLUE_S, mode);
 }
@@ -88,7 +88,7 @@ LDX (filter *f_ptr)
 {
   char *mode = load_reg (X, &X_status, f_ptr);
   if (mode == NULL)
-    printf ("unknown ldx mode: bpf_msh or bpf_ind, plz open an issue:)");
+    printf ("!! Unknown ldx mode: bpf_msh or bpf_ind, plz open an issue:) !!");
   else
     printf (BLUE_X " = " BLUE_S, mode);
 }
@@ -320,7 +320,7 @@ RET (filter *f_ptr)
   if (retstr != NULL)
     printf ("return %s", retstr);
   else
-    printf (INVALID_RET_VAL ": 0x%x", retval);
+    PEXIT (INVALID_RET_VAL ": 0x%x", retval);
 }
 
 static void
@@ -341,7 +341,7 @@ MISC (filter *f_ptr)
       A_status = X_status;
       return;
     default:
-      printf (INVALID_MISC_MODE ": 0x%x", mode);
+      PEXIT (INVALID_MISC_MODE ": 0x%x", mode);
     }
 }
 
@@ -377,7 +377,7 @@ parse_class (filter *f_ptr, uint32_t pc)
       MISC (f_ptr);
       return;
     default:
-      printf (INVALID_CLASS ": 0x%x", cls);
+      PEXIT (INVALID_CLASS ": 0x%x", cls);
     }
 }
 
