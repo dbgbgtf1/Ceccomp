@@ -6,8 +6,10 @@
 #include "error.h"
 #include <asm-generic/errno.h>
 #include <errno.h>
+#include <linux/ptrace.h>
 #include <seccomp.h>
 #include <stdint.h>
+#include <string.h>
 #include <sys/ptrace.h>
 #include <sys/prctl.h>
 #include <sys/wait.h>
@@ -94,22 +96,21 @@ filter_mode (syscall_info *Info, int pid, fprog *prog, FILE *output_fp)
   free (prog->filter);
 }
 
-static void
+__attribute__ ((noreturn)) static void
 child (char *argv[])
 {
+  setpgid (0, 0);
+
   ptrace (PTRACE_TRACEME, 0, 0, 0);
   raise (SIGSTOP);
 
   int err = execv (argv[0], argv);
   if (err)
-    {
-      printf ("execv failed executed: %s\n", argv[0]);
-      PERROR ("execv");
-    }
-  // argv should start with program name
+    PEXIT (EXECV_ERR ": %s, %s\n", argv[0], strerror (errno));
+  exit (0);
 }
 
-static void
+static int
 parent (int pid, FILE *output_fp, bool oneshot)
 {
   syscall_info Info;
@@ -125,7 +126,7 @@ parent (int pid, FILE *output_fp, bool oneshot)
 
       waitpid (pid, &status, 0);
       if (!WIFSTOPPED (status))
-        PEXIT ("child process status: %d", status);
+        return status;
 
       ptrace (PTRACE_GET_SYSCALL_INFO, pid, sizeof (syscall_info), &Info);
 
@@ -143,7 +144,7 @@ parent (int pid, FILE *output_fp, bool oneshot)
         filter_mode (&Info, pid, &prog, output_fp);
 
       if (oneshot)
-        return;
+        return status;
     }
 }
 
@@ -155,6 +156,8 @@ program_trace (char *argv[], FILE *output_fp, bool oneshot)
     child (argv);
   else
     parent (pid, output_fp, oneshot);
+
+  kill (-pid, SIGKILL);
 }
 
 void
@@ -172,7 +175,7 @@ pid_trace (int pid, uint32_t arch, FILE *output_fp)
         case EPERM:
           PEXIT ("%s", SYS_ADMIN_OR_KERNEL);
         default:
-          PERROR ("ptrace seize error");
+          PERROR (PTRACE_SEIZE_ERR);
         }
     }
 
@@ -200,7 +203,7 @@ pid_trace (int pid, uint32_t arch, FILE *output_fp)
           printf (BLUE (NOT_AN_CBPF));
           continue;
         default:
-          PERROR ("ptrace get filter error");
+          PERROR (PTRACE_GET_FILTER_ERR);
         }
     }
   while (true);

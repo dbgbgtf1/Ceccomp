@@ -70,6 +70,9 @@
   "Run with CAP_SYS_ADMIN capability when trace pid\nand kernel pid can't "   \
   "be trace"
 #define NOT_AN_CBPF "Non-cbpf found, can't resolve, but continue"
+#define PTRACE_SEIZE_ERR "ptrace seize error"
+#define PTRACE_GET_FILTER_ERR "ptrace get filter error"
+#define EXECV_ERR "execv failed executing"
 
 #define PEXIT(str, ...)                                                       \
   {                                                                           \

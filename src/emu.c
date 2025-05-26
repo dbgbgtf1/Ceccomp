@@ -125,9 +125,13 @@ emu_assign_line (line_set *Line, reg_mem *reg, seccomp_data *data)
 }
 
 static char *
-emu_ret_line (line_set *Line)
+emu_ret_line (line_set *Line, reg_mem *reg)
 {
   char *retval_str = Line->clean_line + strlen ("return");
+
+  if (STARTWITH(retval_str, "$A"))
+    return RETVAL2STR(reg->A);
+
   int32_t retval = STR2RETVAL (retval_str);
   if (retval == -1)
     PEXIT (INVALID_RET_VAL ": %s", Line->origin_line);
@@ -249,7 +253,7 @@ emu_lines (FILE *read_fp, seccomp_data *data)
       if (STARTWITH (clean_line, "if"))
         actual_idx = emu_if_line (&Line, reg, data);
       else if (STARTWITH (clean_line, "return"))
-        return emu_ret_line (&Line);
+        return emu_ret_line (&Line, reg);
       else if (STARTWITH (clean_line, "goto"))
         actual_idx = emu_goto_line (&Line);
       else if (STARTWITH (clean_line, "$A=-$A"))
