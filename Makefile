@@ -80,6 +80,7 @@ check_disasm:
 	cat bpf/* | ceccomp disasm > result_disasm
 	diff result_testdisasm result_disasm
 	@echo disasm test passed
+	@echo ""
 
 check_asm:
 	make ceccomp DEBUG=1 -B
@@ -87,6 +88,7 @@ check_asm:
 	ceccomp asm disasm_result --fmt hexfmt > result_asm
 	diff result_testasm result_asm
 	@echo asm test passed
+	@echo ""
 
 check_emu:
 	make ceccomp DEBUG=1 -B
@@ -98,8 +100,9 @@ check_emu:
 		number=$$(($$number+1)); \
 	done
 	@echo emu test passed
+	@echo ""
 
 
-.PHONY: clean all
+.PHONY: clean all check check_disasm check_asm check_emu
 clean:
 	rm -rf $(BUILD_DIR)
