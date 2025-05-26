@@ -290,6 +290,12 @@ ALU (line_set *Line)
   char *origin_line = Line->origin_line;
   filter filter = BPF_STMT (BPF_ALU, 0);
 
+  if (STARTWITH (clean_line, "$A=-$A"))
+    {
+      filter.code |= BPF_NEG;
+      return filter;
+    }
+
   char *sym_str = clean_line + strlen ("$A");
   uint8_t sym_enum = parse_alu_sym (sym_str, clean_line);
   uint8_t sym_len = GETSYMLEN (sym_enum);
@@ -333,6 +339,14 @@ assemble (uint32_t arch, FILE *read_fp, print_mode p_mode)
   prog.len = 1;
   prog.filter = malloc (sizeof (filter) * 1024);
 
+  char *format = NULL;
+  if (p_mode == HEXFMT)
+    format = "\"\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\",\n";
+  else if (p_mode == HEXLINE)
+    format = "\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x";
+  else if (p_mode == RAW)
+    format = "%c%c%c%c%c%c%c%c";
+
   while (pre_asm (read_fp, &Line), Line.origin_line != NULL)
     {
       filter f_current = { 0, 0, 0, 0 };
@@ -348,6 +362,8 @@ assemble (uint32_t arch, FILE *read_fp, print_mode p_mode)
         f_current = JMP_GOTO (&Line, prog.len);
       else if (STARTWITH (clean_line, "return"))
         f_current = RET (&Line);
+      else if (STARTWITH (clean_line, "$A=-$A"))
+        f_current = ALU (&Line);
       else if (STARTWITH (clean_line, "$mem["))
         f_current = ST_STX (&Line);
       else if (STARTWITH (clean_line, "$") && *(clean_line + 2) == '=')
@@ -356,19 +372,10 @@ assemble (uint32_t arch, FILE *read_fp, print_mode p_mode)
         f_current = ALU (&Line);
 
       prog.filter[prog.len] = f_current;
+      format_print (prog.filter[prog.len], format);
+
       prog.len++;
     }
-
-  char *format = NULL;
-  if (p_mode == HEXFMT)
-    format = "\"\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\",\n";
-  else if (p_mode == HEXLINE)
-    format = "\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x";
-  else if (p_mode == RAW)
-    format = "%c%c%c%c%c%c%c%c";
-
-  for (int i = 1; i < prog.len; i++)
-    format_print (prog.filter[i], format);
 
   printf ("\n");
   free (prog.filter);

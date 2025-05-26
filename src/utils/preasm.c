@@ -1,4 +1,5 @@
 #include "preasm.h"
+#include "color.h"
 #include "error.h"
 #include "main.h"
 #include <fcntl.h>
@@ -50,19 +51,27 @@ pre_get_lines (FILE *fp)
         origin_line[read - 1] = '\0';
 
       char *start = NULL;
-      if ((start = strstr (origin_line, "if")) != NULL)
+      if ((start = strstr (origin_line, BLUE_START "if")) != NULL)
+        return start;
+      else if ((start = strstr (origin_line, "if")) != NULL)
         return start;
 
+      if ((start = strstr (origin_line, BLUE_START "return")) != NULL)
+        return start;
       else if ((start = strstr (origin_line, "return")) != NULL)
         return start;
 
+      if ((start = strstr (origin_line, BLUE_START "goto")) != NULL)
+        return start;
       else if ((start = strstr (origin_line, "goto")) != NULL)
         return start;
 
+      if ((start = strstr (origin_line, BLUE_START "$")) != NULL)
+        return start;
       else if ((start = strchr (origin_line, '$')) != NULL)
         return start;
 
-      else if (is_etc (origin_line))
+      if (is_etc (origin_line))
         return "";
 
       PEXIT (INVALID_ASM_CODE ": %s", origin_line);

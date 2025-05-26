@@ -5,6 +5,8 @@
 
 #define CLR "\e[0m"
 
+#define BLUE_START "\e[36m"
+
 #define UNDERLINE(str) "\e[4m" str CLR
 #define RED(str) "\e[31m" str CLR
 #define YELLOW(str) "\e[33m" str CLR
