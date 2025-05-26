@@ -222,19 +222,6 @@ emu_alu_line (line_set *Line, reg_mem *reg)
   printf (BLUE_A " %.*s " BLUE_S "\n", sym_len, sym_str, rval_str);
 }
 
-static void
-clear_color (char *origin_line)
-{
-  char *color_start = NULL;
-  char *color_end = NULL;
-
-  while ((color_start = strchr (origin_line, '\e')) != NULL)
-    {
-      color_end = strchr (color_start, 'm') + 1;
-      safe_strcpy (color_start, color_end);
-    }
-}
-
 char *
 emu_lines (FILE *read_fp, seccomp_data *data)
 {
@@ -251,7 +238,7 @@ emu_lines (FILE *read_fp, seccomp_data *data)
 
       if (read_idx < actual_idx)
         {
-          clear_color (origin_line);
+          pre_clear_color (origin_line);
           LIGHTCOLORPRINTF (FORMAT ": %s", read_idx, origin_line);
           free (clean_line);
           continue;

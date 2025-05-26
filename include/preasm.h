@@ -9,7 +9,7 @@ typedef struct
   char *origin_line;
 } line_set;
 
-extern void safe_strcpy (char *dest, char *src);
+extern void pre_clear_color (char *clean_line);
 
 extern void pre_asm (FILE *fp, line_set *Line);
 
