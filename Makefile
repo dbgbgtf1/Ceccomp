@@ -1,4 +1,4 @@
-TARGET := ceccomp test
+TARGET := ceccomp test check
 
 SRC_DIR := ./src
 INC_DIR := ./include
@@ -38,7 +38,7 @@ BIN_DIR ?= $(PREFIX)/bin
 ZSH_DST ?= $(PREFIX)/share/zsh/site-functions
 ZSH_SRC := ./completions
 
-all: ceccomp test
+all: ceccomp test check
 
 install: bin_install zsh_cmp_install
 	@echo "install success"
@@ -71,6 +71,34 @@ $(BUILD_DIR)/%.c.o: $(TEST_DIR)/%.c | $(BUILD_DIR)
 
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR) $(BUILD_UTIL) $(BUILD_TEST)
+
+check: check_disasm check_asm check_emu
+
+check_disasm:
+	make ceccomp DEBUG=1 -B
+	cat bpf/* | ./build/ceccomp disasm > result_testdisasm
+	cat bpf/* | ceccomp disasm > result_disasm
+	diff result_testdisasm result_disasm
+	@echo disasm test passed
+
+check_asm:
+	make ceccomp DEBUG=1 -B
+	./build/ceccomp asm disasm_result --fmt hexfmt > result_testasm
+	ceccomp asm disasm_result --fmt hexfmt > result_asm
+	diff result_testasm result_asm
+	@echo asm test passed
+
+check_emu:
+	make ceccomp DEBUG=1 -B
+	number=0; \
+	while [ "$$number" -lt 100 ]; do \
+		./build/ceccomp emu result_disasm $$number > result_testemu; \
+		ceccomp emu result_disasm $$number > result_emu; \
+		diff result_emu result_testemu; \
+		number=$$(($$number+1)); \
+	done
+	@echo emu test passed
+
 
 .PHONY: clean all
 clean:
