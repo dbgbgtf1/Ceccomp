@@ -84,8 +84,8 @@ check_disasm:
 
 check_asm:
 	make ceccomp DEBUG=1 -B
-	./build/ceccomp asm disasm_result --fmt hexfmt > result_testasm
-	ceccomp asm disasm_result --fmt hexfmt > result_asm
+	./build/ceccomp asm result_disasm --fmt hexfmt > result_testasm
+	ceccomp asm result_disasm --fmt hexfmt > result_asm
 	diff result_testasm result_asm
 	@echo asm test passed
 	@echo ""
