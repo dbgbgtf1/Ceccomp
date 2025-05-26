@@ -129,9 +129,9 @@ JMP (line_set *Line, uint32_t pc, uint32_t arch)
 }
 
 static bool
-LD_LDX_ABS (char *rval, filter *f_ptr)
+LD_LDX_ABS (char *rval_str, filter *f_ptr)
 {
-  uint32_t offset = STR2ABS (rval);
+  uint32_t offset = STR2ABS (rval_str);
   if (offset == (uint32_t)-1)
     return false;
 
@@ -141,19 +141,17 @@ LD_LDX_ABS (char *rval, filter *f_ptr)
 }
 
 static bool
-LD_LDX_MEM (char *rval, filter *f_ptr, char *origin_line)
+LD_LDX_MEM (char *rval_str, filter *f_ptr, char *origin_line)
 {
   char *end;
-  if (!STARTWITH (rval, "$mem["))
+  if (!STARTWITH (rval_str, "$mem["))
     return false;
 
-  rval += strlen ("$mem[");
-  uint32_t mem_idx = strtol (rval, &end, 0);
+  rval_str += strlen ("$mem[");
+  uint32_t mem_idx = strtol (rval_str, &end, 0);
 
   if (*end != ']')
     PEXIT (INVALID_MEM ": %s", origin_line);
-  if (*(end + 1) != '=')
-    PEXIT (INVALID_OPERATOR ": %s", origin_line);
   if (mem_idx > 15)
     PEXIT (INVALID_MEM_IDX ": %s", origin_line);
 
@@ -163,16 +161,16 @@ LD_LDX_MEM (char *rval, filter *f_ptr, char *origin_line)
 }
 
 static bool
-LD_LDX_IMM (char *rval, filter *f_ptr, uint32_t arch)
+LD_LDX_IMM (char *rval_str, filter *f_ptr, uint32_t arch)
 {
   char *end;
   f_ptr->code |= BPF_IMM;
-  f_ptr->k = seccomp_syscall_resolve_name_arch (arch, rval);
+  f_ptr->k = seccomp_syscall_resolve_name_arch (arch, rval_str);
   if (f_ptr->k != (uint32_t)__NR_SCMP_ERROR)
     return true;
 
-  f_ptr->k = strtol (rval, &end, 0);
-  if (end == rval)
+  f_ptr->k = strtol (rval_str, &end, 0);
+  if (end == rval_str)
     return false;
   return true;
 }
@@ -191,12 +189,12 @@ LD_LDX (line_set *Line, uint32_t arch)
   else
     PEXIT (INVALID_LEFT_VAR ": %s", origin_line);
 
-  char *rval = clean_line + 3;
-  if (LD_LDX_ABS (rval, &filter))
+  char *rval_str = clean_line + 3;
+  if (LD_LDX_ABS (rval_str, &filter))
     return filter;
-  else if (LD_LDX_MEM (rval, &filter, origin_line))
+  else if (LD_LDX_MEM (rval_str, &filter, origin_line))
     return filter;
-  else if (LD_LDX_IMM (rval, &filter, arch))
+  else if (LD_LDX_IMM (rval_str, &filter, arch))
     return filter;
   PEXIT (INVALID_RIGHT_VAL ": %s", origin_line);
 }
@@ -245,9 +243,10 @@ ST_STX (line_set *Line)
 
   if (*(end + 2) != '$')
     PEXIT (INVALID_RIGHT_VAL ": %s", origin_line);
+
   if (*(end + 3) == 'A')
     filter.code |= BPF_A;
-  if (*(end + 3) == 'X')
+  else if (*(end + 3) == 'X')
     filter.code |= BPF_X;
   else
     PEXIT (INVALID_RIGHT_VAL ": %s", origin_line);
