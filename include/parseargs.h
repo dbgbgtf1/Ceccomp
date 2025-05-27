@@ -39,7 +39,7 @@ struct ceccomp_args
   uint64_t sys_args[6];
   uint64_t ip;
 
-  char *program_start;
+  uint64_t program_idx;
   pid_t pid;
 };
 
@@ -52,8 +52,6 @@ extern void version ();
 extern void help ();
 
 extern uint64_t strtoull_check (char *num, int base, char *err);
-
-extern uint32_t get_arg_idx (int argc, char *argv[], char *arg_to_find);
 
 extern error_t parse_opt (int key, char *arg, struct argp_state *state);
 

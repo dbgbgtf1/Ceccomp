@@ -46,7 +46,7 @@
 
 #define INVALID_RET_VAL "Invalid ret value"
 
-// text->raw
+// raw
 #define INVALID_OFFSET_ABS "Invalid offset of seccomp_data"
 
 #define INVALID_CLASS "Invalid class"
@@ -64,6 +64,9 @@
 #define INVALID_ALU_OP "Invalid alu operation"
 #define INVALID_ALU_SRC "Invalid alu src"
 #define INVALID_LD_LDX_MODE "Invalid ld or ldx mode"
+#define INVALID_LD_LDX_BPF_IND "Invalid ld or ldx mode: BPF_IND"
+#define INVALID_LD_LDX_BPF_MEM "Invalid ld or ldx mode: BPF_MEM"
+#define INVALID_LD_LDX_SIZE "Invalid ld or ldx size"
 
 // trace err
 #define SYS_ADMIN_OR_KERNEL                                                   \

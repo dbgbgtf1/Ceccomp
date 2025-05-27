@@ -113,24 +113,12 @@ emu_args (ceccomp_args *args_ptr, char *arg)
     args_ptr->ip = strtoull_check (arg, 0, INVALID_IP);
 }
 
-uint32_t
-get_arg_idx (int argc, char *argv[], char *arg_to_find)
-{
-  int32_t idx = 0;
-  while (idx++ < argc)
-    {
-      if (!strcmp (argv[idx], arg_to_find))
-        return idx;
-    }
-  return -1;
-}
-
 error_t
 parse_opt (int key, char *arg, struct argp_state *state)
 {
   ceccomp_args *args_ptr = state->input;
 
-  if (args_ptr->program_start != (char *)ARG_INIT_VAL)
+  if (args_ptr->program_idx != ARG_INIT_VAL)
     return 0;
 
   if (args_ptr->mode == TRACE_MODE)
@@ -138,7 +126,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
       if (key == ARGP_KEY_ARG)
         {
           args_ptr->mode = TRACE_PROG_MODE;
-          args_ptr->program_start = arg;
+          args_ptr->program_idx = state->next - 1;
           return 0;
         }
       else if (key == 'p')
@@ -158,7 +146,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
       if (state->arg_num == 0)
         args_ptr->mode = parse_subcommand (arg);
       else if (args_ptr->mode == PROBE_MODE)
-        args_ptr->program_start = arg;
+        args_ptr->program_idx = state->next - 1;
       else if (args_ptr->mode == ASM_MODE || args_ptr->mode == DISASM_MODE)
         asm_disasm_args (args_ptr, arg);
       else if (args_ptr->mode == EMU_MODE)

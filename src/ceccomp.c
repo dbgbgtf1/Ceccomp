@@ -33,7 +33,7 @@ init (ceccomp_args *args)
   args->sys_args[3] = ARG_INIT_VAL;
   args->sys_args[4] = ARG_INIT_VAL;
   args->sys_args[5] = ARG_INIT_VAL;
-  args->program_start = (char *)ARG_INIT_VAL;
+  args->program_idx = ARG_INIT_VAL;
   args->pid = (pid_t)ARG_INIT_VAL;
 }
 
@@ -60,7 +60,7 @@ main (int argc, char **argv)
 
   uint32_t program_start_idx = -1;
   if (args.mode == TRACE_PROG_MODE || args.mode == PROBE_MODE)
-    program_start_idx = get_arg_idx (argc, argv, args.program_start);
+    program_start_idx = args.program_idx;
 
   switch (args.mode)
     {

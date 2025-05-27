@@ -5,3 +5,4 @@ Test
 result*
 *.gdb_history
 *.cache/
+CeccompBuild/
