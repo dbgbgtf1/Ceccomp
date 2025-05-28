@@ -1,6 +1,7 @@
 #include "emu.h"
 #include "color.h"
-#include "error.h"
+#include "log/error.h"
+#include "log/logger.h"
 #include "main.h"
 #include "parseargs.h"
 #include "parseobj.h"
@@ -18,7 +19,6 @@
 #include <unistd.h>
 
 #define LIGHTCOLORPRINTF(str, ...) printf (LIGHTCOLOR (str "\n"), __VA_ARGS__)
-
 static bool
 is_state_true (uint32_t A, uint32_t cmp_enum, uint32_t rval)
 {
@@ -44,14 +44,13 @@ is_state_true (uint32_t A, uint32_t cmp_enum, uint32_t rval)
 }
 
 static bool
-emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data,
-               char *origin_line)
+emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data)
 {
-  uint8_t sym_enum = parse_cmp_sym (sym_str, origin_line);
+  uint8_t sym_enum = parse_cmp_sym (sym_str);
   uint8_t sym_len = GETSYMLEN (sym_enum);
 
   char *rval_str = sym_str + sym_len;
-  uint32_t rval = right_val_ifline (rval_str, reg, data->arch, origin_line);
+  uint32_t rval = right_val_ifline (rval_str, reg, data->arch);
 
   printf (BLUE_A);
   printf (" %.*s ", sym_len, sym_str);
@@ -61,13 +60,10 @@ emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data,
 }
 
 static uint32_t
-emu_if_line (line_set *Line, reg_mem *reg, seccomp_data *data)
+emu_if_line (char *clean_line, reg_mem *reg, seccomp_data *data)
 {
-  char *clean_line = Line->clean_line;
-  char *origin_line = Line->origin_line;
-
   char *sym_str;
-  bool reverse = maybe_reverse (clean_line, origin_line);
+  bool reverse = maybe_reverse (clean_line);
   if (reverse)
     {
       sym_str = clean_line + strlen ("if!($A");
@@ -80,13 +76,13 @@ emu_if_line (line_set *Line, reg_mem *reg, seccomp_data *data)
     }
 
   bool condition;
-  condition = emu_condition (sym_str, reg, data, origin_line);
+  condition = emu_condition (sym_str, reg, data);
 
   char *right_brace = strchr (sym_str, ')');
   if (right_brace == NULL)
-    PEXIT (BRACE_WRAP_CONDITION ": %s", origin_line);
+    log_err (BRACE_WRAP_CONDITION);
 
-  uint32_t jmp_set = parse_goto (right_brace + 1, origin_line);
+  uint32_t jmp_set = parse_goto (right_brace + 1);
   uint16_t jf = GETJF (jmp_set);
   uint16_t jt = GETJT (jmp_set);
 
@@ -104,52 +100,60 @@ emu_if_line (line_set *Line, reg_mem *reg, seccomp_data *data)
 }
 
 static void
-emu_assign_line (line_set *Line, reg_mem *reg, seccomp_data *data)
+emu_assign_line (char *clean_line, reg_mem *reg, seccomp_data *data)
 {
-  char *clean_line = Line->clean_line;
-  char *origin_line = Line->origin_line;
-
   reg_set lval;
-  left_val_assignline (clean_line, &lval, reg, origin_line);
+  left_val_assignline (clean_line, &lval, reg);
   uint8_t lval_len = lval.reg_len;
   uint32_t *lval_ptr = lval.reg_ptr;
 
   if (*(clean_line + lval_len) != '=')
-    PEXIT (INVALID_OPERATOR ": %s", origin_line);
+    log_err (INVALID_OPERATOR);
 
   char *rval_str = clean_line + lval_len + 1;
-  uint32_t rval = right_val_assignline (rval_str, data, reg, origin_line);
+
+  if (STARTWITH (clean_line, "$A"))
+    {
+      uint32_t offset = STR2ABS (rval_str);
+      if (offset != (uint32_t)-1)
+        {
+          *lval_ptr = *(uint32_t *)((char *)data + offset);
+          printf (BLUE_LS " = " BLUE_S "\n", lval_len, clean_line, rval_str);
+          return;
+        }
+    }
+
+  uint32_t rval = right_val_assignline (rval_str, reg);
 
   *lval_ptr = rval;
   printf (BLUE_LS " = " BLUE_S "\n", lval_len, clean_line, rval_str);
 }
 
 static char *
-emu_ret_line (line_set *Line, reg_mem *reg)
+emu_ret_line (char *clean_line, reg_mem *reg)
 {
-  char *retval_str = Line->clean_line + strlen ("return");
+  char *retval_str = clean_line + strlen ("return");
 
-  if (STARTWITH(retval_str, "$A"))
-    return RETVAL2STR(reg->A);
+  if (STARTWITH (retval_str, "$A"))
+    return RETVAL2STR (reg->A);
 
   int32_t retval = STR2RETVAL (retval_str);
   if (retval == -1)
-    PEXIT (INVALID_RET_VAL ": %s", Line->origin_line);
+    log_err (INVALID_RET_VAL);
 
   retval_str = RETVAL2STR (retval);
   return retval_str;
 }
 
 static uint32_t
-emu_goto_line (line_set *Line)
+emu_goto_line (char *clean_line)
 {
-  char *clean_line = Line->clean_line;
-  char *origin_line = Line->origin_line;
+  char *jmp_to_str = clean_line + strlen ("goto");
   char *end;
-  uint32_t jmp_to = strtoul (clean_line + strlen ("goto"), &end, 10);
+  uint32_t jmp_to = strtoul (jmp_to_str, &end, 10);
 
-  if (clean_line == end)
-    PEXIT (INVALID_NR_AFTER_GOTO ": %s", origin_line);
+  if (jmp_to_str == end)
+    log_err (INVALID_NR_AFTER_GOTO);
 
   printf ("goto %04d\n", jmp_to);
   return jmp_to;
@@ -198,13 +202,10 @@ emu_alu_neg (reg_mem *reg)
 }
 
 static void
-emu_alu_line (line_set *Line, reg_mem *reg)
+emu_alu_line (char *clean_line, reg_mem *reg)
 {
-  char *clean_line = Line->clean_line;
-  char *origin_line = Line->origin_line;
-
   char *sym_str = clean_line + strlen ("$A");
-  uint8_t sym_enum = parse_alu_sym (sym_str, origin_line);
+  uint8_t sym_enum = parse_alu_sym (sym_str);
   uint8_t sym_len = GETSYMLEN (sym_enum);
 
   uint32_t *A_ptr = &reg->A;
@@ -218,7 +219,7 @@ emu_alu_line (line_set *Line, reg_mem *reg)
     {
       rval = strtoul (rval_str, &end, 0);
       if (rval_str == end)
-        PEXIT (INVALID_RIGHT_VAL ": %s", origin_line);
+        log_err (INVALID_RIGHT_VAL);
     }
 
   emu_do_alu (A_ptr, sym_enum, rval);
@@ -237,8 +238,9 @@ emu_lines (FILE *read_fp, seccomp_data *data)
   for (uint32_t read_idx = 1, actual_idx = 1;
        pre_asm (read_fp, &Line), Line.origin_line != NULL; read_idx++)
     {
-      origin_line = Line.origin_line;
       clean_line = Line.clean_line;
+      origin_line = Line.origin_line;
+      set_log (origin_line, read_idx);
 
       if (read_idx < actual_idx)
         {
@@ -251,20 +253,21 @@ emu_lines (FILE *read_fp, seccomp_data *data)
       actual_idx++;
 
       if (STARTWITH (clean_line, "if"))
-        actual_idx = emu_if_line (&Line, reg, data);
+        actual_idx = emu_if_line (clean_line, reg, data);
       else if (STARTWITH (clean_line, "return"))
-        return emu_ret_line (&Line, reg);
+        return emu_ret_line (clean_line, reg);
       else if (STARTWITH (clean_line, "goto"))
-        actual_idx = emu_goto_line (&Line);
+        actual_idx = emu_goto_line (clean_line);
       else if (STARTWITH (clean_line, "$A=-$A"))
         emu_alu_neg (reg);
-      else if ((STARTWITH (clean_line, "$") && *(clean_line + 2) == '=')
-               || (STARTWITH (clean_line, "$mem[")))
-        emu_assign_line (&Line, reg, data);
+      else if ((STARTWITH (clean_line, "$") && *(clean_line + 2) == '='))
+        emu_assign_line (clean_line, reg, data);
+      else if (STARTWITH (clean_line, "$mem["))
+        emu_assign_line (clean_line, reg, data);
       else if (STARTWITH (clean_line, "$A"))
-        emu_alu_line (&Line, reg);
+        emu_alu_line (clean_line, reg);
       else
-        PEXIT (INVALID_ASM_CODE ": %s", origin_line);
+        log_err (INVALID_ASM_CODE);
 
       free (clean_line);
     }

@@ -1,9 +1,10 @@
 #include "parsefilter.h"
+#include "checkfilter.h"
 #include "color.h"
 #include "emu.h"
-#include "error.h"
+#include "log/error.h"
+#include "log/logger.h"
 #include "main.h"
-#include "parseargs.h"
 #include "transfer.h"
 #include <linux/bpf_common.h>
 #include <linux/filter.h>
@@ -22,7 +23,7 @@ static uint32_t arch;
 
 static char A[REG_BUF_LEN] = "0";
 static char X[REG_BUF_LEN] = "0";
-static char mem[0x10][REG_BUF_LEN] = { "0" };
+static char mem[0x10][REG_BUF_LEN] = { "" };
 
 typedef enum
 {
@@ -35,62 +36,58 @@ static reg_status A_status = none;
 static reg_status X_status = none;
 
 static char *
+load_reg_abs (char reg[REG_BUF_LEN], reg_status *reg_stat, filter *f_ptr)
+{
+  char *abs_name = 0;
+  abs_name = ABS2STR (f_ptr->k);
+  if (!abs_name)
+    log_err (INVALID_OFFSET_ABS);
+  strcpy (reg, abs_name);
+  if (!strcmp (reg, ARCHITECTURE))
+    *reg_stat = architecture;
+  else if (!strcmp (reg, SYSCALL_NR))
+    *reg_stat = syscall_nr;
+  else
+    *reg_stat = none;
+  return reg;
+}
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
+static char *
 load_reg (char reg[REG_BUF_LEN], reg_status *reg_stat, filter *f_ptr)
 {
   uint16_t mode = BPF_MODE (f_ptr->code);
   uint32_t k = f_ptr->k;
-  char *abs_name = 0;
 
   switch (mode)
     {
     case BPF_IMM:
-      snprintf (reg, REG_BUF_LEN, "0x%x", f_ptr->k);
+      snprintf (reg, REG_BUF_LEN, "0x%x", k);
       return reg;
     case BPF_ABS:
-      abs_name = ABS2STR (k);
-      if (!abs_name)
-        PEXIT (INVALID_OFFSET_ABS ": " BLUE_H, k);
-      strcpy (reg, abs_name);
-      if (!strcmp (reg, ARCHITECTURE))
-        *reg_stat = architecture;
-      else if (!strcmp (reg, SYSCALL_NR))
-        *reg_stat = syscall_nr;
-      else
-        *reg_stat = none;
-      return reg;
-    case BPF_IND:
-      return NULL;
+      return load_reg_abs (reg, reg_stat, f_ptr);
     case BPF_MEM:
-      strncpy (reg, mem[k], REG_BUF_LEN);
+      if (*mem[k] == '\0')
+        log_err (ST_MEM_BEFORE_LD);
+      strcpy (reg, mem[k]);
       return REG2STR (offsetof (reg_mem, mem[k]));
-    case BPF_LEN:
-      snprintf (reg, REG_BUF_LEN, "0x%x", (uint32_t)sizeof (seccomp_data));
-      return reg;
-    case BPF_MSH:
-      return NULL;
-    default:
-      PEXIT (INVALID_LD_LDX_MODE ": 0x%x", mode);
     }
 }
+#pragma GCC diagnostic pop
 
 static void
 LD (filter *f_ptr)
 {
-  char *mode = load_reg (A, &A_status, f_ptr);
-  if (mode == NULL)
-    printf ("!! Unknown ld mode: bpf_msh or bpf_ind, plz open an issue:) !!");
-  else
-    printf (BLUE_A " = " BLUE_S, mode);
+  char *rval_str = load_reg (A, &A_status, f_ptr);
+  printf (BLUE_A " = " BLUE_S, rval_str);
 }
 
 static void
 LDX (filter *f_ptr)
 {
-  char *mode = load_reg (X, &X_status, f_ptr);
-  if (mode == NULL)
-    printf ("!! Unknown ldx mode: bpf_msh or bpf_ind, plz open an issue:) !!");
-  else
-    printf (BLUE_X " = " BLUE_S, mode);
+  char *rval_str = load_reg (X, &X_status, f_ptr);
+  printf (BLUE_X " = " BLUE_S, rval_str);
 }
 
 static void
@@ -108,9 +105,11 @@ STX (filter *f_ptr)
 }
 
 static const char *alu_sym_tbl[]
-    = { " += ", " -= ",  " *= ",  " /= ",  " &= ", " |= ",
-        " ^= ", " %%= ", " <<= ", " >>= ", " = -" };
+    = { " += ", " -= ", " *= ",  " /= ",  " &= ",
+        " |= ", " ^= ", " <<= ", " >>= ", " = -" };
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
 static const char *
 ALU_OP (filter *f_ptr)
 {
@@ -132,18 +131,15 @@ ALU_OP (filter *f_ptr)
       return alu_sym_tbl[5];
     case BPF_XOR:
       return alu_sym_tbl[6];
-    case BPF_MOD:
-      return alu_sym_tbl[7];
     case BPF_LSH:
-      return alu_sym_tbl[8];
+      return alu_sym_tbl[7];
     case BPF_RSH:
-      return alu_sym_tbl[9];
+      return alu_sym_tbl[8];
     case BPF_NEG:
-      return alu_sym_tbl[10];
-    default:
-      PEXIT (INVALID_ALU_OP ": 0x%x", op);
+      return alu_sym_tbl[9];
     }
 }
+#pragma GCC diagnostic pop
 
 static void
 ALU (filter *f_ptr)
@@ -159,24 +155,22 @@ ALU (filter *f_ptr)
 
   strcpy (A, "A");
   strcat (A, alu_sym);
-  if (src == BPF_X)
+
+  if (BPF_OP (f_ptr->code) == BPF_NEG)
+    strcpy (rval, "$A");
+  else if (src == BPF_K)
+    sprintf (rval, "0x%x", f_ptr->k);
+  else if (src == BPF_X)
     {
       strcpy (rval, "$X");
       A_status = none;
     }
-  else if (src == BPF_K)
-    snprintf (rval, REG_BUF_LEN - 0x10, "0x%x", f_ptr->k);
-  else
-    PEXIT (INVALID_ALU_SRC ": 0x%x", src);
-
-  if (BPF_OP (f_ptr->code) == BPF_NEG)
-    printf (BLUE_A);
-  else
-    printf (BLUE_S, rval);
-
+  printf (BLUE_S, rval);
   strcat (A, rval);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
 static uint8_t
 JMP_MODE (filter *f_ptr)
 {
@@ -192,10 +186,9 @@ JMP_MODE (filter *f_ptr)
       return 2;
     case BPF_JSET:
       return 3;
-    default:
-      PEXIT (INVALID_JMP_MODE ": 0x%x", jmode);
     }
 }
+#pragma GCC diagnostic pop
 
 static char *
 try_transfer (uint32_t val)
@@ -231,20 +224,7 @@ JMP_SRC (filter *f_ptr, char cmpval_str[REG_BUF_LEN])
     case BPF_K:
       ret_same_type (f_ptr->k, cmpval_str);
       return;
-    default:
-      PEXIT (INVALID_JMP_SRC ": 0x%x", src);
     }
-}
-
-static uint32_t
-JMP_GOTO (filter *f_ptr)
-{
-  uint16_t src = BPF_SRC (f_ptr->code);
-
-  if (src == BPF_K)
-    return f_ptr->k;
-  else
-    PEXIT (INVALID_JMP_SRC ": 0x%x", src);
 }
 
 const char *true_cmp_sym_tbl[4]
@@ -265,15 +245,16 @@ JMP (filter *f_ptr, uint32_t pc)
 
   if (BPF_OP (f_ptr->code) == BPF_JA)
     {
-      printf ("goto " FORMAT, pc + JMP_GOTO (f_ptr) + 2);
+      printf ("goto " FORMAT, pc + f_ptr->k + 2);
       return;
     }
 
   cmp_sym_idx = JMP_MODE (f_ptr);
   JMP_SRC (f_ptr, cmp_rval_str);
 
-  if (jt == 0 && jf == 0)
-    PEXIT ("%s", INVALID_JT_JF);
+  // if (jt == 0 && jf == 0)
+  // log_warn(JT_JF_BOTH_ZERO);
+  // turns out this is allowed by kernel
 
   if (jt == 0)
     {
@@ -293,34 +274,37 @@ JMP (filter *f_ptr, uint32_t pc)
     }
 }
 
-static uint32_t
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
+static char *
 RET_VAL (filter *f_ptr)
 {
   uint16_t ret = BPF_RVAL (f_ptr->code);
   uint32_t retval;
+  char *end;
 
   switch (ret)
     {
     case BPF_A:
-      retval = strtoull_check (A, 0, INVALID_REG_A_VAL);
-      return retval;
+      retval = strtoul (A, &end, 0);
+      if (A == end)
+        return "$A";
+      return RETVAL2STR (retval);
     case BPF_K:
-      return f_ptr->k;
-    default:
-      PEXIT (INVALID_RET_MODE ": 0x%x", ret);
+      return RETVAL2STR (f_ptr->k);
     }
 }
+#pragma GCC diagnostic pop
 
 static void
 RET (filter *f_ptr)
 {
-  uint32_t retval = RET_VAL (f_ptr);
-  char *retstr = RETVAL2STR (retval);
+  char *ret_str = RET_VAL (f_ptr);
 
-  if (retstr != NULL)
-    printf ("return %s", retstr);
-  else
-    PEXIT (INVALID_RET_VAL ": 0x%x", retval);
+  if (ret_str == NULL)
+    log_err (INVALID_RET_VAL);
+
+  printf ("return %s", ret_str);
 }
 
 static void
@@ -340,8 +324,6 @@ MISC (filter *f_ptr)
       strncpy (A, X, REG_BUF_LEN);
       A_status = X_status;
       return;
-    default:
-      PEXIT (INVALID_MISC_MODE ": 0x%x", mode);
     }
 }
 
@@ -376,8 +358,6 @@ parse_class (filter *f_ptr, uint32_t pc)
     case BPF_MISC:
       MISC (f_ptr);
       return;
-    default:
-      PEXIT (INVALID_CLASS ": 0x%x", cls);
     }
 }
 
@@ -390,14 +370,22 @@ parse_filter (uint32_t arch_token, fprog *sock_prog, FILE *output_fileptr)
 
   int stdout_backup = global_hide_stdout (fileno (output_fileptr));
 
+  scmp_check_filter (prog->filter, len);
+
   printf (" Line  CODE  JT   JF      K\n");
   printf ("---------------------------------\n");
   for (uint32_t i = 0; i < len; i++)
     {
+      set_log ("", i);
+
       filter *f_ptr = &prog->filter[i];
-      printf (" " FORMAT ": 0x%02x 0x%02x 0x%02x 0x%08x ", i + 1, f_ptr->code,
-              f_ptr->jt, f_ptr->jf, f_ptr->k);
+
+      printf (" " FORMAT, i + 1);
+      printf (": 0x%02x 0x%02x ", f_ptr->code, f_ptr->jt);
+      printf ("0x%02x 0x%08x ", f_ptr->jf, f_ptr->k);
+
       parse_class (f_ptr, i);
+
       printf ("\n");
     }
   printf ("---------------------------------\n");

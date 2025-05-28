@@ -1,5 +1,6 @@
 #include "parseobj.h"
-#include "error.h"
+#include "log/error.h"
+#include "log/logger.h"
 #include "main.h"
 #include "transfer.h"
 #include <seccomp.h>
@@ -17,8 +18,7 @@
 // if ($A == write)
 // if ($A > 0xffffffff)
 uint32_t
-right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch,
-                  char *origin_line)
+right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch)
 {
   uint32_t rval = STR2ARCH (rval_str);
   if (rval != (uint32_t)-1)
@@ -38,24 +38,20 @@ right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch,
   if (rval_str != end)
     return rval;
 
-  PEXIT (INVALID_RIGHT_VAL ": %s", origin_line);
+  log_err (INVALID_RIGHT_VAL);
 }
 
 // this is used in assign line, right value only
-// $A = $low args[0]
-// $A = $syscall_nr
 // $A = $mem[0x0]
 // $A = $mem[0]
 // $A = 0x100
+// $X = $mem[0x0] (this is wrong! $X can't be load with abs)
 uint32_t
-right_val_assignline (char *rval_str, seccomp_data *data, reg_mem *reg_ptr,
-                      char *origin_line)
+right_val_assignline (char *rval_str, reg_mem *reg_ptr)
 {
-  uint32_t offset = STR2ABS (rval_str);
-  if (offset != (uint32_t)-1)
-    return *(uint32_t *)((char *)data + offset);
+  uint32_t offset;
 
-  else if ((offset = STR2REG (rval_str)) != (uint32_t)-1)
+  if ((offset = STR2REG (rval_str)) != (uint32_t)-1)
     return *(uint32_t *)((char *)reg_ptr + offset);
 
   char *end = NULL;
@@ -63,7 +59,7 @@ right_val_assignline (char *rval_str, seccomp_data *data, reg_mem *reg_ptr,
   if (end != rval_str)
     return rval;
 
-  PEXIT (INVALID_RIGHT_VAL ": %s", origin_line);
+  log_err (INVALID_RIGHT_VAL);
 }
 
 // this is used in assign line, left value only
@@ -72,12 +68,11 @@ right_val_assignline (char *rval_str, seccomp_data *data, reg_mem *reg_ptr,
 // $mem[0x0]
 // $mem[0]
 void
-left_val_assignline (char *lval_str, reg_set *reg_set, reg_mem *reg_ptr,
-                     char *origin_line)
+left_val_assignline (char *lval_str, reg_set *reg_set, reg_mem *reg_ptr)
 {
   uint32_t reg_offset = STR2REG (lval_str);
   if (reg_offset == (uint32_t)-1)
-    PEXIT (INVALID_LEFT_VAR ": %s", origin_line);
+    log_err (INVALID_LEFT_VAR);
 
   if (reg_offset > offsetof (reg_mem, X))
     reg_set->reg_len = (size_t)strchr (lval_str, ']') - (size_t)lval_str + 1;
@@ -90,7 +85,7 @@ left_val_assignline (char *lval_str, reg_set *reg_set, reg_mem *reg_ptr,
 // return JMP ENUM, GETSYMLEN and GETSYMIDX to use it
 // take a look at JMP ENUM, GETSYMLEN and GETSYMIDX
 uint8_t
-parse_cmp_sym (char *sym_str, char *origin_line)
+parse_cmp_sym (char *sym_str)
 {
   if (!strncmp (sym_str, "==", 2))
     return CMP_EQ;
@@ -108,11 +103,11 @@ parse_cmp_sym (char *sym_str, char *origin_line)
   else if (!strncmp (sym_str, "<", 1))
     return CMP_LT;
 
-  PEXIT (INVALID_OPERATOR ": %s", origin_line);
+  log_err (INVALID_OPERATOR);
 }
 
 uint8_t
-parse_alu_sym (char *cmp_str, char *origin_line)
+parse_alu_sym (char *cmp_str)
 {
   if (!strncmp (cmp_str, "&=", 2))
     return ALU_AN;
@@ -133,14 +128,14 @@ parse_alu_sym (char *cmp_str, char *origin_line)
   else if (!strncmp (cmp_str, ">>=", 3))
     return ALU_RS;
 
-  PEXIT (INVALID_OPERATOR ": %s", origin_line);
+  log_err (INVALID_OPERATOR);
 }
 
 uint32_t
-parse_goto (char *goto_str, char *origin_line)
+parse_goto (char *goto_str)
 {
   if (!STARTWITH (goto_str, "goto"))
-    PEXIT (GOTO_AFTER_CONDITION ": %s", origin_line);
+    log_err (GOTO_AFTER_CONDITION);
 
   char *jt_str = goto_str + strlen ("goto");
   char *jf_str = NULL;
@@ -149,14 +144,14 @@ parse_goto (char *goto_str, char *origin_line)
 
   jt = strtoul (jt_str, &jf_str, 10);
   if (jf_str == jt_str)
-    PEXIT (LINE_NR_AFTER_GOTO ": %s", origin_line);
+    log_err (LINE_NR_AFTER_GOTO);
 
   if (STARTWITH (jf_str, ",elsegoto"))
     {
       jf_str += strlen (",elsegoto");
       jf = strtoul (jf_str, &jt_str, 10);
       if (jt_str == jf_str)
-        PEXIT (LINE_NR_AFTER_ELSE ": %s", origin_line);
+        log_err (LINE_NR_AFTER_ELSE);
     }
 
   return JMPSET (jt, jf);
@@ -166,12 +161,12 @@ parse_goto (char *goto_str, char *origin_line)
 // BPF JMP always compare other with $A
 // so make sure this startwith "if($A" or "if!($A"
 bool
-maybe_reverse (char *clean_line, char *origin_line)
+maybe_reverse (char *clean_line)
 {
   if (STARTWITH (clean_line, "if($A"))
     return false;
   else if (STARTWITH (clean_line, "if!($A"))
     return true;
   else
-    PEXIT (INVALID_IF ": %s", origin_line);
+    log_err (INVALID_IF);
 }

@@ -1,5 +1,5 @@
 #include "parseargs.h"
-#include "error.h"
+#include "log/error.h"
 #include "main.h"
 #include "transfer.h"
 #include <argp.h>

@@ -3,7 +3,7 @@
 #include "main.h"
 #include "parsefilter.h"
 #include "color.h"
-#include "error.h"
+#include "log/error.h"
 #include <asm-generic/errno.h>
 #include <errno.h>
 #include <linux/ptrace.h>

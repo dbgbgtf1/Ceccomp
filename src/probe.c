@@ -1,6 +1,6 @@
 #include "probe.h"
 #include "emu.h"
-#include "error.h"
+#include "log/error.h"
 #include "main.h"
 #include "trace.h"
 #include <fcntl.h>

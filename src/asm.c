@@ -1,5 +1,6 @@
 #include "asm.h"
-#include "error.h"
+#include "log/error.h"
+#include "log/logger.h"
 #include "main.h"
 #include "parseargs.h"
 #include "parseobj.h"
@@ -9,6 +10,7 @@
 #include <linux/bpf_common.h>
 #include <linux/filter.h>
 #include <seccomp.h>
+#include <stdatomic.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -35,7 +37,7 @@ MISC_TAX ()
 // also EQ and NE can be the same thing
 // only you have to reverse
 static uint16_t
-jmp_mode (uint8_t cmp_enum, bool *reverse, char *origin_line)
+jmp_mode (uint8_t cmp_enum, bool *reverse)
 {
   switch (cmp_enum)
     {
@@ -57,15 +59,14 @@ jmp_mode (uint8_t cmp_enum, bool *reverse, char *origin_line)
     case CMP_AD:
       return BPF_JSET;
     default:
-      PEXIT (INVALID_CMPENUM ": %d\n: %s", cmp_enum, origin_line);
+      PEXIT ("%s", INVALID_CMPENUM);
     }
 }
 #pragma GCC diagnostic pop
 
 static filter
-JMP_GOTO (line_set *Line, uint32_t pc)
+JMP_GOTO (char *clean_line, uint32_t pc)
 {
-  char *clean_line = Line->clean_line;
   char *jmp_nr = clean_line + strlen ("goto");
 
   filter filter = BPF_JUMP (BPF_JMP | BPF_JA, 0, 0, 0);
@@ -73,29 +74,27 @@ JMP_GOTO (line_set *Line, uint32_t pc)
   filter.k = strtol (jmp_nr, &end, 10) - pc - 1;
 
   if (jmp_nr == end)
-    PEXIT (INVALID_NR_AFTER_GOTO ": %s", Line->origin_line);
+    log_err (INVALID_NR_AFTER_GOTO);
 
   return filter;
 }
 
 static filter
-JMP (line_set *Line, uint32_t pc, uint32_t arch)
+JMP (char *clean_line, uint32_t pc, uint32_t arch)
 {
-  char *clean_line = Line->clean_line;
-  char *origin_line = Line->origin_line;
   filter filter = BPF_JUMP (BPF_JMP, 0, 0, 0);
 
-  bool reverse = maybe_reverse (clean_line, origin_line);
+  bool reverse = maybe_reverse (clean_line);
   char *cmp_str;
   if (reverse)
     cmp_str = clean_line + strlen ("if!($A");
   else
     cmp_str = clean_line + strlen ("if($A");
 
-  uint8_t sym_enum = parse_cmp_sym (cmp_str, origin_line);
+  uint8_t sym_enum = parse_cmp_sym (cmp_str);
   uint8_t sym_len = GETSYMLEN (sym_enum);
 
-  filter.code |= jmp_mode (sym_enum, &reverse, origin_line);
+  filter.code |= jmp_mode (sym_enum, &reverse);
 
   char *rval = cmp_str + sym_len;
   if (STARTWITH (rval, "$X"))
@@ -103,14 +102,14 @@ JMP (line_set *Line, uint32_t pc, uint32_t arch)
   else
     {
       filter.code |= BPF_K;
-      filter.k |= right_val_ifline (rval, NULL, arch, origin_line);
+      filter.k |= right_val_ifline (rval, NULL, arch);
     }
 
   char *right_brace = strchr (rval, ')');
   if (right_brace == NULL)
-    PEXIT (BRACE_WRAP_CONDITION ": %s", origin_line);
+    log_err (BRACE_WRAP_CONDITION);
 
-  uint32_t jmp_set = parse_goto (right_brace + 1, origin_line);
+  uint32_t jmp_set = parse_goto (right_brace + 1);
   uint16_t jt = GETJT (jmp_set);
   uint16_t jf = GETJF (jmp_set);
 
@@ -141,7 +140,7 @@ LD_LDX_ABS (char *rval_str, filter *f_ptr)
 }
 
 static bool
-LD_LDX_MEM (char *rval_str, filter *f_ptr, char *origin_line)
+LD_LDX_MEM (char *rval_str, filter *f_ptr)
 {
   char *end;
   if (!STARTWITH (rval_str, "$mem["))
@@ -151,9 +150,9 @@ LD_LDX_MEM (char *rval_str, filter *f_ptr, char *origin_line)
   uint32_t mem_idx = strtol (rval_str, &end, 0);
 
   if (*end != ']')
-    PEXIT (INVALID_MEM ": %s", origin_line);
+    log_err (INVALID_MEM);
   if (mem_idx > 15)
-    PEXIT (INVALID_MEM_IDX ": %s", origin_line);
+    log_err (INVALID_MEM_IDX);
 
   f_ptr->code |= BPF_MEM;
   f_ptr->k = mem_idx;
@@ -176,34 +175,32 @@ LD_LDX_IMM (char *rval_str, filter *f_ptr, uint32_t arch)
 }
 
 static filter
-LD_LDX (line_set *Line, uint32_t arch)
+LD_LDX (char *clean_line, uint32_t arch)
 {
-  char *clean_line = Line->clean_line;
-  char *origin_line = Line->origin_line;
-
   filter filter = { 0, 0, 0, 0 };
+  char *rval_str = clean_line + 3;
   if (*(clean_line + 1) == 'A')
-    filter.code |= BPF_LD;
+    {
+      filter.code |= BPF_LD;
+      if (LD_LDX_ABS (rval_str, &filter))
+        return filter;
+    }
   else if (*(clean_line + 1) == 'X')
     filter.code |= BPF_LDX;
   else
-    PEXIT (INVALID_LEFT_VAR ": %s", origin_line);
+    log_err (INVALID_LEFT_VAR);
 
-  char *rval_str = clean_line + 3;
-  if (LD_LDX_ABS (rval_str, &filter))
-    return filter;
-  else if (LD_LDX_MEM (rval_str, &filter, origin_line))
+  if (LD_LDX_MEM (rval_str, &filter))
     return filter;
   else if (LD_LDX_IMM (rval_str, &filter, arch))
     return filter;
-  PEXIT (INVALID_RIGHT_VAL ": %s", origin_line);
+
+  log_err (INVALID_RIGHT_VAL);
 }
 
 static filter
-RET (line_set *Line)
+RET (char *clean_line)
 {
-  char *clean_line = Line->clean_line;
-  char *origin_line = Line->origin_line;
   filter filter = { BPF_RET, 0, 0, 0 };
 
   char *retval_str = clean_line + strlen ("return");
@@ -217,45 +214,43 @@ RET (line_set *Line)
   else if (STARTWITH (retval_str, "$A"))
     filter.code |= BPF_A;
   else
-    PEXIT (INVALID_RET ": %s", origin_line);
+    log_err (INVALID_RET);
 
   return filter;
 }
 
 static filter
-ST_STX (line_set *Line)
+ST_STX (char *clean_line)
 {
-  char *clean_line = Line->clean_line;
-  char *origin_line = Line->origin_line;
   filter filter = { 0, 0, 0, 0 };
 
   char *idx_str = clean_line + strlen ("$mem[");
   char *end;
   uint32_t idx = strtol (idx_str, &end, 0);
   if (*end != ']')
-    PEXIT (INVALID_MEM ": %s", origin_line);
+    log_err (INVALID_MEM);
   if (*(end + 1) != '=')
-    PEXIT (INVALID_OPERATOR ": %s", origin_line);
+    log_err (INVALID_OPERATOR);
   if (idx > 15)
-    PEXIT (INVALID_MEM_IDX ": %s", origin_line);
+    log_err (INVALID_MEM_IDX);
 
   filter.k = idx;
 
   if (*(end + 2) != '$')
-    PEXIT (INVALID_RIGHT_VAL ": %s", origin_line);
+    log_err (INVALID_RIGHT_VAL);
 
   if (*(end + 3) == 'A')
     filter.code |= BPF_A;
   else if (*(end + 3) == 'X')
     filter.code |= BPF_X;
   else
-    PEXIT (INVALID_RIGHT_VAL ": %s", origin_line);
+    log_err (INVALID_RIGHT_VAL);
 
   return filter;
 }
 
 static uint16_t
-alu_mode (uint8_t alu_enum, char *origin_line)
+alu_mode (uint8_t alu_enum)
 {
   switch (alu_enum)
     {
@@ -271,22 +266,18 @@ alu_mode (uint8_t alu_enum, char *origin_line)
       return BPF_OR;
     case ALU_AN:
       return BPF_AND;
-    case ALU_NG:
-      return BPF_NEG;
     case ALU_LS:
       return BPF_LSH;
     case ALU_RS:
       return BPF_RSH;
     default:
-      PEXIT (INVALID_ALUENUM ": %d\n: %s", alu_enum, origin_line);
+      PEXIT ("%s", INVALID_ALUENUM);
     }
 }
 
 static filter
-ALU (line_set *Line)
+ALU (char *clean_line)
 {
-  char *clean_line = Line->clean_line;
-  char *origin_line = Line->origin_line;
   filter filter = BPF_STMT (BPF_ALU, 0);
 
   if (STARTWITH (clean_line, "$A=-$A"))
@@ -296,10 +287,10 @@ ALU (line_set *Line)
     }
 
   char *sym_str = clean_line + strlen ("$A");
-  uint8_t sym_enum = parse_alu_sym (sym_str, clean_line);
+  uint8_t sym_enum = parse_alu_sym (sym_str);
   uint8_t sym_len = GETSYMLEN (sym_enum);
 
-  filter.code |= alu_mode (sym_enum, origin_line);
+  filter.code |= alu_mode (sym_enum);
 
   char *rval_str = sym_str + sym_len;
   if (!strcmp (rval_str, "$X"))
@@ -307,11 +298,12 @@ ALU (line_set *Line)
       filter.k = BPF_X;
       return filter;
     }
+  filter.code |= BPF_K;
 
   char *end;
   filter.k = strtol (rval_str, &end, 0);
   if (rval_str == end)
-    PEXIT (INVALID_RIGHT_VAL ": %s", origin_line);
+    log_err (INVALID_RIGHT_VAL);
   return filter;
 }
 
@@ -319,7 +311,7 @@ static void
 format_print (filter filter, char *format)
 {
   uint8_t low_code = filter.code & 0xff;
-  uint8_t high_code = (filter.code & 0xff00) / 0x100;
+  uint8_t high_code = (filter.code & ~0xff) / 0x100;
   uint8_t jt = filter.jt;
   uint8_t jf = filter.jf;
   uint8_t k_0 = filter.k & 0xff;
@@ -350,25 +342,26 @@ assemble (uint32_t arch, FILE *read_fp, print_mode p_mode)
     {
       filter f_current = { 0, 0, 0, 0 };
       char *clean_line = Line.clean_line;
+      set_log (Line.origin_line, prog.len);
 
       if (!strcmp (clean_line, "$A=$X"))
         f_current = MISC_TXA ();
       else if (!strcmp (clean_line, "$X=$A"))
         f_current = MISC_TAX ();
       else if (STARTWITH (clean_line, "if"))
-        f_current = JMP (&Line, prog.len, arch);
+        f_current = JMP (clean_line, prog.len, arch);
       else if (STARTWITH (clean_line, "goto"))
-        f_current = JMP_GOTO (&Line, prog.len);
+        f_current = JMP_GOTO (clean_line, prog.len);
       else if (STARTWITH (clean_line, "return"))
-        f_current = RET (&Line);
+        f_current = RET (clean_line);
       else if (STARTWITH (clean_line, "$A=-$A"))
-        f_current = ALU (&Line);
+        f_current = ALU (clean_line);
       else if (STARTWITH (clean_line, "$mem["))
-        f_current = ST_STX (&Line);
+        f_current = ST_STX (clean_line);
       else if (STARTWITH (clean_line, "$") && *(clean_line + 2) == '=')
-        f_current = LD_LDX (&Line, arch);
+        f_current = LD_LDX (clean_line, arch);
       else if (STARTWITH (clean_line, "$A"))
-        f_current = ALU (&Line);
+        f_current = ALU (clean_line);
 
       prog.filter[prog.len] = f_current;
       format_print (prog.filter[prog.len], format);

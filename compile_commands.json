@@ -10,6 +10,24 @@
       "-g",
       "-c",
       "-o",
+      "build/utils/logger.c.o",
+      "src/utils/logger.c"
+    ],
+    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
+    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/utils/logger.c",
+    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/utils/logger.c.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-I./include",
+      "-fpie",
+      "-fstack-protector",
+      "-Wall",
+      "-Wextra",
+      "-g",
+      "-c",
+      "-o",
       "build/utils/parsefilter.c.o",
       "src/utils/parsefilter.c"
     ],
@@ -52,6 +70,24 @@
     "directory": "/home/dbgbgtf/Main/work/Ceccomp",
     "file": "/home/dbgbgtf/Main/work/Ceccomp/src/utils/parseobj.c",
     "output": "/home/dbgbgtf/Main/work/Ceccomp/build/utils/parseobj.c.o"
+  },
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-I./include",
+      "-fpie",
+      "-fstack-protector",
+      "-Wall",
+      "-Wextra",
+      "-g",
+      "-c",
+      "-o",
+      "build/utils/checkfilter.c.o",
+      "src/utils/checkfilter.c"
+    ],
+    "directory": "/home/dbgbgtf/Main/work/Ceccomp",
+    "file": "/home/dbgbgtf/Main/work/Ceccomp/src/utils/checkfilter.c",
+    "output": "/home/dbgbgtf/Main/work/Ceccomp/build/utils/checkfilter.c.o"
   },
   {
     "arguments": [

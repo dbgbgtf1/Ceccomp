@@ -1,6 +1,6 @@
 #include "preasm.h"
 #include "color.h"
-#include "error.h"
+#include "log/error.h"
 #include "main.h"
 #include <fcntl.h>
 #include <seccomp.h>

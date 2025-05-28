@@ -31,7 +31,7 @@
 #define INVALID_LEFT_VAR "Invalid left valiable"
 
 #define INVALID_MEM_IDX "Invalid idx of $mem"
-#define INVALID_MEM "Invalid $mem"
+#define INVALID_MEM "Invalid $mem[]"
 
 #define INVALID_IF "Invalid if line"
 #define INVALID_RET "Invalid ret line"
@@ -60,13 +60,18 @@
 #define INVALID_RET_MODE "Invalid ret mode"
 #define INVALID_JMP_MODE "Invalid jmp mode"
 #define INVALID_JMP_SRC "Invalid jmp src"
-#define INVALID_JT_JF "Invalid jt and jf both 0"
 #define INVALID_ALU_OP "Invalid alu operation"
 #define INVALID_ALU_SRC "Invalid alu src"
-#define INVALID_LD_LDX_MODE "Invalid ld or ldx mode"
-#define INVALID_LD_LDX_BPF_IND "Invalid ld or ldx mode: BPF_IND"
-#define INVALID_LD_LDX_BPF_MEM "Invalid ld or ldx mode: BPF_MEM"
-#define INVALID_LD_LDX_SIZE "Invalid ld or ldx size"
+#define ST_MEM_BEFORE_LD "Store mem before ld or ldx"
+
+#define JT_JF_BOTH_ZERO "Jt and jf both 0"
+
+// seccomp check err
+#define ALU_DIV_BY_ZERO "Alu div by zero"
+#define ALU_SH_OUT_OF_RANGE "Alu lsh or rsh out of range"
+#define JMP_OUT_OF_RANGE "Jmp out of bpf len"
+#define MUST_END_WITH_RET "Bpf filter must end with return"
+#define INVALID_OPERTION "Invalid opertion"
 
 // trace err
 #define SYS_ADMIN_OR_KERNEL                                                   \

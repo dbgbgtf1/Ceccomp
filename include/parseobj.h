@@ -42,21 +42,19 @@ typedef enum
   ALU_RS = 0x31
 } Sym;
 
-extern uint32_t right_val_ifline (char *val_str, reg_mem *reg, uint32_t arch,
-                                  char *origin_line);
+extern uint32_t right_val_ifline (char *val_str, reg_mem *reg, uint32_t arch);
 
-extern uint32_t right_val_assignline (char *rval_str, seccomp_data *data,
-                                      reg_mem *reg_ptr, char *origin_line);
+extern uint32_t right_val_assignline (char *rval_str, reg_mem *reg_ptr);
 
 extern void left_val_assignline (char *lval_str, reg_set *reg_len_ptr,
-                                 reg_mem *reg_ptr, char *origin_line);
+                                 reg_mem *reg_ptr);
 
-extern uint8_t parse_cmp_sym (char *sym_str, char *origin_line);
+extern uint8_t parse_cmp_sym (char *sym_str);
 
-extern uint8_t parse_alu_sym (char *sym_str, char *origin_line);
+extern uint8_t parse_alu_sym (char *sym_str);
 
-extern uint32_t parse_goto (char *goto_str, char *origin_line);
+extern uint32_t parse_goto (char *goto_str);
 
-extern bool maybe_reverse (char *clean_line, char *origin_line);
+extern bool maybe_reverse (char *clean_line);
 
 #endif
