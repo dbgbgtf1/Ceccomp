@@ -8,6 +8,7 @@
 #include "preasm.h"
 #include "transfer.h"
 #include <fcntl.h>
+#include <linux/filter.h>
 #include <seccomp.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -227,14 +228,25 @@ emu_alu_line (char *clean_line, reg_mem *reg)
   printf (BLUE_A " %.*s " BLUE_S "\n", sym_len, sym_str, rval_str);
 }
 
+static void
+init_regs (reg_mem *reg)
+{
+  reg->A = 0;
+  reg->X = 0;
+  for (int i = 0; i < BPF_MEMWORDS; i++)
+    reg->mem[i] = (uint32_t)ARG_INIT_VAL;
+}
+
 char *
 emu_lines (FILE *read_fp, seccomp_data *data)
 {
   line_set Line = { NULL, NULL };
   reg_mem *reg = malloc (sizeof (reg_mem));
+  init_regs (reg);
 
   char *origin_line;
   char *clean_line;
+  char *ret = NULL;
   for (uint32_t read_idx = 1, actual_idx = 1;
        pre_asm (read_fp, &Line), Line.origin_line != NULL; read_idx++)
     {
@@ -255,7 +267,7 @@ emu_lines (FILE *read_fp, seccomp_data *data)
       if (STARTWITH (clean_line, "if"))
         actual_idx = emu_if_line (clean_line, reg, data);
       else if (STARTWITH (clean_line, "return"))
-        return emu_ret_line (clean_line, reg);
+        ret = emu_ret_line (clean_line, reg);
       else if (STARTWITH (clean_line, "goto"))
         actual_idx = emu_goto_line (clean_line);
       else if (STARTWITH (clean_line, "$A=-$A"))
@@ -273,7 +285,9 @@ emu_lines (FILE *read_fp, seccomp_data *data)
     }
 
   free (reg);
-  return NULL;
+  if (ret == NULL)
+    PEXIT ("%s", MUST_END_WITH_RET);
+  return ret;
 }
 
 int

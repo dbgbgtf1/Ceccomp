@@ -23,7 +23,7 @@ static uint32_t arch;
 
 static char A[REG_BUF_LEN] = "0";
 static char X[REG_BUF_LEN] = "0";
-static char mem[0x10][REG_BUF_LEN] = { "" };
+static char mem[BPF_MEMWORDS][REG_BUF_LEN] = { "" };
 
 typedef enum
 {

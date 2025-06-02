@@ -84,7 +84,7 @@
 
 #define PEXIT(str, ...)                                                       \
   {                                                                           \
-    printf (RED ("Error: ") str "\n", __VA_ARGS__);                           \
+    printf (RED ("[ERROR]: ") str "\n", __VA_ARGS__);                         \
     exit (0);                                                                 \
   }
 

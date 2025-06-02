@@ -151,7 +151,7 @@ LD_LDX_MEM (char *rval_str, filter *f_ptr)
 
   if (*end != ']')
     log_err (INVALID_MEM);
-  if (mem_idx > 15)
+  if (mem_idx >= BPF_MEMWORDS)
     log_err (INVALID_MEM_IDX);
 
   f_ptr->code |= BPF_MEM;
@@ -231,7 +231,7 @@ ST_STX (char *clean_line)
     log_err (INVALID_MEM);
   if (*(end + 1) != '=')
     log_err (INVALID_OPERATOR);
-  if (idx > 15)
+  if (idx >= BPF_MEMWORDS)
     log_err (INVALID_MEM_IDX);
 
   filter.k = idx;

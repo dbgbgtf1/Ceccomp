@@ -2,6 +2,7 @@
 #include "log/error.h"
 #include "log/logger.h"
 #include "main.h"
+#include "parseargs.h"
 #include "transfer.h"
 #include <seccomp.h>
 #include <stdbool.h>
@@ -51,8 +52,14 @@ right_val_assignline (char *rval_str, reg_mem *reg_ptr)
 {
   uint32_t offset;
 
-  if ((offset = STR2REG (rval_str)) != (uint32_t)-1)
-    return *(uint32_t *)((char *)reg_ptr + offset);
+  offset = STR2REG (rval_str);
+  if (offset != (uint32_t)-1)
+    {
+      uint32_t retval = *(uint32_t *)((char *)reg_ptr + offset);
+      if (STARTWITH (rval_str, "$mem[") && retval == (uint32_t)ARG_INIT_VAL)
+        log_err (ST_MEM_BEFORE_LD);
+      return retval;
+    }
 
   char *end = NULL;
   uint32_t rval = strtoul (rval_str, &end, 0);

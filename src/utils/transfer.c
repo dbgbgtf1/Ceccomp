@@ -2,6 +2,7 @@
 #include "color.h"
 #include "emu.h"
 #include "main.h"
+#include <linux/filter.h>
 #include <seccomp.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -266,10 +267,10 @@ STR2REG (char *str)
   char *idx_str = str + strlen ("$mem[");
   char *end = NULL;
   uint32_t idx = strtol (idx_str, &end, 0);
-  if (*end == ']' && idx <= 15)
-    return offsetof (reg_mem, mem[0]) + idx * sizeof (uint32_t);
+  if (*end != ']' || idx >= BPF_MEMWORDS)
+    return -1;
 
-  return -1;
+  return offsetof (reg_mem, mem[0]) + idx * sizeof (uint32_t);
 }
 
 char *
