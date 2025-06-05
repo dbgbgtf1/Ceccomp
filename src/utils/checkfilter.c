@@ -12,10 +12,10 @@ void
 scmp_check_filter (filter *f_ptr, uint32_t len)
 {
   uint32_t pc;
-  for (pc = 0; pc < len - 1; (pc)++)
+  for (pc = 0; pc < len - 1; pc++)
     {
       filter *ftest = &f_ptr[pc];
-      set_log ("", pc);
+      set_log ("", pc + 1);
       uint16_t code = ftest->code;
 
       switch (code)

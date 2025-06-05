@@ -105,11 +105,11 @@ JMP (char *clean_line, uint32_t pc, uint32_t arch)
       filter.k |= right_val_ifline (rval, NULL, arch);
     }
 
-  char *right_brace = strchr (rval, ')');
-  if (right_brace == NULL)
-    log_err (BRACE_WRAP_CONDITION);
+  char *right_paren = strchr (rval, ')');
+  if (right_paren == NULL)
+    log_err (PAREN_WRAP_CONDITION);
 
-  uint32_t jmp_set = parse_goto (right_brace + 1);
+  uint32_t jmp_set = parse_goto (right_paren + 1);
   uint16_t jt = GETJT (jmp_set);
   uint16_t jf = GETJF (jmp_set);
 
@@ -240,9 +240,9 @@ ST_STX (char *clean_line)
     log_err (INVALID_RIGHT_VAL);
 
   if (*(end + 3) == 'A')
-    filter.code |= BPF_A;
+    filter.code |= BPF_ST;
   else if (*(end + 3) == 'X')
-    filter.code |= BPF_X;
+    filter.code |= BPF_STX;
   else
     log_err (INVALID_RIGHT_VAL);
 
@@ -295,7 +295,7 @@ ALU (char *clean_line)
   char *rval_str = sym_str + sym_len;
   if (!strcmp (rval_str, "$X"))
     {
-      filter.k = BPF_X;
+      filter.code |= BPF_X;
       return filter;
     }
   filter.code |= BPF_K;
@@ -365,10 +365,12 @@ assemble (uint32_t arch, FILE *read_fp, print_mode p_mode)
 
       prog.filter[prog.len] = f_current;
       format_print (prog.filter[prog.len], format);
-
       prog.len++;
+
+      free_line(&Line);
     }
 
-  printf ("\n");
+  if (p_mode != RAW)
+    putchar('\n');
   free (prog.filter);
 }

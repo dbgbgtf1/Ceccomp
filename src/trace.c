@@ -200,7 +200,7 @@ pid_trace (int pid, uint32_t arch, FILE *output_fp)
         case EINVAL:
           goto detach;
         case EMEDIUMTYPE:
-          printf (BLUE (NOT_AN_CBPF));
+          printf (CYAN (NOT_AN_CBPF));
           continue;
         default:
           PERROR (PTRACE_GET_FILTER_ERR);

@@ -1,7 +1,10 @@
 #include "transfer.h"
 #include "color.h"
 #include "emu.h"
+#include "log/error.h"
+#include "log/logger.h"
 #include "main.h"
+#include "parseargs.h"
 #include <linux/filter.h>
 #include <seccomp.h>
 #include <stddef.h>
@@ -205,51 +208,78 @@ STR2ABS (char *str)
     return -1;
 }
 
+#define RET_STR_LEN 0x20
 char *
 RETVAL2STR (uint32_t retval)
 {
+  static char retval_str[RET_STR_LEN];
+
   switch (retval & ~0xffff)
     {
     case SCMP_ACT_KILL:
       return RED ("KILL");
     case SCMP_ACT_ALLOW:
-      return GREEN ("ALLOW");
+      return CYAN ("ALLOW");
     case SCMP_ACT_KILL_PROCESS:
       return RED ("KILL_PROCESS");
-    case SCMP_ACT_TRAP:
-      return YELLOW ("TRAP");
-    case SCMP_ACT_NOTIFY:
-      return YELLOW ("NOTIFY");
     case SCMP_ACT_LOG:
       return YELLOW ("LOG");
+    case SCMP_ACT_NOTIFY:
+      return YELLOW ("NOTIFY");
+    case SCMP_ACT_TRAP:
+      snprintf (retval_str, RET_STR_LEN, YELLOW ("TRAP") "(%d)",
+                retval & 0xffff);
+      return retval_str;
     case SCMP_ACT_ERRNO (0):
-      return RED ("ERRNO");
+      snprintf (retval_str, RET_STR_LEN, RED ("ERRNO") "(%d)",
+                retval & 0xffff);
+      return retval_str;
     case SCMP_ACT_TRACE (0):
-      return YELLOW ("TRACE");
+      snprintf (retval_str, RET_STR_LEN, YELLOW ("TRACE") "(%d)",
+                retval & 0xffff);
+      return retval_str;
     default:
       return NULL;
     }
+}
+#undef RET_STR_LEN
+
+int16_t
+parse_ret_data (char *paren)
+{
+  if (*paren == '\0')
+    return 0;
+
+  if (*paren != '(')
+    log_err (RET_DATA_PAREN);
+
+  char *end;
+  int16_t ret = strtol (paren + 1, &end, 0);
+  if (*end != ')')
+    log_err (INVALID_RET_DATA);
+
+  return ret;
 }
 
 int32_t
 STR2RETVAL (char *str)
 {
-  if (strstr (str, "KILL"))
+  if (strstr (str, "KILL_PROCESS"))
+    return SCMP_ACT_KILL_PROCESS;
+  else if (strstr (str, "KILL"))
     return SCMP_ACT_KILL;
   else if (strstr (str, "ALLOW"))
     return SCMP_ACT_ALLOW;
-  else if (strstr (str, "KILL_PROCESS"))
-    return SCMP_ACT_KILL_PROCESS;
-  else if (strstr (str, "TRAP"))
-    return SCMP_ACT_TRAP;
   else if (strstr (str, "NOTIFY"))
     return SCMP_ACT_NOTIFY;
   else if (strstr (str, "LOG"))
     return SCMP_ACT_LOG;
+  else if (strstr (str, "TRAP"))
+    return SCMP_ACT_TRAP | parse_ret_data (str + strlen ("TRAP"));
   else if (strstr (str, "ERRNO"))
-    return SCMP_ACT_ERRNO (0);
+    return SCMP_ACT_ERRNO (0) | parse_ret_data (str + strlen ("ERRNO"));
   else if (strstr (str, "TRACE"))
-    return SCMP_ACT_TRACE (0);
+    return SCMP_ACT_TRACE (0) | parse_ret_data (str + strlen ("TRACE"));
   else
     return -1;
 }

@@ -80,27 +80,27 @@ static void
 LD (filter *f_ptr)
 {
   char *rval_str = load_reg (A, &A_status, f_ptr);
-  printf (BLUE_A " = " BLUE_S, rval_str);
+  printf (CYAN_A " = " CYAN_S, rval_str);
 }
 
 static void
 LDX (filter *f_ptr)
 {
   char *rval_str = load_reg (X, &X_status, f_ptr);
-  printf (BLUE_X " = " BLUE_S, rval_str);
+  printf (CYAN_X " = " CYAN_S, rval_str);
 }
 
 static void
 ST (filter *f_ptr)
 {
-  printf (BLUE_M " = " BLUE_A, f_ptr->k);
+  printf (CYAN_M " = " CYAN_A, f_ptr->k);
   strncpy (mem[f_ptr->k], A, REG_BUF_LEN);
 }
 
 static void
 STX (filter *f_ptr)
 {
-  printf (BLUE_M " = " BLUE_X, f_ptr->k);
+  printf (CYAN_M " = " CYAN_X, f_ptr->k);
   strncpy (mem[f_ptr->k], X, REG_BUF_LEN);
 }
 
@@ -150,7 +150,7 @@ ALU (filter *f_ptr)
 
   alu_sym = ALU_OP (f_ptr);
 
-  printf (BLUE_A);
+  printf (CYAN_A);
   printf ("%s", alu_sym);
 
   strcpy (A, "A");
@@ -165,7 +165,7 @@ ALU (filter *f_ptr)
       strcpy (rval, "$X");
       A_status = none;
     }
-  printf (BLUE_S, rval);
+  printf (CYAN_S, rval);
   strcat (A, rval);
 }
 
@@ -228,11 +228,11 @@ JMP_SRC (filter *f_ptr, char cmpval_str[REG_BUF_LEN])
 }
 
 const char *true_cmp_sym_tbl[4]
-    = { "if (" BLUE_A " == " BLUE_S ") ", "if (" BLUE_A " > " BLUE_S ") ",
-        "if (" BLUE_A " >= " BLUE_S ") ", "if (" BLUE_A " & " BLUE_S ") " };
+    = { "if (" CYAN_A " == " CYAN_S ") ", "if (" CYAN_A " > " CYAN_S ") ",
+        "if (" CYAN_A " >= " CYAN_S ") ", "if (" CYAN_A " & " CYAN_S ") " };
 const char *false_cmp_sym_tbl[4]
-    = { "if (" BLUE_A " != " BLUE_S ") ", "if (" BLUE_A " < " BLUE_S ") ",
-        "if (" BLUE_A " <= " BLUE_S ") ", "if !(" BLUE_A " & " BLUE_S ") " };
+    = { "if (" CYAN_A " != " CYAN_S ") ", "if (" CYAN_A " < " CYAN_S ") ",
+        "if (" CYAN_A " <= " CYAN_S ") ", "if !(" CYAN_A " & " CYAN_S ") " };
 
 static void
 JMP (filter *f_ptr, uint32_t pc)
@@ -274,35 +274,23 @@ JMP (filter *f_ptr, uint32_t pc)
     }
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wreturn-type"
-static char *
-RET_VAL (filter *f_ptr)
+static void
+RET (filter *f_ptr)
 {
+  char *ret_str;
   uint16_t ret = BPF_RVAL (f_ptr->code);
-  uint32_t retval;
-  char *end;
 
   switch (ret)
     {
     case BPF_A:
-      retval = strtoul (A, &end, 0);
-      if (A == end)
-        return "$A";
-      return RETVAL2STR (retval);
+      ret_str = "$A";
+      break;
     case BPF_K:
-      return RETVAL2STR (f_ptr->k);
+      ret_str = RETVAL2STR (f_ptr->k);
+      break;
+    default:
+      log_err (INVALID_RET_VAL);
     }
-}
-#pragma GCC diagnostic pop
-
-static void
-RET (filter *f_ptr)
-{
-  char *ret_str = RET_VAL (f_ptr);
-
-  if (ret_str == NULL)
-    log_err (INVALID_RET_VAL);
 
   printf ("return %s", ret_str);
 }
@@ -315,12 +303,12 @@ MISC (filter *f_ptr)
   switch (mode)
     {
     case BPF_TAX:
-      printf (BLUE_X " = " BLUE_A);
+      printf (CYAN_X " = " CYAN_A);
       strncpy (X, A, REG_BUF_LEN);
       X_status = A_status;
       return;
     case BPF_TXA:
-      printf (BLUE_A " = " BLUE_X);
+      printf (CYAN_A " = " CYAN_X);
       strncpy (A, X, REG_BUF_LEN);
       A_status = X_status;
       return;

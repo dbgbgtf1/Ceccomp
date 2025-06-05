@@ -11,6 +11,8 @@ typedef struct
 
 extern void pre_clear_color (char *clean_line);
 
+extern void free_line (line_set *Line);
+
 extern void pre_asm (FILE *fp, line_set *Line);
 
 #endif

@@ -53,9 +53,9 @@ emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data)
   char *rval_str = sym_str + sym_len;
   uint32_t rval = right_val_ifline (rval_str, reg, data->arch);
 
-  printf (BLUE_A);
+  printf (CYAN_A);
   printf (" %.*s ", sym_len, sym_str);
-  printf (BLUE_LS, (uint32_t)(strchr (rval_str, ')') - rval_str), rval_str);
+  printf (CYAN_LS, (uint32_t)(strchr (rval_str, ')') - rval_str), rval_str);
 
   return is_state_true (reg->A, sym_enum, rval);
 }
@@ -79,11 +79,11 @@ emu_if_line (char *clean_line, reg_mem *reg, seccomp_data *data)
   bool condition;
   condition = emu_condition (sym_str, reg, data);
 
-  char *right_brace = strchr (sym_str, ')');
-  if (right_brace == NULL)
-    log_err (BRACE_WRAP_CONDITION);
+  char *right_paren = strchr (sym_str, ')');
+  if (right_paren == NULL)
+    log_err (PAREN_WRAP_CONDITION);
 
-  uint32_t jmp_set = parse_goto (right_brace + 1);
+  uint32_t jmp_set = parse_goto (right_paren + 1);
   uint16_t jf = GETJF (jmp_set);
   uint16_t jt = GETJT (jmp_set);
 
@@ -119,7 +119,7 @@ emu_assign_line (char *clean_line, reg_mem *reg, seccomp_data *data)
       if (offset != (uint32_t)-1)
         {
           *lval_ptr = *(uint32_t *)((char *)data + offset);
-          printf (BLUE_LS " = " BLUE_S "\n", lval_len, clean_line, rval_str);
+          printf (CYAN_LS " = " CYAN_S "\n", lval_len, clean_line, rval_str);
           return;
         }
     }
@@ -127,7 +127,7 @@ emu_assign_line (char *clean_line, reg_mem *reg, seccomp_data *data)
   uint32_t rval = right_val_assignline (rval_str, reg);
 
   *lval_ptr = rval;
-  printf (BLUE_LS " = " BLUE_S "\n", lval_len, clean_line, rval_str);
+  printf (CYAN_LS " = " CYAN_S "\n", lval_len, clean_line, rval_str);
 }
 
 static char *
@@ -198,7 +198,7 @@ static void
 emu_alu_neg (reg_mem *reg)
 {
   reg->A = -reg->A;
-  printf (BLUE_A " = -" BLUE_A "\n");
+  printf (CYAN_A " = -" CYAN_A "\n");
   return;
 }
 
@@ -225,7 +225,7 @@ emu_alu_line (char *clean_line, reg_mem *reg)
 
   emu_do_alu (A_ptr, sym_enum, rval);
 
-  printf (BLUE_A " %.*s " BLUE_S "\n", sym_len, sym_str, rval_str);
+  printf (CYAN_A " %.*s " CYAN_S "\n", sym_len, sym_str, rval_str);
 }
 
 static void
@@ -244,21 +244,24 @@ emu_lines (FILE *read_fp, seccomp_data *data)
   reg_mem *reg = malloc (sizeof (reg_mem));
   init_regs (reg);
 
-  char *origin_line;
-  char *clean_line;
   char *ret = NULL;
-  for (uint32_t read_idx = 1, actual_idx = 1;
-       pre_asm (read_fp, &Line), Line.origin_line != NULL; read_idx++)
+  for (uint32_t read_idx = 1, actual_idx = 1;; read_idx++)
     {
-      clean_line = Line.clean_line;
-      origin_line = Line.origin_line;
+      if (Line.origin_line)
+        free_line (&Line);
+      pre_asm (read_fp, &Line);
+      if (Line.origin_line == NULL)
+        break;
+
+      char *clean_line = Line.clean_line;
+      char *origin_line = Line.origin_line;
+
       set_log (origin_line, read_idx);
 
       if (read_idx < actual_idx)
         {
           pre_clear_color (origin_line);
           LIGHTCOLORPRINTF (FORMAT ": %s", read_idx, origin_line);
-          free (clean_line);
           continue;
         }
       printf (FORMAT ": ", read_idx);
@@ -267,7 +270,10 @@ emu_lines (FILE *read_fp, seccomp_data *data)
       if (STARTWITH (clean_line, "if"))
         actual_idx = emu_if_line (clean_line, reg, data);
       else if (STARTWITH (clean_line, "return"))
-        ret = emu_ret_line (clean_line, reg);
+        {
+          ret = emu_ret_line (clean_line, reg);
+          break;
+        }
       else if (STARTWITH (clean_line, "goto"))
         actual_idx = emu_goto_line (clean_line);
       else if (STARTWITH (clean_line, "$A=-$A"))
@@ -280,10 +286,9 @@ emu_lines (FILE *read_fp, seccomp_data *data)
         emu_alu_line (clean_line, reg);
       else
         log_err (INVALID_ASM_CODE);
-
-      free (clean_line);
     }
 
+  free_line(&Line);
   free (reg);
   if (ret == NULL)
     PEXIT ("%s", MUST_END_WITH_RET);
@@ -344,5 +349,5 @@ emulate (ceccomp_args *args)
   if (stdout_backup != 0)
     global_ret_stdout (stdout_backup);
 
-  printf ("return " BLUE_S "\n", retval_str);
+  printf ("return " CYAN_S "\n", retval_str);
 }

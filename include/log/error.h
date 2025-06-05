@@ -35,8 +35,10 @@
 
 #define INVALID_IF "Invalid if line"
 #define INVALID_RET "Invalid ret line"
+#define RET_DATA_PAREN "Missing parentheses in ret data, example: ERRNO(2)"
+#define INVALID_RET_DATA "Invalid ret data"
 
-#define BRACE_WRAP_CONDITION "Use (condition) to wrap condition"
+#define PAREN_WRAP_CONDITION "Use (condition) to wrap condition"
 #define GOTO_AFTER_CONDITION "Use 'goto' after (condition)"
 #define LINE_NR_AFTER_GOTO "Line number to go after 'goto'"
 #define LINE_NR_AFTER_ELSE "Line number to go after ',else goto'"
