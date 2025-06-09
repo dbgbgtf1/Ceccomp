@@ -6,3 +6,4 @@ result*
 *.gdb_history
 *.cache/
 CeccompBuild/
+diff_result
