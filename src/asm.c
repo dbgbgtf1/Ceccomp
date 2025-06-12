@@ -31,8 +31,8 @@ MISC_TAX ()
   return (filter)BPF_STMT (BPF_MISC | BPF_TAX, 0);
 }
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
+// #pragma GCC diagnostic push
+// #pragma GCC diagnostic ignored "-Wimplicit-fallthrough"
 // comparing the sym
 // also EQ and NE can be the same thing
 // only you have to reverse
@@ -43,16 +43,19 @@ jmp_mode (uint8_t cmp_enum, bool *reverse)
     {
     case CMP_NE:
       *reverse = !*reverse;
+    // fall through
     case CMP_EQ:
       return BPF_JEQ;
 
     case CMP_LT:
       *reverse = !*reverse;
+    // fall through
     case CMP_GT:
       return BPF_JGT;
 
     case CMP_LE:
       *reverse = !*reverse;
+    // fall through
     case CMP_GE:
       return BPF_JGE;
 
@@ -62,7 +65,6 @@ jmp_mode (uint8_t cmp_enum, bool *reverse)
       PEXIT ("%s", INVALID_CMPENUM);
     }
 }
-#pragma GCC diagnostic pop
 
 static filter
 JMP_GOTO (char *clean_line, uint32_t pc)
