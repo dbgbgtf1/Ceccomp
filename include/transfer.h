@@ -61,7 +61,9 @@ extern "C"
 
   extern int32_t STR2REG (char *str);
 
-  extern char *REG2STR (uint32_t offset);
+  extern int32_t STR2MEM (char *str);
+
+  extern char *REG_MEM2STR (uint32_t offset);
 
 #ifdef __cplusplus
 }

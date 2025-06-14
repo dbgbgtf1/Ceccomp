@@ -291,7 +291,14 @@ STR2REG (char *str)
     return offsetof (reg_mem, A);
   else if (STARTWITH (str, "$X"))
     return offsetof (reg_mem, X);
-  else if (!STARTWITH (str, "$mem["))
+  else
+    return -1;
+}
+
+int32_t
+STR2MEM (char *str)
+{
+  if (!STARTWITH (str, "$mem["))
     return -1;
 
   char *idx_str = str + strlen ("$mem[");
@@ -304,7 +311,7 @@ STR2REG (char *str)
 }
 
 char *
-REG2STR (uint32_t offset)
+REG_MEM2STR (uint32_t offset)
 {
   switch (offset)
     {

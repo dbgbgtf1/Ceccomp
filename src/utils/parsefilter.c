@@ -70,7 +70,7 @@ load_reg (char reg[REG_BUF_LEN], reg_status *reg_stat, filter *f_ptr)
       if (*mem[k] == '\0')
         log_err (ST_MEM_BEFORE_LD);
       strcpy (reg, mem[k]);
-      return REG2STR (offsetof (reg_mem, mem[k]));
+      return REG_MEM2STR (offsetof (reg_mem, mem[k]));
     }
 }
 #pragma GCC diagnostic pop

@@ -54,12 +54,12 @@ right_val_assignline (char *rval_str, reg_mem *reg_ptr)
 
   offset = STR2REG (rval_str);
   if (offset != (uint32_t)-1)
-    {
-      uint32_t retval = *(uint32_t *)((char *)reg_ptr + offset);
-      if (STARTWITH (rval_str, "$mem[") && retval == (uint32_t)ARG_INIT_VAL)
-        log_err (ST_MEM_BEFORE_LD);
-      return retval;
-    }
+    return *(uint32_t *)((char *)reg_ptr + offset);
+
+  offset = STR2MEM (rval_str);
+  if (offset != (uint32_t)-1)
+    if (*(uint32_t *)((char *)reg_ptr + offset) == (uint32_t)ARG_INIT_VAL)
+      log_err (ST_MEM_BEFORE_LD);
 
   char *end = NULL;
   uint32_t rval = strtoul (rval_str, &end, 0);
@@ -78,15 +78,22 @@ void
 left_val_assignline (char *lval_str, reg_set *reg_set, reg_mem *reg_ptr)
 {
   uint32_t reg_offset = STR2REG (lval_str);
-  if (reg_offset == (uint32_t)-1)
-    log_err (INVALID_LEFT_VAR);
+  if (reg_offset != (uint32_t)-1)
+    {
+      reg_set->reg_len = strlen ("$A");
+      reg_set->reg_ptr = (uint32_t *)((char *)reg_ptr + reg_offset);
+      return;
+    }
 
-  if (reg_offset >= offsetof (reg_mem, mem[0]))
-    reg_set->reg_len = (size_t)strchr (lval_str, ']') - (size_t)lval_str + 1;
+  reg_offset = STR2MEM (lval_str);
+  if (reg_offset != (uint32_t)-1)
+    {
+      reg_set->reg_len = (size_t)strchr (lval_str, ']') - (size_t)lval_str + 1;
+      reg_set->reg_ptr = (uint32_t *)((char *)reg_ptr + reg_offset);
+      return;
+    }
   else
-    reg_set->reg_len = strlen ("$A");
-
-  reg_set->reg_ptr = (uint32_t *)((char *)reg_ptr + reg_offset);
+    log_err (INVALID_LEFT_VAR);
 }
 
 // return JMP ENUM, GETSYMLEN and GETSYMIDX to use it
