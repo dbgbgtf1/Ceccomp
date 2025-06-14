@@ -4,7 +4,6 @@
 #include "log/error.h"
 #include "log/logger.h"
 #include "main.h"
-#include "parseargs.h"
 #include <linux/filter.h>
 #include <seccomp.h>
 #include <stddef.h>

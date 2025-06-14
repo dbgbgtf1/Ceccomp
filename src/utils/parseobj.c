@@ -58,8 +58,12 @@ right_val_assignline (char *rval_str, reg_mem *reg_ptr)
 
   offset = STR2MEM (rval_str);
   if (offset != (uint32_t)-1)
-    if (*(uint32_t *)((char *)reg_ptr + offset) == (uint32_t)ARG_INIT_VAL)
-      log_err (ST_MEM_BEFORE_LD);
+    {
+      uint32_t retval = *(uint32_t *)((char *)reg_ptr + offset);
+      if (retval == (uint32_t)ARG_INIT_VAL)
+        log_err (ST_MEM_BEFORE_LD);
+      return retval;
+    }
 
   char *end = NULL;
   uint32_t rval = strtoul (rval_str, &end, 0);
