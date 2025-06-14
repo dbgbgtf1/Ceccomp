@@ -46,7 +46,7 @@ right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch)
 // $A = $mem[0x0]
 // $A = $mem[0]
 // $A = 0x100
-// $X = $mem[0x0] (this is wrong! $X can't be load with abs)
+// $X = $syscall_nr (this is wrong! $X can't be load with abs)
 uint32_t
 right_val_assignline (char *rval_str, reg_mem *reg_ptr)
 {
@@ -81,7 +81,7 @@ left_val_assignline (char *lval_str, reg_set *reg_set, reg_mem *reg_ptr)
   if (reg_offset == (uint32_t)-1)
     log_err (INVALID_LEFT_VAR);
 
-  if (reg_offset > offsetof (reg_mem, X))
+  if (reg_offset >= offsetof (reg_mem, mem[0]))
     reg_set->reg_len = (size_t)strchr (lval_str, ']') - (size_t)lval_str + 1;
   else
     reg_set->reg_len = strlen ("$A");
