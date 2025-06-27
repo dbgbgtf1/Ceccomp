@@ -17,7 +17,7 @@ CECCOMP_MAIN := $(BUILD_DIR)/ceccomp.c.o
 CC := gcc
 
 CFLAGS := -fpie -fstack-protector -Wall -Wextra
-LDFLAGS := -lseccomp -z now -z noexecstack -fpie -fstack-protector -Wall -Wextra
+LDFLAGS := -z now -z noexecstack -fpie -fstack-protector -Wall -Wextra -lseccomp
 
 ifdef DEBUG
 	ifeq ($(DEBUG),1)
