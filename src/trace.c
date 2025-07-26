@@ -153,16 +153,23 @@ terminate_children ()
   kill (0, SIGTERM);
 }
 
+static void
+exit_when_sigint (int signo)
+{
+  exit (signo);
+}
+
 void
 program_trace (char *argv[], FILE *output_fp, bool oneshot)
 {
+  signal (SIGINT, exit_when_sigint);
+  atexit (terminate_children);
+
   int pid = fork ();
   if (pid == 0)
     child (argv);
   else
     parent (pid, output_fp, oneshot);
-
-  atexit (terminate_children);
 }
 
 void
