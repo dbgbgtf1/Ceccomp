@@ -99,8 +99,6 @@ filter_mode (syscall_info *Info, int pid, fprog *prog, FILE *output_fp)
 __attribute__ ((noreturn)) static void
 child (char *argv[])
 {
-  setpgid (0, 0);
-
   ptrace (PTRACE_TRACEME, 0, 0, 0);
   raise (SIGSTOP);
 
@@ -148,6 +146,13 @@ parent (int pid, FILE *output_fp, bool oneshot)
     }
 }
 
+static void
+terminate_children ()
+{
+  signal (SIGTERM, SIG_IGN);
+  kill (0, SIGTERM);
+}
+
 void
 program_trace (char *argv[], FILE *output_fp, bool oneshot)
 {
@@ -157,7 +162,7 @@ program_trace (char *argv[], FILE *output_fp, bool oneshot)
   else
     parent (pid, output_fp, oneshot);
 
-  kill (-pid, SIGKILL);
+  atexit (terminate_children);
 }
 
 void
