@@ -8,6 +8,8 @@ else
 		-nrRf $(firstword $(MAKEFILE_LIST)) \
 		ECHO="COUNTTHIS" | grep -c "COUNTTHIS")
 	L := $(shell echo -n $T | wc -m)
+	GREEN := $(shell printf '\033[32m')
+	RESET := $(shell printf '\033[0m')
 	ECHO_NOPROG = printf "    $(1)\t$(2)\n"
 	ECHO = printf "    $(1)\t[%$Ld/%$Ld]\t$(2)\n" \
 		$(shell flock $(LOCK) -c 'read n < $(MARK); echo $$n; echo $$((n+1)) > $(MARK)') \
@@ -74,14 +76,14 @@ zsh_cmp_install: $(ZSH_SRC)/_ceccomp
 	@install -m 0644 $< $(ZSH_DST)
 
 ceccomp: init_progress $(BUILD_DIR)/ceccomp
-	@$(call ECHO_NOPROG,\x1b[32mBUILT,$@\x1b[0m)
+	@$(call ECHO_NOPROG,$(GREEN)BUILT,$@$(RESET))
 
 $(BUILD_DIR)/ceccomp: $(OBJS) $(CECCOMP_MAIN)
 	@$(call ECHO,LD,$@)
 	@$(CC) $(LDFLAGS) $^ -o $@
 
 test: init_progress $(BUILD_DIR)/test
-	@$(call ECHO_NOPROG,\x1b[32mBUILT,$@\x1b[0m)
+	@$(call ECHO_NOPROG,$(GREEN)BUILT,$@$(RESET))
 
 $(BUILD_DIR)/test: $(TEST_OBJS)
 	@$(call ECHO,LD,$@)
