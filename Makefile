@@ -8,7 +8,7 @@ else
 		-nrRf $(firstword $(MAKEFILE_LIST)) \
 		ECHO="COUNTTHIS" | grep -c "COUNTTHIS")
 	L := $(shell echo -n $T | wc -m)
-	ECHO_NOPROG = echo -e "    $(1)\t$(2)"
+	ECHO_NOPROG = printf "    $(1)\t$(2)\n"
 	ECHO = printf "    $(1)\t[%$Ld/%$Ld]\t$(2)\n" \
 		$(shell flock $(LOCK) -c 'read n < $(MARK); echo $$n; echo $$((n+1)) > $(MARK)') \
 		$T
