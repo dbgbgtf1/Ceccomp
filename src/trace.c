@@ -1,14 +1,17 @@
 // clang-format off
 #include "trace.h"
+#include "log/logger.h"
 #include "main.h"
 #include "parsefilter.h"
 #include "color.h"
 #include "log/error.h"
 #include <asm-generic/errno.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <linux/ptrace.h>
 #include <seccomp.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/ptrace.h>
 #include <sys/prctl.h>
@@ -123,8 +126,19 @@ parent (int pid, FILE *output_fp, bool oneshot)
       ptrace (PTRACE_SYSCALL, pid, 0, 0);
 
       waitpid (pid, &status, 0);
-      if (!WIFSTOPPED (status))
+      if (WIFEXITED (status) || WIFSIGNALED (status))
         return status;
+
+      if (WIFCONTINUED (status))
+        continue;
+
+      int sig = WSTOPSIG (status);
+      if ((sig != (SIGTRAP | 0x80)) && (sig != SIGTRAP))
+        {
+          printf ("child receive 0x%x\n", sig);
+          ptrace (PTRACE_SINGLESTEP, pid, 0, sig);
+          continue;
+        }
 
       ptrace (PTRACE_GET_SYSCALL_INFO, pid, sizeof (syscall_info), &Info);
 
@@ -169,7 +183,7 @@ program_trace (char *argv[], FILE *output_fp, bool oneshot)
   if (pid == 0)
     child (argv);
   else
-    parent (pid, output_fp, oneshot);
+    printf ("child status 0x%x", parent (pid, output_fp, oneshot));
 }
 
 void
