@@ -1,50 +1,46 @@
 #include "log/logger.h"
 #include "color.h"
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-typedef struct
-{
-  char *src;
-  uint32_t idx;
-} log;
-
-static log logger;
 
 #define INFO "[INFO]: "
 #define WARN YELLOW ("[WARN]: ")
 #define ERR RED ("[ERROR]: ")
 
 void
-log_info (char *msg)
+info_print (const char *caller_func, char *fmt, ...)
 {
-  printf (INFO "%s\n", logger.src);
-  printf (FORMAT ": ", logger.idx);
-  printf ("%s\n", msg);
-  return;
+  va_list args;
+  va_start (args, fmt);
+  fprintf (stderr, INFO);
+  fprintf (stderr, " in %s: ", caller_func);
+  vfprintf (stderr, fmt, args);
+  puts ("");
+  va_end (args);
 }
 
 void
-log_warn (char *msg)
+warn_print (const char *caller_func, char *fmt, ...)
 {
-  printf (WARN "%s\n", logger.src);
-  printf (FORMAT ": ", logger.idx);
-  printf ("%s\n", msg);
-  return;
-}
-
-_Noreturn void
-log_err (char *msg)
-{
-  printf (ERR "%s\n", logger.src);
-  printf (FORMAT ": ", logger.idx);
-  printf ("%s\n", msg);
-  exit (-1);
+  va_list args;
+  va_start (args, fmt);
+  fprintf (stderr, WARN);
+  fprintf (stderr, " in %s: ", caller_func);
+  vfprintf (stderr, fmt, args);
+  puts ("");
+  va_end (args);
 }
 
 void
-set_log (char *src, uint32_t pc)
+error_print (const char *caller_func, char *fmt, ...)
 {
-  logger.src = src;
-  logger.idx = pc;
+  va_list args;
+  va_start (args, fmt);
+  fprintf (stderr, ERR);
+  fprintf (stderr, " in %s: ", caller_func);
+  vfprintf (stderr, fmt, args);
+  puts ("");
+  va_end (args);
+  exit (1);
 }

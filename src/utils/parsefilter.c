@@ -34,13 +34,15 @@ typedef enum
 static reg_status A_status = none;
 static reg_status X_status = none;
 
+static uint32_t parse_idx = 0;
+
 static char *
 load_reg_abs (char reg[REG_BUF_LEN], reg_status *reg_stat, filter *f_ptr)
 {
   char *abs_name = 0;
   abs_name = ABS2STR (f_ptr->k);
   if (!abs_name)
-    log_err (INVALID_OFFSET_ABS);
+    error ("%d %s", parse_idx, INVALID_OFFSET_ABS);
   strcpy (reg, abs_name);
   if (!strcmp (reg, ARCHITECTURE))
     *reg_stat = architecture;
@@ -68,7 +70,7 @@ load_reg (char reg[REG_BUF_LEN], reg_status *reg_stat, filter *f_ptr)
       return load_reg_abs (reg, reg_stat, f_ptr);
     case BPF_MEM:
       if (*mem[k] == '\0')
-        log_err (ST_MEM_BEFORE_LD);
+        error ("%d %s", parse_idx, ST_MEM_BEFORE_LD);
       strcpy (reg, mem[k]);
       return REG_MEM2STR (offsetof (reg_mem, mem[k]));
     }
@@ -288,7 +290,7 @@ RET (filter *f_ptr)
       ret_str = RETVAL2STR (f_ptr->k);
       break;
     default:
-      log_err (INVALID_RET_VAL);
+      error ("%d %s", parse_idx, INVALID_RET_VAL);
     }
 
   printf ("return %s", ret_str);
@@ -361,17 +363,15 @@ parse_filter (uint32_t arch_token, fprog *sock_prog, FILE *output_fileptr)
 
   printf (" Line  CODE  JT   JF      K\n");
   printf ("---------------------------------\n");
-  for (uint32_t i = 0; i < len; i++)
+  for (; parse_idx < len; parse_idx++)
     {
-      set_log ("", i);
+      filter *f_ptr = &prog->filter[parse_idx];
 
-      filter *f_ptr = &prog->filter[i];
-
-      printf (" " FORMAT, i + 1);
+      printf (" " FORMAT, parse_idx + 1);
       printf (": 0x%02x 0x%02x ", f_ptr->code, f_ptr->jt);
       printf ("0x%02x 0x%08x ", f_ptr->jf, f_ptr->k);
 
-      parse_class (f_ptr, i);
+      parse_class (f_ptr, parse_idx);
 
       printf ("\n");
     }

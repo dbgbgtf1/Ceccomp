@@ -250,12 +250,12 @@ parse_ret_data (char *paren)
     return 0;
 
   if (*paren != '(')
-    log_err (RET_DATA_PAREN);
+    error ("%d %s", RET_DATA_PAREN);
 
   char *end;
   int16_t ret = strtol (paren + 1, &end, 0);
   if (*end != ')')
-    log_err (INVALID_RET_DATA);
+    error ("%d %s", INVALID_RET_DATA);
 
   return ret;
 }

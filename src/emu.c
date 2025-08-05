@@ -19,6 +19,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+static uint32_t read_idx;
+static uint32_t execute_idx;
+
 #define LIGHTCOLORPRINTF(str, ...) printf (LIGHTCOLOR (str "\n"), __VA_ARGS__)
 static bool
 is_state_true (uint32_t A, uint32_t cmp_enum, uint32_t rval)
@@ -81,7 +84,7 @@ emu_if_line (char *clean_line, reg_mem *reg, seccomp_data *data)
 
   char *right_paren = strchr (sym_str, ')');
   if (right_paren == NULL)
-    log_err (PAREN_WRAP_CONDITION);
+    error ("%d %s", read_idx, PAREN_WRAP_CONDITION);
 
   uint32_t jmp_set = parse_goto (right_paren + 1);
   uint16_t jf = GETJF (jmp_set);
@@ -109,7 +112,7 @@ emu_assign_line (char *clean_line, reg_mem *reg, seccomp_data *data)
   uint32_t *lval_ptr = lval.reg_ptr;
 
   if (*(clean_line + lval_len) != '=')
-    log_err (INVALID_OPERATOR);
+    error ("%d %s", read_idx, INVALID_OPERATOR);
 
   char *rval_str = clean_line + lval_len + 1;
 
@@ -140,7 +143,7 @@ emu_ret_line (char *clean_line, reg_mem *reg)
 
   int32_t retval = STR2RETVAL (retval_str);
   if (retval == -1)
-    log_err (INVALID_RET_VAL);
+    error ("%d %s", read_idx, INVALID_RET_VAL);
 
   retval_str = RETVAL2STR (retval);
   return retval_str;
@@ -154,7 +157,7 @@ emu_goto_line (char *clean_line)
   uint32_t jmp_to = strtoul (jmp_to_str, &end, 10);
 
   if (jmp_to_str == end)
-    log_err (INVALID_NR_AFTER_GOTO);
+    error ("%d %s", read_idx, INVALID_NR_AFTER_GOTO);
 
   printf ("goto %04d\n", jmp_to);
   return jmp_to;
@@ -220,7 +223,7 @@ emu_alu_line (char *clean_line, reg_mem *reg)
     {
       rval = strtoul (rval_str, &end, 0);
       if (rval_str == end)
-        log_err (INVALID_RIGHT_VAL);
+        error ("%d %s", read_idx, INVALID_RIGHT_VAL);
     }
 
   emu_do_alu (A_ptr, sym_enum, rval);
@@ -245,7 +248,7 @@ emu_lines (FILE *read_fp, seccomp_data *data)
   init_regs (reg);
 
   char *ret = NULL;
-  for (uint32_t read_idx = 1, actual_idx = 1;; read_idx++)
+  for (read_idx = 1, execute_idx = 1;; read_idx++)
     {
       if (Line.origin_line)
         free_line (&Line);
@@ -256,26 +259,24 @@ emu_lines (FILE *read_fp, seccomp_data *data)
       char *clean_line = Line.clean_line;
       char *origin_line = Line.origin_line;
 
-      set_log (origin_line, read_idx);
-
-      if (read_idx < actual_idx)
+      if (read_idx < execute_idx)
         {
           pre_clear_color (origin_line);
           LIGHTCOLORPRINTF (FORMAT ": %s", read_idx, origin_line);
           continue;
         }
       printf (FORMAT ": ", read_idx);
-      actual_idx++;
+      execute_idx++;
 
       if (STARTWITH (clean_line, "if"))
-        actual_idx = emu_if_line (clean_line, reg, data);
+        execute_idx = emu_if_line (clean_line, reg, data);
       else if (STARTWITH (clean_line, "return"))
         {
           ret = emu_ret_line (clean_line, reg);
           break;
         }
       else if (STARTWITH (clean_line, "goto"))
-        actual_idx = emu_goto_line (clean_line);
+        execute_idx = emu_goto_line (clean_line);
       else if (STARTWITH (clean_line, "$A=-$A"))
         emu_alu_neg (reg);
       else if ((STARTWITH (clean_line, "$") && *(clean_line + 2) == '='))
@@ -285,10 +286,10 @@ emu_lines (FILE *read_fp, seccomp_data *data)
       else if (STARTWITH (clean_line, "$A"))
         emu_alu_line (clean_line, reg);
       else
-        log_err (INVALID_ASM_CODE);
+        error ("%d %s",read_idx, INVALID_ASM_CODE);
     }
 
-  free_line(&Line);
+  free_line (&Line);
   free (reg);
   if (ret == NULL)
     PEXIT ("%s", MUST_END_WITH_RET);

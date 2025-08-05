@@ -15,7 +15,6 @@ scmp_check_filter (filter *f_ptr, uint32_t len)
   for (pc = 0; pc < len - 1; pc++)
     {
       filter *ftest = &f_ptr[pc];
-      set_log ("", pc + 1);
       uint16_t code = ftest->code;
 
       switch (code)
@@ -46,7 +45,7 @@ scmp_check_filter (filter *f_ptr, uint32_t len)
           continue;
         case BPF_ALU | BPF_DIV | BPF_K:
           if (ftest->k == 0)
-            log_info (ALU_DIV_BY_ZERO);
+            info ("%d %s", pc + 1, ALU_DIV_BY_ZERO);
           continue;
         case BPF_ALU | BPF_DIV | BPF_X:
         case BPF_ALU | BPF_AND | BPF_K:
@@ -59,7 +58,7 @@ scmp_check_filter (filter *f_ptr, uint32_t len)
         case BPF_ALU | BPF_LSH | BPF_K:
         case BPF_ALU | BPF_RSH | BPF_K:
           if (ftest->k >= 32)
-            log_err (ALU_SH_OUT_OF_RANGE);
+            error ("%d %s", pc + 1, ALU_SH_OUT_OF_RANGE);
           continue;
         case BPF_ALU | BPF_LSH | BPF_X:
         case BPF_ALU | BPF_RSH | BPF_X:
@@ -69,7 +68,7 @@ scmp_check_filter (filter *f_ptr, uint32_t len)
           continue;
         case BPF_JMP | BPF_JA:
           if (ftest->k >= (unsigned int)(len - pc - 1))
-            log_err (JMP_OUT_OF_RANGE);
+            error ("%d %s", pc + 1, JMP_OUT_OF_RANGE);
           continue;
         case BPF_JMP | BPF_JEQ | BPF_K:
         case BPF_JMP | BPF_JEQ | BPF_X:
@@ -80,13 +79,13 @@ scmp_check_filter (filter *f_ptr, uint32_t len)
         case BPF_JMP | BPF_JSET | BPF_K:
         case BPF_JMP | BPF_JSET | BPF_X:
           if (pc + ftest->jt + 1 >= len || pc + ftest->jf + 1 >= len)
-            log_err (JMP_OUT_OF_RANGE);
+            error ("%d %s", pc + 1, JMP_OUT_OF_RANGE);
           continue;
         case BPF_RET | BPF_K:
         case BPF_RET | BPF_A:
           continue;
         default:
-          log_err (INVALID_OPERTION);
+          error ("%d %s", pc + 1, INVALID_OPERTION);
         }
     }
 
@@ -97,5 +96,5 @@ scmp_check_filter (filter *f_ptr, uint32_t len)
       return;
     }
 
-  log_err (MUST_END_WITH_RET);
+  error ("%s", MUST_END_WITH_RET);
 }

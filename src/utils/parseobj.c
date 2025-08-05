@@ -39,7 +39,7 @@ right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch)
   if (rval_str != end)
     return rval;
 
-  log_err (INVALID_RIGHT_VAL);
+  error ("%s", INVALID_RIGHT_VAL);
 }
 
 // this is used in assign line, right value only
@@ -61,7 +61,7 @@ right_val_assignline (char *rval_str, reg_mem *reg_ptr)
     {
       uint32_t retval = *(uint32_t *)((char *)reg_ptr + offset);
       if (retval == (uint32_t)ARG_INIT_VAL)
-        log_err (ST_MEM_BEFORE_LD);
+        error ("%s", ST_MEM_BEFORE_LD);
       return retval;
     }
 
@@ -70,7 +70,7 @@ right_val_assignline (char *rval_str, reg_mem *reg_ptr)
   if (end != rval_str)
     return rval;
 
-  log_err (INVALID_RIGHT_VAL);
+  error ("%s", INVALID_RIGHT_VAL);
 }
 
 // this is used in assign line, left value only
@@ -97,7 +97,7 @@ left_val_assignline (char *lval_str, reg_set *reg_set, reg_mem *reg_ptr)
       return;
     }
   else
-    log_err (INVALID_LEFT_VAR);
+    error ("%s", INVALID_LEFT_VAR);
 }
 
 // return JMP ENUM, GETSYMLEN and GETSYMIDX to use it
@@ -121,7 +121,7 @@ parse_cmp_sym (char *sym_str)
   else if (!strncmp (sym_str, "<", 1))
     return CMP_LT;
 
-  log_err (INVALID_OPERATOR);
+  error ("%s", INVALID_OPERATOR);
 }
 
 uint8_t
@@ -146,14 +146,14 @@ parse_alu_sym (char *cmp_str)
   else if (!strncmp (cmp_str, ">>=", 3))
     return ALU_RS;
 
-  log_err (INVALID_OPERATOR);
+  error ("%s", INVALID_OPERATOR);
 }
 
 uint32_t
 parse_goto (char *goto_str)
 {
   if (!STARTWITH (goto_str, "goto"))
-    log_err (GOTO_AFTER_CONDITION);
+    error ("%s", GOTO_AFTER_CONDITION);
 
   char *jt_str = goto_str + strlen ("goto");
   char *jf_str = NULL;
@@ -162,14 +162,14 @@ parse_goto (char *goto_str)
 
   jt = strtoul (jt_str, &jf_str, 10);
   if (jf_str == jt_str)
-    log_err (LINE_NR_AFTER_GOTO);
+    error ("%s", LINE_NR_AFTER_GOTO);
 
   if (STARTWITH (jf_str, ",elsegoto"))
     {
       jf_str += strlen (",elsegoto");
       jf = strtoul (jf_str, &jt_str, 10);
       if (jt_str == jf_str)
-        log_err (LINE_NR_AFTER_ELSE);
+        error ("%s", LINE_NR_AFTER_ELSE);
     }
 
   return JMPSET (jt, jf);
@@ -186,5 +186,5 @@ maybe_reverse (char *clean_line)
   else if (STARTWITH (clean_line, "if!($A"))
     return true;
   else
-    log_err (INVALID_IF);
+    error ("%s", INVALID_IF);
 }

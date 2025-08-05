@@ -1,14 +1,17 @@
 #ifndef LOGGER
 #define LOGGER
 
-#include <stdint.h>
+#include <sys/cdefs.h>
+// clang-format off
+__attribute_noinline__ void info_print (const char *caller_func, char *fmt, ...);
 
-extern void log_info (char *msg);
+__attribute_noinline__ void warn_print (const char *caller_func, char *fmt, ...);
 
-extern void log_warn (char *msg);
+__attribute_noinline__ __attribute__ ((noreturn)) void error_print (const char *caller_func, char *fmt, ...);
+// clang-format on
 
-extern _Noreturn void log_err (char *msg);
-
-extern void set_log (char *src, uint32_t pc);
+#define info(fmt, ...) info_print (__func__, fmt, __VA_ARGS__)
+#define warn(fmt, ...) warn_print (__func__, fmt, __VA_ARGS__)
+#define error(fmt, ...) error_print (__func__, fmt, __VA_ARGS__)
 
 #endif
