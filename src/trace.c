@@ -6,6 +6,7 @@
 #include "color.h"
 #include "log/error.h"
 #include <asm-generic/errno.h>
+#include <complex.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/ptrace.h>
@@ -62,13 +63,14 @@ check_scmp_mode (syscall_info *Info, int pid, fprog *prog)
   prog->len = ptrace (PTRACE_PEEKDATA, pid, Info->entry.args[2], 0);
   // also get filter len, maybe we need to dump it if the seccomp succeed
 
-  regs exitRegs;
-
-  ptrace (PTRACE_SINGLESTEP, pid, 0, 0);
+  ptrace (PTRACE_SYSCALL, pid, 0, 0);
   waitpid (pid, NULL, 0);
-  ptrace (PTRACE_GETREGS, pid, 0, &exitRegs);
+  ptrace (PTRACE_GET_SYSCALL_INFO, pid, sizeof (syscall_info), Info);
 
-  if (exitRegs.rax != 0)
+  if (Info->op != PTRACE_SYSCALL_INFO_EXIT)
+    error ("%s", SHOULD_BE_EXIT);
+
+  if (Info->exit.is_error)
     seccomp_mode = LOAD_FAIL;
   // seccomp set failed, nothing happened
 

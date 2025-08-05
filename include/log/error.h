@@ -83,6 +83,7 @@
 #define PTRACE_SEIZE_ERR "ptrace seize error"
 #define PTRACE_GET_FILTER_ERR "ptrace get filter error"
 #define EXECV_ERR "execv failed executing"
+#define SHOULD_BE_EXIT "should be ptrace exit here"
 
 #define PEXIT(str, ...)                                                       \
   {                                                                           \
