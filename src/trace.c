@@ -225,8 +225,9 @@ pid_trace (int pid, uint32_t arch, FILE *output_fp)
       switch (errno)
         {
         case ENOENT:
+          PEXIT ("%s", TRACE_PID_ENOENT);
         case EINVAL:
-          goto detach;
+          PEXIT ("%s", TRACE_PID_UNSUPPORTED);
         case EMEDIUMTYPE:
           printf (CYAN (NOT_AN_CBPF));
           continue;
@@ -236,7 +237,6 @@ pid_trace (int pid, uint32_t arch, FILE *output_fp)
     }
   while (true);
 
-detach:
   ptrace (PTRACE_DETACH, pid, 0, 0);
   free (prog.filter);
 }

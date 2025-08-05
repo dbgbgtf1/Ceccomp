@@ -84,6 +84,11 @@
 #define PTRACE_GET_FILTER_ERR "ptrace get filter error"
 #define EXECV_ERR "execv failed executing"
 #define SHOULD_BE_EXIT "should be ptrace exit here"
+#define TRACE_PID_UNSUPPORTED                                                  \
+  "Sorry, PTRACE_SECCOMP_GET_FILTER is not supported on your system"
+#define TRACE_PID_ENOENT                                                       \
+  "ENOENT returned, which is unexpected, please submit your case in our "      \
+  "issues"
 
 #define PEXIT(str, ...)                                                       \
   {                                                                           \
