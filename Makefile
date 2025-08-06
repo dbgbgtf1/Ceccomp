@@ -87,7 +87,7 @@ test: init_progress $(BUILD_DIR)/test
 
 $(BUILD_DIR)/test: $(TEST_OBJS)
 	@$(call ECHO,LD,$@)
-	@$(CC) $(CFLAGS) $^ -o $@
+	@$(CC) $(LDFLAGS) $^ -o $@
 
 $(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c | $(BUILD_DIR)
 	@$(call ECHO,CC,$@)

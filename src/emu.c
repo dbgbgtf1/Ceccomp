@@ -43,7 +43,7 @@ is_state_true (uint32_t A, uint32_t cmp_enum, uint32_t rval)
     case CMP_NE:
       return (A != rval);
     default:
-      PEXIT (INVALID_CMPENUM ": %d", cmp_enum);
+      error (INVALID_CMPENUM ": %d", cmp_enum);
     }
 }
 
@@ -193,7 +193,7 @@ emu_do_alu (uint32_t *A_ptr, uint8_t alu_enum, uint32_t rval)
       *A_ptr >>= rval;
       return;
     default:
-      PEXIT (INVALID_ALUENUM ": %d\n", alu_enum)
+      error (INVALID_ALUENUM ": %d\n", alu_enum);
     }
 }
 
@@ -292,7 +292,7 @@ emu_lines (FILE *read_fp, seccomp_data *data)
   free_line (&Line);
   free (reg);
   if (ret == NULL)
-    PEXIT ("%s", MUST_END_WITH_RET);
+    error ("%s", MUST_END_WITH_RET);
   return ret;
 }
 
@@ -301,10 +301,10 @@ global_hide_stdout (int filedup2)
 {
   int stdout_backup = dup (STDOUT_FILENO);
   if (stdout_backup == -1)
-    PERROR ("dup");
+    error ("dup: %s", strerror (errno));
 
   if (dup2 (filedup2, STDOUT_FILENO) == -1)
-    PERROR ("global_hide_stdout dup2");
+    error ("dup2: %s", strerror (errno));
 
   return stdout_backup;
 }
@@ -313,7 +313,7 @@ void
 global_ret_stdout (int stdout_backup)
 {
   if (dup2 (stdout_backup, STDOUT_FILENO) == -1)
-    PERROR ("global_ret_stdout dup2")
+    error ("dup2: %s", strerror (errno));
   close (stdout_backup);
 }
 
@@ -325,7 +325,7 @@ emulate (ceccomp_args *args)
   data.arch = args->arch_token;
 
   if (args->syscall_nr == (char *)ARG_INIT_VAL)
-    PEXIT ("%s", INPUT_SYS_NR);
+    error ("%s", INPUT_SYS_NR);
 
   data.nr
       = seccomp_syscall_resolve_name_arch (args->arch_token, args->syscall_nr);

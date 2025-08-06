@@ -1,5 +1,6 @@
 #include "parseargs.h"
 #include "log/error.h"
+#include "log/logger.h"
 #include "main.h"
 #include "transfer.h"
 #include <argp.h>
@@ -17,7 +18,7 @@ strtoull_check (char *num, int base, char *err)
   char *end;
   uint64_t ret = strtoull (num, &end, base);
   if (num == end)
-    PEXIT ("%s: %s", err, num);
+    error ("%s: %s", err, num);
   return ret;
 }
 
@@ -75,7 +76,7 @@ parse_print_mode (char *arg)
   else if (!strcmp (arg, "raw"))
     return RAW;
   else
-    PEXIT (INVALID_PRINT_MODE ": %s", arg);
+    error (INVALID_PRINT_MODE ": %s", arg);
 }
 
 // asm and disasm share the same args logic
@@ -89,7 +90,7 @@ asm_disasm_args (ceccomp_args *args_ptr, char *arg)
 
   args_ptr->read_fp = fopen (arg, "r");
   if (args_ptr->read_fp == NULL)
-    PEXIT (UNABLE_OPEN_FILE ": %s", arg);
+    error (UNABLE_OPEN_FILE ": %s", arg);
 }
 
 static void
@@ -102,7 +103,7 @@ emu_args (ceccomp_args *args_ptr, char *arg)
     {
       args_ptr->read_fp = fopen (arg, "r");
       if (args_ptr->read_fp == NULL)
-        PEXIT (UNABLE_OPEN_FILE ": %s", arg);
+        error (UNABLE_OPEN_FILE ": %s", arg);
     }
   else if (arg_idx == 2)
     args_ptr->syscall_nr = arg;
@@ -158,12 +159,12 @@ parse_opt (int key, char *arg, struct argp_state *state)
     case 'o':
       args_ptr->output_fp = fopen (arg, "w+");
       if (args_ptr->output_fp == NULL)
-        PEXIT (UNABLE_OPEN_FILE ": %s", arg);
+        error (UNABLE_OPEN_FILE ": %s", arg);
       return 0;
     case 'a':
       args_ptr->arch_token = STR2ARCH (arg);
       if (args_ptr->arch_token == (uint32_t)-1)
-        PEXIT (INVALID_ARCH ": %s" SUPPORT_ARCH, arg);
+        error (INVALID_ARCH ": %s" SUPPORT_ARCH, arg);
       return 0;
     case 'p':
       args_ptr->pid = strtoull_check (arg, 0, INVALID_PID);

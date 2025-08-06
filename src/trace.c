@@ -109,7 +109,7 @@ child (char *argv[])
 
   int err = execv (argv[0], argv);
   if (err)
-    PEXIT (EXECV_ERR ": %s, %s\n", argv[0], strerror (errno));
+    error (EXECV_ERR ": %s, %s\n", argv[0], strerror (errno));
   exit (0);
 }
 
@@ -137,7 +137,6 @@ parent (int pid, FILE *output_fp, bool oneshot)
       int sig = WSTOPSIG (status);
       if ((sig != (SIGTRAP | 0x80)) && (sig != SIGTRAP))
         {
-          printf ("child receive 0x%x\n", sig);
           ptrace (PTRACE_SINGLESTEP, pid, 0, sig);
           continue;
         }
@@ -185,7 +184,7 @@ program_trace (char *argv[], FILE *output_fp, bool oneshot)
   if (pid == 0)
     child (argv);
   else
-    printf ("child status 0x%x", parent (pid, output_fp, oneshot));
+    info ("child status 0x%x", parent (pid, output_fp, oneshot));
 }
 
 void
@@ -201,9 +200,9 @@ pid_trace (int pid, uint32_t arch, FILE *output_fp)
       switch (errno)
         {
         case EPERM:
-          PEXIT ("%s", SYS_ADMIN_OR_KERNEL);
+          error ("%s", SYS_ADMIN_OR_KERNEL);
         default:
-          PERROR (PTRACE_SEIZE_ERR);
+          error ("ptrace: %s", strerror (errno));
         }
     }
 
@@ -225,14 +224,14 @@ pid_trace (int pid, uint32_t arch, FILE *output_fp)
       switch (errno)
         {
         case ENOENT:
-          PEXIT ("%s", TRACE_PID_ENOENT);
+          error ("ptrace: %s", TRACE_PID_ENOENT);
         case EINVAL:
-          PEXIT ("%s", TRACE_PID_UNSUPPORTED);
+          error ("ptrace: %s", TRACE_PID_UNSUPPORTED);
         case EMEDIUMTYPE:
           printf (CYAN (NOT_AN_CBPF));
           continue;
         default:
-          PERROR (PTRACE_GET_FILTER_ERR);
+          error ("ptrace: %s", strerror (errno));
         }
     }
   while (true);

@@ -90,16 +90,4 @@
   "ENOENT returned, which is unexpected, please submit your case in our "      \
   "issues"
 
-#define PEXIT(str, ...)                                                       \
-  {                                                                           \
-    printf (RED ("[ERROR]: ") str "\n", __VA_ARGS__);                         \
-    exit (0);                                                                 \
-  }
-
-#define PERROR(str)                                                           \
-  {                                                                           \
-    perror (str);                                                             \
-    exit (0);                                                                 \
-  }
-
 #endif

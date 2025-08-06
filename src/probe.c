@@ -1,6 +1,6 @@
 #include "probe.h"
 #include "emu.h"
-#include "log/error.h"
+#include "log/logger.h"
 #include "main.h"
 #include "trace.h"
 #include <fcntl.h>
@@ -9,6 +9,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 char *to_test_list[]
@@ -20,7 +21,7 @@ probe (char *argv[], uint32_t arch_token, FILE *output_fp)
 {
   FILE *tmp_fp = tmpfile ();
   if (tmp_fp == NULL)
-    PERROR ("tmpfile create failed");
+    error ("open: %s", strerror (errno));
   program_trace (argv, tmp_fp, true);
 
   for (size_t i = 0; i < ARRAY_SIZE (to_test_list); i++)

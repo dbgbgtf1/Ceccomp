@@ -1,5 +1,6 @@
 #include "preasm.h"
 #include "log/error.h"
+#include "log/logger.h"
 #include "main.h"
 #include <fcntl.h>
 #include <seccomp.h>
@@ -88,7 +89,7 @@ check_valid_line (char *clean_line)
   if (is_etc (clean_line))
     return "";
 
-  PEXIT (INVALID_ASM_CODE ": %s", clean_line);
+  error (INVALID_ASM_CODE ": %s", clean_line);
 }
 
 static char *copy_line;
