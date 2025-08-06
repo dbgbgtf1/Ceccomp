@@ -14,7 +14,7 @@ info_print (const char *caller_func, char *fmt, ...)
   va_list args;
   va_start (args, fmt);
   fprintf (stderr, INFO);
-  fprintf (stderr, " in %s: ", caller_func);
+  fprintf (stderr, "in %s: ", caller_func);
   vfprintf (stderr, fmt, args);
   puts ("");
   va_end (args);
@@ -26,7 +26,7 @@ warn_print (const char *caller_func, char *fmt, ...)
   va_list args;
   va_start (args, fmt);
   fprintf (stderr, WARN);
-  fprintf (stderr, " in %s: ", caller_func);
+  fprintf (stderr, "in %s: ", caller_func);
   vfprintf (stderr, fmt, args);
   puts ("");
   va_end (args);
@@ -38,7 +38,7 @@ error_print (const char *caller_func, char *fmt, ...)
   va_list args;
   va_start (args, fmt);
   fprintf (stderr, ERR);
-  fprintf (stderr, " in %s: ", caller_func);
+  fprintf (stderr, "in %s: ", caller_func);
   vfprintf (stderr, fmt, args);
   puts ("");
   va_end (args);
