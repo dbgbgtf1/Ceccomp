@@ -49,7 +49,7 @@ ifdef DEBUG
 		LDFLAGS += -g3 -O0
 	endif
 else
-	CFLAGS += -O2 -s
+	CFLAGS += -O2
 	LDFLAGS += -O2 -s
 endif
 
