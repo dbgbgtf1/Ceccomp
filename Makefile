@@ -59,7 +59,7 @@ BIN_DIR ?= $(PREFIX)/bin
 ZSH_DST ?= $(PREFIX)/share/zsh/site-functions
 ZSH_SRC := completions
 
-all: ceccomp test check
+all: ceccomp test
 
 install: bin_install zsh_cmp_install
 
@@ -103,7 +103,7 @@ $(BUILD_DIR):
 init_progress: | $(BUILD_DIR)
 	@echo 1 > $(MARK)
 
-.PHONY: clean all check check_disasm check_asm check_emu init_progress ceccomp test
+.PHONY: clean all init_progress ceccomp test
 clean:
 	@$(call ECHO_NOPROG,RM,$(BUILD_DIR))
 	@rm -rf $(BUILD_DIR)
