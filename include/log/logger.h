@@ -3,11 +3,11 @@
 
 #include <sys/cdefs.h>
 // clang-format off
-__attribute_noinline__ void info_print (const char *caller_func, char *fmt, ...);
+__attribute__ ((noinline)) void info_print (const char *caller_func, char *fmt, ...);
 
-__attribute_noinline__ void warn_print (const char *caller_func, char *fmt, ...);
+__attribute__ ((noinline)) void warn_print (const char *caller_func, char *fmt, ...);
 
-__attribute_noinline__ __attribute__ ((noreturn)) void error_print (const char *caller_func, char *fmt, ...);
+__attribute__ ((noinline)) __attribute__ ((noreturn)) void error_print (const char *caller_func, char *fmt, ...);
 // clang-format on
 
 #define info(fmt, ...) info_print (__func__, fmt, __VA_ARGS__)
