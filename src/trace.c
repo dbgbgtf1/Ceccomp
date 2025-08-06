@@ -10,6 +10,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/ptrace.h>
+#include <linux/seccomp.h>
 #include <seccomp.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -41,7 +42,8 @@ check_scmp_mode (syscall_info *Info, int pid, fprog *prog)
   uint64_t arg0 = Info->entry.args[0];
   uint64_t arg1 = Info->entry.args[1];
 
-  if (nr == (uint64_t)seccomp_syscall_resolve_name_arch (arch, "seccomp"))
+  if (nr == (uint64_t)seccomp_syscall_resolve_name_arch (arch, "seccomp")
+      && (arg0 == SECCOMP_SET_MODE_FILTER || arg0 == SECCOMP_MODE_STRICT))
     seccomp_mode = arg0 | LOAD_SUCCESS;
   else if (nr == (uint64_t)seccomp_syscall_resolve_name_arch (arch, "prctl")
            && arg0 == PR_SET_SECCOMP)
