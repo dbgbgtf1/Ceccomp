@@ -45,12 +45,12 @@ ifdef DEBUG
 		CFLAGS += -g -O2
 		LDFLAGS += -g -O2
 	else ifeq ($(DEBUG),2)
-		CFLAGS += -g
-		LDFLAGS += -g
+		CFLAGS += -g3 -O0 -DDEBUG
+		LDFLAGS += -g3 -O0
 	endif
 else
-	CFLAGS += -O2
-	LDFLAGS += -O2
+	CFLAGS += -O2 -s
+	LDFLAGS += -O2 -s
 endif
 
 DEST_DIR ?= 
