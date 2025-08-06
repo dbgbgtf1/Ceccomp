@@ -1,0 +1,24 @@
+#!/bin/bash
+
+COMMIT_MSG_FILE="$1"
+
+if [[ $COMMIT_MSG_FILE == "install" ]]; then
+    ln -sf ../../scripts/$(basename $0) .git/hooks/commit-msg
+    echo "commit-msg hook installed"
+    exit 0
+fi
+
+VERSION_REGEX='\b[0-9]+\.[0-9]+\b'
+
+print_highlight() {
+    echo -e "\x1b[33m$1\x1b[0m" >&2
+}
+if grep -qE "$VERSION_REGEX" "$COMMIT_MSG_FILE"; then
+    print_highlight "========================================"
+    print_highlight "Version update detected!"
+    print_highlight "Please check if updated include/main.h"
+    print_highlight "========================================"
+    print_highlight
+fi
+
+exit 0
