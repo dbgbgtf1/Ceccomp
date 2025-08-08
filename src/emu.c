@@ -84,7 +84,7 @@ emu_if_line (char *clean_line, reg_mem *reg, seccomp_data *data)
 
   char *right_paren = strchr (sym_str, ')');
   if (right_paren == NULL)
-    error ("%d %s", read_idx, PAREN_WRAP_CONDITION);
+    error (FORMAT " %s", read_idx, PAREN_WRAP_CONDITION);
 
   uint32_t jmp_set = parse_goto (right_paren + 1);
   uint16_t jf = GETJF (jmp_set);
@@ -112,7 +112,7 @@ emu_assign_line (char *clean_line, reg_mem *reg, seccomp_data *data)
   uint32_t *lval_ptr = lval.reg_ptr;
 
   if (*(clean_line + lval_len) != '=')
-    error ("%d %s", read_idx, INVALID_OPERATOR);
+    error (FORMAT " %s", read_idx, INVALID_OPERATOR);
 
   char *rval_str = clean_line + lval_len + 1;
 
@@ -143,7 +143,7 @@ emu_ret_line (char *clean_line, reg_mem *reg)
 
   int32_t retval = STR2RETVAL (retval_str);
   if (retval == -1)
-    error ("%d %s", read_idx, INVALID_RET_VAL);
+    error (FORMAT " %s", read_idx, INVALID_RET_VAL);
 
   retval_str = RETVAL2STR (retval);
   return retval_str;
@@ -157,7 +157,7 @@ emu_goto_line (char *clean_line)
   uint32_t jmp_to = strtoul (jmp_to_str, &end, 10);
 
   if (jmp_to_str == end)
-    error ("%d %s", read_idx, INVALID_NR_AFTER_GOTO);
+    error (FORMAT " %s", read_idx, INVALID_NR_AFTER_GOTO);
 
   printf ("goto %04d\n", jmp_to);
   return jmp_to;
@@ -193,7 +193,7 @@ emu_do_alu (uint32_t *A_ptr, uint8_t alu_enum, uint32_t rval)
       *A_ptr >>= rval;
       return;
     default:
-      error (INVALID_ALUENUM ": %d\n", alu_enum);
+      error (INVALID_ALUENUM ": %d", alu_enum);
     }
 }
 
@@ -223,7 +223,7 @@ emu_alu_line (char *clean_line, reg_mem *reg)
     {
       rval = strtoul (rval_str, &end, 0);
       if (rval_str == end)
-        error ("%d %s", read_idx, INVALID_RIGHT_VAL);
+        error (FORMAT " %s", read_idx, INVALID_RIGHT_VAL);
     }
 
   emu_do_alu (A_ptr, sym_enum, rval);
@@ -286,7 +286,7 @@ emu_lines (FILE *read_fp, seccomp_data *data)
       else if (STARTWITH (clean_line, "$A"))
         emu_alu_line (clean_line, reg);
       else
-        error ("%d %s",read_idx, INVALID_ASM_CODE);
+        error (FORMAT " %s", read_idx, INVALID_ASM_CODE);
     }
 
   free_line (&Line);
