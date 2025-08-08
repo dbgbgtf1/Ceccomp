@@ -176,7 +176,8 @@ parse_opt (int key, char *arg, struct argp_state *state)
       args_ptr->fmt_mode = parse_print_mode (arg);
       return 0;
     case 'h':
-      args_ptr->mode = HELP_MODE;
+      if (args_ptr->mode == HELP_ABNORMAL)
+        args_ptr->mode = HELP_MODE;
       return 0;
     default:
       return 0;
