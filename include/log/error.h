@@ -75,6 +75,9 @@
 #define MUST_END_WITH_RET "Bpf filter must end with return"
 #define INVALID_OPERTION "Invalid opertion"
 
+#define ERROR_HAPPEN                                                          \
+  "The above code has errors, please check the warnings for specific details"
+
 // trace err
 #define SYS_ADMIN_OR_KERNEL                                                   \
   "Run with CAP_SYS_ADMIN capability when trace pid\nand kernel pid can't "   \
@@ -84,10 +87,10 @@
 #define PTRACE_GET_FILTER_ERR "ptrace get filter error"
 #define EXECV_ERR "execv failed executing"
 #define SHOULD_BE_EXIT "should be ptrace exit here"
-#define TRACE_PID_UNSUPPORTED                                                  \
+#define TRACE_PID_UNSUPPORTED                                                 \
   "Sorry, PTRACE_SECCOMP_GET_FILTER is not supported on your system"
-#define TRACE_PID_ENOENT                                                       \
-  "ENOENT returned, which is unexpected, please submit your case in our "      \
+#define TRACE_PID_ENOENT                                                      \
+  "ENOENT returned, which is unexpected, please submit your case in our "     \
   "issues"
 
 #endif

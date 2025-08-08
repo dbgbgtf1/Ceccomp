@@ -359,7 +359,7 @@ parse_filter (uint32_t arch_token, fprog *sock_prog, FILE *output_fileptr)
 
   int stdout_backup = global_hide_stdout (fileno (output_fileptr));
 
-  scmp_check_filter (prog->filter, len);
+  bool error_happen = scmp_check_filter (prog->filter, len);
 
   printf (" Line  CODE  JT   JF      K\n");
   printf ("---------------------------------\n");
@@ -376,6 +376,9 @@ parse_filter (uint32_t arch_token, fprog *sock_prog, FILE *output_fileptr)
       printf ("\n");
     }
   printf ("---------------------------------\n");
+  
+  if (error_happen == true)
+    warn ("%s", ERROR_HAPPEN);
 
   global_ret_stdout (stdout_backup);
 }
