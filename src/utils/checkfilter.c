@@ -45,7 +45,7 @@ scmp_check_filter (filter *f_ptr, uint32_t len)
           continue;
         case BPF_ALU | BPF_DIV | BPF_K:
           if (ftest->k == 0)
-            info ("%d %s", pc + 1, ALU_DIV_BY_ZERO);
+            error ("%d %s", pc + 1, ALU_DIV_BY_ZERO);
           continue;
         case BPF_ALU | BPF_DIV | BPF_X:
         case BPF_ALU | BPF_AND | BPF_K:
