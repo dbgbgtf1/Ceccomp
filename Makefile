@@ -12,7 +12,7 @@ else
 	RESET := $(shell printf '\033[0m')
 	ECHO_NOPROG = printf "    $(1)\t$(2)\n"
 	ECHO = printf "    $(1)\t[%$Ld/%$Ld]\t$(2)\n" \
-		$(shell flock $(LOCK) -c 'read n < $(MARK); echo $$n; echo $$((n+1)) > $(MARK)') \
+		$(shell SHELL=$(SHELL) flock $(LOCK) -c 'read n < $(MARK); echo $$n; echo $$((n+1)) > $(MARK)') \
 		$T
 	endif
 
@@ -42,10 +42,10 @@ LDFLAGS := -z now -z noexecstack -fpie -fstack-protector -Wall -Wextra -lseccomp
 
 ifdef DEBUG
 	ifeq ($(DEBUG),1)
-		CFLAGS += -g -O2
+		CFLAGS += -g -O2 -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer
 		LDFLAGS += -g -O2
 	else ifeq ($(DEBUG),2)
-		CFLAGS += -g3 -O0 -DDEBUG
+		CFLAGS += -g3 -O0 -DDEBUG # O0 preserve fp by default
 		LDFLAGS += -g3 -O0
 	endif
 else
@@ -64,16 +64,12 @@ all: ceccomp test
 install: bin_install zsh_cmp_install
 
 bin_install: $(BUILD_DIR)/ceccomp
-	@$(call ECHO_NOPROG,MKDIR,$(BIN_DIR))
-	@mkdir -p $(BIN_DIR)
 	@$(call ECHO_NOPROG,INSTALL,$< $(BIN_DIR))
-	@install $< $(BIN_DIR)
+	@install -Dt $(BIN_DIR) $<
 
 zsh_cmp_install: $(ZSH_SRC)/_ceccomp
-	@$(call ECHO_NOPROG,MKDIR,$(ZSH_DST))
-	@mkdir -p $(ZSH_DST)
 	@$(call ECHO_NOPROG,INSTALL,$< $(ZSH_DST))
-	@install -m 0644 $< $(ZSH_DST)
+	@install -Dm 0644 -t $(ZSH_DST) $<
 
 ceccomp: init_progress $(BUILD_DIR)/ceccomp
 	@$(call ECHO_NOPROG,$(GREEN)BUILT,$@$(RESET))
