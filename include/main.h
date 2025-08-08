@@ -11,7 +11,7 @@
 #include "help.h"
 // clang-format on
 
-#define CECCOMP_VERSION "ceccomp 2.8"
+#define CECCOMP_VERSION "ceccomp 2.9"
 
 typedef struct sock_fprog fprog;
 typedef struct sock_filter filter;
