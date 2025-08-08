@@ -1,4 +1,5 @@
 #include "asm.h"
+#include "color.h"
 #include "log/error.h"
 #include "log/logger.h"
 #include "main.h"
@@ -79,7 +80,7 @@ JMP_GOTO (char *clean_line, uint32_t pc)
   filter.k = strtol (jmp_nr, &end, 10) - pc - 1;
 
   if (jmp_nr == end)
-    error ("%d %s", idx, INVALID_NR_AFTER_GOTO);
+    error (FORMAT " %s", idx, INVALID_NR_AFTER_GOTO);
 
   return filter;
 }
@@ -112,7 +113,7 @@ JMP (char *clean_line, uint32_t pc, uint32_t arch)
 
   char *right_paren = strchr (rval, ')');
   if (right_paren == NULL)
-    error ("%d %s", idx, PAREN_WRAP_CONDITION);
+    error (FORMAT " %s", idx, PAREN_WRAP_CONDITION);
 
   uint32_t jmp_set = parse_goto (right_paren + 1);
   uint16_t jt = GETJT (jmp_set);
@@ -155,9 +156,9 @@ LD_LDX_MEM (char *rval_str, filter *f_ptr)
   uint32_t mem_idx = strtol (rval_str, &end, 0);
 
   if (*end != ']')
-    error ("%d %s", idx, INVALID_MEM);
+    error (FORMAT " %s", idx, INVALID_MEM);
   if (mem_idx >= BPF_MEMWORDS)
-    error ("%d %s", idx, INVALID_MEM_IDX);
+    error (FORMAT " %s", idx, INVALID_MEM_IDX);
 
   f_ptr->code |= BPF_MEM;
   f_ptr->k = mem_idx;
@@ -193,14 +194,14 @@ LD_LDX (char *clean_line, uint32_t arch)
   else if (*(clean_line + 1) == 'X')
     filter.code |= BPF_LDX;
   else
-    error ("%d %s", idx, INVALID_LEFT_VAR);
+    error (FORMAT " %s", idx, INVALID_LEFT_VAR);
 
   if (LD_LDX_MEM (rval_str, &filter))
     return filter;
   else if (LD_LDX_IMM (rval_str, &filter, arch))
     return filter;
 
-  error ("%d %s", idx, INVALID_LEFT_VAR);
+  error (FORMAT " %s", idx, INVALID_RIGHT_VAL);
 }
 
 static filter
@@ -219,7 +220,7 @@ RET (char *clean_line)
   else if (STARTWITH (retval_str, "$A"))
     filter.code |= BPF_A;
   else
-    error ("%d %s", idx, INVALID_RET);
+    error (FORMAT " %s", idx, INVALID_RET);
 
   return filter;
 }
@@ -233,23 +234,23 @@ ST_STX (char *clean_line)
   char *end;
   uint32_t idx = strtol (idx_str, &end, 0);
   if (*end != ']')
-    error ("%d %s", idx, INVALID_MEM);
+    error (FORMAT " %s", idx, INVALID_MEM);
   if (*(end + 1) != '=')
-    error ("%d %s", idx, INVALID_OPERATOR);
+    error (FORMAT " %s", idx, INVALID_OPERATOR);
   if (idx >= BPF_MEMWORDS)
-    error ("%d %s", idx, INVALID_MEM_IDX);
+    error (FORMAT " %s", idx, INVALID_MEM_IDX);
 
   filter.k = idx;
 
   if (*(end + 2) != '$')
-    error ("%d %s", INVALID_RIGHT_VAL);
+    error (FORMAT " %s", INVALID_RIGHT_VAL);
 
   if (*(end + 3) == 'A')
     filter.code |= BPF_ST;
   else if (*(end + 3) == 'X')
     filter.code |= BPF_STX;
   else
-    error ("%d %s", idx, INVALID_RIGHT_VAL);
+    error (FORMAT " %s", idx, INVALID_RIGHT_VAL);
 
   return filter;
 }
@@ -308,7 +309,7 @@ ALU (char *clean_line)
   char *end;
   filter.k = strtol (rval_str, &end, 0);
   if (rval_str == end)
-    error ("%d %s", INVALID_RIGHT_VAL);
+    error (FORMAT " %s", INVALID_RIGHT_VAL);
   return filter;
 }
 
