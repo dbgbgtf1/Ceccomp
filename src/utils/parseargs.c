@@ -35,6 +35,8 @@ help ()
   printf ("%s\n", HELP_HINT);
   printf ("%s\n", VERSION);
 
+  printf ("\n%s\n", SUBCMD_HINT);
+
   printf ("\n%s\n", OPTION_HINT);
   exit (0);
 }

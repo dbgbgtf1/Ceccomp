@@ -12,6 +12,17 @@
   "ceccomp trace   [ -a ARCH ] [ -o FILE ] -p PID\n"                          \
   "                [ -o FILE ] PROGRAM [ program-args ]"
 
+#define SUBCMD_HINT                                                           \
+  "asm      -- Assemble bpf text to raw bytes\n"                              \
+  "disasm   -- Disassemble raw bytes to bpf text\n"                           \
+  "emu      -- Emulate bpf program with given syscall and bpf text\n"         \
+  "help     -- Display ceccomp help information\n"                            \
+  "probe    -- Trace the program for the first filter and emulate common "    \
+  "syscalls\n"                                                                \
+  "trace    -- Run program or trace pid, extract bpf filter and then print "  \
+  "to text\n"                                                                 \
+  "version  -- Display ceccomp version\n"
+
 #define OPTION_HINT                                                           \
   "Options:\n" OPTION_ARCH_HINT OPTION_FMT_HINT OPTION_PID_HINT               \
       OPTION_OUTPUT_HINT OPTION_QUIET_HINT ARG_SYSCALL_NR_HINT                \
