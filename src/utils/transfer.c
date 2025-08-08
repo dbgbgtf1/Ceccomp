@@ -218,7 +218,7 @@ RETVAL2STR (uint32_t retval)
     case SCMP_ACT_KILL:
       return RED ("KILL");
     case SCMP_ACT_ALLOW:
-      return CYAN ("ALLOW");
+      return GREEN ("ALLOW");
     case SCMP_ACT_KILL_PROCESS:
       return RED ("KILL_PROCESS");
     case SCMP_ACT_LOG:
