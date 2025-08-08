@@ -21,8 +21,8 @@ info_print (const char *caller_func, char *fmt, ...)
   va_end (args);
   fflush (stderr);
 #else
-  (void) caller_func;
-  (void) fmt;
+  (void)caller_func;
+  (void)fmt;
 #endif // !DEBUG
 }
 
@@ -32,7 +32,11 @@ warn_print (const char *caller_func, char *fmt, ...)
   va_list args;
   va_start (args, fmt);
   fprintf (stderr, WARN);
+#ifdef DEBUG
   fprintf (stderr, "in %s: ", caller_func);
+#else
+  (void)caller_func;
+#endif // !DEBUG
   vfprintf (stderr, fmt, args);
   putc ('\n', stderr);
   va_end (args);
@@ -45,7 +49,11 @@ error_print (const char *caller_func, char *fmt, ...)
   va_list args;
   va_start (args, fmt);
   fprintf (stderr, ERR);
+#ifdef DEBUG
   fprintf (stderr, "in %s: ", caller_func);
+#else
+  (void)caller_func;
+#endif // !DEBUG
   vfprintf (stderr, fmt, args);
   putc ('\n', stderr);
   va_end (args);
