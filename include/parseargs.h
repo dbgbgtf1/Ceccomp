@@ -15,6 +15,9 @@ typedef enum
   TRACE_PID_MODE = 4,
   TRACE_PROG_MODE = 5,
   PROBE_MODE = 6,
+  HELP_MODE = 7,
+  VERSION_MODE = 8,
+  HELP_ABNORMAL = 9,
 } subcommand;
 
 typedef enum
@@ -47,9 +50,9 @@ typedef struct ceccomp_args ceccomp_args;
 
 #define ARG_INIT_VAL (uint64_t)-1
 
-extern void version ();
+extern __attribute__ ((noreturn)) void version ();
 
-extern void help ();
+extern __attribute__ ((noreturn)) void help (int exit_code);
 
 extern uint64_t strtoull_check (char *num, int base, char *err);
 

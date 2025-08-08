@@ -23,7 +23,7 @@ strtoull_check (char *num, int base, char *err)
 }
 
 void
-help ()
+help (int exit_code)
 {
   printf ("usage: ceccomp <subcommand> <args> <options>\n");
   printf ("\n");
@@ -38,7 +38,7 @@ help ()
   printf ("\n%s\n", SUBCMD_HINT);
 
   printf ("\n%s\n", OPTION_HINT);
-  exit (0);
+  exit (exit_code);
 }
 
 void
@@ -62,10 +62,11 @@ parse_subcommand (char *arg)
   else if (!strcmp (arg, "probe"))
     return PROBE_MODE;
   else if (!strcmp (arg, "version"))
-    version ();
+    return VERSION_MODE;
+  else if (!strcmp (arg, "help"))
+    return HELP_MODE;
   else
-    help ();
-  exit (0);
+    return HELP_ABNORMAL;
 }
 
 static print_mode
@@ -173,6 +174,9 @@ parse_opt (int key, char *arg, struct argp_state *state)
       return 0;
     case 'f':
       args_ptr->fmt_mode = parse_print_mode (arg);
+      return 0;
+    case 'h':
+      args_ptr->mode = HELP_MODE;
       return 0;
     default:
       return 0;

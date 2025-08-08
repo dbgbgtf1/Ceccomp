@@ -2,11 +2,13 @@
 #include "asm.h"
 #include "disasm.h"
 #include "emu.h"
+#include "log/logger.h"
 #include "parseargs.h"
 #include "probe.h"
 #include "trace.h"
 #include "transfer.h"
 #include <argp.h>
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -19,7 +21,7 @@ init (ceccomp_args *args)
   struct utsname uts_name;
   uname (&uts_name);
 
-  args->mode = (subcommand)ARG_INIT_VAL;
+  args->mode = HELP_ABNORMAL;
   args->arch_token = STR2ARCH (uts_name.machine);
   args->output_fp = stderr;
   args->read_fp = stdin;
@@ -81,7 +83,13 @@ main (int argc, char **argv)
     case TRACE_PROG_MODE:
       program_trace (&argv[program_start_idx], args.output_fp, false);
       return 0;
+    case VERSION_MODE:
+      version ();
+    case HELP_MODE:
+      help (0);
+    case HELP_ABNORMAL:
+      help (1);
     default:
-      help ();
+      assert (0);
     }
 }
