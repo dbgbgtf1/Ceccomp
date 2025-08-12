@@ -228,7 +228,7 @@ pid_trace (int pid, uint32_t arch, FILE *output_fp)
       switch (errno)
         {
         case ENOENT:
-          error ("ptrace: %s", TRACE_PID_ENOENT);
+          goto detach;
         case EINVAL:
           error ("ptrace: %s", TRACE_PID_UNSUPPORTED);
         case EACCES:
