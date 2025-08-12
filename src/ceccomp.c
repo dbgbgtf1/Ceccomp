@@ -78,7 +78,7 @@ main (int argc, char **argv)
       probe (&argv[program_start_idx], args.arch_token, args.output_fp);
       return 0;
     case TRACE_PID_MODE:
-      pid_trace (args.pid, args.arch_token, args.output_fp);
+      pid_trace (args.pid, args.arch_token);
       return 0;
     case TRACE_PROG_MODE:
       program_trace (&argv[program_start_idx], args.output_fp, false);

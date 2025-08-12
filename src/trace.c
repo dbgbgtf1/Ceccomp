@@ -5,6 +5,7 @@
 #include "parsefilter.h"
 #include "color.h"
 #include "log/error.h"
+#include <asm-generic/errno-base.h>
 #include <asm-generic/errno.h>
 #include <complex.h>
 #include <errno.h>
@@ -190,7 +191,7 @@ program_trace (char *argv[], FILE *output_fp, bool oneshot)
 }
 
 void
-pid_trace (int pid, uint32_t arch, FILE *output_fp)
+pid_trace (int pid, uint32_t arch)
 {
   int status;
   fprog prog;
@@ -221,7 +222,7 @@ pid_trace (int pid, uint32_t arch, FILE *output_fp)
 
       if (prog.len != (unsigned short)-1)
         {
-          parse_filter (arch, &prog, output_fp);
+          parse_filter (arch, &prog, stdout);
           continue;
         }
 
@@ -242,6 +243,7 @@ pid_trace (int pid, uint32_t arch, FILE *output_fp)
     }
   while (true);
 
+detach:
   ptrace (PTRACE_DETACH, pid, 0, 0);
   free (prog.filter);
 }
