@@ -203,6 +203,8 @@ pid_trace (int pid, uint32_t arch, FILE *output_fp)
         {
         case EPERM:
           error ("%s", SYS_ADMIN_OR_KERNEL);
+        case ESRCH:
+          error (NO_SUCH_PROCESS, pid);
         default:
           error ("ptrace: %s", strerror (errno));
         }
@@ -229,6 +231,8 @@ pid_trace (int pid, uint32_t arch, FILE *output_fp)
           error ("ptrace: %s", TRACE_PID_ENOENT);
         case EINVAL:
           error ("ptrace: %s", TRACE_PID_UNSUPPORTED);
+        case EACCES:
+          error ("%s", SYS_ADMIN_OR_KERNEL);
         case EMEDIUMTYPE:
           printf (CYAN (NOT_AN_CBPF));
           continue;

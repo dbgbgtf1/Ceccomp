@@ -82,6 +82,7 @@
 #define SYS_ADMIN_OR_KERNEL                                                   \
   "Run with CAP_SYS_ADMIN capability when trace pid\nand kernel pid can't "   \
   "be trace"
+#define NO_SUCH_PROCESS "No such process with pid %d in the system"
 #define NOT_AN_CBPF "Non-cbpf found, can't resolve, but continue"
 #define PTRACE_SEIZE_ERR "ptrace seize error"
 #define PTRACE_GET_FILTER_ERR "ptrace get filter error"
