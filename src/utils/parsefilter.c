@@ -284,7 +284,7 @@ RET (filter *f_ptr)
   switch (ret)
     {
     case BPF_A:
-      ret_str = "$A";
+      ret_str = CYAN ("$A");
       break;
     case BPF_K:
       ret_str = RETVAL2STR (f_ptr->k);
@@ -376,7 +376,7 @@ parse_filter (uint32_t arch_token, fprog *sock_prog, FILE *output_fileptr)
       printf ("\n");
     }
   printf ("---------------------------------\n");
-  
+
   if (error_happen == true)
     warn ("%s", ERROR_HAPPEN);
 
