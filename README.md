@@ -8,7 +8,7 @@ https://dbgtf.org/ceccomp-doc/
 
 # CheatSheet
 
-![image](https://github.com/user-attachments/assets/912a7384-f13e-4b93-9881-17ad142d9d93)
+<img width="960" height="681" alt="image" src="https://github.com/user-attachments/assets/e35a1b6f-f3e0-436e-b022-6355b55fd9d7" />
 
 # I need You
 
