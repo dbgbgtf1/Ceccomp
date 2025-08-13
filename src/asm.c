@@ -202,8 +202,6 @@ LD_LDX (char *clean_line, uint32_t arch)
       filter.code |= BPF_LD;
       if (LD_LDX_ABS (rval_str, &filter))
         return filter;
-      else if (LD_LDX_LEN (rval_str, &filter))
-        return filter;
     }
   else if (*(clean_line + 1) == 'X')
     filter.code |= BPF_LDX;
@@ -213,6 +211,8 @@ LD_LDX (char *clean_line, uint32_t arch)
   if (LD_LDX_MEM (rval_str, &filter))
     return filter;
   else if (LD_LDX_IMM (rval_str, &filter, arch))
+    return filter;
+  else if (LD_LDX_LEN (rval_str, &filter))
     return filter;
 
   error (FORMAT " %s", idx, INVALID_RIGHT_VAL);

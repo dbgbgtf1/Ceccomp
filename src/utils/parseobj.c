@@ -1,4 +1,5 @@
 #include "parseobj.h"
+#include "asm.h"
 #include "log/error.h"
 #include "log/logger.h"
 #include "main.h"
@@ -46,6 +47,7 @@ right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch)
 // $A = $mem[0x0]
 // $A = $mem[0]
 // $A = 0x100
+// $X = $scmp_data_len
 // $X = $syscall_nr (this is wrong! $X can't be load with abs)
 uint32_t
 right_val_assignline (char *rval_str, reg_mem *reg_ptr)
@@ -69,6 +71,9 @@ right_val_assignline (char *rval_str, reg_mem *reg_ptr)
   uint32_t rval = strtoul (rval_str, &end, 0);
   if (end != rval_str)
     return rval;
+
+  if (!strcmp (rval_str, SCMP_DATA_LEN))
+    return 0x40;
 
   error ("%s", INVALID_RIGHT_VAL);
 }

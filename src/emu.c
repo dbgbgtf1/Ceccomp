@@ -1,5 +1,4 @@
 #include "emu.h"
-#include "asm.h"
 #include "color.h"
 #include "log/error.h"
 #include "log/logger.h"
@@ -126,12 +125,6 @@ emu_assign_line (char *clean_line, reg_mem *reg, seccomp_data *data)
           printf (CYAN_LS " = " CYAN_S "\n", lval_len, clean_line, rval_str);
           return;
         }
-      if (!strcmp (rval_str, SCMP_DATA_LEN))
-        {
-          *lval_ptr = 0x40;
-          printf (CYAN_LS " = " CYAN_S "\n", lval_len, clean_line, rval_str);
-          return;
-        }
     }
 
   uint32_t rval = right_val_assignline (rval_str, reg);
@@ -255,6 +248,7 @@ emu_lines (FILE *read_fp, seccomp_data *data)
   init_regs (reg);
 
   char *ret = NULL;
+  uint32_t tmp_idx = 1;
   for (read_idx = 1, execute_idx = 1;; read_idx++)
     {
       if (Line.origin_line)
@@ -272,18 +266,29 @@ emu_lines (FILE *read_fp, seccomp_data *data)
           LIGHTCOLORPRINTF (FORMAT ": %s", read_idx, origin_line);
           continue;
         }
+
       printf (FORMAT ": ", read_idx);
       execute_idx++;
 
       if (STARTWITH (clean_line, "if"))
-        execute_idx = emu_if_line (clean_line, reg, data);
+        {
+          tmp_idx = emu_if_line (clean_line, reg, data);
+          if (tmp_idx < execute_idx)
+            error ("%s: %s", INVALID_JMP_NR, origin_line);
+          execute_idx = tmp_idx;
+        }
       else if (STARTWITH (clean_line, "return"))
         {
           ret = emu_ret_line (clean_line, reg);
           break;
         }
       else if (STARTWITH (clean_line, "goto"))
-        execute_idx = emu_goto_line (clean_line);
+        {
+          tmp_idx = emu_goto_line (clean_line);
+          if (tmp_idx < execute_idx)
+            error ("%s: %s", INVALID_JMP_NR, origin_line);
+          execute_idx = tmp_idx;
+        }
       else if (STARTWITH (clean_line, "$A=-$A"))
         emu_alu_neg (reg);
       else if ((STARTWITH (clean_line, "$") && *(clean_line + 2) == '='))
