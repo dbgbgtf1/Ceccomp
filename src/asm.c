@@ -12,6 +12,7 @@
 #include <linux/filter.h>
 #include <seccomp.h>
 #include <stdatomic.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -134,6 +135,17 @@ JMP (char *clean_line, uint32_t pc, uint32_t arch)
 }
 
 static bool
+LD_LDX_LEN (char *rval_str, filter *f_ptr)
+{
+  if (strcmp (rval_str, SCMP_DATA_LEN))
+    return false;
+
+  f_ptr->code |= (BPF_W | BPF_LEN);
+  f_ptr->k = sizeof (seccomp_data);
+  return true;
+}
+
+static bool
 LD_LDX_ABS (char *rval_str, filter *f_ptr)
 {
   uint32_t offset = STR2ABS (rval_str);
@@ -189,6 +201,8 @@ LD_LDX (char *clean_line, uint32_t arch)
     {
       filter.code |= BPF_LD;
       if (LD_LDX_ABS (rval_str, &filter))
+        return filter;
+      else if (LD_LDX_LEN (rval_str, &filter))
         return filter;
     }
   else if (*(clean_line + 1) == 'X')
@@ -374,10 +388,10 @@ assemble (uint32_t arch, FILE *read_fp, print_mode p_mode)
       format_print (prog.filter[prog.len], format);
       prog.len++;
 
-      free_line(&Line);
+      free_line (&Line);
     }
 
   if (p_mode != RAW)
-    putchar('\n');
+    putchar ('\n');
   free (prog.filter);
 }

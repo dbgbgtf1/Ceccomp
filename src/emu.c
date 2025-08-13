@@ -1,4 +1,5 @@
 #include "emu.h"
+#include "asm.h"
 #include "color.h"
 #include "log/error.h"
 #include "log/logger.h"
@@ -122,6 +123,12 @@ emu_assign_line (char *clean_line, reg_mem *reg, seccomp_data *data)
       if (offset != (uint32_t)-1)
         {
           *lval_ptr = *(uint32_t *)((char *)data + offset);
+          printf (CYAN_LS " = " CYAN_S "\n", lval_len, clean_line, rval_str);
+          return;
+        }
+      if (!strcmp (rval_str, SCMP_DATA_LEN))
+        {
+          *lval_ptr = 0x40;
           printf (CYAN_LS " = " CYAN_S "\n", lval_len, clean_line, rval_str);
           return;
         }
