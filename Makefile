@@ -73,6 +73,9 @@ PREFIX ?= $(DEST_DIR)/usr
 BIN_DIR ?= $(PREFIX)/bin
 ZSH_DST ?= $(PREFIX)/share/zsh/site-functions
 ZSH_SRC := completions
+PKG_NAME ?= ceccomp
+MAN_DST ?= $(PREFIX)/share/man/man1
+HTML_DST ?= $(PREFIX)/share/$(PKG_NAME)/html
 
 all: ceccomp doc
 
@@ -96,15 +99,26 @@ $(BUILD_IMG_DIR)/%.png: $(SRC_IMG_DIR)/%.png
 	@$(call ECHO_NOPROG,CP,$(notdir $<))
 	@cp $< $@
 
-install: bin_install zsh_cmp_install
+install: bin_install zsh_cmp_install doc_install
 
-bin_install: $(BUILD_DIR)/ceccomp
+bin_install: $(BUILD_DIR)/ceccomp init_progress
 	@$(call ECHO_NOPROG,INSTALL,$< $(BIN_DIR))
 	@install -Dt $(BIN_DIR) $<
 
 zsh_cmp_install: $(ZSH_SRC)/_ceccomp
 	@$(call ECHO_NOPROG,INSTALL,$< $(ZSH_DST))
 	@install -Dm 0644 -t $(ZSH_DST) $<
+
+doc_install: doc_man_install doc_html_install
+
+doc_man_install: $(BUILD_DIR)/ceccomp.1 init_progress
+	@$(call ECHO_NOPROG,INSTALL,$< $(MAN_DST))
+	@install -Dm 0644 -t $(MAN_DST) $<
+
+doc_html_install: $(BUILD_DIR)/index.html init_progress $(IMG_OBJS)
+	@$(call ECHO_NOPROG,INSTALL,$< $(HTML_DST))
+	@install -Dm 0644 -t $(HTML_DST) $<
+	@install -Dm 0644 -t $(HTML_DST)/images $(IMG_OBJS)
 
 ceccomp: init_progress $(BUILD_DIR)/ceccomp
 	@$(call ECHO_NOPROG,$(GREEN)BUILT,$@$(RESET))
@@ -134,7 +148,7 @@ $(BUILD_DIR):
 init_progress: | $(BUILD_DIR)
 	@echo 1 > $(MARK)
 
-.PHONY: clean all init_progress ceccomp test doc doc_html doc_man
+.PHONY: clean all init_progress ceccomp test doc doc_html doc_man doc_install doc_man_install doc_html_install
 clean:
 	@$(call ECHO_NOPROG,RM,$(BUILD_DIR))
 	@rm -rf $(BUILD_DIR)
