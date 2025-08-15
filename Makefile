@@ -68,6 +68,39 @@ else
 	LDFLAGS += -O2 -s
 endif
 
+all: ceccomp doc
+
+MAN_OBJ := $(BUILD_DIR)/ceccomp.1
+MAN_CHN := $(BUILD_DIR)/cn/ceccomp.1
+HTML_OBJ := $(BUILD_DIR)/ceccomp.html
+HTML_CHN := $(BUILD_DIR)/ceccomp-cn.html
+
+doc: doc_html doc_man
+
+doc_man: init_progress $(MAN_OBJ) $(MAN_CHN)
+	@$(call ECHO_NOPROG,$(GREEN)BUILT,man doc$(RESET))
+
+doc_html: init_progress $(IMG_SRCS) $(HTML_OBJ) $(HTML_CHN)
+	@$(call ECHO_NOPROG,$(GREEN)BUILT,html doc$(RESET))
+
+$(MAN_OBJ): $(DOC_DIR)/ceccomp.adoc
+	@$(call ECHO,ASCIIDOC,$@)
+	@asciidoctor -b manpage $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
+
+$(MAN_CHN): $(DOC_DIR)/ceccomp-cn.adoc
+	@$(call ECHO,ASCIIDOC,$@)
+	@asciidoctor -b manpage $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
+
+$(HTML_OBJ): $(DOC_DIR)/ceccomp.adoc
+	@$(call ECHO,ASCIIDOC,$@)
+	@asciidoctor -b html5 $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
+
+$(HTML_CHN): $(DOC_DIR)/ceccomp-cn.adoc
+	@$(call ECHO,ASCIIDOC,$@)
+	@asciidoctor -b html5 $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
+
+.PHONY: doc doc_man doc_html
+
 DEST_DIR ?= 
 PREFIX ?= $(DEST_DIR)/usr
 BIN_DIR ?= $(PREFIX)/bin
@@ -75,50 +108,40 @@ ZSH_DST ?= $(PREFIX)/share/zsh/site-functions
 ZSH_SRC := completions
 PKG_NAME ?= ceccomp
 MAN_DST ?= $(PREFIX)/share/man/man1
+MAN_CHN_DST ?= $(PREFIX)/share/man/zh_CN/man1
 HTML_DST ?= $(PREFIX)/share/$(PKG_NAME)/html
-
-all: ceccomp doc
-
-doc: doc_html doc_man
-
-doc_man: init_progress $(BUILD_DIR)/ceccomp.1
-	@$(call ECHO_NOPROG,$(GREEN)BUILT,man doc$(RESET))
-
-doc_html: init_progress $(IMG_OBJS) $(BUILD_DIR)/index.html
-	@$(call ECHO_NOPROG,$(GREEN)BUILT,html doc$(RESET))
-
-$(BUILD_DIR)/ceccomp.1: $(DOC_DIR)/ceccomp.adoc
-	@$(call ECHO,ASCIIDOC,$@)
-	@asciidoctor -b manpage $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
-
-$(BUILD_DIR)/index.html: $(DOC_DIR)/ceccomp.adoc
-	@$(call ECHO,ASCIIDOC,$@)
-	@asciidoctor -b html5 $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
-
-$(BUILD_IMG_DIR)/%.png: $(SRC_IMG_DIR)/%.png
-	@$(call ECHO_NOPROG,CP,$(notdir $<))
-	@cp $< $@
 
 install: bin_install zsh_cmp_install doc_install
 
-bin_install: $(BUILD_DIR)/ceccomp init_progress
+bin_install: ceccomp $(BUILD_DIR)/ceccomp
 	@$(call ECHO_NOPROG,INSTALL,$< $(BIN_DIR))
-	@install -Dt $(BIN_DIR) $<
+	@install -Dt $(BIN_DIR) $(BUILD_DIR)/ceccomp
 
 zsh_cmp_install: $(ZSH_SRC)/_ceccomp
 	@$(call ECHO_NOPROG,INSTALL,$< $(ZSH_DST))
 	@install -Dm 0644 -t $(ZSH_DST) $<
 
-doc_install: doc_man_install doc_html_install
+doc_install: doc doc_man_install doc_html_install doc_man_cn_install doc_images_install
 
-doc_man_install: $(BUILD_DIR)/ceccomp.1 init_progress
+doc_man_install: $(MAN_OBJ)
 	@$(call ECHO_NOPROG,INSTALL,$< $(MAN_DST))
 	@install -Dm 0644 -t $(MAN_DST) $<
 
-doc_html_install: $(BUILD_DIR)/index.html init_progress $(IMG_OBJS)
+doc_man_cn_install: $(MAN_CHN)
+	@$(call ECHO_NOPROG,INSTALL,$< $(MAN_CHN_DST))
+	@install -Dm 0644 -t $(MAN_CHN_DST) $<
+
+doc_html_install: $(HTML_OBJ) $(HTML_CHN)
 	@$(call ECHO_NOPROG,INSTALL,$< $(HTML_DST))
-	@install -Dm 0644 -t $(HTML_DST) $<
-	@install -Dm 0644 -t $(HTML_DST)/images $(IMG_OBJS)
+	@install -Dm 0644 -t $(HTML_DST) $^
+
+doc_images_install: $(IMG_SRCS)
+	@$(call ECHO_NOPROG,INSTALL,images $(HTML_DST))
+	@install -Dm 0644 -t $(HTML_DST)/images $^
+
+.PHONY: doc_man_install doc_html_install doc_man_cn_install doc_images_install bin_install zsh_cmp_install doc_install install
+
+#### C OBJECTS ###
 
 ceccomp: init_progress $(BUILD_DIR)/ceccomp
 	@$(call ECHO_NOPROG,$(GREEN)BUILT,$@$(RESET))
@@ -148,7 +171,7 @@ $(BUILD_DIR):
 init_progress: | $(BUILD_DIR)
 	@echo 1 > $(MARK)
 
-.PHONY: clean all init_progress ceccomp test doc doc_html doc_man doc_install doc_man_install doc_html_install
+.PHONY: clean all init_progress ceccomp test
 clean:
 	@$(call ECHO_NOPROG,RM,$(BUILD_DIR))
 	@rm -rf $(BUILD_DIR)
