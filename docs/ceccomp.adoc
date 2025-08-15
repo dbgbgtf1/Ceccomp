@@ -20,7 +20,7 @@ ceccomp - A tool to analyze seccomp filters
 == CONCEPT
 
 Kernel use BPF filters to limit syscall rules, applied via `seccomp` or `prctl`
-syscall. For example, down below is a simple filter to block execve syscall in
+syscall. For example, down below is a simple filter to block `execve` syscall in
 hex format:
 
     1: 20 00 00 00 00 00 00 00     $A = $syscall_nr
@@ -56,7 +56,8 @@ taken if not set via `uname`. The default value on your system is {ARCH}.
 
 FMT::
 Determines how `ceccomp` produces binary-format bpf code. Can be _hexfmt_,
-_hexline_ and _raw_. The default value is _hexline_.
+_hexline_ or _raw_. You could find sample output in <<EXAMPLES>> section.
+The default value is _hexline_.
 
 TEXT::
 Take a optional filename to determine which file containing _TEXT_ will
@@ -110,7 +111,7 @@ manually. This subcommand can be used to automatically examining a filter.
 
 SYSCALL_NAME/SYSCALL_NR::
 If you set *SYSCALL_NAME* (like `execve`), it will be translated to *SYSCALL_NR*
-under *ARCH* first, or else set *SYSCALL_NR* directly (like `59`). Then the nr
+under *ARCH* first. Or else set *SYSCALL_NR* directly (like `59`). Then the nr
 will be tested against the bpf filter to see the result of that syscall. This
 argument is NOT optional.
 
@@ -123,8 +124,8 @@ ARCH::
 Argument description can be found in <<asm - ASSEMBLE>> section.
 
 TEXT::
-Take a optional filename to determine which file containing _TEXT_ will
-be assembled. Will read from _stdin_ if not set.
+Take a optional filename to determine which file containing _TEXT_ rule will
+be tested. Will read from _stdin_ if not set.
 
 |===
 |Command|Difference
@@ -137,7 +138,7 @@ be assembled. Will read from _stdin_ if not set.
 possible
 |===
 
-=== trace - TRACE IN RUNTIME
+=== trace - TRACE FILTER IN RUNTIME
 
     ceccomp trace [-o FILE] PROGRAM [program-args]
                   [-a ARCH] -p PID
@@ -149,9 +150,9 @@ Use this if running the program is the simplest way to fetch bpf filters
 or a program with seccomp filters installed is waiting for input.
 
 FILE::
-May be useful when *PROGRAM* produces quite a lot output in `stderr`.
-`ceccomp` allow user to close `stdin` and `stdout` to limit *PROGRAM*
-input and output, so `ceccomp` use `stderr` to print messages when running *PROGRAM*,
+May be useful when *PROGRAM* produces quite a lot output in _stderr_.
+`ceccomp` allow user to close _stdin_ and _stdout_ to limit *PROGRAM*
+input and output, so `ceccomp` use _stderr_ to print messages when running *PROGRAM*,
 set *FILE* if you want to see _TEXT_ in some other file.
 
 PROGRAM::
@@ -186,11 +187,11 @@ launched directly, so `./` is not needed
 
     ceccomp probe [-a ARCH] [-o FILE] PROGRAM [program-args]
 
-Run *PROGRAM* with *program-args* to captures one seccomp filter, and then
+Run *PROGRAM* with *program-args* to captures first seccomp filter, and then
 kill all children. Use it when a quick check against a program is needed,
 and detect potential seccomp rule issues.
 
-All argument descriptions can be found in <<trace - TRACE IN RUNTIME>> section.
+All argument descriptions can be found in <<trace - TRACE FILTER IN RUNTIME>> section.
 
 The output for this subcommand is the emulating result of common syscalls
 like `execve`, `open` and so on. If the filter itself is not capable of
@@ -215,9 +216,11 @@ NOTE: `seccomp-tools` don't have this subcommand.
 
 == TEXT GRAMMAR REFERENCE
 
-A valid text could only contain *statement* like `$A = $arch`, but adding
+A valid _TEXT_ could only contain *statement* like `$A = $arch`, but adding
 an extra *lineno* may help you much. *lineno* starts from 1, and always
 bases 10.
+
+BPF ops which are not described below are banned by kernel.
 
 === Optional Wrapper
 
@@ -248,8 +251,7 @@ seccomp attributes directly due to kernel limit.
     $A = $arch
     $A = $syscall_nr
 
-But those fields with 64-bit long must be assigned via `low_` or `high_`
-prefix.
+To assign `A` with those 64-bit long fields, `low_` or `high_` prefix is needed.
 
     $A = $low_pc
     $A = $high_pc
@@ -260,14 +262,14 @@ prefix.
     $A = $high_args[5]
 
 A special attribute is `sizeof(struct seccomp_data)`, that can be assigned to
-`A` and `X` directly.
+`A` or `X` directly.
 
     $A = $scmp_data_len
     $X = $scmp_data_len
 
 Temporary memory is 32-bit, to access them, you could use hex or dec as index.
-Both `A` and `X` is acceptable. Assigning immediate values accepts any format
-of number if you imply the correct base by "0x" or "0b".
+Both `A` and `X` is assignable. Assigning immediate values to `A` or `X` accepts
+any format of number if you imply the correct base by "0x" or "0b".
 
     $X = $mem[0]
     $A = $mem[0xf]
@@ -385,3 +387,5 @@ endif::[]
 
 Visit https://github.com/dbgbgtf1/Ceccomp to find the code.
 Pull Requests and Issues are welcome!
+
+Copyright (C) 2025-present, distributed under GPLv3.

@@ -1,0 +1,366 @@
+= ceccomp(1)
+dbgbgtf <dudududumaxver@outlook.com>; RocketDev <ma2014119@outlook.com>
+{VERSION}, {TAG_TIME}
+:doctype: manpage
+:docdatetime: {TAG_TIME}
+:manmanual: Ceccomp手册
+:mansource: ceccomp {VERSION}
+:imagesdir: images/
+
+== 名称
+
+ceccomp - 一个分析安全计算(seccomp)过滤器的工具
+
+== 大纲
+
+    usage: ceccomp <asm|disasm|emu|trace|probe|version|help> [FILE] [-q|--quiet]
+                   [-f|--format FMT] [-a|--arch ARCH] [-p|--pid PID]
+                   [-o|--output FILE] ...
+
+== 概念
+
+内核使用BPF过滤器来限制系统调用规则，并使用 `seccomp` 和 `prctl` 两个系统调用来安装过滤器。
+以下是一个以十六进制表示的限制 `execve` 系统调用的简单过滤器：
+
+    1: 20 00 00 00 00 00 00 00     $A = $syscall_nr
+    2: 15 00 00 01 3b 00 00 00     if ($A != execve) goto 4
+    3: 06 00 00 00 00 00 00 00     return KILL
+    4: 06 00 00 00 00 00 ff 7f     return ALLOW
+
+以上十六进制的部分就是内核收到的过滤器，而 `ceccomp` 负责把它拿来反汇编为人类可读的文本。
+例如左侧的 *行号* 和右侧的 *伪代码* 。
+
+IMPORTANT: 之后我会使用 _TEXT_ 作为BPF过滤器人类可读文本（伪代码）的缩写，
+使用 _RAW_ 作为BPF过滤器原始格式的缩写，请记住这个约定。
+
+== 描述
+
+`ceccomp` 有5个主要的功能，它基本上是C版本的 `seccomp-tools` ，然而，
+有一些不同的地方你需要知道，它们会在在每个子命令的章节中被注明。
+
+=== asm - 汇编
+
+    ceccomp asm [-a ARCH] [-f FMT] [TEXT]
+
+将 _TEXT_ 汇编为 _RAW_ 。适用于将手写的过滤器规则嵌入到C代码中，
+或希望观察一些 _TEXT_ 对应的原始字节码。
+
+ARCH::
+可以设置为任何 libseccomp 支持的架构。它将被用于决定系统调用名称对应的系统调用号。
+例如，在 x86_64 上，就像上面的基本示例，你可以写 `"execve"` 而不是数字 `59`
+指代系统调用号。如果不设置这个参数，则通过 `uname` 提取当前系统的架构。
+你的系统上的默认值是 {ARCH} 。
+
+FMT::
+决定了 `ceccomp` 如何输出二进制格式的BPF字节码。可以是 _hexfmt_ 、 _hexline_
+或者 _raw_ 。你可以在 <<ceccomp 示例>> 节中找到示例输出。默认值是 _hexline_ 。
+
+TEXT::
+一个可选的文件名，其中存放了需要被汇编的 _TEXT_ 。不设置则从 _标准输入_ 中读取。
+
+查看 <<TEXT 语法参考>> 一节可以找到如何手写规则。一些示例会在 <<ceccomp 示例>> 一节中展示。
+
+|===
+|命令|差别
+
+|`seccomp-tools asm`
+|使用它自己的语法汇编，有点像脚本
+
+|`ceccomp asm`
+|你可以直接拿着 `disasm` 的输出来汇编，不需要学习新语法；默认使用 _标准输入_ 作为输入
+|===
+
+=== disasm - 反汇编
+
+    ceccomp disasm [-a ARCH] [RAW]
+
+反汇编 _RAW_ 为 _TEXT_ 。适用于当你无法使用 `trace` 看到过滤器时，必须手动提取过滤器，
+然后检查其含义。
+
+ARCH::
+可以设置为任何 libseccomp 支持的架构。它将被用于决定 _RAW_ 中的系统调用号如何被翻译为系统调用名。
+例如，在 x86_64 上，在比较系统调用号时，数字 `0x3b` 将被翻译为 `execve` ，可以看上面的基本示例。
+你的系统上的默认值是 {ARCH} 。
+
+|===
+|命令|差别
+
+|`seccomp-tools disasm`
+|用它自己的语法反汇编；永远不会检查 _RAW_ 是否合法
+
+|`ceccomp disasm`
+|用 ceccomp 语法反汇编，并且默认将 _标准输入_ 作为输入
+|===
+
+=== emu - 模拟
+
+    ceccomp emu [-a ARCH] [-q] [TEXT] SYSCALL_NAME/SYSCALL_NR [ARGS[0] ARGS[1] ... ARGS[5] PC]
+
+按照 _TEXT_ 中描述的规则，模拟从 `PC` 调用 `syscall(SYSCALL_NR, ARGS[0], ARGS[1], ..., ARGS[5])`
+的结果。适用于在不实际运行程序或不想手动检查规则时，查看触发系统调用的结果。
+这个子命令适合用来自动检测一个过滤器。
+
+SYSCALL_NAME/SYSCALL_NR::
+如果你设置了 *SYSCALL_NAME* （比如 `execve` ），那么它会基于 *ARCH* 先被翻译为对应的
+*SYSCALL_NR* 。或者你可以直接设置 *SYSCALL_NR* （例如 `59` ）。然后会测试这个系统调用号经过
+BPF 过滤器处理后的输出并打印出来。这个参数是必填的。
+
+ARGS[0-5] and PC::
+当调用系统调用时对应寄存器的值。例如，在 x86_64 上，它们分别对应了
+`rdi` 、 `rsi` 、 `rdx` 、 `r10` 、 `r8` 、 `r9` 和 `rip` 。它们的默认值都是0。
+
+ARCH::
+参数描述可以在 <<asm - 汇编>> 一节中找到。
+
+TEXT::
+一个可选的文件名，其中存放了需要被测试的 _TEXT_ 规则。不设置则从 _标准输入_ 中读取。
+
+|===
+|命令|差别
+
+|`seccomp-tools emu`
+|用 _RAW_ 作为输入
+
+|`ceccomp emu`
+|用 _TEXT_ 作为输入，并默认将 _标准输入_ 作为输入；可以设置 *PC*
+|===
+
+=== trace - 运行时捕获过滤器
+
+    ceccomp trace [-o FILE] PROGRAM [program-args]
+                  [-a ARCH] -p PID
+
+使用第一行的命令可以利用调试在 *PROGRAM* 运行中加载过滤器时动态捕获过滤器；
+第二行的命令可以从 *PID* 对应的进程中提取出 seccomp 过滤器；一旦捕获到了过滤器，
+将会以 _TEXT_ 的格式将它打印出来。你可以从两个格式中选择一个使用。
+适用于运行一个程序是捕获BPF过滤器最简单的方式或者一个安装了 seccomp
+过滤器的程序正在等待输入。
+
+FILE::
+当 *PROGRAM* 会产生很多输出到 _标准错误_ 时可能很有用。 `ceccomp` 允许用户关闭
+_标准输入_ 和 _标准输出_ 来限制 *PROGRAM* 的输入和输出，所以 当运行
+*PROGRAM* 时 `ceccomp` 使用 _标准错误_ 来打印消息。如果你想在别的文件中看见
+_TEXT_ 的话请设置 *FILE* 。
+
+PROGRAM::
+设置为你想运行的程序，并且 *program-args* 将作为它的参数，
+就像运行 shell 命令 `exec PROGRAM program-args` 。
+
+ARCH::
+参数描述可以在 <<disasm - 反汇编>> 一节中找到。
+
+PID::
+设置为你想检查的 pid。 *PID* 和 *PROGRAM* 相冲突；你只能在一条命令中动态运行一个程序，
+或者检查一个 pid。
+
+NOTE: 要想从 *PID* 中提取过滤器，你需要 `CAP_SYS_ADMIN` ，同时还可能需要
+`CAP_SYS_PTRACE` ，最简单的获取它们的方法是用 `sudo` 运行 `ceccomp` 。
+
+|===
+|命令|差别
+
+|`seccomp-tools dump`
+|可以设置输出格式；每一个过滤器可以输出到不同的文件；当 *PROGRAM*
+加载了 *LIMIT* 个过滤器后就杀死程序；将 *PROGRAM* 包装在 `sh -c` 中运行
+
+|`ceccomp trace`
+|所有过滤器被输出到同一个文件；永远不会杀死 *PROGRAM* ； *PROGRAM* 是直接被执行的，
+所以不需要 `./`
+|===
+
+=== probe - 快速测试常见的系统调用
+
+    ceccomp probe [-a ARCH] [-o FILE] PROGRAM [program-args]
+
+以 *program-args* 为参数运行 *PROGRAM* 来捕获第一个 seccomp 过滤器，
+然后杀死所有子进程。适用于快速测试一个程序的规则并检测潜在的 seccomp
+规则问题。
+
+所有参数描述都可以在 <<trace - 运行时捕获过滤器>> 一节中找到。
+
+这个子命令的输出是一系列常见的系统调用的模拟结果，例如 `execve` 、 `open` 等。
+如果过滤器本身并不能阻拦系统调用，那你一眼就能看出来。
+
+这个子命令的典型输出如下所示，更多完整的实例可以在 <<ceccomp 示例>> 一节中找到。
+
+    open      -> ALLOW
+    read      -> ALLOW
+    write     -> ALLOW
+    execve    -> KILL
+    execveat  -> KILL
+    mmap      -> ALLOW
+    mprotect  -> ALLOW
+    openat    -> ALLOW
+    sendfile  -> ALLOW
+    ptrace    -> ERRNO(1)
+    fork      -> ALLOW
+
+NOTE: `seccomp-tools` 没有等价的子命令。
+
+== TEXT 语法参考
+
+一个有效的 _TEXT_ 可以只包含 *伪代码* 如 `$A = $arch` ，但是添加一些多余的
+*行号* 可能可以辅助你手写 _TEXT_ 。 *行号* 从1开始，并且永远是十进制的。
+
+其余未描述到的BPF操作都被内核禁止了。
+
+=== 可选的其他字段
+
+`ceccomp disasm` 展示了很多东西，但对于 asm 来说大部分是可选的。
+
+    Line  CODE  JT   JF      K
+    ---------------------------------
+    0001: 0x06 0x00 0x00 0x7fff0000 return ALLOW
+    ---------------------------------
+
+以上例子中，只用 `return ALLOW` 这条 *伪代码* 是需要的。
+
+NOTE: `ceccomp disasm` 和 `seccomp-tools disasm` 的输出之间有很多细微的差别，
+以下是一个典型的输出示例。同时有些伪代码是不同的，所以不要盲目将 seccomp-tools
+的输出管道给 ceccomp。
+
+    line  CODE  JT   JF      K
+    =================================
+    0000: 0x06 0x00 0x00 0x7fff0000  return ALLOW
+
+=== 赋值
+
+`A` 可以直接赋值为 seccomp 属性。由于内核限制， `X` 不能直接赋值为 seccomp 属性。
+
+    $A = $arch
+    $A = $syscall_nr
+
+要给 `A` 赋值为这些64位长的字段，必须使用 `low_` 或者 `high_` 的前缀。
+
+    $A = $low_pc
+    $A = $high_pc
+    $A = $low_args[0]
+    $A = $high_args[0]
+    ...
+    $A = $low_args[5]
+    $A = $high_args[5]
+
+一个特殊的属性是 `sizeof(struct seccomp_data)` ，它可以直接赋值给 `A` 或 `X` 。
+
+    $A = $scmp_data_len
+    $X = $scmp_data_len
+
+临时内存是32位的，要想访问它们，你可以使用十六进制或者十进制的索引。
+`A` 和 `X` 都是可赋值的。给 `A` 或 `X` 赋值为立即数接受任意格式的数字，
+只要你使用 "0x" 或者 "0b" 等前缀正确表达数字是几进制的。
+
+    $X = $mem[0]
+    $A = $mem[0xf]
+    $A = $mem[15] # both hex and dec index are OK
+    $A = 0
+    $X = 0x3b
+    $A = 0b111
+    $X = 0777
+
+你还可以将 `X` 赋值给 `A` 或者反过来。将 `X` 或 `A` 赋值给临时内存当然可以。
+
+    $A = $X
+    $X = $A
+    $mem[3] = $X
+    $mem[0x4] = $A
+
+=== 数学运算
+
+你可以以多种方式操作 `A` 。
+
+    $A += 30
+    $A -= 4
+    $A *= 9
+    $A /= 1
+    $A &= 7
+    $A >>= 6
+
+右值也可以是 `X` 。
+
+    $A &= $X
+    $A |= $X
+    $A ^= $X
+    $A <<= $X
+
+想要对 `A` 取反可以这么做。
+
+    $A = -$A
+
+=== 当...时向下跳转
+
+无条件跳转：
+
+    goto 3
+
+当...跳转：
+
+    if ($A == execve) goto 3
+    if ($A != 1234) goto 4
+    if ($A & $X) goto 5
+    if !($A & 7) goto 6
+    if ($A <= $X) goto 7
+
+当条件为真时跳转到...，条件为假时跳转到...：
+    
+    if ($A > $X) goto 3, else goto 4
+    if ($A >= 4567) goto 5, else goto 6
+
+=== 返回码
+
+返回寄存器 `A` 的值：
+
+    return $A
+
+或者返回一个立即数，多余的字段放在 `()` 里。 `TRACE` 、 `TRAP` 和 `ERRNO`
+接受一个额外的字段，如果没有 `()` ，它们将被视为 `行为(0)` 。
+
+    return KILL
+    return KILL_PROCESS
+    return TRAP(123)
+    return ERRNO(0)
+    return TRACE
+    return TRACE(3)
+    return LOG
+    return NOTIFY
+
+== ceccomp 示例
+
+ifdef::backend-manpage[]
+手册不能显示图片，因此如果想看示例请参阅html版本。
+endif::[]
+
+ifndef::backend-manpage[]
+=== asm 示例
+image::asm.png[]
+=== disasm 示例
+image::disasm.png[]
+=== emu 示例
+image::emu.png[]
+image::emu_quiet.png[]
+=== trace 示例
+运行程序：
+
+image::trace.png[]
+
+如果设置了 `-o FILE` ：
+
+image::output_trick.png[]
+
+PID模式：
+
+image::trace_pid.png[]
+
+zsh下PID模式可以使用补全：
+
+image::trace_completion.png[]
+
+=== probe 示例
+image::probe.png[]
+endif::[]
+
+== 仓库
+
+在 https://github.com/dbgbgtf1/Ceccomp 可以找到源代码。
+欢迎提交 Pull Requests 和 Issues ！
+
+Copyright (C) 2025-现在，基于 GPLv3 分发。
