@@ -4,7 +4,7 @@ A tool to resolve seccomp just like `seccomp-tools`, written in C
 
 # Doc
 
-https://dbgtf.org/ceccomp-doc/
+https://github.com/dbgbgtf1/Ceccomp/blob/main/docs/ceccomp.adoc
 
 # CheatSheet
 
