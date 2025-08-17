@@ -1,10 +1,32 @@
 # Ceccomp
 
-A tool to resolve seccomp just like `seccomp-tools`, written in C
+A tool to analyze seccomp filters like `seccomp-tools`, written in C
 
 # Doc
 
-https://github.com/dbgbgtf1/Ceccomp/blob/main/docs/ceccomp.adoc
+[English Version](docs/ceccomp.adoc) | [中文文档](docs/ceccomp-cn.adoc)
+
+# Install
+
+- Arch Linux users:
+
+Install via AUR, build `ceccomp` package ⇒ [![AUR package](https://repology.org/badge/version-for-repo/aur/ceccomp.svg)](https://repology.org/project/ceccomp/versions)
+
+- Stable installation:
+
+Clone the whole repo, then checkout to the latest tag and `make`, finally install.
+
+```sh
+git clone https://github.com/dbgbgtf1/Ceccomp.git
+cd Ceccomp
+git checkout $(git describe --tags $(git rev-list --tags --max-count=1))
+make ceccomp DEBUG=1
+make install # install at /usr/bin
+```
+
+- Testing installation:
+
+Clone the whole repo, and then `make`.
 
 # CheatSheet
 
@@ -16,4 +38,4 @@ Any Issue or Pr are welcome!
 
 # License
 
-The GNU General Public License v3.0
+Copyright (C) 2024-present, ceccomp contributors, distributed under GNU General Public License v3.0
