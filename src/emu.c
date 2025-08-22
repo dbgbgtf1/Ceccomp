@@ -285,6 +285,8 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
       if (STARTWITH (clean_line, "if"))
         {
           tmp_idx = emu_if_line (clean_line, reg, data);
+          if (tmp_idx == 0)
+            continue;
           if (tmp_idx < execute_idx)
             error ("%s: %s", INVALID_JMP_NR, origin_line);
           execute_idx = tmp_idx;
@@ -297,6 +299,8 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
       else if (STARTWITH (clean_line, "goto"))
         {
           tmp_idx = emu_goto_line (clean_line);
+          if (tmp_idx == 0)
+            continue;
           if (tmp_idx < execute_idx)
             error ("%s: %s", INVALID_JMP_NR, origin_line);
           execute_idx = tmp_idx;
