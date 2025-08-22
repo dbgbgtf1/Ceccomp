@@ -8,6 +8,7 @@
 #include "preasm.h"
 #include "transfer.h"
 #include <fcntl.h>
+#include <iso646.h>
 #include <linux/filter.h>
 #include <seccomp.h>
 #include <stdbool.h>
@@ -68,7 +69,7 @@ emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data)
 }
 
 static uint32_t
-emu_if_line (char *clean_line, reg_mem *reg, seccomp_data *data)
+jmp_to (char *clean_line, reg_mem *reg, seccomp_data *data)
 {
   char *sym_str;
   bool reverse = maybe_reverse (clean_line);
@@ -105,6 +106,18 @@ emu_if_line (char *clean_line, reg_mem *reg, seccomp_data *data)
     return jf;
   else
     return jt;
+}
+
+static void
+emu_if_line (char *clean_line, char *origin_line, reg_mem *reg,
+             seccomp_data *data, uint32_t *execute_idx)
+{
+  uint32_t tmp_idx = jmp_to (clean_line, reg, data);
+  if (tmp_idx == 0)
+    return;
+  if (tmp_idx < *execute_idx)
+    error ("%s: %s", INVALID_JMP_NR, origin_line);
+  *execute_idx = tmp_idx;
 }
 
 static void
@@ -155,8 +168,8 @@ emu_ret_line (char *clean_line, reg_mem *reg)
   return retval_str;
 }
 
-static uint32_t
-emu_goto_line (char *clean_line)
+static void
+emu_goto_line (char *clean_line, char *origin_line, uint32_t *execute_idx)
 {
   char *jmp_to_str = clean_line + strlen ("goto");
   char *end;
@@ -166,7 +179,11 @@ emu_goto_line (char *clean_line)
     error (FORMAT " %s", read_idx, INVALID_NR_AFTER_GOTO);
 
   fprintf (s_output_fp, "goto %04d\n", jmp_to);
-  return jmp_to;
+
+  if (jmp_to < *execute_idx)
+    error ("%s: %s", INVALID_JMP_NR, origin_line);
+
+  *execute_idx = jmp_to;
 }
 
 static void
@@ -260,7 +277,6 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
   init_regs (&reg);
 
   char *ret = NULL;
-  uint32_t tmp_idx = 1;
   for (read_idx = 1, execute_idx = 1;; read_idx++)
     {
       if (Line.origin_line)
@@ -283,28 +299,14 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
       execute_idx++;
 
       if (STARTWITH (clean_line, "if"))
-        {
-          tmp_idx = emu_if_line (clean_line, &reg, data);
-          if (tmp_idx == 0)
-            continue;
-          if (tmp_idx < execute_idx)
-            error ("%s: %s", INVALID_JMP_NR, origin_line);
-          execute_idx = tmp_idx;
-        }
+        emu_if_line (clean_line, origin_line, &reg, data, &execute_idx);
       else if (STARTWITH (clean_line, "return"))
         {
           ret = emu_ret_line (clean_line, &reg);
           break;
         }
       else if (STARTWITH (clean_line, "goto"))
-        {
-          tmp_idx = emu_goto_line (clean_line);
-          if (tmp_idx == 0)
-            continue;
-          if (tmp_idx < execute_idx)
-            error ("%s: %s", INVALID_JMP_NR, origin_line);
-          execute_idx = tmp_idx;
-        }
+        emu_goto_line (clean_line, origin_line, &execute_idx);
       else if (STARTWITH (clean_line, "$A=-$A"))
         emu_alu_neg (&reg);
       else if ((STARTWITH (clean_line, "$") && *(clean_line + 2) == '='))
