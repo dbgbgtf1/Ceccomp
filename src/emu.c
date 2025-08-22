@@ -256,8 +256,8 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
     s_output_fp = stdout;
 
   line_set Line = { NULL, NULL };
-  reg_mem *reg = malloc (sizeof (reg_mem));
-  init_regs (reg);
+  reg_mem reg;
+  init_regs (&reg);
 
   char *ret = NULL;
   uint32_t tmp_idx = 1;
@@ -284,7 +284,7 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
 
       if (STARTWITH (clean_line, "if"))
         {
-          tmp_idx = emu_if_line (clean_line, reg, data);
+          tmp_idx = emu_if_line (clean_line, &reg, data);
           if (tmp_idx == 0)
             continue;
           if (tmp_idx < execute_idx)
@@ -293,7 +293,7 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
         }
       else if (STARTWITH (clean_line, "return"))
         {
-          ret = emu_ret_line (clean_line, reg);
+          ret = emu_ret_line (clean_line, &reg);
           break;
         }
       else if (STARTWITH (clean_line, "goto"))
@@ -306,13 +306,13 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
           execute_idx = tmp_idx;
         }
       else if (STARTWITH (clean_line, "$A=-$A"))
-        emu_alu_neg (reg);
+        emu_alu_neg (&reg);
       else if ((STARTWITH (clean_line, "$") && *(clean_line + 2) == '='))
-        emu_assign_line (clean_line, reg, data);
+        emu_assign_line (clean_line, &reg, data);
       else if (STARTWITH (clean_line, "$mem["))
-        emu_assign_line (clean_line, reg, data);
+        emu_assign_line (clean_line, &reg, data);
       else if (STARTWITH (clean_line, "$A"))
-        emu_alu_line (clean_line, reg);
+        emu_alu_line (clean_line, &reg);
       else
         error (FORMAT " %s", read_idx, INVALID_ASM_CODE);
     }
@@ -321,7 +321,6 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
     fclose (s_output_fp);
 
   free_line (&Line);
-  free (reg);
   if (ret == NULL)
     error ("%s", MUST_END_WITH_RET);
   return ret;
