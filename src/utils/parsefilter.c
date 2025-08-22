@@ -17,6 +17,8 @@
 
 #define REG_BUF_LEN 0x100
 
+static FILE *s_output_fp;
+
 static fprog *prog;
 static uint32_t arch;
 
@@ -81,27 +83,27 @@ static void
 LD (filter *f_ptr)
 {
   char *rval_str = load_reg (A, &A_status, f_ptr);
-  printf (CYAN_A " = " CYAN_S, rval_str);
+  fprintf (s_output_fp, CYAN_A " = " CYAN_S, rval_str);
 }
 
 static void
 LDX (filter *f_ptr)
 {
   char *rval_str = load_reg (X, &X_status, f_ptr);
-  printf (CYAN_X " = " CYAN_S, rval_str);
+  fprintf (s_output_fp, CYAN_X " = " CYAN_S, rval_str);
 }
 
 static void
 ST (filter *f_ptr)
 {
-  printf (CYAN_M " = " CYAN_A, f_ptr->k);
+  fprintf (s_output_fp, CYAN_M " = " CYAN_A, f_ptr->k);
   strncpy (mem[f_ptr->k], A, REG_BUF_LEN);
 }
 
 static void
 STX (filter *f_ptr)
 {
-  printf (CYAN_M " = " CYAN_X, f_ptr->k);
+  fprintf (s_output_fp, CYAN_M " = " CYAN_X, f_ptr->k);
   strncpy (mem[f_ptr->k], X, REG_BUF_LEN);
 }
 
@@ -151,8 +153,8 @@ ALU (filter *f_ptr)
 
   alu_sym = ALU_OP (f_ptr);
 
-  printf (CYAN_A);
-  printf ("%s", alu_sym);
+  fprintf (s_output_fp, CYAN_A);
+  fprintf (s_output_fp, "%s", alu_sym);
 
   strcpy (A, "A");
   strcat (A, alu_sym);
@@ -166,7 +168,7 @@ ALU (filter *f_ptr)
       strcpy (rval, "$X");
       A_status = none;
     }
-  printf (CYAN_S, rval);
+  fprintf (s_output_fp, CYAN_S, rval);
   strcat (A, rval);
 }
 
@@ -246,7 +248,7 @@ JMP (filter *f_ptr, uint32_t pc)
 
   if (BPF_OP (f_ptr->code) == BPF_JA)
     {
-      printf ("goto " FORMAT, pc + f_ptr->k + 2);
+      fprintf (s_output_fp, "goto " FORMAT, pc + f_ptr->k + 2);
       return;
     }
 
@@ -259,19 +261,19 @@ JMP (filter *f_ptr, uint32_t pc)
 
   if (jt == 0)
     {
-      printf (false_cmp_sym_tbl[cmp_sym_idx], cmp_rval_str);
-      printf ("goto " FORMAT, pc + jf + 2);
+      fprintf (s_output_fp, false_cmp_sym_tbl[cmp_sym_idx], cmp_rval_str);
+      fprintf (s_output_fp, "goto " FORMAT, pc + jf + 2);
     }
   else if (jf == 0)
     {
-      printf (true_cmp_sym_tbl[cmp_sym_idx], cmp_rval_str);
-      printf ("goto " FORMAT, pc + jt + 2);
+      fprintf (s_output_fp, true_cmp_sym_tbl[cmp_sym_idx], cmp_rval_str);
+      fprintf (s_output_fp, "goto " FORMAT, pc + jt + 2);
     }
   else
     {
-      printf (true_cmp_sym_tbl[cmp_sym_idx], cmp_rval_str);
-      printf ("goto " FORMAT, pc + jt + 2);
-      printf (", else goto " FORMAT, pc + jf + 2);
+      fprintf (s_output_fp, true_cmp_sym_tbl[cmp_sym_idx], cmp_rval_str);
+      fprintf (s_output_fp, "goto " FORMAT, pc + jt + 2);
+      fprintf (s_output_fp, ", else goto " FORMAT, pc + jf + 2);
     }
 }
 
@@ -293,7 +295,7 @@ RET (filter *f_ptr)
       error ("%d %s", parse_idx, INVALID_RET_VAL);
     }
 
-  printf ("return %s", ret_str);
+  fprintf (s_output_fp, "return %s", ret_str);
 }
 
 static void
@@ -304,12 +306,12 @@ MISC (filter *f_ptr)
   switch (mode)
     {
     case BPF_TAX:
-      printf (CYAN_X " = " CYAN_A);
+      fprintf (s_output_fp, CYAN_X " = " CYAN_A);
       strncpy (X, A, REG_BUF_LEN);
       X_status = A_status;
       return;
     case BPF_TXA:
-      printf (CYAN_A " = " CYAN_X);
+      fprintf (s_output_fp, CYAN_A " = " CYAN_X);
       strncpy (A, X, REG_BUF_LEN);
       A_status = X_status;
       return;
@@ -351,34 +353,31 @@ parse_class (filter *f_ptr, uint32_t pc)
 }
 
 void
-parse_filter (uint32_t arch_token, fprog *sock_prog, FILE *output_fileptr)
+parse_filter (uint32_t arch_token, fprog *sock_prog, FILE *output_fp)
 {
   arch = arch_token;
   prog = sock_prog;
   uint32_t len = prog->len;
-
-  int stdout_backup = global_hide_stdout (fileno (output_fileptr));
+  s_output_fp = output_fp;
 
   bool error_happen = scmp_check_filter (prog->filter, len);
 
-  printf (" Line  CODE  JT   JF      K\n");
-  printf ("---------------------------------\n");
+  fprintf (s_output_fp, " Line  CODE  JT   JF      K\n");
+  fprintf (s_output_fp, "---------------------------------\n");
   for (; parse_idx < len; parse_idx++)
     {
       filter *f_ptr = &prog->filter[parse_idx];
 
-      printf (" " FORMAT, parse_idx + 1);
-      printf (": 0x%02x 0x%02x ", f_ptr->code, f_ptr->jt);
-      printf ("0x%02x 0x%08x ", f_ptr->jf, f_ptr->k);
+      fprintf (s_output_fp, " " FORMAT, parse_idx + 1);
+      fprintf (s_output_fp, ": 0x%02x 0x%02x ", f_ptr->code, f_ptr->jt);
+      fprintf (s_output_fp, "0x%02x 0x%08x ", f_ptr->jf, f_ptr->k);
 
       parse_class (f_ptr, parse_idx);
 
-      printf ("\n");
+      fprintf (s_output_fp, "\n");
     }
-  printf ("---------------------------------\n");
+  fprintf (s_output_fp, "---------------------------------\n");
 
   if (error_happen == true)
     warn ("%s", ERROR_HAPPEN);
-
-  global_ret_stdout (stdout_backup);
 }

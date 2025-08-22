@@ -12,11 +12,7 @@ typedef struct
   uint32_t mem[BPF_MEMWORDS];
 } reg_mem;
 
-extern void global_ret_stdout (int stdout_backup);
-
-extern int global_hide_stdout (int filedup2);
-
-extern char *emu_lines (FILE *fp, seccomp_data *data);
+extern char *emu_lines (bool quiet, FILE *read_fp, seccomp_data *data);
 
 extern void emulate (ceccomp_args *args);
 

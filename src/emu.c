@@ -22,7 +22,10 @@
 static uint32_t read_idx;
 static uint32_t execute_idx;
 
-#define LIGHTCOLORPRINTF(str, ...) printf (LIGHTCOLOR (str "\n"), __VA_ARGS__)
+static FILE *s_output_fp;
+
+#define LIGHTCOLORPRINTF(str, ...)                                            \
+  fprintf (s_output_fp, LIGHTCOLOR (str "\n"), __VA_ARGS__)
 static bool
 is_state_true (uint32_t A, uint32_t cmp_enum, uint32_t rval)
 {
@@ -56,9 +59,10 @@ emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data)
   char *rval_str = sym_str + sym_len;
   uint32_t rval = right_val_ifline (rval_str, reg, data->arch);
 
-  printf (CYAN_A);
-  printf (" %.*s ", sym_len, sym_str);
-  printf (CYAN_LS, (uint32_t)(strchr (rval_str, ')') - rval_str), rval_str);
+  fprintf (s_output_fp, CYAN_A);
+  fprintf (s_output_fp, " %.*s ", sym_len, sym_str);
+  fprintf (s_output_fp, CYAN_LS, (uint32_t)(strchr (rval_str, ')') - rval_str),
+           rval_str);
 
   return is_state_true (reg->A, sym_enum, rval);
 }
@@ -71,12 +75,12 @@ emu_if_line (char *clean_line, reg_mem *reg, seccomp_data *data)
   if (reverse)
     {
       sym_str = clean_line + strlen ("if!($A");
-      printf ("if !(");
+      fprintf (s_output_fp, "if !(");
     }
   else
     {
       sym_str = clean_line + strlen ("if($A");
-      printf ("if (");
+      fprintf (s_output_fp, "if (");
     }
 
   bool condition;
@@ -91,9 +95,9 @@ emu_if_line (char *clean_line, reg_mem *reg, seccomp_data *data)
   uint16_t jt = GETJT (jmp_set);
 
   if (jf != 0)
-    printf (") goto " FORMAT ", else goto " FORMAT "\n", jt, jf);
+    fprintf (s_output_fp, ") goto " FORMAT ", else goto " FORMAT "\n", jt, jf);
   else
-    printf (") goto " FORMAT "\n", jt);
+    fprintf (s_output_fp, ") goto " FORMAT "\n", jt);
 
   if (condition && reverse)
     return jf;
@@ -122,7 +126,8 @@ emu_assign_line (char *clean_line, reg_mem *reg, seccomp_data *data)
       if (offset != (uint32_t)-1)
         {
           *lval_ptr = *(uint32_t *)((char *)data + offset);
-          printf (CYAN_LS " = " CYAN_S "\n", lval_len, clean_line, rval_str);
+          fprintf (s_output_fp, CYAN_LS " = " CYAN_S "\n", lval_len,
+                   clean_line, rval_str);
           return;
         }
     }
@@ -130,7 +135,8 @@ emu_assign_line (char *clean_line, reg_mem *reg, seccomp_data *data)
   uint32_t rval = right_val_assignline (rval_str, reg);
 
   *lval_ptr = rval;
-  printf (CYAN_LS " = " CYAN_S "\n", lval_len, clean_line, rval_str);
+  fprintf (s_output_fp, CYAN_LS " = " CYAN_S "\n", lval_len, clean_line,
+           rval_str);
 }
 
 static char *
@@ -159,7 +165,7 @@ emu_goto_line (char *clean_line)
   if (jmp_to_str == end)
     error (FORMAT " %s", read_idx, INVALID_NR_AFTER_GOTO);
 
-  printf ("goto %04d\n", jmp_to);
+  fprintf (s_output_fp, "goto %04d\n", jmp_to);
   return jmp_to;
 }
 
@@ -201,7 +207,7 @@ static void
 emu_alu_neg (reg_mem *reg)
 {
   reg->A = -reg->A;
-  printf (CYAN_A " = -" CYAN_A "\n");
+  fprintf (s_output_fp, CYAN_A " = -" CYAN_A "\n");
   return;
 }
 
@@ -228,7 +234,8 @@ emu_alu_line (char *clean_line, reg_mem *reg)
 
   emu_do_alu (A_ptr, sym_enum, rval);
 
-  printf (CYAN_A " %.*s " CYAN_S "\n", sym_len, sym_str, rval_str);
+  fprintf (s_output_fp, CYAN_A " %.*s " CYAN_S "\n", sym_len, sym_str,
+           rval_str);
 }
 
 static void
@@ -241,8 +248,13 @@ init_regs (reg_mem *reg)
 }
 
 char *
-emu_lines (FILE *read_fp, seccomp_data *data)
+emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
 {
+  if (quiet)
+    s_output_fp = fopen ("/dev/null", "r+");
+  else
+    s_output_fp = stdout;
+
   line_set Line = { NULL, NULL };
   reg_mem *reg = malloc (sizeof (reg_mem));
   init_regs (reg);
@@ -267,7 +279,7 @@ emu_lines (FILE *read_fp, seccomp_data *data)
           continue;
         }
 
-      printf (FORMAT ": ", read_idx);
+      fprintf (s_output_fp, FORMAT ": ", read_idx);
       execute_idx++;
 
       if (STARTWITH (clean_line, "if"))
@@ -301,32 +313,14 @@ emu_lines (FILE *read_fp, seccomp_data *data)
         error (FORMAT " %s", read_idx, INVALID_ASM_CODE);
     }
 
+  if (quiet)
+    fclose (s_output_fp);
+
   free_line (&Line);
   free (reg);
   if (ret == NULL)
     error ("%s", MUST_END_WITH_RET);
   return ret;
-}
-
-int
-global_hide_stdout (int filedup2)
-{
-  int stdout_backup = dup (STDOUT_FILENO);
-  if (stdout_backup == -1)
-    error ("dup: %s", strerror (errno));
-
-  if (dup2 (filedup2, STDOUT_FILENO) == -1)
-    error ("dup2: %s", strerror (errno));
-
-  return stdout_backup;
-}
-
-void
-global_ret_stdout (int stdout_backup)
-{
-  if (dup2 (stdout_backup, STDOUT_FILENO) == -1)
-    error ("dup2: %s", strerror (errno));
-  close (stdout_backup);
 }
 
 void
@@ -348,19 +342,11 @@ emulate (ceccomp_args *args)
     data.args[i] = args->sys_args[i];
   data.instruction_pointer = args->ip;
 
-  int stdout_backup = 0;
   char *retval_str = NULL;
   if (args->quiet)
-    {
-      int null_fd = open ("/dev/null", O_WRONLY);
-      stdout_backup = global_hide_stdout (null_fd);
-      close (null_fd);
-    }
-
-  retval_str = emu_lines (args->read_fp, &data);
-
-  if (stdout_backup != 0)
-    global_ret_stdout (stdout_backup);
+    retval_str = emu_lines (true, args->read_fp, &data);
+  else
+    retval_str = emu_lines (false, args->read_fp, &data);
 
   printf ("return " CYAN_S "\n", retval_str);
 }
