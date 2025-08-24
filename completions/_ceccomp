@@ -11,6 +11,9 @@ local archs=(
 arch_compstr=(
     '(-a --arch)'{-a,--arch}"[Target BPF architecture]:ARCH:($archs)"
 )
+color_compstr=(
+    '(-c --no-color)'{-c,--no-color}'[Disable color]'
+)
 output_compstr=(
     '(-o --output)'{-o,--output}'[Print to file to avoid mixing tracee output]:FILE:_files'
 )
@@ -38,6 +41,7 @@ if (( CURRENT == 2 )) {
         (asm)
             _arguments \
                 $arch_compstr \
+                $color_compstr \
                 '(-f --fmt)'{-f,--fmt}'[Output format of BPF]:FMT:(raw hexline hexfmt)' \
                 '2:BPF:_files' \
                 '*: :'
@@ -45,12 +49,14 @@ if (( CURRENT == 2 )) {
         (disasm)
             _arguments \
                 $arch_compstr \
+                $color_compstr \
                 '2:RAW:_files' \
                 '*: :'
             ;;
         (trace)
             _arguments -C \
                 $arch_compstr \
+                $color_compstr \
                 '(-p --pid)'{-p,--pid}'[Attach to which process to extract its filters]:PID:->getpid' \
                 $output_compstr \
                 '*:arguments:_files'
@@ -70,12 +76,14 @@ if (( CURRENT == 2 )) {
         (probe)
             _arguments -C \
                 $arch_compstr \
+                $color_compstr \
                 $output_compstr \
                 '*:arguments:_files'
             ;;
         (emu)
             _arguments -C \
                 $arch_compstr \
+                $color_compstr \
                 '(-q --quiet)'{-q,--quiet}'[Print return value only]' \
                 '2:BPF:_files' \
                 ':NR:->syscall_nr' \
