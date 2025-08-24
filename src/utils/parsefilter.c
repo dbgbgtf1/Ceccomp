@@ -242,7 +242,7 @@ print_condition (const char *sym, char *rval_str)
 {
   fprintf (s_output_fp, "%s", sym);
   fprintf (s_output_fp, CYAN_S, rval_str);
-  fprintf (s_output_fp, ")");
+  fprintf (s_output_fp, ") ");
 }
 
 static void
