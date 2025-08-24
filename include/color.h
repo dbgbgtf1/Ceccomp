@@ -12,12 +12,12 @@
 #define PURPLECLR "\e[95m"
 #define LIGHTCLR "\e[90m"
 
-#define RED(str) "\e[31m" str CLR
-#define GREEN(str) "\e[32m" str CLR
-#define YELLOW(str) "\e[33m" str CLR
-#define CYAN(str) "\e[36m" str CLR
-#define PURPLE(str) "\e[95m" str CLR
-#define LIGHT(str) "\e[90m" str CLR
+#define RED(str) REDCLR str CLR
+#define GREEN(str) GREENCLR str CLR
+#define YELLOW(str) YELLOWCLR str CLR
+#define CYAN(str) CYANCLR str CLR
+#define PURPLE(str) PURPLECLR str CLR
+#define LIGHT(str) LIGHTCLR str CLR
 
 #define CYAN_A CYAN ("$A")
 #define CYAN_X CYAN ("$X")
