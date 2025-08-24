@@ -5,13 +5,19 @@
 
 #define CLR "\e[0m"
 
-#define UNDERLINE(str) "\e[4m" str CLR
+#define REDCLR "\e[31m"
+#define GREENCLR "\e[32m"
+#define YELLOWCLR "\e[33m"
+#define CYANCLR "\e[36m"
+#define PURPLECLR "\e[95m"
+#define LIGHTCLR "\e[90m"
+
 #define RED(str) "\e[31m" str CLR
-#define YELLOW(str) "\e[33m" str CLR
 #define GREEN(str) "\e[32m" str CLR
+#define YELLOW(str) "\e[33m" str CLR
 #define CYAN(str) "\e[36m" str CLR
 #define PURPLE(str) "\e[95m" str CLR
-#define LIGHTCOLOR(str) "\e[90m" str CLR
+#define LIGHT(str) "\e[90m" str CLR
 
 #define CYAN_A CYAN ("$A")
 #define CYAN_X CYAN ("$X")

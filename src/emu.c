@@ -26,7 +26,7 @@ static uint32_t execute_idx;
 static FILE *s_output_fp;
 
 #define LIGHTCOLORPRINTF(str, ...)                                            \
-  fprintf (s_output_fp, LIGHTCOLOR (str "\n"), __VA_ARGS__)
+  fprintf (s_output_fp, LIGHT (str "\n"), __VA_ARGS__)
 static bool
 is_state_true (uint32_t A, uint32_t cmp_enum, uint32_t rval)
 {
