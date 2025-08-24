@@ -25,8 +25,8 @@
 
 #define OPTION_HINT                                                           \
   "Options:\n" OPTION_ARCH_HINT OPTION_FMT_HINT OPTION_PID_HINT               \
-      OPTION_OUTPUT_HINT OPTION_QUIET_HINT ARG_SYSCALL_NR_HINT                \
-          OPTION_ARG_IP_HINT OPTION_FILE_HINT
+      OPTION_OUTPUT_HINT OPTION_QUIET_HINT OPTION_COLOR_HINT                  \
+          ARG_SYSCALL_NR_HINT OPTION_ARG_IP_HINT OPTION_FILE_HINT
 
 #define OPTION_ARCH_HINT                                                      \
   "-a, --arch (x86_64|aarch64|...)  Which architecture to resolve "           \
