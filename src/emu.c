@@ -139,17 +139,18 @@ emu_assign_line (char *clean_line, reg_mem *reg, seccomp_data *data)
       if (offset != (uint32_t)-1)
         {
           *lval_ptr = *(uint32_t *)((char *)data + offset);
-          fprintf (s_output_fp, CYAN_LS " = " CYAN_S "\n", lval_len,
-                   clean_line, rval_str);
-          return;
+          goto print_result;
         }
     }
 
   uint32_t rval = right_val_assignline (rval_str, reg);
-
   *lval_ptr = rval;
-  fprintf (s_output_fp, CYAN_LS " = " CYAN_S "\n", lval_len, clean_line,
-           rval_str);
+
+print_result:
+  fprintf (s_output_fp, CYAN_LS, lval_len, clean_line);
+  fprintf (s_output_fp, " = ");
+  fprintf (s_output_fp, CYAN_S, rval_str);
+  fprintf (s_output_fp, "\n");
 }
 
 static char *
@@ -224,7 +225,7 @@ static void
 emu_alu_neg (reg_mem *reg)
 {
   reg->A = -reg->A;
-  fprintf (s_output_fp, CYAN_A " = -" CYAN_A "\n");
+  fprintf (s_output_fp, "%s = -%s\n", CYAN_A, CYAN_A);
   return;
 }
 
@@ -251,8 +252,9 @@ emu_alu_line (char *clean_line, reg_mem *reg)
 
   emu_do_alu (A_ptr, sym_enum, rval);
 
-  fprintf (s_output_fp, CYAN_A " %.*s " CYAN_S "\n", sym_len, sym_str,
-           rval_str);
+  fprintf (s_output_fp, "%s %.*s ", CYAN_A, sym_len, sym_str);
+  fprintf (s_output_fp, CYAN_S, rval_str);
+  fprintf (s_output_fp, "\n");
 }
 
 static void
@@ -353,5 +355,7 @@ emulate (ceccomp_args *args)
   else
     retval_str = emu_lines (false, args->read_fp, &data);
 
-  printf ("return " CYAN_S "\n", retval_str);
+  printf ("return ");
+  printf (CYAN_S, retval_str);
+  printf ("\n");
 }

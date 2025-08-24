@@ -1,7 +1,15 @@
 #ifndef COLOR
 #define COLOR
 
+#include <stdbool.h>
+
 #define FORMAT "%04d"
+
+extern bool color_enable;
+
+extern void disable_color ();
+
+extern void enable_color ();
 
 #define CLR "\e[0m"
 
@@ -12,12 +20,12 @@
 #define PURPLECLR "\e[95m"
 #define LIGHTCLR "\e[90m"
 
-#define RED(str) REDCLR str CLR
-#define GREEN(str) GREENCLR str CLR
-#define YELLOW(str) YELLOWCLR str CLR
-#define CYAN(str) CYANCLR str CLR
-#define PURPLE(str) PURPLECLR str CLR
-#define LIGHT(str) LIGHTCLR str CLR
+#define RED(str) ((color_enable) ? str : (REDCLR str CLR))
+#define GREEN(str) ((color_enable) ? str : (GREENCLR str CLR))
+#define YELLOW(str) ((color_enable) ? str : (YELLOWCLR str CLR))
+#define CYAN(str) ((color_enable) ? str : (CYANCLR str CLR))
+#define PURPLE(str) ((color_enable) ? str : (PURPLECLR str CLR))
+#define LIGHT(str) ((color_enable) ? str : (LIGHTCLR str CLR))
 
 #define CYAN_A CYAN ("$A")
 #define CYAN_X CYAN ("$X")

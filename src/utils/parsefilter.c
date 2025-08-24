@@ -83,27 +83,31 @@ static void
 LD (filter *f_ptr)
 {
   char *rval_str = load_reg (A, &A_status, f_ptr);
-  fprintf (s_output_fp, CYAN_A " = " CYAN_S, rval_str);
+  fprintf (s_output_fp, "%s = ", CYAN_A);
+  fprintf (s_output_fp, CYAN_S, rval_str);
 }
 
 static void
 LDX (filter *f_ptr)
 {
   char *rval_str = load_reg (X, &X_status, f_ptr);
-  fprintf (s_output_fp, CYAN_X " = " CYAN_S, rval_str);
+  fprintf (s_output_fp, "%s = ", CYAN_X);
+  fprintf (s_output_fp, CYAN_S, rval_str);
 }
 
 static void
 ST (filter *f_ptr)
 {
-  fprintf (s_output_fp, CYAN_M " = " CYAN_A, f_ptr->k);
+  fprintf (s_output_fp, CYAN_M, f_ptr->k);
+  fprintf (s_output_fp, " = %s", CYAN_A);
   strncpy (mem[f_ptr->k], A, REG_BUF_LEN);
 }
 
 static void
 STX (filter *f_ptr)
 {
-  fprintf (s_output_fp, CYAN_M " = " CYAN_X, f_ptr->k);
+  fprintf (s_output_fp, CYAN_M, f_ptr->k);
+  fprintf (s_output_fp, " = %s", CYAN_X);
   strncpy (mem[f_ptr->k], X, REG_BUF_LEN);
 }
 
@@ -230,12 +234,16 @@ JMP_SRC (filter *f_ptr, char cmpval_str[REG_BUF_LEN])
     }
 }
 
-const char *true_cmp_sym_tbl[4]
-    = { "if (" CYAN_A " == " CYAN_S ") ", "if (" CYAN_A " > " CYAN_S ") ",
-        "if (" CYAN_A " >= " CYAN_S ") ", "if (" CYAN_A " & " CYAN_S ") " };
-const char *false_cmp_sym_tbl[4]
-    = { "if (" CYAN_A " != " CYAN_S ") ", "if (" CYAN_A " < " CYAN_S ") ",
-        "if (" CYAN_A " <= " CYAN_S ") ", "if !(" CYAN_A " & " CYAN_S ") " };
+const char *true_cmp_sym_tbl[4] = { " == ", " > ", " >= ", " & " };
+const char *false_cmp_sym_tbl[4] = { " != ", " < ", " <= ", " & " };
+
+static void
+print_condition (const char *sym, char *rval_str)
+{
+  fprintf (s_output_fp, "%s", sym);
+  fprintf (s_output_fp, CYAN_S, rval_str);
+  fprintf (s_output_fp, ")");
+}
 
 static void
 JMP (filter *f_ptr, uint32_t pc)
@@ -259,19 +267,26 @@ JMP (filter *f_ptr, uint32_t pc)
   // log_warn(JT_JF_BOTH_ZERO);
   // turns out this is allowed by kernel
 
+  fprintf (s_output_fp, "if ");
+  if (jt == 0 && cmp_sym_idx == 3)
+    fprintf (s_output_fp, "!(");
+  else
+    fprintf (s_output_fp, "(");
+  fprintf (s_output_fp, CYAN_A);
+
   if (jt == 0)
     {
-      fprintf (s_output_fp, false_cmp_sym_tbl[cmp_sym_idx], cmp_rval_str);
+      print_condition (false_cmp_sym_tbl[cmp_sym_idx], cmp_rval_str);
       fprintf (s_output_fp, "goto " FORMAT, pc + jf + 2);
     }
   else if (jf == 0)
     {
-      fprintf (s_output_fp, true_cmp_sym_tbl[cmp_sym_idx], cmp_rval_str);
+      print_condition (true_cmp_sym_tbl[cmp_sym_idx], cmp_rval_str);
       fprintf (s_output_fp, "goto " FORMAT, pc + jt + 2);
     }
   else
     {
-      fprintf (s_output_fp, true_cmp_sym_tbl[cmp_sym_idx], cmp_rval_str);
+      print_condition (true_cmp_sym_tbl[cmp_sym_idx], cmp_rval_str);
       fprintf (s_output_fp, "goto " FORMAT, pc + jt + 2);
       fprintf (s_output_fp, ", else goto " FORMAT, pc + jf + 2);
     }
@@ -306,12 +321,12 @@ MISC (filter *f_ptr)
   switch (mode)
     {
     case BPF_TAX:
-      fprintf (s_output_fp, CYAN_X " = " CYAN_A);
+      fprintf (s_output_fp, "%s = %s", CYAN_X, CYAN_A);
       strncpy (X, A, REG_BUF_LEN);
       X_status = A_status;
       return;
     case BPF_TXA:
-      fprintf (s_output_fp, CYAN_A " = " CYAN_X);
+      fprintf (s_output_fp, "%s = %s", CYAN_A, CYAN_X);
       strncpy (A, X, REG_BUF_LEN);
       A_status = X_status;
       return;

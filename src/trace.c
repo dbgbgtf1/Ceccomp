@@ -31,7 +31,8 @@
 static void
 strict_mode ()
 {
-  printf (STRICT_MODE);
+  printf (RED ("Strict Mode Detected?!\n"));
+  printf (RED ("Only read, write, _exit!\n"));
 }
 
 static uint64_t

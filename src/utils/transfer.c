@@ -226,15 +226,15 @@ RETVAL2STR (uint32_t retval)
     case SCMP_ACT_NOTIFY:
       return YELLOW ("NOTIFY");
     case SCMP_ACT_TRAP:
-      snprintf (retval_str, RET_STR_LEN, YELLOW ("TRAP") "(%d)",
+      snprintf (retval_str, RET_STR_LEN, "%s(%d)", YELLOW ("TRAP"),
                 retval & 0xffff);
       return retval_str;
     case SCMP_ACT_ERRNO (0):
-      snprintf (retval_str, RET_STR_LEN, RED ("ERRNO") "(%d)",
+      snprintf (retval_str, RET_STR_LEN, "%s(%d)", RED ("ERRNO"),
                 retval & 0xffff);
       return retval_str;
     case SCMP_ACT_TRACE (0):
-      snprintf (retval_str, RET_STR_LEN, YELLOW ("TRACE") "(%d)",
+      snprintf (retval_str, RET_STR_LEN, "%s(%d)", YELLOW ("TRACE"),
                 retval & 0xffff);
       return retval_str;
     default:

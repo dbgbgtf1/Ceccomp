@@ -159,6 +159,9 @@ parse_opt (int key, char *arg, struct argp_state *state)
     case 'q':
       args_ptr->quiet = true;
       return 0;
+    case 'c':
+      args_ptr->color = false;
+      return 0;
     case 'o':
       if (args_ptr->mode == TRACE_PROG_MODE || args_ptr->mode == PROBE_MODE)
         {
