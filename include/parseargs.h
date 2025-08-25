@@ -27,6 +27,13 @@ typedef enum
   RAW = 2
 } print_mode;
 
+typedef enum
+{
+  ALWAYS = 0,
+  AUTO = 1,
+  NEVER = 2
+} color_mode;
+
 struct ceccomp_args
 {
   subcommand mode;
@@ -38,7 +45,7 @@ struct ceccomp_args
   print_mode fmt_mode;
 
   bool quiet;
-  bool color;
+  color_mode color;
   char *syscall_nr;
   uint64_t sys_args[6];
   uint64_t ip;

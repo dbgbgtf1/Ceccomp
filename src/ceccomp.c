@@ -3,7 +3,6 @@
 #include "color.h"
 #include "disasm.h"
 #include "emu.h"
-#include "log/logger.h"
 #include "parseargs.h"
 #include "probe.h"
 #include "trace.h"
@@ -29,7 +28,7 @@ init (ceccomp_args *args)
   args->read_fp = stdin;
   args->fmt_mode = HEXLINE;
   args->quiet = false;
-  args->color = true;
+  args->color = AUTO;
   args->syscall_nr = (char *)ARG_INIT_VAL;
   args->sys_args[0] = 0;
   args->sys_args[1] = 0;
@@ -43,7 +42,7 @@ init (ceccomp_args *args)
 
 static struct argp_option options[] = {
   { "quiet", 'q', NULL, 0, NULL, 0 },
-  { "no-color", 'c', NULL, 0, NULL, 0 },
+  { "color", 'c', "COLOR", 0, NULL, 0 },
   { "output", 'o', "OUTPUT", 0, NULL, 0 },
   { "arch", 'a', "ARCH", 0, NULL, 0 },
   { "pid", 'p', "PID", 0, NULL, 0 },
@@ -68,10 +67,12 @@ main (int argc, char **argv)
 
   uint32_t program_start_idx = -1;
   if (args.mode == TRACE_PROG_MODE || args.mode == PROBE_MODE)
-    program_start_idx = args.program_idx;
-
-  if (args.color)
-    disable_color ();
+    {
+      program_start_idx = args.program_idx;
+      set_color (&args, args.output_fp);
+    }
+  else
+    set_color (&args, stdout);
 
   switch (args.mode)
     {

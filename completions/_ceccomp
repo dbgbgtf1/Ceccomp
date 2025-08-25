@@ -12,7 +12,7 @@ arch_compstr=(
     '(-a --arch)'{-a,--arch}"[Target BPF architecture]:ARCH:($archs)"
 )
 color_compstr=(
-    '(-c --no-color)'{-c,--no-color}'[Disable color]'
+    '(-c --color)'{-c,--color}'[Set color mode]:COLOR:(always auto never)'
 )
 output_compstr=(
     '(-o --output)'{-o,--output}'[Print to file to avoid mixing tracee output]:FILE:_files'

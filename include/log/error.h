@@ -1,12 +1,11 @@
 #ifndef ERROR
 #define ERROR
 
-#include "color.h"
-
 // args err
 #define UNABLE_OPEN_FILE "Unable to open file"
 #define INVALID_ARCH "Invalid arch"
 #define INVALID_PRINT_MODE "Invalid print mode"
+#define INVALID_COLOR_MODE "Invalid color mode"
 #define SUPPORT_ARCH                                                          \
   STR_ARCH_X86                                                                \
   " " STR_ARCH_X86_64 " " STR_ARCH_X32 " " STR_ARCH_ARM " " STR_ARCH_AARCH64  \

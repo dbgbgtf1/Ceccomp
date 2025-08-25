@@ -82,6 +82,19 @@ parse_print_mode (char *arg)
     error (INVALID_PRINT_MODE ": %s", arg);
 }
 
+static color_mode
+parse_color_mode (char *arg)
+{
+  if (!strcmp (arg, "always"))
+    return ALWAYS;
+  else if (!strcmp (arg, "auto"))
+    return AUTO;
+  else if (!strcmp (arg, "never"))
+    return NEVER;
+  else
+    error (INVALID_COLOR_MODE ": %s", arg);
+}
+
 // asm and disasm share the same args logic
 static void
 asm_disasm_args (ceccomp_args *args_ptr, char *arg)
@@ -160,7 +173,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
       args_ptr->quiet = true;
       return 0;
     case 'c':
-      args_ptr->color = false;
+      args_ptr->color = parse_color_mode (arg);
       return 0;
     case 'o':
       if (args_ptr->mode == TRACE_PROG_MODE || args_ptr->mode == PROBE_MODE)

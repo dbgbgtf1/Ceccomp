@@ -1,6 +1,7 @@
 #ifndef COLOR
 #define COLOR
 
+#include "parseargs.h"
 #include <stdbool.h>
 
 #define FORMAT "%04d"
@@ -11,6 +12,8 @@ extern void disable_color ();
 
 extern void enable_color ();
 
+extern void set_color (ceccomp_args *args, FILE *output);
+
 #define CLR "\e[0m"
 
 #define REDCLR "\e[31m"
@@ -20,12 +23,12 @@ extern void enable_color ();
 #define PURPLECLR "\e[95m"
 #define LIGHTCLR "\e[90m"
 
-#define RED(str) ((color_enable) ? str : (REDCLR str CLR))
-#define GREEN(str) ((color_enable) ? str : (GREENCLR str CLR))
-#define YELLOW(str) ((color_enable) ? str : (YELLOWCLR str CLR))
-#define CYAN(str) ((color_enable) ? str : (CYANCLR str CLR))
-#define PURPLE(str) ((color_enable) ? str : (PURPLECLR str CLR))
-#define LIGHT(str) ((color_enable) ? str : (LIGHTCLR str CLR))
+#define RED(str) ((color_enable) ? (REDCLR str CLR) : str)
+#define GREEN(str) ((color_enable) ? (GREENCLR str CLR) : str)
+#define YELLOW(str) ((color_enable) ? (YELLOWCLR str CLR) : str)
+#define CYAN(str) ((color_enable) ? (CYANCLR str CLR) : str)
+#define PURPLE(str) ((color_enable) ? (PURPLECLR str CLR) : str)
+#define LIGHT(str) ((color_enable) ? (LIGHTCLR str CLR) : str)
 
 #define CYAN_A CYAN ("$A")
 #define CYAN_X CYAN ("$X")

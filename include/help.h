@@ -46,7 +46,8 @@
 #define OPTION_QUIET_HINT                                                     \
   "-q, --quiet                      Print emulate result only\n"
 
-#define OPTION_COLOR_HINT "-c, --no-color                   Disable color\n"
+#define OPTION_COLOR_HINT                                                     \
+  "-c, --color                   Set color mode, default as auto\n"
 
 #define ARG_SYSCALL_NR_HINT                                                   \
   "syscall_nr                       System call number or name (e.g. "        \

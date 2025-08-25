@@ -334,7 +334,6 @@ void
 emulate (ceccomp_args *args)
 {
   seccomp_data data = { 0, 0, 0, { 0, 0, 0, 0, 0, 0 } };
-
   data.arch = args->arch_token;
 
   if (args->syscall_nr == (char *)ARG_INIT_VAL)

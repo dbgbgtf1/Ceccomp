@@ -5,7 +5,7 @@ Items marked with :star: is the major change why we release a new version.
 * :star: Add doc system powered by *asciidoc* #2
 * :star: Add signal forwarding to `trace` in expected way #5
 * :star: Add subcommand description #7
-* :star: Add disable-color option #10
+* :star: Add color option, can be set to always, auto, never #10
 * Warn invalid seccomp filter instead of refuse directly #4
 * Raise errors on corrupted TEXT in `emu`
 * Suppress printing function if not debugging
