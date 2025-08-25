@@ -1,16 +1,18 @@
-#define ASM_HINT "ceccomp asm     [ -c ][ -a ARCH ] [ -f FMT ] [ text ]"
+#define ASM_HINT "ceccomp asm     [ -c COLOR ][ -a ARCH ] [ -f FMT ] [ text ]"
 
-#define DISASM_HINT "ceccomp disasm  [ -c ][ -a ARCH ] [ raw ]"
+#define DISASM_HINT "ceccomp disasm  [ -c COLOR ][ -a ARCH ] [ raw ]"
 
 #define EMU_HINT                                                              \
-  "ceccomp emu     [ -c ][ -a ARCH ] [ -q ] text syscall_nr [ args[0-5] ip ]"
+  "ceccomp emu     [ -c COLOR ][ -a ARCH ] [ -q ] text syscall_nr [ "         \
+  "args[0-5] ip ]"
 
 #define PROBE_HINT                                                            \
-  "ceccomp probe   [ -c ][ -a ARCH ] [ -o FILE ] PROGRAM [ program-args ]"
+  "ceccomp probe   [ -c COLOR ][ -a ARCH ] [ -o FILE ] PROGRAM [ "            \
+  "program-args ]"
 
 #define TRACE_HINT                                                            \
-  "ceccomp trace   [ -c ][ -a ARCH ] [ -o FILE ] -p PID\n"                    \
-  "                [ -c ][ -o FILE ] PROGRAM [ program-args ]"
+  "ceccomp trace   [ -c COLOR ][ -a ARCH ] [ -o FILE ] -p PID\n"              \
+  "                [ -c COLOR ][ -o FILE ] PROGRAM [ program-args ]"
 
 #define SUBCMD_HINT                                                           \
   "asm      -- Assemble bpf text to raw bytes\n"                              \
