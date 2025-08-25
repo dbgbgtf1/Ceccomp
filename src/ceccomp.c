@@ -31,12 +31,12 @@ init (ceccomp_args *args)
   args->quiet = false;
   args->color = true;
   args->syscall_nr = (char *)ARG_INIT_VAL;
-  args->sys_args[0] = ARG_INIT_VAL;
-  args->sys_args[1] = ARG_INIT_VAL;
-  args->sys_args[2] = ARG_INIT_VAL;
-  args->sys_args[3] = ARG_INIT_VAL;
-  args->sys_args[4] = ARG_INIT_VAL;
-  args->sys_args[5] = ARG_INIT_VAL;
+  args->sys_args[0] = 0;
+  args->sys_args[1] = 0;
+  args->sys_args[2] = 0;
+  args->sys_args[3] = 0;
+  args->sys_args[4] = 0;
+  args->sys_args[5] = 0;
   args->program_idx = ARG_INIT_VAL;
   args->pid = (pid_t)ARG_INIT_VAL;
 }
