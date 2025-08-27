@@ -13,8 +13,8 @@
 #include <unistd.h>
 
 char *to_test_list[]
-    = { "open",     "read",   "write",    "execve", "execveat", "mmap",
-        "mprotect", "openat", "sendfile", "ptrace", "fork" };
+    = { "open", "openat",   "read",   "write",    "execve", "execveat",
+        "mmap", "mprotect", "openat", "sendfile", "ptrace", "fork" };
 
 void
 probe (char *argv[], uint32_t arch_token, FILE *output_fp)
