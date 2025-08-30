@@ -263,10 +263,6 @@ JMP (filter *f_ptr, uint32_t pc)
   cmp_sym_idx = JMP_MODE (f_ptr);
   JMP_SRC (f_ptr, cmp_rval_str);
 
-  // if (jt == 0 && jf == 0)
-  // log_warn(JT_JF_BOTH_ZERO);
-  // turns out this is allowed by kernel
-
   fprintf (s_output_fp, "if ");
   if (jt == 0 && cmp_sym_idx == 3)
     fprintf (s_output_fp, "!(");
@@ -290,6 +286,13 @@ JMP (filter *f_ptr, uint32_t pc)
       fprintf (s_output_fp, "goto " FORMAT, pc + jt + 2);
       fprintf (s_output_fp, ", else goto " FORMAT, pc + jf + 2);
     }
+
+  if (jt == 0 && jf == 0)
+    {
+      fprintf (s_output_fp, "\n\n");
+      warn ("%s", JT_JF_BOTH_ZERO);
+    }
+  // turns out this is allowed by kernel
 }
 
 static void
