@@ -1,18 +1,18 @@
-#define ASM_HINT "ceccomp asm     [ -c COLOR ][ -a ARCH ] [ -f FMT ] [ text ]"
+#define ASM_HINT "ceccomp asm     [ -c WHEN ] [ -a ARCH ] [ -f FMT ] [ text ]"
 
-#define DISASM_HINT "ceccomp disasm  [ -c COLOR ][ -a ARCH ] [ raw ]"
+#define DISASM_HINT "ceccomp disasm  [ -c WHEN ] [ -a ARCH ] [ raw ]"
 
 #define EMU_HINT                                                              \
-  "ceccomp emu     [ -c COLOR ][ -a ARCH ] [ -q ] text syscall_nr [ "         \
+  "ceccomp emu     [ -c WHEN ] [ -a ARCH ] [ -q ] text syscall_nr [ "         \
   "args[0-5] ip ]"
 
 #define PROBE_HINT                                                            \
-  "ceccomp probe   [ -c COLOR ][ -a ARCH ] [ -o FILE ] PROGRAM [ "            \
+  "ceccomp probe   [ -c WHEN ] [ -a ARCH ] [ -o FILE ] PROGRAM [ "            \
   "program-args ]"
 
 #define TRACE_HINT                                                            \
-  "ceccomp trace   [ -c COLOR ][ -a ARCH ] [ -o FILE ] -p PID\n"              \
-  "                [ -c COLOR ][ -o FILE ] PROGRAM [ program-args ]"
+  "ceccomp trace   [ -c WHEN ] [ -a ARCH ] [ -o FILE ] -p PID\n"              \
+  "                [ -c WHEN ] [ -o FILE ] PROGRAM [ program-args ]"
 
 #define SUBCMD_HINT                                                           \
   "asm      -- Assemble bpf text to raw bytes\n"                              \
@@ -49,7 +49,7 @@
   "-q, --quiet                      Print emulate result only\n"
 
 #define OPTION_COLOR_HINT                                                     \
-  "-c, --color                   Set color mode, default as auto\n"
+  "-c, --color                      When to print in color, default as auto\n"
 
 #define ARG_SYSCALL_NR_HINT                                                   \
   "syscall_nr                       System call number or name (e.g. "        \
