@@ -40,10 +40,15 @@ IMPORTANT: 之后我会使用 _TEXT_ 作为BPF过滤器人类可读文本（伪�
 
 === asm - 汇编
 
-    ceccomp asm [-a ARCH] [-f FMT] [TEXT]
+    ceccomp asm [-c WHEN] [-a ARCH] [-f FMT] [TEXT]
 
 将 _TEXT_ 汇编为 _RAW_ 。适用于将手写的过滤器规则嵌入到C代码中，
 或希望观察一些 _TEXT_ 对应的原始字节码。
+
+WHEN::
+决定了 `ceccomp` 何时输出有颜色的文本。当设置为 _auto_ 时， `ceccomp`
+会在输出目标是一个“tty”时打印颜色。可以是 _auto_ 、 _never_ 或者 _always_ 。
+默认值是 _auto_ 。
 
 ARCH::
 可以设置为任何 libseccomp 支持的架构。它将被用于决定系统调用名称对应的系统调用号。
@@ -72,10 +77,14 @@ TEXT::
 
 === disasm - 反汇编
 
-    ceccomp disasm [-a ARCH] [RAW]
+    ceccomp disasm [-c WHEN] [-a ARCH] [RAW]
 
 反汇编 _RAW_ 为 _TEXT_ 。适用于当你无法使用 `trace` 看到过滤器时，必须手动提取过滤器，
 然后检查其含义。
+
+WHEN::
+参数描述可以在 <<asm - 汇编>> 一节中找到。 `disasm` 可能会打印更多有颜色的文本，包括针对
+_TEXT_ 的语法高亮。
 
 ARCH::
 可以设置为任何 libseccomp 支持的架构。它将被用于决定 _RAW_ 中的系统调用号如何被翻译为系统调用名。
@@ -94,11 +103,15 @@ ARCH::
 
 === emu - 模拟
 
-    ceccomp emu [-a ARCH] [-q] [TEXT] SYSCALL_NAME/SYSCALL_NR [ARGS[0] ARGS[1] ... ARGS[5] PC]
+    ceccomp emu [-c WHEN] [-a ARCH] [-q] [TEXT] SYSCALL_NAME/SYSCALL_NR [ARGS[0] ARGS[1] ... ARGS[5] PC]
 
 按照 _TEXT_ 中描述的规则，模拟从 `PC` 调用 `syscall(SYSCALL_NR, ARGS[0], ARGS[1], ..., ARGS[5])`
 的结果。适用于在不实际运行程序或不想手动检查规则时，查看触发系统调用的结果。
 这个子命令适合用来自动检测一个过滤器。
+
+WHEN::
+参数描述可以在 <<asm - 汇编>> 一节中找到。 `emu` 可能会打印更多有颜色的文本，包括针对
+_TEXT_ 的语法高亮以及跳过的伪代码。
 
 SYSCALL_NAME/SYSCALL_NR::
 如果你设置了 *SYSCALL_NAME* （比如 `execve` ），那么它会基于 *ARCH* 先被翻译为对应的
@@ -127,14 +140,18 @@ TEXT::
 
 === trace - 运行时捕获过滤器
 
-    ceccomp trace [-o FILE] PROGRAM [program-args]
-                  [-a ARCH] -p PID
+    ceccomp trace [-c WHEN] [-o FILE] PROGRAM [program-args]
+                  [-c WHEN] [-a ARCH] -p PID
 
 使用第一行的命令可以利用调试在 *PROGRAM* 运行中加载过滤器时动态捕获过滤器；
 第二行的命令可以从 *PID* 对应的进程中提取出 seccomp 过滤器；一旦捕获到了过滤器，
 将会以 _TEXT_ 的格式将它打印出来。你可以从两个格式中选择一个使用。
 适用于运行一个程序是捕获BPF过滤器最简单的方式或者一个安装了 seccomp
 过滤器的程序正在等待输入。
+
+WHEN::
+参数描述可以在 <<asm - 汇编>> 一节中找到。 `trace` 可能会打印更多有颜色的文本，包括针对
+_TEXT_ 的语法高亮。
 
 FILE::
 当 *PROGRAM* 会产生很多输出到 _标准错误_ 时可能很有用。 `ceccomp` 允许用户关闭
@@ -170,7 +187,7 @@ NOTE: 要想从 *PID* 中提取过滤器，你需要 `CAP_SYS_ADMIN` ，同时�
 
 === probe - 快速测试常见的系统调用
 
-    ceccomp probe [-a ARCH] [-o FILE] PROGRAM [program-args]
+    ceccomp probe [-c WHEN] [-a ARCH] [-o FILE] PROGRAM [program-args]
 
 以 *program-args* 为参数运行 *PROGRAM* 来捕获第一个 seccomp 过滤器，
 然后杀死所有子进程。适用于快速测试一个程序的规则并检测潜在的 seccomp
