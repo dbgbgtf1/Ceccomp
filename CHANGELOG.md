@@ -8,27 +8,29 @@ Items marked with :star: is the major change why we release a new version.
 
 ## 3.0 (INCOMING)
 * **BREAKING** Remove `-o FILE` for `trace` pid mode
-* :star: Add doc system powered by *asciidoc*
-  :link: [#2](https://github.com/dbgbgtf1/Ceccomp/issues/2)
-* :star: Add signal forwarding to `trace` in expected way
-  :link: [#5](https://github.com/dbgbgtf1/Ceccomp/issues/5)
-* :star: Add subcommand description
-  :link: [#7](https://github.com/dbgbgtf1/Ceccomp/issues/7)
-* :star: Add color option, can be set to always, auto, never
-  :link: [#10](https://github.com/dbgbgtf1/Ceccomp/issues/10)
-* Warn invalid seccomp filter instead of refuse directly
-  :link: [#4](https://github.com/dbgbgtf1/Ceccomp/issues/4)
+* :star: Add doc system powered by *asciidoc* :link: [#2]
+* :star: Add signal forwarding to `trace` in expected way :link: [#5]
+* :star: Add subcommand description :link: [#7]
+* :star: Add color option, can be set to always, auto, never :link: [#10]
+* Warn invalid seccomp filter instead of refuse directly :link: [#4]
 * Raise errors on corrupted TEXT in `emu`
 * Suppress printing function if not debugging
 * Set `$?` to 1 when failed to parse args
 * Limit truncating file on `-o` flag by checking subcommand
 * Update color in `return $A` BPF OP for better visual effect
 * Implement assigning `len(struct seccomp_data)` to `A` or `X`
+
+[#2]: https://github.com/dbgbgtf1/Ceccomp/issues/2
+[#5]: https://github.com/dbgbgtf1/Ceccomp/issues/5
+[#7]: https://github.com/dbgbgtf1/Ceccomp/issues/7
+[#10]: https://github.com/dbgbgtf1/Ceccomp/issues/10
+[#4]: https://github.com/dbgbgtf1/Ceccomp/issues/4
 ## 2.9
-* :star: Fix Makefile compatibility among shells
-  :link: [#6](https://github.com/dbgbgtf1/Ceccomp/issues/6)
+* :star: Fix Makefile compatibility among shells :link: [#6]
 * Add git-hook to remind dev to update version string
 * Update color in `return` BPF OP for better visual effect
+
+[#6]: https://github.com/dbgbgtf1/Ceccomp/issues/6
 ## 2.8
 * :star: Improve compatibility among compilers
 * :star: Add Kbuild-like build prompt with progress
@@ -41,10 +43,11 @@ Items marked with :star: is the major change why we release a new version.
 * Suppress compiler warning by `// fall through`
 * Applying more checks on `asm`
 ## 2.5
-* :star: Add parentheses for `TRAP` as it has `ret_data`, but *libseccomp* hasn't implement
-  it :link: [seccomp/libseccomp#466](https://github.com/seccomp/libseccomp/issues/466)
+* :star: Add parentheses for `TRAP` as it has `ret_data`, but *libseccomp* hasn't implement it :link: [seccomp/libseccomp#466]
 * Add check script
 * Fix uninitialized memory access
+
+[seccomp/libseccomp#466]: https://github.com/seccomp/libseccomp/issues/466
 ## 2.4
 * :star: Port kernel filter check
 * Add some logging functions

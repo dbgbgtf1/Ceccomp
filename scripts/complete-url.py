@@ -11,7 +11,7 @@ pattern = re.compile(r'(?:\s+)((?:[\w.-]+/[\w.-]+)?[#!]\d+)$')
 
 
 def convert(token: str) -> str:
-    """Convert raw ref to markdown link"""
+    """Convert raw ref to URL"""
     repo = DEFAULT_REPO
 
     if '#' in token:
@@ -19,16 +19,24 @@ def convert(token: str) -> str:
             repo, number = token.split('#', 1)
         else:
             number = token[1:]
-        return f'  :link: [{token}](https://github.com/{repo}/issues/{number})'
+        return f'https://github.com/{repo}/issues/{number}'
 
     if '!' in token:
         if '/' in token.split('!')[0]:
             repo, number = token.split('!', 1)
         else:
             number = token[1:]
-        return f'  :link: [{token}](https://github.com/{repo}/pulls/{number})'
+        return f'https://github.com/{repo}/pulls/{number}'
 
     assert False, f'Token {token} does not match any case, what the hack?'
+
+def flush_refs(output_lines: list[str], refs: dict[str, str], need_lf: bool):
+    """Write refs at the end of paragraph"""
+    if refs:
+        if need_lf:
+            output_lines.append('\n') # terminate list
+        output_lines.extend(f'[{token}]: {url}\n' for token, url in refs.items())
+        refs.clear()
 
 
 def main():
@@ -41,22 +49,33 @@ def main():
     with open(CHANGELOG) as f:
         lines = f.readlines()
 
+    refs = {} # token:url
     output_lines = []
+    has_old_ref = False
     for lineno, line in enumerate(lines, start=1):
+        if line.startswith('##'):
+            flush_refs(output_lines, refs, not has_old_ref)
+            has_old_ref = False
+        elif line.startswith('['):
+            has_old_ref = True
+
         m = pattern.search(line)
         if m:
             token = m.group(1)
-            new_line = line[: m.start(1)].rstrip() + '\n'
-            converted = convert(token)
+            url = convert(token)
+            refs[token] = url
+            new_line = line[: m.start(1)].rstrip() + f' :link: [{token}]\n'
 
             if is_check:
                 print(f'[line {lineno}] found: {token}')
                 has_match = True
             else:
                 output_lines.append(new_line)
-                output_lines.append(converted + '\n')
         elif not is_check:
             output_lines.append(line)
+
+    # flush at EOF
+    flush_refs(output_lines, refs, not has_old_ref)
 
     if not is_check:
         with open(CHANGELOG, 'w') as f:
