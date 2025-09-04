@@ -41,8 +41,8 @@ Items marked with :star: is the major change why we release a new version.
 * Suppress compiler warning by `// fall through`
 * Applying more checks on `asm`
 ## 2.5
-* :star: Add parentheses for `TRAP` as it has `ret_data`, but *libseccomp* doesn't implement it
-  :link: [seccomp/libseccomp#466](https://github.com/seccomp/libseccomp/issues/466)
+* :star: Add parentheses for `TRAP` as it has `ret_data`, but *libseccomp* hasn't implement
+  it :link: [seccomp/libseccomp#466](https://github.com/seccomp/libseccomp/issues/466)
 * Add check script
 * Fix uninitialized memory access
 ## 2.4
