@@ -6,12 +6,12 @@ import os
 CHANGELOG = 'CHANGELOG.md'
 DEFAULT_REPO = 'dbgbgtf1/Ceccomp'
 
-# 匹配三种引用情况：#123, !456, user/repo#789, user/repo!456
+# match 3 raw ref case：#123, !456, user/repo#789, user/repo!456
 pattern = re.compile(r'(?:\s+)((?:[\w.-]+/[\w.-]+)?[#!]\d+)$')
 
 
 def convert(token: str) -> str:
-    """根据匹配到的 token 转换成对应的 Markdown 链接"""
+    """Convert raw ref to markdown link"""
     repo = DEFAULT_REPO
 
     if '#' in token:
@@ -62,7 +62,7 @@ def main():
         with open(CHANGELOG, 'w') as f:
             f.writelines(output_lines)
 
-    # --check 模式下，若发现可转换内容，则退出码设为1
+    # set exit code to 1 when see convertible ref in check mode
     if is_check and has_match:
         sys.exit(1)
 
