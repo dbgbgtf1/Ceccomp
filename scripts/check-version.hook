@@ -20,6 +20,16 @@ if grep -qE "$VERSION_REGEX" "$COMMIT_MSG_FILE"; then
     print_highlight "Please check if updated Makefile"
     print_highlight "========================================"
     print_highlight
+    python3 scripts/complete-url.py --check > /dev/null
+    action_req=$?
+    if [ $action_req -eq 1 ]; then
+        print_highlight "========================================"
+        print_highlight "There are raw reference to issues/pulls in CHANGELOG!"
+        print_highlight "Please run scripts/complete-url.py to format"
+        print_highlight "========================================"
+        print_highlight
+        exit 1
+    fi
 fi
 
 exit 0

@@ -1,5 +1,7 @@
+#!/usr/bin/python3
 import re
 import sys
+import os
 
 CHANGELOG = 'CHANGELOG.md'
 DEFAULT_REPO = 'dbgbgtf1/Ceccomp'
@@ -30,6 +32,9 @@ def convert(token: str) -> str:
 
 
 def main():
+    if not os.path.isdir('.git'):
+        print('Please goto repo root first', file=sys.stderr)
+        sys.exit(2)
     is_check = len(sys.argv) > 1 and sys.argv[1] == '--check'
     has_match = False
 
