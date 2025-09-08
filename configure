@@ -1,0 +1,71 @@
+#!/usr/bin/python3
+import argparse
+import os
+# color escape code definition
+def TXT_RED(s): return f'\x1b[31m{s}\x1b[0m'
+def TXT_GREEN(s): return f'\x1b[32m{s}\x1b[0m'
+def TXT_YELLOW(s): return f'\x1b[33m{s}\x1b[0m'
+def TXT_BLUE(s): return f'\x1b[34m{s}\x1b[0m'
+def TXT_MAGENTA(s): return f'\x1b[35m{s}\x1b[0m'
+def TXT_CYAN(s): return f'\x1b[36m{s}\x1b[0m'
+
+
+def parse_args():
+    epilog = '''
+    Some influential environment variables:
+    CC          C compiler command
+    CFLAGS      Extra C compiler flags
+    LDFLAGS     Extra linker flags
+    MAKE        Make command
+    ASCIIDOC    Asciidoc document compiler
+
+Please report bug at https://github.com/dbgbgtf1/Ceccomp
+Copyright (C) 2025-present, distributed under GPLv3
+    '''
+    parser = argparse.ArgumentParser(
+        prog='configure.py',
+        description='Configure build flags for Ceccomp, written in Python',
+        epilog=epilog,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+
+    config_grp = parser.add_argument_group('Configure-time options (fixed once Makefile is generated)')
+    config_grp.add_argument('--enable-verbose', action='store_true', help='Enable verbose output')
+    config_grp.add_argument('--without-doc', action='store_true', help='Do not install documentation')
+    config_grp.add_argument('--with-argp', action='store_true', help='Enable argp support')
+
+    make_grp = parser.add_argument_group('Make-time options (can be overridden by make cli) [make var]')
+    make_grp.add_argument('--prefix', type=str, metavar='=DIR', default='/usr',
+        help='Installation prefix (default: /usr) [PREFIX]')
+    make_grp.add_argument('--bindir', type=str, metavar='=DIR',
+        help='User executables directory (default: PREFIX/bin) [BINDIR]')
+    make_grp.add_argument('--zshfpath', type=str, metavar='=DIR',
+        help='Zsh functions path (default: PREFIX/share/zsh/site-functions) [ZSH_FPATH]')
+    make_grp.add_argument('--docdir', type=str, metavar='=DIR',
+        help='Documentation directory (default: PREFIX/share/doc/ceccomp) [DOCDIR]')
+    make_grp.add_argument('--mandir', type=str, metavar='=DIR',
+        help='Man pages directory (default: PREFIX/share/man) [MANDIR]')
+    make_grp.add_argument('--debug-level', type=int, metavar='=LEVEL', default=1,
+        help='Set debug symbol level (0: -O2 -s|1: -O2 -g, default|2: -O0 -g3 -DDEBUG) [DEBUG]')
+
+    args = parser.parse_args()
+
+    # Default path logic (autotools style)
+    if args.bindir is None:
+        args.bindir = os.path.join(args.prefix, 'bin')
+    if args.zshfpath is None:
+        args.zshfpath = os.path.join(args.prefix, 'share', 'zsh', 'site-functions')
+    if args.docdir is None:
+        args.docdir = os.path.join(args.prefix, 'share', 'doc', 'ceccomp')
+    if args.mandir is None:
+        args.mandir = os.path.join(args.prefix, 'share', 'man')
+    if args.debug_level not in (0, 1, 2):
+        print('Invalid debug_level')
+        exit(1)
+
+    return args
+
+
+if __name__ == '__main__':
+    args = parse_args()
+    print(args)
