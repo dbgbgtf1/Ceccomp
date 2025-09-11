@@ -16,13 +16,14 @@ else
 		$T
 	endif
 
-VERSION := 2.9
+VERSION ?= {{VERSION}}
 ifneq ($(findstring .,$(VERSION)),)
 	TAG := v$(VERSION)
 else
 	TAG := $(VERSION)
 endif
-TAG_TIME := $(shell git log -1 --format=format:%as $(TAG))
+TAG_TIME ?= {{TAG_TIME}}
+# TAG_TIME := $(shell git log -1 --format=format:%as $(TAG))
 ARCH := $(shell uname -m)
 
 TARGET := ceccomp test
@@ -30,12 +31,12 @@ TARGET := ceccomp test
 SRC_DIR := src
 INC_DIR := include
 TEST_DIR := test
-DOC_DIR := docs
-IMG_DIR := images
 SRC_IMG_DIR := $(DOC_DIR)/$(IMG_DIR)
 BUILD_DIR := build
-BUILD_IMG_DIR := $(BUILD_DIR)/$(IMG_DIR)
 BUILD_UTIL := $(BUILD_DIR)/utils
+DOC_DIR := docs
+IMG_DIR := images
+BUILD_IMG_DIR := $(BUILD_DIR)/$(IMG_DIR)
 
 LOCK := $(BUILD_DIR)/lock
 MARK := $(BUILD_DIR)/progress
@@ -52,8 +53,9 @@ CECCOMP_MAIN := $(BUILD_DIR)/ceccomp.c.o
 
 CC := gcc
 
-CFLAGS := -fpie -fstack-protector -Wall -Wextra '-DVERSION_CODE="$(VERSION)"'
-LDFLAGS := -z now -z noexecstack -fpie -fstack-protector -Wall -Wextra -lseccomp
+CFLAGS := -fpie -fstack-protector -Wall -Wextra '-DVERSION_CODE="$(VERSION)"' {{EXTRA_CFLAGS}}
+LDFLAGS := -z now -z noexecstack -fpie -fstack-protector -Wall -Wextra -lseccomp {{EXTRA_LDFLAGS}}
+DEBUG ?= {{DEBUG_LEVEL}}
 
 ifdef DEBUG
 	ifeq ($(DEBUG),1)
@@ -70,6 +72,7 @@ endif
 
 all: ceccomp doc
 
+{{DOC_GEN_IF}}
 MAN_OBJ := $(BUILD_DIR)/ceccomp.1
 MAN_CHN := $(BUILD_DIR)/cn/ceccomp.1
 HTML_OBJ := $(BUILD_DIR)/ceccomp.html
@@ -100,16 +103,13 @@ $(HTML_CHN): $(DOC_DIR)/ceccomp-cn.adoc
 	@asciidoctor -b html5 $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
 
 .PHONY: doc doc_man doc_html
+{{DOC_GEN_ENDIF}}
 
 DEST_DIR ?= 
 PREFIX ?= $(DEST_DIR)/usr
 BIN_DIR ?= $(PREFIX)/bin
 ZSH_DST ?= $(PREFIX)/share/zsh/site-functions
 ZSH_SRC := completions
-PKG_NAME ?= ceccomp
-MAN_DST ?= $(PREFIX)/share/man/man1
-MAN_CHN_DST ?= $(PREFIX)/share/man/zh_CN/man1
-HTML_DST ?= $(PREFIX)/share/$(PKG_NAME)/html
 
 install: bin_install zsh_cmp_install doc_install
 
@@ -120,6 +120,12 @@ bin_install: ceccomp $(BUILD_DIR)/ceccomp
 zsh_cmp_install: $(ZSH_SRC)/_ceccomp
 	@$(call ECHO_NOPROG,INSTALL,$< $(ZSH_DST))
 	@install -Dm 0644 -t $(ZSH_DST) $<
+
+{{DOC_INSTALL_IF}}
+PKG_NAME ?= ceccomp
+MAN_DST ?= $(PREFIX)/share/man/man1
+MAN_CHN_DST ?= $(PREFIX)/share/man/zh_CN/man1
+HTML_DST ?= $(PREFIX)/share/$(PKG_NAME)/html
 
 doc_install: doc doc_man_install doc_html_install doc_man_cn_install doc_images_install
 
@@ -139,7 +145,10 @@ doc_images_install: $(IMG_SRCS)
 	@$(call ECHO_NOPROG,INSTALL,images $(HTML_DST))
 	@install -Dm 0644 -t $(HTML_DST)/images $^
 
-.PHONY: doc_man_install doc_html_install doc_man_cn_install doc_images_install bin_install zsh_cmp_install doc_install install
+.PHONY: doc_man_install doc_html_install doc_man_cn_install doc_images_install
+{{DOC_INSTALL_ENDIF}}
+
+.PHONY: bin_install zsh_cmp_install doc_install install
 
 #### C OBJECTS ###
 

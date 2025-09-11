@@ -1,6 +1,15 @@
 #!/usr/bin/python3
 import argparse
+import subprocess
 import os
+import sys
+import shutil
+from dataclasses import dataclass
+
+# constants
+VERSION = '3.0'
+TAG_TIME = ''
+
 # color escape code definition
 def TXT_RED(s): return f'\x1b[31m{s}\x1b[0m'
 def TXT_GREEN(s): return f'\x1b[32m{s}\x1b[0m'
@@ -9,15 +18,30 @@ def TXT_BLUE(s): return f'\x1b[34m{s}\x1b[0m'
 def TXT_MAGENTA(s): return f'\x1b[35m{s}\x1b[0m'
 def TXT_CYAN(s): return f'\x1b[36m{s}\x1b[0m'
 
+# error handling
+def warn(msg: any):
+    print(TXT_YELLOW(f'[WARN] {msg}'), flush=True, file=sys.stderr)
+
+def error(msg: any):
+    print(TXT_RED(f'[ERR!] {msg}'), file=sys.stderr)
+    sys.exit(1)
+
+# build option parsing
+class GNUStyleHelpFormatter(argparse.RawDescriptionHelpFormatter):
+    """Custom help formatter that forces --opt=VALUE style"""
+    def _format_action_invocation(self, action):
+        # only long options, no short option
+        if not action.option_strings:
+            return super()._format_action_invocation(action)
+        return ', '.join(f'{opt}={action.metavar}' if action.metavar else opt
+                         for opt in action.option_strings)
 
 def parse_args():
-    epilog = '''
-    Some influential environment variables:
-    CC          C compiler command
-    CFLAGS      Extra C compiler flags
-    LDFLAGS     Extra linker flags
-    MAKE        Make command
-    ASCIIDOC    Asciidoc document compiler
+    epilog = '''Some influential environment variables:
+    CC                 C compiler command
+    CFLAGS             Extra C compiler flags
+    LDFLAGS            Extra linker flags
+    ASCIIDOC           Asciidoc document compiler
 
 Please report bug at https://github.com/dbgbgtf1/Ceccomp
 Copyright (C) 2025-present, distributed under GPLv3
@@ -26,46 +50,243 @@ Copyright (C) 2025-present, distributed under GPLv3
         prog='configure.py',
         description='Configure build flags for Ceccomp, written in Python',
         epilog=epilog,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        formatter_class=GNUStyleHelpFormatter,
     )
 
     config_grp = parser.add_argument_group('Configure-time options (fixed once Makefile is generated)')
     config_grp.add_argument('--enable-verbose', action='store_true', help='Enable verbose output')
     config_grp.add_argument('--without-doc', action='store_true', help='Do not install documentation')
-    config_grp.add_argument('--with-argp', action='store_true', help='Enable argp support')
+    # config_grp.add_argument('--with-argp', action='store_true', help='Enable argp support')
+    # argp is dynamically tested
 
     make_grp = parser.add_argument_group('Make-time options (can be overridden by make cli) [make var]')
-    make_grp.add_argument('--prefix', type=str, metavar='=DIR', default='/usr',
+    make_grp.add_argument('--prefix', type=str, metavar='PREFIX', default='/usr',
         help='Installation prefix (default: /usr) [PREFIX]')
-    make_grp.add_argument('--bindir', type=str, metavar='=DIR',
+    make_grp.add_argument('--bindir', type=str, metavar='DIR',
         help='User executables directory (default: PREFIX/bin) [BINDIR]')
-    make_grp.add_argument('--zshfpath', type=str, metavar='=DIR',
+    make_grp.add_argument('--zshfpath', type=str, metavar='DIR',
         help='Zsh functions path (default: PREFIX/share/zsh/site-functions) [ZSH_FPATH]')
-    make_grp.add_argument('--docdir', type=str, metavar='=DIR',
+    make_grp.add_argument('--docdir', type=str, metavar='DIR',
         help='Documentation directory (default: PREFIX/share/doc/ceccomp) [DOCDIR]')
-    make_grp.add_argument('--mandir', type=str, metavar='=DIR',
+    make_grp.add_argument('--mandir', type=str, metavar='DIR',
         help='Man pages directory (default: PREFIX/share/man) [MANDIR]')
-    make_grp.add_argument('--debug-level', type=int, metavar='=LEVEL', default=1,
+    make_grp.add_argument('--debug-level', type=int, metavar='LEVEL', default=1,
         help='Set debug symbol level (0: -O2 -s|1: -O2 -g, default|2: -O0 -g3 -DDEBUG) [DEBUG]')
 
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    # Default path logic (autotools style)
-    if args.bindir is None:
-        args.bindir = os.path.join(args.prefix, 'bin')
-    if args.zshfpath is None:
-        args.zshfpath = os.path.join(args.prefix, 'share', 'zsh', 'site-functions')
-    if args.docdir is None:
-        args.docdir = os.path.join(args.prefix, 'share', 'doc', 'ceccomp')
-    if args.mandir is None:
-        args.mandir = os.path.join(args.prefix, 'share', 'man')
-    if args.debug_level not in (0, 1, 2):
-        print('Invalid debug_level')
-        exit(1)
+@dataclass
+class BuildOptions:
+    prefix: str
+    bindir: str
+    zshfpath: str
+    docdir: str
+    mandir: str
+    debug_level: int
 
-    return args
+    verbose: bool
+    doc: bool
+
+    cc: str | None
+    asciidoc: str | None
+    cflags: str
+    ldflags: str
+
+    def __post_init__(self):
+        if self.bindir is None:
+            self.bindir = os.path.join(self.prefix, 'bin')
+        if self.zshfpath is None:
+            self.zshfpath = os.path.join(self.prefix, 'share', 'zsh', 'site-functions')
+        if self.docdir is None:
+            self.docdir = os.path.join(self.prefix, 'share', 'doc', 'ceccomp')
+        if self.mandir is None:
+            self.mandir = os.path.join(self.prefix, 'share', 'man')
+        if self.debug_level not in (0, 1, 2):
+            error('debug_level option can only be 0, 1 or 2!')
+
+        def check_cmd(env: str, *candidates: list[str]) -> str | None:
+            """enumerate available command in system"""
+            var = getattr(self, env)
+            if var is not None:
+                if shutil.which(var) is None:
+                    error(f'{var} provided by environment {env.upper()} is not runnable!')
+                else:
+                    return var
+            # no such environment variable
+            for candidate in candidates:
+                if shutil.which(candidate) is not None:
+                    return candidate
+            return None
+
+        self.cc = check_cmd('cc', 'cc', 'gcc', 'clang')
+        self.asciidoc = check_cmd('asciidoc', 'asciidoctor', 'asciidoc')
+        if self.cflags is None:
+            self.cflags = ''
+        if self.ldflags is None:
+            self.ldflags = ''
+
+args = parse_args()
+buildopts = BuildOptions(
+    prefix=args.prefix,
+    bindir=args.bindir,
+    zshfpath=args.zshfpath,
+    docdir=args.docdir,
+    mandir=args.mandir,
+    debug_level=args.debug_level,
+
+    verbose=args.enable_verbose,
+    doc=not args.without_doc,
+
+    cc=os.getenv('CC'),
+    asciidoc=os.getenv('ASCIIDOC'),
+    cflags=os.getenv('CFLAGS'),
+    ldflags=os.getenv('LDFLAGS'),
+)
+del args
+
+# gathering system information and check
+@dataclass
+class Makefile:
+    s: str
+    def inject(self, placeholder: str, filler: str | list[str] | bool) -> None:
+        if isinstance(filler, str):
+            self.s = self.s.replace(f'{{{{{placeholder}}}}}', filler) # {{PLACEHOLDER}}
+            return
+        if isinstance(filler, bool):
+            # keep text?
+            if filler:
+                self.s = self.s.replace(f'{{{{{placeholder}_IF}}}}', '')
+                self.s = self.s.replace(f'{{{{{placeholder}_ENDIF}}}}', '')
+            else:
+                begin = self.s.find(f'{{{{{placeholder}_IF}}}}')
+                end   = self.s.find(f'{{{{{placeholder}_ENDIF}}}}') + len(f'{{{{{placeholder}_ENDIF}}}}')
+                self.s = self.s[:begin] + self.s[end:]
+        for i, e in enumerate(filler):
+            self.s = self.s.replace(f'{{{{{placeholder}{i}}}}}', e) # {{PLACEHOLDER0}}
+
+class TaskManager:
+    tasks: list[function[None, [Makefile]]]
+    makefile: Makefile
+
+    def __init__(self, makefile_name: str) -> None:
+        self.tasks = []
+        if not os.path.isfile(makefile_name):
+            error(f'Reading Makefile {makefile_name}, but it\'s not a file!')
+        try:
+            with open(makefile_name) as file:
+                self.makefile.s = file.read()
+        except OSError as e:
+            error(f'Can not open Makefile: {e}')
+
+    def run_tasks(self):
+        width = len(str(len(self.tasks)))
+        total = len(self.tasks)
+        for seq, handler in enumerate(self.tasks, start=1):
+            # no need to flush as stdout will be flushed in handler
+            print(f'[{seq:>{width}}/{total}] ', end='')
+            handler(self.makefile)
+
+    def add_task(self, handler: function[None, [Makefile]]):
+        self.tasks.append(handler)
+
+taskmgr = TaskManager('Makefile.in')
+
+def pcheck(txt: str):
+    print(f'Checking {txt}... ', end='', flush=True)
+
+def run_command(argv: list[str], stdin: str | None=None) -> tuple[int, str, str]:
+    """
+    Run command with given argv and input, return process returncode, stdout and stderr
+    Return -1, '', exception message if exception raised is known, or else return -2, '', message.
+    """
+    try:
+        argv[0] = shutil.which(argv[0])
+        proc = subprocess.run(argv, input=stdin, capture_output=True)
+    except subprocess.SubprocessError as e:
+        return -1, '', str(e)
+    except UnicodeDecodeError as e:
+        return -1, '', 'UnicodeDecodeError: program output contains non-utf-8 bytes'
+    except Exception as e:
+        return -2, '', str(e)
+    else:
+        return proc.returncode, proc.stdout, proc.stderr
+
+def new_task(func: function) -> function:
+    taskmgr.add_task(func)
+    return func
 
 
-if __name__ == '__main__':
-    args = parse_args()
-    print(args)
+# color definition:
+# green:   well-tested
+# cyan:    should work
+# blue:    not work and have to take fallback choice
+# magenta: unexpected or no fallback choice
+
+# consuming buildopts: verbose,
+@new_task
+def check_platform(_: str):
+    pcheck('system platform')
+    if sys.platform == 'linux':
+        print(TXT_GREEN('Linux'))
+    elif sys.platform == 'android':
+        print(TXT_CYAN('Android'))
+    else:
+        print(TXT_MAGENTA(sys.platform))
+        error(f'Ceccomp only support Linux!')
+
+@new_task
+def check_flock(makefile: Makefile):
+    pcheck('if flock in system')
+    if shutil.which('flock') is None:
+        makefile.inject('VERBOSE', '1')
+        print(TXT_BLUE('no'))
+        warn('flock not found in system, Makefile verbose is set to true. You may need util-linux package')
+    else:
+        makefile.inject('VERBOSE', '1' if buildopts.verbose else '0')
+        print(TXT_GREEN('yes'))
+
+@new_task
+def check_doc(makefile: Makefile):
+    pcheck('documentation settings')
+    if not buildopts.doc:
+        print(TXT_BLUE('no doc'))
+        makefile.inject('DOC_GEN', False)
+        makefile.inject('DOC_INSTALL', False)
+        return
+    if buildopts.asciidoc is None:
+        print(TXT_MAGENTA('no asciidoc found'))
+        error('Asciidoc compiler not found, pass --without-doc to disable documentation generation!')
+    print(TXT_GREEN(buildopts.asciidoc))
+    makefile.inject('DOC_GEN', True)
+    makefile.inject('DOC_INSTALL', True)
+
+@new_task
+def check_cc(makefile: Makefile):
+    pcheck('C compiler')
+    if buildopts.cc is None:
+        print(TXT_MAGENTA('no cc found'))
+        error('C compiler command not found in system!')
+
+@new_task
+def check_linux_headers(makefile: Makefile):
+    pcheck('Linux-related headers')
+
+@new_task
+def check_libseccomp(makefile: Makefile):
+    pcheck('libseccomp')
+
+@new_task
+def check_argp(makefile: Makefile):
+    pcheck('argp parser')
+
+@new_task
+def check_source(makefile: Makefile):
+    pcheck('source code type')
+    if os.path.isdir('.git'):
+        print(TXT_GREEN('git install'))
+    else:
+        print(TXT_CYAN('tarball install'))
+
+@new_task
+def check_version(makefile: Makefile):
+    pcheck('target version')
