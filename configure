@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+import datetime
 import argparse
 import subprocess
 import os
@@ -56,6 +57,7 @@ Copyright (C) 2025-present, distributed under GPLv3
     config_grp = parser.add_argument_group('Configure-time options (fixed once Makefile is generated)')
     config_grp.add_argument('--enable-verbose', action='store_true', help='Enable verbose output')
     config_grp.add_argument('--without-doc', action='store_true', help='Do not install documentation')
+    config_grp.add_argument('--devmode', action='store_true', help='Allow you to compile against any commit')
     # config_grp.add_argument('--with-argp', action='store_true', help='Enable argp support')
     # argp is dynamically tested
 
@@ -63,15 +65,19 @@ Copyright (C) 2025-present, distributed under GPLv3
     make_grp.add_argument('--prefix', type=str, metavar='PREFIX', default='/usr',
         help='Installation prefix (default: /usr) [PREFIX]')
     make_grp.add_argument('--bindir', type=str, metavar='DIR',
-        help='User executables directory (default: PREFIX/bin) [BINDIR]')
+        help='User executables directory (default: PREFIX/bin) [BIN_DIR]')
     make_grp.add_argument('--zshfpath', type=str, metavar='DIR',
         help='Zsh functions path (default: PREFIX/share/zsh/site-functions) [ZSH_FPATH]')
     make_grp.add_argument('--docdir', type=str, metavar='DIR',
-        help='Documentation directory (default: PREFIX/share/doc/ceccomp) [DOCDIR]')
+        help='Documentation directory (default: PREFIX/share/doc/ceccomp) [DOC_DIR]')
     make_grp.add_argument('--mandir', type=str, metavar='DIR',
-        help='Man pages directory (default: PREFIX/share/man) [MANDIR]')
+        help='Man pages directory (default: PREFIX/share/man) [MAN_DIR]')
     make_grp.add_argument('--debug-level', type=int, metavar='LEVEL', default=1,
         help='Set debug symbol level (0: -O2 -s|1: -O2 -g, default|2: -O0 -g3 -DDEBUG) [DEBUG]')
+    make_grp.add_argument('--version', type=str, metavar='VER',
+        help=f'Set ceccomp version (default: {VERSION}) [VERSION]')
+    make_grp.add_argument('--tag-time', type=str, metavar='TIME',
+        help=f'Set the time of current tag. Use "CONFIG" for the time when running configure; or write in YYYY-mm-dd like default value {TAG_TIME} [TAG_TIME]')
 
     return parser.parse_args()
 
@@ -83,14 +89,19 @@ class BuildOptions:
     docdir: str
     mandir: str
     debug_level: int
+    version: str
+    tag_time: str
 
     verbose: bool
     doc: bool
+    devmode: bool
 
     cc: str | None
     asciidoc: str | None
     cflags: str
     ldflags: str
+
+    git_install: bool = True
 
     def __post_init__(self):
         if self.bindir is None:
@@ -118,12 +129,20 @@ class BuildOptions:
                     return candidate
             return None
 
+        # the None value will be processed in check
         self.cc = check_cmd('cc', 'cc', 'gcc', 'clang')
         self.asciidoc = check_cmd('asciidoc', 'asciidoctor', 'asciidoc')
         if self.cflags is None:
             self.cflags = ''
         if self.ldflags is None:
             self.ldflags = ''
+        if self.tag_time == 'CONFIG':
+            self.tag_time = datetime.datetime.today().strftime('%Y-%m-%d')
+        elif self.tag_time:
+            try:
+                datetime.datetime.strptime(self.tag_time, '%Y-%m-%d')
+            except ValueError:
+                error(f'Invalid tag-time {self.tag_time}, format is YYYY-mm-dd')
 
 args = parse_args()
 buildopts = BuildOptions(
@@ -133,9 +152,12 @@ buildopts = BuildOptions(
     docdir=args.docdir,
     mandir=args.mandir,
     debug_level=args.debug_level,
+    version=args.version,
+    tag_time=args.tag_time,
 
     verbose=args.enable_verbose,
     doc=not args.without_doc,
+    devmode=args.devmode,
 
     cc=os.getenv('CC'),
     asciidoc=os.getenv('ASCIIDOC'),
@@ -148,19 +170,23 @@ del args
 @dataclass
 class Makefile:
     s: str
-    def inject(self, placeholder: str, filler: str | list[str] | bool) -> None:
+    def inject(self, placeholder: str, filler: str | list[str] | tuple[int, bool]) -> None:
         if isinstance(filler, str):
             self.s = self.s.replace(f'{{{{{placeholder}}}}}', filler) # {{PLACEHOLDER}}
             return
-        if isinstance(filler, bool):
-            # keep text?
-            if filler:
-                self.s = self.s.replace(f'{{{{{placeholder}_IF}}}}', '')
-                self.s = self.s.replace(f'{{{{{placeholder}_ENDIF}}}}', '')
-            else:
-                begin = self.s.find(f'{{{{{placeholder}_IF}}}}')
-                end   = self.s.find(f'{{{{{placeholder}_ENDIF}}}}') + len(f'{{{{{placeholder}_ENDIF}}}}')
-                self.s = self.s[:begin] + self.s[end:]
+        if isinstance(filler, tuple):
+            count, keep = filler
+            for i in range(count):
+                if keep:
+                    self.s = self.s.replace(f'{{{{{placeholder}{i}_IF}}}}', '')
+                    self.s = self.s.replace(f'{{{{{placeholder}{i}_ENDIF}}}}', '')
+                else:
+                    begin = self.s.find(f'{{{{{placeholder}{i}_IF}}}}')
+                    end   = self.s.find(f'{{{{{placeholder}{i}_ENDIF}}}}')
+                    assert begin != -1
+                    assert end   != -1
+                    end += len(f'{{{{{placeholder}{i}_ENDIF}}}}')
+                    self.s = self.s[:begin] + self.s[end:]
         for i, e in enumerate(filler):
             self.s = self.s.replace(f'{{{{{placeholder}{i}}}}}', e) # {{PLACEHOLDER0}}
 
@@ -221,8 +247,6 @@ def new_task(func: function) -> function:
 # cyan:    should work
 # blue:    not work and have to take fallback choice
 # magenta: unexpected or no fallback choice
-
-# consuming buildopts: verbose,
 @new_task
 def check_platform(_: str):
     pcheck('system platform')
@@ -249,44 +273,240 @@ def check_flock(makefile: Makefile):
 def check_doc(makefile: Makefile):
     pcheck('documentation settings')
     if not buildopts.doc:
+        makefile.inject('DOC', (5, False))
         print(TXT_BLUE('no doc'))
-        makefile.inject('DOC_GEN', False)
-        makefile.inject('DOC_INSTALL', False)
         return
     if buildopts.asciidoc is None:
         print(TXT_MAGENTA('no asciidoc found'))
         error('Asciidoc compiler not found, pass --without-doc to disable documentation generation!')
+    makefile.inject('DOC', (5, True))
+    makefile.inject('ASCIIDOC', buildopts.asciidoc)
     print(TXT_GREEN(buildopts.asciidoc))
-    makefile.inject('DOC_GEN', True)
-    makefile.inject('DOC_INSTALL', True)
 
+standard_c = '''
+#include <stdio.h>
+int main() {
+    puts("");
+    return 0;
+}
+'''
 @new_task
 def check_cc(makefile: Makefile):
     pcheck('C compiler')
     if buildopts.cc is None:
         print(TXT_MAGENTA('no cc found'))
         error('C compiler command not found in system!')
+    code, _, stderr = run_command([buildopts.cc, '-x', 'c', '-', '-o', '/dev/null'], standard_c)
+    if code:
+        print(TXT_MAGENTA(buildopts.cc))
+        if code == -1:
+            error(f'C compiler is not working: {stderr}')
+        if code == -2:
+            error(f'Unexpected error: {stderr}')
+        print(f'Compiler returned non-zero returncode with message:\n{stderr}')
+        error(f'C compiler can not compile minimum C unit')
+    # code == 0
+    makefile.inject('CC', buildopts.cc)
+    print(TXT_GREEN(buildopts.cc))
+del standard_c
 
+
+linux_headers = '''
+#include <unistd.h>
+#include <linux/filter.h>
+#include <sys/mman.h>
+int main() {
+    struct sock_fprog *addr = (struct sock_fprog *)mmap(NULL, 0x1000, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANON, -1, 0);
+    *addr = (struct sock_fprog){ .len = 0, .filter = NULL };
+    return 0;
+}
+'''
 @new_task
-def check_linux_headers(makefile: Makefile):
+def check_linux_headers(_: Makefile):
     pcheck('Linux-related headers')
+    code, _, stderr = run_command([buildopts.cc, '-x', 'c', '-', '-o', '/dev/null'], linux_headers)
+    if code:
+        print(TXT_MAGENTA('no'))
+        if code == -1:
+            error(f'C compiler is not working: {stderr}')
+        if code == -2:
+            error(f'Unexpected error: {stderr}')
+        print(f'Compiler returned non-zero returncode with message:\n{stderr}')
+        error(f'Can not compile Linux-related unit, you may install linux-headers package')
+    print(TXT_GREEN('yes'))
+del linux_headers
 
+
+libseccomp = '''
+#include <stdio.h>
+#include <seccomp.h>
+int main() {
+    printf("%d", seccomp_version()->major);
+    return 0;
+}
+'''
 @new_task
-def check_libseccomp(makefile: Makefile):
+def check_libseccomp(_: Makefile):
     pcheck('libseccomp')
+    code, _, stderr = run_command([buildopts.cc, '-x', 'c', '-', '-lseccomp', '-o', '/dev/null'], libseccomp)
+    if code:
+        print(TXT_MAGENTA('no'))
+        if code == -1:
+            error(f'C compiler is not working: {stderr}')
+        if code == -2:
+            error(f'Unexpected error: {stderr}')
+        print(f'Compiler returned non-zero returncode with message:\n{stderr}')
+        error(f'Can not compile libseccomp unit, you may install libseccomp package')
+    print(TXT_GREEN('yes'))
+del libseccomp
 
+
+argp = '''
+#include <argp.h>
+int main(int argc, char **argv) {
+    return argp_parse(0, argc, argv, 0, 0, 0);
+}
+'''
 @new_task
 def check_argp(makefile: Makefile):
     pcheck('argp parser')
+    code, _, stderr = run_command([buildopts.cc, '-x', 'c', '-', '-o', '/dev/null'], argp)
+    if code:
+        if code == -1:
+            print(TXT_MAGENTA('no'))
+            error(f'C compiler is not working: {stderr}')
+        if code == -2:
+            print(TXT_MAGENTA('no'))
+            error(f'Unexpected error: {stderr}')
+        # code > 0
+        # some system need external argp package, so we try to link
+        code, _, stderr = run_command([buildopts.cc, '-x', 'c', '-', '-largp', '-o', '/dev/null'], argp)
+        if code:
+            print(TXT_MAGENTA('no'))
+            if code == -1:
+                print(TXT_MAGENTA('no'))
+                error(f'C compiler is not working: {stderr}')
+            if code == -2:
+                print(TXT_MAGENTA('no'))
+                error(f'Unexpected error: {stderr}')
+            print(f'Compiler returned non-zero returncode with message:\n{stderr}')
+            error(f'Can not compile argp unit, you may install argp package')
+        # code == 0 and link argp
+        makefile.inject('LIBARGP', '-largp')
+        print(TXT_CYAN('external'))
+        return
+    # code == 0
+    print(TXT_GREEN('builtin'))
+del argp
 
 @new_task
-def check_source(makefile: Makefile):
+def check_source(_: Makefile):
     pcheck('source code type')
     if os.path.isdir('.git'):
+        buildopts.git_install = True
         print(TXT_GREEN('git install'))
     else:
+        buildopts.git_install = False
         print(TXT_CYAN('tarball install'))
 
 @new_task
 def check_version(makefile: Makefile):
     pcheck('target version')
+    if buildopts.git_install:
+        if not buildopts.devmode:
+            code, stdout, stderr = run_command(['git', 'describe', '--exact-match'])
+            if code < 0:
+                print(TXT_MAGENTA('git failed'))
+                print(f'Git not accessible?\n{stderr}')
+                error('Can not run git, you may install git package')
+
+            elif code == 0: # we are at a tag, adopt it
+                tag = stdout.strip()
+                buildopts.version = tag if not tag.startswith('v') else tag[1:]
+                code, stdout, _ = run_command(['git', 'log', '-1', '--format=format:%as', tag])
+                if code:
+                    print(TXT_MAGENTA('get tag time failed'))
+                    error('Can not get tag-time for the latest tag')
+                buildopts.tag_time = stdout.strip()
+
+            else: # we are not at a tag, try to go to a tag
+                code, stdout, _ = run_command(['git', 'rev-list', '--tags', '--max-count=1'])
+                if code:
+                    print(TXT_MAGENTA('git failed'))
+                    error('Can not determine the latest tag by git, to build from git, you need to pull the whole repo!')
+                code, stdout, _ = run_command(['git', 'describe', '--tags', stdout.strip()])
+                if code:
+                    print(TXT_MAGENTA('git failed'))
+                    error('Can not determine the latest tag by git')
+                tag = stdout.strip()
+                code, stdout, _ = run_command(['git', 'checkout', tag]) # checkout to that tag
+                if code:
+                    print(TXT_MAGENTA('checkout failed'))
+                    error('Can not checkout the latest tag')
+                print(TXT_CYAN(tag))
+                warn('Checked out to new tag, please rerun me to build stable version of ceccomp!')
+                sys.exit(0)
+
+        else: # devmode is True
+            code, stdout, stderr = run_command(['git', 'describe'])
+            if code < 0:
+                print(TXT_MAGENTA('git failed'))
+                print(f'Git not accessible?\n{stderr}')
+                error('Can not run git, you may install git package')
+
+            elif code == 0: # current commit get correctly resolved (tag-rev-gcommit or tag)
+                if '-' in stdout:
+                    tag, revision, commit = stdout.split('-')
+                else:
+                    tag = stdout.strip()
+                    revision = '0'
+                ver = tag if not tag.startswith('v') else tag[1:]
+                buildopts.version = f'{ver}.r{revision}_{commit[1:]}' # skip g
+                code, stdout, _ = run_command(['git', 'log', '-1', '--format=format:%as'])
+                if code:
+                    print(TXT_MAGENTA('get tag time failed'))
+                    error('Can not get tag-time for the latest tag')
+                buildopts.tag_time = stdout.strip()
+
+            else: # git failed to describe
+                print(TXT_MAGENTA('describe failed'))
+                error('Can not determine the latest tag by git, to build from git, you need to pull the whole repo!')
+
+    else: # tarball install
+        if not buildopts.version:
+            buildopts.version = VERSION
+        if not buildopts.tag_time:
+            buildopts.tag_time = TAG_TIME
+
+    makefile.inject('VERSION', buildopts.version)
+    makefile.inject('TAG_TIME', buildopts.tag_time)
+    if buildopts.git_install and not buildopts.devmode:
+        print(TXT_GREEN(buildopts.version))
+    elif buildopts.git_install and buildopts.devmode:
+        print(TXT_BLUE(buildopts.version))
+    else:
+        print(TXT_CYAN(buildopts.version))
+
+
+taskmgr.run_tasks()
+# vars not injected: EXTRA_CFLAGS EXTRA_LDFLAGS DEBUG_LEVEL PREFIX BINDIR ZSH_FPATH MANDIR DOCDIR
+taskmgr.makefile.inject('EXTRA_CFLAGS', buildopts.cflags)
+taskmgr.makefile.inject('EXTRA_LDFLAGS', buildopts.ldflags)
+taskmgr.makefile.inject('DEBUG_LEVEL', str(buildopts.debug_level))
+taskmgr.makefile.inject('PREFIX', buildopts.prefix)
+taskmgr.makefile.inject('BINDIR', buildopts.bindir)
+taskmgr.makefile.inject('ZSH_FPATH', buildopts.zshfpath)
+taskmgr.makefile.inject('MANDIR', buildopts.mandir)
+taskmgr.makefile.inject('DOCDIR', buildopts.docdir)
+
+assert taskmgr.makefile.s.find('{{') == -1
+
+print('Writting back to Makefile...', end='', flush=True)
+try:
+    with open('Makefile', 'w') as f:
+        f.write(taskmgr.makefile.s)
+except Exception as e:
+    print(TXT_RED('failed'))
+    error(f'Unexpected error when write back: {e}')
+else:
+    print(TXT_GREEN('ok'))

@@ -16,6 +16,8 @@ else
 		$T
 	endif
 
+V ?= {{VERBOSE}}
+
 VERSION ?= {{VERSION}}
 ifneq ($(findstring .,$(VERSION)),)
 	TAG := v$(VERSION)
@@ -31,30 +33,33 @@ TARGET := ceccomp test
 SRC_DIR := src
 INC_DIR := include
 TEST_DIR := test
-SRC_IMG_DIR := $(DOC_DIR)/$(IMG_DIR)
 BUILD_DIR := build
 BUILD_UTIL := $(BUILD_DIR)/utils
-DOC_DIR := docs
-IMG_DIR := images
-BUILD_IMG_DIR := $(BUILD_DIR)/$(IMG_DIR)
 
 LOCK := $(BUILD_DIR)/lock
 MARK := $(BUILD_DIR)/progress
 
 C_SRCS := $(shell find $(SRC_DIR) ! -name 'ceccomp.c' -name '*.c' -or -name '*.s')
 TEST_SRCS := $(shell find $(TEST_DIR) -name '*.c')
-IMG_SRCS := $(shell find $(SRC_IMG_DIR) -name "*.png")
 
 OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.c.o,$(C_SRCS))
 TEST_OBJS := $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.c.o,$(TEST_SRCS))
+
+{{DOC0_IF}}
+SRC_IMG_DIR := $(DOC_DIR)/$(IMG_DIR)
+DOC_DIR := docs
+IMG_DIR := images
+BUILD_IMG_DIR := $(BUILD_DIR)/$(IMG_DIR)
+IMG_SRCS := $(shell find $(SRC_IMG_DIR) -name "*.png")
 IMG_OBJS := $(patsubst $(SRC_IMG_DIR)/%.png,$(BUILD_IMG_DIR)/%.png,$(IMG_SRCS))
+{{DOC0_ENDIF}}
 
 CECCOMP_MAIN := $(BUILD_DIR)/ceccomp.c.o
 
-CC := gcc
+CC ?= {{CC}}
 
 CFLAGS := -fpie -fstack-protector -Wall -Wextra '-DVERSION_CODE="$(VERSION)"' {{EXTRA_CFLAGS}}
-LDFLAGS := -z now -z noexecstack -fpie -fstack-protector -Wall -Wextra -lseccomp {{EXTRA_LDFLAGS}}
+LDFLAGS := -z now -z noexecstack -fpie -fstack-protector -Wall -Wextra -lseccomp {{LIBARGP}} {{EXTRA_LDFLAGS}}
 DEBUG ?= {{DEBUG_LEVEL}}
 
 ifdef DEBUG
@@ -70,13 +75,14 @@ else
 	LDFLAGS += -O2 -s
 endif
 
-all: ceccomp doc
+all: ceccomp {{DOC1_IF}}doc{{DOC1_ENDIF}}
 
-{{DOC_GEN_IF}}
+{{DOC2_IF}}
 MAN_OBJ := $(BUILD_DIR)/ceccomp.1
 MAN_CHN := $(BUILD_DIR)/cn/ceccomp.1
 HTML_OBJ := $(BUILD_DIR)/ceccomp.html
 HTML_CHN := $(BUILD_DIR)/ceccomp-cn.html
+ASCIIDOC := {{ASCIIDOC}}
 
 doc: doc_html doc_man
 
@@ -88,44 +94,44 @@ doc_html: init_progress $(IMG_SRCS) $(HTML_OBJ) $(HTML_CHN)
 
 $(MAN_OBJ): $(DOC_DIR)/ceccomp.adoc
 	@$(call ECHO,ASCIIDOC,$@)
-	@asciidoctor -b manpage $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
+	@$(ASCIIDOC) -b manpage $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
 
 $(MAN_CHN): $(DOC_DIR)/ceccomp-cn.adoc
 	@$(call ECHO,ASCIIDOC,$@)
-	@asciidoctor -b manpage $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
+	@$(ASCIIDOC) -b manpage $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
 
 $(HTML_OBJ): $(DOC_DIR)/ceccomp.adoc
 	@$(call ECHO,ASCIIDOC,$@)
-	@asciidoctor -b html5 $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
+	@$(ASCIIDOC) -b html5 $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
 
 $(HTML_CHN): $(DOC_DIR)/ceccomp-cn.adoc
 	@$(call ECHO,ASCIIDOC,$@)
-	@asciidoctor -b html5 $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
+	@$(ASCIIDOC) -b html5 $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
 
 .PHONY: doc doc_man doc_html
-{{DOC_GEN_ENDIF}}
+{{DOC2_ENDIF}}
 
-DEST_DIR ?= 
-PREFIX ?= $(DEST_DIR)/usr
-BIN_DIR ?= $(PREFIX)/bin
-ZSH_DST ?= $(PREFIX)/share/zsh/site-functions
+PREFIX ?= {{PREFIX}}
+BIN_DIR ?= {{BINDIR}}
+ZSH_FPATH ?= {{ZSH_FPATH}}
 ZSH_SRC := completions
 
-install: bin_install zsh_cmp_install doc_install
+install: bin_install zsh_cmp_install {{DOC3_IF}}doc_install{{DOC3_ENDIF}}
 
 bin_install: ceccomp $(BUILD_DIR)/ceccomp
 	@$(call ECHO_NOPROG,INSTALL,$< $(BIN_DIR))
 	@install -Dt $(BIN_DIR) $(BUILD_DIR)/ceccomp
 
 zsh_cmp_install: $(ZSH_SRC)/_ceccomp
-	@$(call ECHO_NOPROG,INSTALL,$< $(ZSH_DST))
-	@install -Dm 0644 -t $(ZSH_DST) $<
+	@$(call ECHO_NOPROG,INSTALL,$< $(ZSH_FPATH))
+	@install -Dm 0644 -t $(ZSH_FPATH) $<
 
-{{DOC_INSTALL_IF}}
-PKG_NAME ?= ceccomp
-MAN_DST ?= $(PREFIX)/share/man/man1
-MAN_CHN_DST ?= $(PREFIX)/share/man/zh_CN/man1
-HTML_DST ?= $(PREFIX)/share/$(PKG_NAME)/html
+{{DOC4_IF}}
+MAN_DIR ?= {{MANDIR}}
+MAN_DST ?= $(MAN_DIR)/man1
+MAN_CHN_DST ?= $(MAN_DIR)/zh_CN/man1
+DOC_DIR ?= {{DOCDIR}}
+HTML_DST ?= $(DOC_DIR)/html
 
 doc_install: doc doc_man_install doc_html_install doc_man_cn_install doc_images_install
 
@@ -145,10 +151,10 @@ doc_images_install: $(IMG_SRCS)
 	@$(call ECHO_NOPROG,INSTALL,images $(HTML_DST))
 	@install -Dm 0644 -t $(HTML_DST)/images $^
 
-.PHONY: doc_man_install doc_html_install doc_man_cn_install doc_images_install
-{{DOC_INSTALL_ENDIF}}
+.PHONY: doc_man_install doc_html_install doc_man_cn_install doc_images_install doc_install 
+{{DOC4_ENDIF}}
 
-.PHONY: bin_install zsh_cmp_install doc_install install
+.PHONY: bin_install zsh_cmp_install install
 
 #### C OBJECTS ###
 
