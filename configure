@@ -5,6 +5,7 @@ import subprocess
 import os
 import sys
 import shutil
+from collections.abc import Callable
 from dataclasses import dataclass
 
 # constants
@@ -131,7 +132,7 @@ class BuildOptions:
 
         # the None value will be processed in check
         self.cc = check_cmd('cc', 'cc', 'gcc', 'clang')
-        self.asciidoc = check_cmd('asciidoc', 'asciidoctor', 'asciidoc')
+        self.asciidoc = check_cmd('asciidoc', 'asciidoctor')
         if self.cflags is None:
             self.cflags = ''
         if self.ldflags is None:
@@ -187,11 +188,12 @@ class Makefile:
                     assert end   != -1
                     end += len(f'{{{{{placeholder}{i}_ENDIF}}}}')
                     self.s = self.s[:begin] + self.s[end:]
+            return
         for i, e in enumerate(filler):
             self.s = self.s.replace(f'{{{{{placeholder}{i}}}}}', e) # {{PLACEHOLDER0}}
 
 class TaskManager:
-    tasks: list[function[None, [Makefile]]]
+    tasks: list[Callable[[Makefile], None]]
     makefile: Makefile
 
     def __init__(self, makefile_name: str) -> None:
@@ -200,7 +202,7 @@ class TaskManager:
             error(f'Reading Makefile {makefile_name}, but it\'s not a file!')
         try:
             with open(makefile_name) as file:
-                self.makefile.s = file.read()
+                self.makefile = Makefile(file.read())
         except OSError as e:
             error(f'Can not open Makefile: {e}')
 
@@ -212,10 +214,11 @@ class TaskManager:
             print(f'[{seq:>{width}}/{total}] ', end='')
             handler(self.makefile)
 
-    def add_task(self, handler: function[None, [Makefile]]):
+    def add_task(self, handler: Callable[[Makefile], None]):
         self.tasks.append(handler)
 
 taskmgr = TaskManager('Makefile.in')
+
 
 def pcheck(txt: str):
     print(f'Checking {txt}... ', end='', flush=True)
@@ -227,7 +230,7 @@ def run_command(argv: list[str], stdin: str | None=None) -> tuple[int, str, str]
     """
     try:
         argv[0] = shutil.which(argv[0])
-        proc = subprocess.run(argv, input=stdin, capture_output=True)
+        proc = subprocess.run(argv, input=stdin, capture_output=True, text=True)
     except subprocess.SubprocessError as e:
         return -1, '', str(e)
     except UnicodeDecodeError as e:
@@ -237,7 +240,7 @@ def run_command(argv: list[str], stdin: str | None=None) -> tuple[int, str, str]
     else:
         return proc.returncode, proc.stdout, proc.stderr
 
-def new_task(func: function) -> function:
+def new_task(func: Callable) -> Callable:
     taskmgr.add_task(func)
     return func
 
@@ -251,9 +254,9 @@ def new_task(func: function) -> function:
 def check_platform(_: str):
     pcheck('system platform')
     if sys.platform == 'linux':
-        print(TXT_GREEN('Linux'))
+        print(TXT_GREEN('linux'))
     elif sys.platform == 'android':
-        print(TXT_CYAN('Android'))
+        print(TXT_CYAN('android'))
     else:
         print(TXT_MAGENTA(sys.platform))
         error(f'Ceccomp only support Linux!')
@@ -278,10 +281,14 @@ def check_doc(makefile: Makefile):
         return
     if buildopts.asciidoc is None:
         print(TXT_MAGENTA('no asciidoc found'))
-        error('Asciidoc compiler not found, pass --without-doc to disable documentation generation!')
+        error('Asciidoc compiler not found, pass --without-doc to disable documentation generation or install asciidoctor package!')
     makefile.inject('DOC', (5, True))
     makefile.inject('ASCIIDOC', buildopts.asciidoc)
-    print(TXT_GREEN(buildopts.asciidoc))
+    if 'asciidoctor' in buildopts.asciidoc:
+        print(TXT_GREEN(buildopts.asciidoc))
+    else:
+        print(TXT_CYAN(buildopts.asciidoc))
+        warn(f'Your asciidoc compiler {buildopts.asciidoc} is not tested and may fail to generate docs')
 
 standard_c = '''
 #include <stdio.h>
@@ -303,12 +310,11 @@ def check_cc(makefile: Makefile):
             error(f'C compiler is not working: {stderr}')
         if code == -2:
             error(f'Unexpected error: {stderr}')
-        print(f'Compiler returned non-zero returncode with message:\n{stderr}')
+        print(f'Compiler returned non-zero returncode with message:\n{stderr}', end='')
         error(f'C compiler can not compile minimum C unit')
     # code == 0
     makefile.inject('CC', buildopts.cc)
     print(TXT_GREEN(buildopts.cc))
-del standard_c
 
 
 linux_headers = '''
@@ -331,10 +337,9 @@ def check_linux_headers(_: Makefile):
             error(f'C compiler is not working: {stderr}')
         if code == -2:
             error(f'Unexpected error: {stderr}')
-        print(f'Compiler returned non-zero returncode with message:\n{stderr}')
+        print(f'Compiler returned non-zero returncode with message:\n{stderr}', end='')
         error(f'Can not compile Linux-related unit, you may install linux-headers package')
     print(TXT_GREEN('yes'))
-del linux_headers
 
 
 libseccomp = '''
@@ -355,10 +360,9 @@ def check_libseccomp(_: Makefile):
             error(f'C compiler is not working: {stderr}')
         if code == -2:
             error(f'Unexpected error: {stderr}')
-        print(f'Compiler returned non-zero returncode with message:\n{stderr}')
+        print(f'Compiler returned non-zero returncode with message:\n{stderr}', end='')
         error(f'Can not compile libseccomp unit, you may install libseccomp package')
     print(TXT_GREEN('yes'))
-del libseccomp
 
 
 argp = '''
@@ -389,15 +393,15 @@ def check_argp(makefile: Makefile):
             if code == -2:
                 print(TXT_MAGENTA('no'))
                 error(f'Unexpected error: {stderr}')
-            print(f'Compiler returned non-zero returncode with message:\n{stderr}')
+            print(f'Compiler returned non-zero returncode with message:\n{stderr}', end='')
             error(f'Can not compile argp unit, you may install argp package')
         # code == 0 and link argp
         makefile.inject('LIBARGP', '-largp')
         print(TXT_CYAN('external'))
         return
     # code == 0
+    makefile.inject('LIBARGP', '')
     print(TXT_GREEN('builtin'))
-del argp
 
 @new_task
 def check_source(_: Makefile):
@@ -417,7 +421,7 @@ def check_version(makefile: Makefile):
             code, stdout, stderr = run_command(['git', 'describe', '--exact-match'])
             if code < 0:
                 print(TXT_MAGENTA('git failed'))
-                print(f'Git not accessible?\n{stderr}')
+                print(f'Git not accessible? {stderr}')
                 error('Can not run git, you may install git package')
 
             elif code == 0: # we are at a tag, adopt it
@@ -426,6 +430,7 @@ def check_version(makefile: Makefile):
                 code, stdout, _ = run_command(['git', 'log', '-1', '--format=format:%as', tag])
                 if code:
                     print(TXT_MAGENTA('get tag time failed'))
+                    print(stderr, end='' if stderr[-1] == '\n' else '\n')
                     error('Can not get tag-time for the latest tag')
                 buildopts.tag_time = stdout.strip()
 
@@ -433,15 +438,18 @@ def check_version(makefile: Makefile):
                 code, stdout, _ = run_command(['git', 'rev-list', '--tags', '--max-count=1'])
                 if code:
                     print(TXT_MAGENTA('git failed'))
+                    print(stderr, end='' if stderr[-1] == '\n' else '\n')
                     error('Can not determine the latest tag by git, to build from git, you need to pull the whole repo!')
                 code, stdout, _ = run_command(['git', 'describe', '--tags', stdout.strip()])
                 if code:
                     print(TXT_MAGENTA('git failed'))
+                    print(stderr, end='' if stderr[-1] == '\n' else '\n')
                     error('Can not determine the latest tag by git')
                 tag = stdout.strip()
                 code, stdout, _ = run_command(['git', 'checkout', tag]) # checkout to that tag
                 if code:
                     print(TXT_MAGENTA('checkout failed'))
+                    print(stderr, end='' if stderr[-1] == '\n' else '\n')
                     error('Can not checkout the latest tag')
                 print(TXT_CYAN(tag))
                 warn('Checked out to new tag, please rerun me to build stable version of ceccomp!')
@@ -451,25 +459,28 @@ def check_version(makefile: Makefile):
             code, stdout, stderr = run_command(['git', 'describe'])
             if code < 0:
                 print(TXT_MAGENTA('git failed'))
-                print(f'Git not accessible?\n{stderr}')
+                print(f'Git not accessible? {stderr}')
                 error('Can not run git, you may install git package')
 
             elif code == 0: # current commit get correctly resolved (tag-rev-gcommit or tag)
                 if '-' in stdout:
-                    tag, revision, commit = stdout.split('-')
+                    tag, revision, commit = stdout.strip().split('-')
+                    ver = tag if not tag.startswith('v') else tag[1:]
+                    buildopts.version = f'{ver}.r{revision}_{commit[1:]}' # skip g
                 else:
                     tag = stdout.strip()
-                    revision = '0'
-                ver = tag if not tag.startswith('v') else tag[1:]
-                buildopts.version = f'{ver}.r{revision}_{commit[1:]}' # skip g
+                    ver = tag if not tag.startswith('v') else tag[1:]
+                    buildopts.version = f'{ver}.r0'
                 code, stdout, _ = run_command(['git', 'log', '-1', '--format=format:%as'])
                 if code:
                     print(TXT_MAGENTA('get tag time failed'))
+                    print(stderr, end='' if stderr[-1] == '\n' else '\n')
                     error('Can not get tag-time for the latest tag')
                 buildopts.tag_time = stdout.strip()
 
             else: # git failed to describe
                 print(TXT_MAGENTA('describe failed'))
+                print(stderr, end='' if stderr[-1] == '\n' else '\n')
                 error('Can not determine the latest tag by git, to build from git, you need to pull the whole repo!')
 
     else: # tarball install
@@ -501,7 +512,7 @@ taskmgr.makefile.inject('DOCDIR', buildopts.docdir)
 
 assert taskmgr.makefile.s.find('{{') == -1
 
-print('Writting back to Makefile...', end='', flush=True)
+print('Writting back to Makefile... ', end='', flush=True)
 try:
     with open('Makefile', 'w') as f:
         f.write(taskmgr.makefile.s)

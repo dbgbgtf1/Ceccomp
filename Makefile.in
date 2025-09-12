@@ -46,9 +46,9 @@ OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.c.o,$(C_SRCS))
 TEST_OBJS := $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.c.o,$(TEST_SRCS))
 
 {{DOC0_IF}}
-SRC_IMG_DIR := $(DOC_DIR)/$(IMG_DIR)
 DOC_DIR := docs
 IMG_DIR := images
+SRC_IMG_DIR := $(DOC_DIR)/$(IMG_DIR)
 BUILD_IMG_DIR := $(BUILD_DIR)/$(IMG_DIR)
 IMG_SRCS := $(shell find $(SRC_IMG_DIR) -name "*.png")
 IMG_OBJS := $(patsubst $(SRC_IMG_DIR)/%.png,$(BUILD_IMG_DIR)/%.png,$(IMG_SRCS))
