@@ -141,6 +141,8 @@ DOC_INSTALL_DIR ?= {{DOCDIR}}
 HTML_DST ?= $(DOC_INSTALL_DIR)/html
 
 doc_install: doc doc_man_install doc_html_install doc_man_cn_install doc_images_install
+	$Q$(call ECHO_NOPROG,INSTALL,README.md $(DOC_INSTALL_DIR))
+	$Qinstall -Dm 0644 -t $(DOC_INSTALL_DIR) README.md
 
 doc_man_install: $(MAN_OBJ)
 	$Q$(call ECHO_NOPROG,INSTALL,$< $(MAN_DST))
