@@ -12,6 +12,7 @@ Items marked with :star: is the major change why we release a new version.
 * :star: Add signal forwarding to `trace` in expected way :link: [#5]
 * :star: Add subcommand description :link: [#7]
 * :star: Add color option, can be set to always, auto, never :link: [#10]
+* :star: Add Python-version configure script :link: [#9]
 * Warn invalid seccomp filter instead of refuse directly :link: [#4]
 * Raise errors on corrupted TEXT in `emu`
 * Suppress printing function if not debugging
@@ -19,12 +20,14 @@ Items marked with :star: is the major change why we release a new version.
 * Limit truncating file on `-o` flag by checking subcommand
 * Update color in `return $A` BPF OP for better visual effect
 * Implement assigning `len(struct seccomp_data)` to `A` or `X`
+* Implement uninstall operation and verbose control in Makefile
 
 [#2]: https://github.com/dbgbgtf1/Ceccomp/issues/2
 [#5]: https://github.com/dbgbgtf1/Ceccomp/issues/5
 [#7]: https://github.com/dbgbgtf1/Ceccomp/issues/7
 [#10]: https://github.com/dbgbgtf1/Ceccomp/issues/10
 [#4]: https://github.com/dbgbgtf1/Ceccomp/issues/4
+[#9]: https://github.com/dbgbgtf1/Ceccomp/issues/9
 ## 2.9
 * :star: Fix Makefile compatibility among shells :link: [#6]
 * Add git-hook to remind dev to update version string

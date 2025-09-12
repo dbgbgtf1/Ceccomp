@@ -79,6 +79,8 @@ endif
 
 all: ceccomp {{DOC1_IF}}doc{{DOC1_ENDIF}}
 
+##### DOCUMENTATION PART #####
+
 {{DOC2_IF}}
 MAN_OBJ := $(BUILD_DIR)/ceccomp.1
 MAN_CHN := $(BUILD_DIR)/cn/ceccomp.1
@@ -113,6 +115,9 @@ $(HTML_CHN): $(DOC_DIR)/ceccomp-cn.adoc
 .PHONY: doc doc_man doc_html
 {{DOC2_ENDIF}}
 
+
+##### INSTALL CECCOMP #####
+
 PREFIX ?= {{PREFIX}}
 BIN_DIR ?= {{BINDIR}}
 ZSH_FPATH ?= {{ZSH_FPATH}}
@@ -132,8 +137,8 @@ zsh_cmp_install: $(ZSH_SRC)/_ceccomp
 MAN_DIR ?= {{MANDIR}}
 MAN_DST ?= $(MAN_DIR)/man1
 MAN_CHN_DST ?= $(MAN_DIR)/zh_CN/man1
-DOC_DIR ?= {{DOCDIR}}
-HTML_DST ?= $(DOC_DIR)/html
+DOC_INSTALL_DIR ?= {{DOCDIR}}
+HTML_DST ?= $(DOC_INSTALL_DIR)/html
 
 doc_install: doc doc_man_install doc_html_install doc_man_cn_install doc_images_install
 
@@ -157,6 +162,24 @@ doc_images_install: $(IMG_SRCS)
 {{DOC4_ENDIF}}
 
 .PHONY: bin_install zsh_cmp_install install
+
+UNINSTALL = test -f $(1) && rm -f $(1) || :
+UNINSTALL_RECURSIVE = test -d $(1) && rm -rf $(1) || :
+uninstall:
+	$Q$(call ECHO_NOPROG,UNINSTALL,$(BIN_DIR)/ceccomp)
+	$Q$(call UNINSTALL,$(BIN_DIR)/ceccomp)
+	$Q$(call ECHO_NOPROG,UNINSTALL,$(ZSH_FPATH)/_ceccomp)
+	$Q$(call UNINSTALL,$(ZSH_FPATH)/_ceccomp)
+	{{DOC5_IF}}
+	$Q$(call ECHO_NOPROG,UNINSTALL,$(MAN_DIR)/man1/ceccomp.1)
+	$Q$(call UNINSTALL,$(MAN_DIR)/man1/ceccomp.1)
+	$Q$(call ECHO_NOPROG,UNINSTALL,$(MAN_DIR)/zh_CN/man1/ceccomp.1)
+	$Q$(call UNINSTALL,$(MAN_DIR)/zh_CN/man1/ceccomp.1)
+	$Q$(call ECHO_NOPROG,UNINSTALL,$(DOC_INSTALL_DIR))
+	$Q$(call UNINSTALL_RECURSIVE,$(DOC_INSTALL_DIR)/../ceccomp) # in case DOC_INSTALL_DIR is not set...
+	{{DOC5_ENDIF}}
+
+.PHONY: uninstall
 
 #### C OBJECTS ###
 

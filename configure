@@ -275,13 +275,13 @@ def check_flock(makefile: Makefile):
 def check_doc(makefile: Makefile):
     pcheck('documentation settings')
     if not buildopts.doc:
-        makefile.inject('DOC', (5, False))
+        makefile.inject('DOC', (6, False))
         print(TXT_BLUE('no doc'))
         return
     if buildopts.asciidoc is None:
         print(TXT_MAGENTA('no asciidoc found'))
         error('Asciidoc compiler not found, pass --without-doc to disable documentation generation or install asciidoctor package!')
-    makefile.inject('DOC', (5, True))
+    makefile.inject('DOC', (6, True))
     makefile.inject('ASCIIDOC', buildopts.asciidoc)
     if 'asciidoctor' in buildopts.asciidoc:
         print(TXT_GREEN(buildopts.asciidoc))
