@@ -17,7 +17,7 @@ print_highlight() {
 if grep -qE "$VERSION_REGEX" "$COMMIT_MSG_FILE"; then
     print_highlight "========================================"
     print_highlight "Version update detected!"
-    print_highlight "Please check if updated Makefile"
+    print_highlight "Please check if updated configure"
     print_highlight "========================================"
     print_highlight
     python3 scripts/complete-url.py --check > /dev/null

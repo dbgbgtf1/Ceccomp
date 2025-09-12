@@ -58,8 +58,7 @@ Copyright (C) 2025-present, distributed under GPLv3
     config_grp = parser.add_argument_group('Configure-time options (fixed once Makefile is generated)')
     config_grp.add_argument('--enable-verbose', action='store_true', help='Enable verbose output')
     config_grp.add_argument('--without-doc', action='store_true', help='Do not install documentation')
-    config_grp.add_argument('--devmode', action='store_true', help='Allow you to compile against any commit')
-    # config_grp.add_argument('--with-argp', action='store_true', help='Enable argp support')
+    config_grp.add_argument('--devmode', action='store_true', help='Allow you to compile against any commit (only work in git mode)')
     # argp is dynamically tested
 
     make_grp = parser.add_argument_group('Make-time options (can be overridden by make cli) [make var]')
