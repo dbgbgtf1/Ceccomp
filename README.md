@@ -21,7 +21,7 @@ git clone https://github.com/dbgbgtf1/Ceccomp.git
 cd Ceccomp
 ./configure
 ./configure # run this when Makefile is not generated
-make DEBUG=1
+make
 make install # install at /usr/bin
 ```
 
