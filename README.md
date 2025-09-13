@@ -14,19 +14,27 @@ Install via AUR, build `ceccomp` package ⇒ [![AUR package](https://repology.or
 
 - Stable installation:
 
-Clone the whole repo, then checkout to the latest tag and `make`, finally install.
+Clone the whole repo, then run `./configure`.
 
 ```sh
 git clone https://github.com/dbgbgtf1/Ceccomp.git
 cd Ceccomp
-git checkout $(git describe --tags $(git rev-list --tags --max-count=1))
-make ceccomp DEBUG=1
+./configure
+./configure # run this when Makefile is not generated
+make DEBUG=1
 make install # install at /usr/bin
 ```
 
 - Testing installation:
 
-Clone the whole repo, and then `make`.
+Clone the whole repo, and then run `./configure --devmode`.
+
+```sh
+git clone https://github.com/dbgbgtf1/Ceccomp.git
+cd Ceccomp
+./configure --devmode
+make DEBUG=2
+```
 
 # CheatSheet
 

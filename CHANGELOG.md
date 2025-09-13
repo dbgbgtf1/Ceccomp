@@ -6,7 +6,7 @@ Items marked with :star: is the major change why we release a new version.
 <!-- write user/repo#num or user/repo!num to reference. Then run scripts/complete-url.py -->
 <!-- to format raw ref to URL. -->
 
-## 3.0 (INCOMING)
+## 3.0
 * **BREAKING** Remove `-o FILE` for `trace` pid mode
 * :star: Add doc system powered by *asciidoc* :link: [#2]
 * :star: Add signal forwarding to `trace` in expected way :link: [#5]
