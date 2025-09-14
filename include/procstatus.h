@@ -6,7 +6,8 @@ typedef enum
 {
   none,
   strict_mode,
-  filter_mode
+  filter_mode,
+  error
 } seccomp_mode;
 
 extern seccomp_mode get_proc_seccomp (pid_t pid);

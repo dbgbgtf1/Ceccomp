@@ -24,6 +24,7 @@ get_proc_seccomp (pid_t pid)
     perror ("fopen");
 
   char *line = NULL;
+  char *end;
   size_t size = 0;
   ssize_t nread;
 
@@ -32,11 +33,14 @@ get_proc_seccomp (pid_t pid)
       if (strstr (line, SECCOMP))
         {
           line += strlen (SECCOMP);
-          mode = strtoull_check (line, 10, FAIL_READ_PROC_STATUS);
+          mode = strtoull (line, &end, 10);
+
+          if (end == line)
+            return error;
+
           free (line);
           return mode;
         }
     }
-
-  error ("%s", FAIL_READ_PROC_STATUS);
+  return error;
 }

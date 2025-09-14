@@ -198,6 +198,9 @@ static void
 einval_get_filter (pid_t pid)
 {
   seccomp_mode mode = get_proc_seccomp (pid);
+  if (mode == error)
+    error ("ptrace: %s\n%s\n%s", POSSIBLE_ERRORS, TRACEE_STRICT,
+           TRACE_PID_UNSUPPORTED);
   if (mode == strict_mode)
     mode_strict ();
   else if (mode == filter_mode)
@@ -208,6 +211,9 @@ static void
 eaccess_get_filter (pid_t pid)
 {
   seccomp_mode mode = get_proc_seccomp (pid);
+  if (mode == error)
+    error ("ptrace: %s\n%s\n%s", POSSIBLE_ERRORS, CECCOMP_IN_SECCOMP,
+           SYS_ADMIN_OR_KERNEL);
   if (mode != none)
     error ("ptrace: %s", CECCOMP_IN_SECCOMP);
   else

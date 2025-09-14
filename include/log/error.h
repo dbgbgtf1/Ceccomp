@@ -93,7 +93,10 @@
 #define TRACE_PID_ENOENT                                                      \
   "ENOENT returned, which is unexpected, please submit your case in our "     \
   "issues"
-#define FAIL_READ_PROC_STATUS "Fail read proc pid status to get seccomp mode"
-#define CECCOMP_IN_SECCOMP "Ceccomp is in seccomp, kernel forbid tracer in seccomp to get tracee filter"
+#define POSSIBLE_ERRORS "Error cause unknown, due to the followings"
+#define TRACEE_STRICT "tracee in strict mode"
+#define CECCOMP_IN_SECCOMP                                                    \
+  "Ceccomp is in seccomp, kernel forbid tracer in seccomp to get tracee "     \
+  "filter"
 
 #endif
