@@ -208,7 +208,7 @@ einval_get_filter (pid_t pid)
 }
 
 static void
-eaccess_get_filter (pid_t pid)
+eacces_get_filter (pid_t pid)
 {
   seccomp_mode mode = get_proc_seccomp (pid);
   if (mode == error)
@@ -233,7 +233,7 @@ error_get_filter (pid_t pid, int err)
       einval_get_filter (pid);
       return false;
     case EACCES:
-      eaccess_get_filter (getpid ());
+      eacces_get_filter (getpid ());
     case EMEDIUMTYPE:
       warn ("%s", NOT_AN_CBPF);
       return true;
