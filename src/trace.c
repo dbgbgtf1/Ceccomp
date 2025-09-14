@@ -194,8 +194,6 @@ program_trace (char *argv[], FILE *output_fp, bool oneshot)
     info ("child status 0x%x", parent (pid, output_fp, oneshot));
 }
 
-// return true means continue
-// else break
 static void
 einval_get_filter (pid_t pid)
 {
@@ -216,7 +214,7 @@ error_get_filter (pid_t pid, int err)
     case ENOENT:
       return false;
     case EINVAL:
-      einval_get_filter(pid);
+      einval_get_filter (pid);
       return false;
     case EACCES:
       error ("%s", SYS_ADMIN_OR_KERNEL);
@@ -256,11 +254,11 @@ pid_trace (int pid, uint32_t arch)
     {
       prog.len
           = ptrace (PTRACE_SECCOMP_GET_FILTER, pid, prog_idx, prog.filter);
-      prog_idx++;
 
       if (prog.len != (unsigned short)-1)
         {
           parse_filter (arch, &prog, stdout);
+          prog_idx++;
           continue;
         }
 
@@ -269,7 +267,8 @@ pid_trace (int pid, uint32_t arch)
     }
   while (true);
 
-  printf ("All filter printed\n");
+  if (prog_idx == 0)
+    printf ("All filter printed\n");
   ptrace (PTRACE_DETACH, pid, 0, 0);
   free (prog.filter);
 }
