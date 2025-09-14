@@ -235,7 +235,7 @@ error_get_filter (pid_t pid, int err)
     case EACCES:
       eaccess_get_filter (getpid ());
     case EMEDIUMTYPE:
-      printf (CYAN (NOT_AN_CBPF));
+      warn ("%s", NOT_AN_CBPF);
       return true;
     default:
       error ("ptrace: %s", strerror (err));
