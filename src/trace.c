@@ -204,6 +204,16 @@ einval_get_filter (pid_t pid)
     error ("ptrace: %s", TRACE_PID_UNSUPPORTED);
 }
 
+static void
+eaccess_get_filter (pid_t pid)
+{
+  seccomp_mode mode = get_proc_seccomp (pid);
+  if (mode != none)
+    error ("ptrace: %s", CECCOMP_IN_SECCOMP);
+  else
+    error ("%s", SYS_ADMIN_OR_KERNEL);
+}
+
 // return true means continue
 // else break
 static bool
@@ -217,7 +227,7 @@ error_get_filter (pid_t pid, int err)
       einval_get_filter (pid);
       return false;
     case EACCES:
-      error ("%s", SYS_ADMIN_OR_KERNEL);
+      eaccess_get_filter (getpid ());
     case EMEDIUMTYPE:
       printf (CYAN (NOT_AN_CBPF));
       return true;
