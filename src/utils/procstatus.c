@@ -5,6 +5,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 
@@ -13,6 +14,8 @@
 seccomp_mode
 get_proc_seccomp (pid_t pid)
 {
+  seccomp_mode mode;
+
   char proc_pid[0x100];
   snprintf (proc_pid, 0x100, "/proc/%d/status", pid);
 
@@ -29,7 +32,9 @@ get_proc_seccomp (pid_t pid)
       if (strstr (line, SECCOMP))
         {
           line += strlen (SECCOMP);
-          return strtoull_check (line, 10, FAIL_READ_PROC_STATUS);
+          mode = strtoull_check (line, 10, FAIL_READ_PROC_STATUS);
+          free (line);
+          return mode;
         }
     }
 
