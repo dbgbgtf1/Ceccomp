@@ -1,7 +1,5 @@
 #include "procstatus.h"
-#include "log/error.h"
-#include "log/logger.h"
-#include "parseargs.h"
+#include "main.h"
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -30,7 +28,7 @@ get_proc_seccomp (pid_t pid)
 
   while ((nread = getline (&line, &size, f)) != -1)
     {
-      if (strstr (line, SECCOMP))
+      if (STARTWITH (line, SECCOMP))
         {
           line += strlen (SECCOMP);
           mode = strtoull (line, &end, 10);
