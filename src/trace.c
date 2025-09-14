@@ -3,6 +3,7 @@
 #include "log/logger.h"
 #include "main.h"
 #include "parsefilter.h"
+#include "procstatus.h"
 #include "color.h"
 #include "log/error.h"
 #include <asm-generic/errno-base.h>
@@ -13,11 +14,13 @@
 #include <linux/ptrace.h>
 #include <linux/seccomp.h>
 #include <seccomp.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/ptrace.h>
 #include <sys/prctl.h>
+#include <sys/types.h>
 #include <sys/wait.h>
 #include <signal.h>
 #include <stddef.h>
@@ -29,7 +32,7 @@
 #define LOAD_FAIL 0x80000000
 
 static void
-strict_mode ()
+mode_strict ()
 {
   printf (RED ("Strict Mode Detected?!\n"));
   printf (RED ("Only read, write, _exit!\n"));
@@ -97,7 +100,7 @@ dump_filter (syscall_info *Info, int pid, fprog *prog)
 }
 
 static void
-filter_mode (syscall_info *Info, int pid, fprog *prog, FILE *output_fp)
+mode_filter (syscall_info *Info, int pid, fprog *prog, FILE *output_fp)
 {
   prog->filter = malloc (prog->len * sizeof (filter));
   dump_filter (Info, pid, prog);
@@ -156,9 +159,9 @@ parent (int pid, FILE *output_fp, bool oneshot)
       if ((seccomp_mode & LOAD_FAIL) != 0)
         continue;
       if (seccomp_mode == (SECCOMP_SET_MODE_STRICT | LOAD_SUCCESS))
-        strict_mode ();
+        mode_strict ();
       else if (seccomp_mode == (SECCOMP_SET_MODE_FILTER | LOAD_SUCCESS))
-        filter_mode (&Info, pid, &prog, output_fp);
+        mode_filter (&Info, pid, &prog, output_fp);
 
       if (oneshot)
         return status;
@@ -189,6 +192,40 @@ program_trace (char *argv[], FILE *output_fp, bool oneshot)
     child (argv);
   else
     info ("child status 0x%x", parent (pid, output_fp, oneshot));
+}
+
+// return true means continue
+// else break
+static void
+einval_get_filter (pid_t pid)
+{
+  seccomp_mode mode = get_proc_seccomp (pid);
+  if (mode == strict_mode)
+    mode_strict ();
+  else if (mode == filter_mode)
+    error ("ptrace: %s", TRACE_PID_UNSUPPORTED);
+}
+
+// return true means continue
+// else break
+static bool
+error_get_filter (pid_t pid, int err)
+{
+  switch (err)
+    {
+    case ENOENT:
+      return false;
+    case EINVAL:
+      einval_get_filter(pid);
+      return false;
+    case EACCES:
+      error ("%s", SYS_ADMIN_OR_KERNEL);
+    case EMEDIUMTYPE:
+      printf (CYAN (NOT_AN_CBPF));
+      return true;
+    default:
+      error ("ptrace: %s", strerror (err));
+    }
 }
 
 void
@@ -227,24 +264,12 @@ pid_trace (int pid, uint32_t arch)
           continue;
         }
 
-      switch (errno)
-        {
-        case ENOENT:
-          goto detach;
-        case EINVAL:
-          error ("ptrace: %s", TRACE_PID_UNSUPPORTED);
-        case EACCES:
-          error ("%s", SYS_ADMIN_OR_KERNEL);
-        case EMEDIUMTYPE:
-          printf (CYAN (NOT_AN_CBPF));
-          continue;
-        default:
-          error ("ptrace: %s", strerror (errno));
-        }
+      if (!error_get_filter (pid, errno))
+        break;
     }
   while (true);
 
-detach:
+  printf ("All filter printed\n");
   ptrace (PTRACE_DETACH, pid, 0, 0);
   free (prog.filter);
 }
