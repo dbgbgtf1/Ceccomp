@@ -3,6 +3,7 @@
 #include "log/logger.h"
 #include "parseargs.h"
 #include <stddef.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -16,6 +17,9 @@ get_proc_seccomp (pid_t pid)
   snprintf (proc_pid, 0x100, "/proc/%d/status", pid);
 
   FILE *f = fopen (proc_pid, "r");
+  if ((int64_t)f == -1)
+    perror ("fopen");
+
   char *line = NULL;
   size_t size = 0;
   ssize_t nread;
