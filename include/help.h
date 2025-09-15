@@ -29,46 +29,27 @@
      "to text\n"                                                              \
      "version  -- Display ceccomp version\n")
 
-// macro starts with OPTION don't need _()
-// because OPTION_HINT already has _()
-#define OPTION_ARCH_HINT                                                      \
-  "-a, --arch (x86_64|aarch64|...)  Which architecture to resolve "           \
-  "syscall_nr, default as your arch\n"
-
-#define OPTION_FMT_HINT                                                       \
-  "-f, --fmt (hexline|hexfmt|raw)   Output format, default as hexline\n"
-
-#define OPTION_PID_HINT                                                       \
-  "-p, --pid system_process_id      Extract bpf filters from process and "    \
-  "print with bpf text form; CAP_SYS_ADMIN is needed to work\n"
-
-#define OPTION_OUTPUT_HINT                                                    \
-  "-o, --output file                Print to file to avoid mixing "           \
-  "ceccomp "                                                                  \
-  "output and tracee program output, default as stderr\n"
-
-#define OPTION_QUIET_HINT                                                     \
-  "-q, --quiet                      Print emulate result only\n"
-
-#define OPTION_COLOR_HINT                                                     \
-  "-c, --color                      When to print in color, default as "      \
-  "auto\n"
-
-#define ARG_SYSCALL_NR_HINT                                                   \
-  "syscall_nr                       System call number or name (e.g. "        \
-  "0|read)\n"
-
-#define OPTION_ARG_IP_HINT                                                    \
-  "args[0-5], ip                    args and ip (instruction pointer) "       \
-  "used "                                                                     \
-  "for emulation, default as 0\n"
-
-#define OPTION_FILE_HINT                                                      \
-  "raw, text                        File with BPF RAW or BPF TEXT, see "      \
-  "docs "                                                                     \
-  "for detail, default as stdin\n"
-
 #define OPTION_HINT                                                           \
-  _ ("Options:\n" OPTION_ARCH_HINT OPTION_FMT_HINT OPTION_PID_HINT            \
-         OPTION_OUTPUT_HINT OPTION_QUIET_HINT OPTION_COLOR_HINT               \
-             ARG_SYSCALL_NR_HINT OPTION_ARG_IP_HINT OPTION_FILE_HINT)
+  _ ("Options:\n"                                                             \
+     "-a, --arch (x86_64|aarch64|...)  Which architecture to resolve "        \
+     "syscall_nr, default as your arch\n"                                     \
+     \
+     "-f, --fmt (hexline|hexfmt|raw)   Output format, default as hexline\n"   \
+     \
+     "-p, --pid system_process_id      Extract bpf filters from process and " \
+     "print with bpf text form; CAP_SYS_ADMIN is needed to work\n"            \
+     \
+     "-o, --output file                Print to file to avoid mixing "        \
+     "ceccomp output and tracee program output, default as stderr\n"          \
+     \
+     "-q, --quiet                      Print emulate result only\n"           \
+     \
+     "-c, --color                      When to print in color, default as "   \
+     "auto\n"                                                                 \
+     \
+     "syscall_nr                       System call number or name (e.g. "     \
+     "0|read)\n"                                                              \
+     "args[0-5], ip                    args and ip (instruction pointer) "    \
+     "used for emulation, default as 0\n"                                     \
+     "raw, text                        File with BPF RAW or BPF TEXT, see "   \
+     "docs for detail, default as stdin\n")
