@@ -33,7 +33,7 @@ help (int exit_code)
   printf ("%s\n", PROBE_HINT);
   printf ("%s\n", TRACE_HINT);
   printf ("%s\n", HELP_HINT);
-  printf ("%s\n", VERSION);
+  printf ("%s\n", VERSION_HINT);
 
   printf ("\n%s\n", SUBCMD_HINT);
 
@@ -79,7 +79,7 @@ parse_print_mode (char *arg)
   else if (!strcmp (arg, "raw"))
     return RAW;
   else
-    error (INVALID_PRINT_MODE ": %s", arg);
+    error ("%s: %s", INVALID_PRINT_MODE, arg);
 }
 
 static color_mode
@@ -92,7 +92,7 @@ parse_color_mode (char *arg)
   else if (!strcmp (arg, "never"))
     return NEVER;
   else
-    error (INVALID_COLOR_MODE ": %s", arg);
+    error ("%s: %s", INVALID_COLOR_MODE, arg);
 }
 
 // asm and disasm share the same args logic
@@ -106,7 +106,7 @@ asm_disasm_args (ceccomp_args *args_ptr, char *arg)
 
   args_ptr->read_fp = fopen (arg, "r");
   if (args_ptr->read_fp == NULL)
-    error (UNABLE_OPEN_FILE ": %s", arg);
+    error ("%s: %s", UNABLE_OPEN_FILE, arg);
 }
 
 static void
@@ -119,7 +119,7 @@ emu_args (ceccomp_args *args_ptr, char *arg)
     {
       args_ptr->read_fp = fopen (arg, "r");
       if (args_ptr->read_fp == NULL)
-        error (UNABLE_OPEN_FILE ": %s", arg);
+        error ("%s: %s", UNABLE_OPEN_FILE, arg);
     }
   else if (arg_idx == 2)
     args_ptr->syscall_nr = arg;
@@ -180,13 +180,13 @@ parse_opt (int key, char *arg, struct argp_state *state)
         {
           args_ptr->output_fp = fopen (arg, "w+");
           if (args_ptr->output_fp == NULL)
-            error (UNABLE_OPEN_FILE ": %s", arg);
+            error ("%s: %s", UNABLE_OPEN_FILE, arg);
         }
       return 0;
     case 'a':
       args_ptr->arch_token = STR2ARCH (arg);
       if (args_ptr->arch_token == (uint32_t)-1)
-        error (INVALID_ARCH ": %s" SUPPORT_ARCH, arg);
+        error ("%s: %s\n%s", INVALID_ARCH, arg, SUPPORT_ARCH);
       return 0;
     case 'p':
       args_ptr->pid = strtoull_check (arg, 0, INVALID_PID);

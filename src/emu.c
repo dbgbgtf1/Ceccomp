@@ -9,6 +9,7 @@
 #include "transfer.h"
 #include <fcntl.h>
 #include <iso646.h>
+#include <libintl.h>
 #include <linux/filter.h>
 #include <seccomp.h>
 #include <stdbool.h>
@@ -47,7 +48,7 @@ is_state_true (uint32_t A, uint32_t cmp_enum, uint32_t rval)
     case CMP_NE:
       return (A != rval);
     default:
-      error (INVALID_CMPENUM ": %d", cmp_enum);
+      error ("%s: %d", INPOSSIBLE_CMP_ENUM, cmp_enum);
     }
 }
 
@@ -217,7 +218,7 @@ emu_do_alu (uint32_t *A_ptr, uint8_t alu_enum, uint32_t rval)
       *A_ptr >>= rval;
       return;
     default:
-      error (INVALID_ALUENUM ": %d", alu_enum);
+      error ("%s: %d", INPOSSIBLE_ALU_ENUM, alu_enum);
     }
 }
 

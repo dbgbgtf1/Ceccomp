@@ -9,6 +9,8 @@
 #include "transfer.h"
 #include <argp.h>
 #include <assert.h>
+#include <libintl.h>
+#include <locale.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -16,8 +18,8 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 
-void
-init (ceccomp_args *args)
+static void
+init_args (ceccomp_args *args)
 {
   struct utsname uts_name;
   uname (&uts_name);
@@ -51,16 +53,25 @@ static struct argp_option options[] = {
   { "usage", 'u', NULL, 0, NULL, 0 },
 };
 
-int
-main (int argc, char **argv)
+static void
+init_output ()
 {
   setbuf (stdin, NULL);
   setbuf (stdout, NULL);
   setbuf (stderr, NULL);
+  setlocale (LC_ALL, "");
+  bindtextdomain ("ceccomp", "/home/dbgbgtf/Main/work/Ceccomp/po");
+  textdomain ("ceccomp");
+}
+
+int
+main (int argc, char **argv)
+{
+  init_output();
 
   ceccomp_args args;
+  init_args (&args);
 
-  init (&args);
   static struct argp argp
       = { options, parse_opt, NULL, NULL, NULL, NULL, NULL };
   argp_parse (&argp, argc, argv, ARGP_IN_ORDER, 0, &args);

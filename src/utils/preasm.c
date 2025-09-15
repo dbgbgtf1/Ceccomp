@@ -89,7 +89,7 @@ check_valid_line (char *clean_line)
   if (is_etc (clean_line))
     return "";
 
-  error (INVALID_ASM_CODE ": %s", clean_line);
+  error ("%s: %s", INVALID_ASM_CODE, clean_line);
 }
 
 static char *copy_line;

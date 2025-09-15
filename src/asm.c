@@ -8,6 +8,7 @@
 #include "preasm.h"
 #include "transfer.h"
 #include <fcntl.h>
+#include <libintl.h>
 #include <linux/bpf_common.h>
 #include <linux/filter.h>
 #include <seccomp.h>
@@ -67,7 +68,7 @@ jmp_mode (uint8_t cmp_enum, bool *reverse)
     case CMP_AD:
       return BPF_JSET;
     default:
-      error ("%s", INVALID_CMPENUM);
+      error ("%s", INPOSSIBLE_CMP_ENUM);
     }
 }
 
@@ -291,7 +292,7 @@ alu_mode (uint8_t alu_enum)
     case ALU_RS:
       return BPF_RSH;
     default:
-      error ("%s", INVALID_ALUENUM);
+      error ("%s", INPOSSIBLE_ALU_ENUM);
     }
 }
 

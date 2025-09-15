@@ -116,7 +116,7 @@ child (char *argv[])
 
   int err = execv (argv[0], argv);
   if (err)
-    error (EXECV_ERR ": %s, %s\n", argv[0], strerror (errno));
+    error ("%s: %s, %s\n", EXECV_ERR, argv[0], strerror (errno));
   exit (0);
 }
 
@@ -207,7 +207,7 @@ einval_get_filter (pid_t pid)
     error ("ptrace: %s", TRACE_PID_UNSUPPORTED);
 }
 
-static void
+__attribute__ ((noreturn)) static void
 eacces_get_filter (pid_t pid)
 {
   seccomp_mode mode = get_proc_seccomp (pid);
