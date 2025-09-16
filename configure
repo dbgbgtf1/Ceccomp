@@ -72,6 +72,8 @@ Copyright (C) 2025-present, distributed under GPLv3
         help='Documentation directory (default: PREFIX/share/doc/ceccomp) [DOC_DIR]')
     make_grp.add_argument('--mandir', type=str, metavar='DIR',
         help='Man pages directory (default: PREFIX/share/man) [MAN_DIR]')
+    make_grp.add_argument('--localedir', type=str, metavar='DIR',
+        help='Localization directory (default: PREFIX/share/locale) [LOCALE_DIR]')
     make_grp.add_argument('--debug-level', type=int, metavar='LEVEL', default=1,
         help='Set debug symbol level (0: -O2 -s|1: -O2 -g, default|2: -O0 -g3 -DDEBUG) [DEBUG]')
     make_grp.add_argument('--version', type=str, metavar='VER',
@@ -88,6 +90,7 @@ class BuildOptions:
     zshfpath: str
     docdir: str
     mandir: str
+    localedir: str
     debug_level: int
     version: str
     tag_time: str
@@ -112,6 +115,8 @@ class BuildOptions:
             self.docdir = os.path.join(self.prefix, 'share', 'doc', 'ceccomp')
         if self.mandir is None:
             self.mandir = os.path.join(self.prefix, 'share', 'man')
+        if self.localedir is None:
+            self.localedir = os.path.join(self.prefix, 'share', 'locale')
         if self.debug_level not in (0, 1, 2):
             error('debug_level option can only be 0, 1 or 2!')
 
@@ -151,6 +156,7 @@ buildopts = BuildOptions(
     zshfpath=args.zshfpath,
     docdir=args.docdir,
     mandir=args.mandir,
+    localedir=args.localedir,
     debug_level=args.debug_level,
     version=args.version,
     tag_time=args.tag_time,
@@ -170,13 +176,16 @@ del args
 @dataclass
 class Makefile:
     s: str
-    def inject(self, placeholder: str, filler: str | list[str] | tuple[int, bool]) -> None:
+    def inject(self, placeholder: str, filler: str | list[str] | bool) -> None:
         if isinstance(filler, str):
             self.s = self.s.replace(f'{{{{{placeholder}}}}}', filler) # {{PLACEHOLDER}}
             return
-        if isinstance(filler, tuple):
-            count, keep = filler
-            for i in range(count):
+        if isinstance(filler, bool):
+            keep = filler
+            i = 0
+            while True:
+                if self.s.find(f'{{{{{placeholder}{i}_IF}}}}') == -1:
+                    break
                 if keep:
                     self.s = self.s.replace(f'{{{{{placeholder}{i}_IF}}}}', '')
                     self.s = self.s.replace(f'{{{{{placeholder}{i}_ENDIF}}}}', '')
@@ -187,6 +196,7 @@ class Makefile:
                     assert end   != -1
                     end += len(f'{{{{{placeholder}{i}_ENDIF}}}}')
                     self.s = self.s[:begin] + self.s[end:]
+                i += 1
             return
         for i, e in enumerate(filler):
             self.s = self.s.replace(f'{{{{{placeholder}{i}}}}}', e) # {{PLACEHOLDER0}}
