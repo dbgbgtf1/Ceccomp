@@ -1,210 +1,211 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# localization for ceccomp in Chinese simplified.
+# Copyright (C) 2025-present ceccomp contributors
+# This file is distributed under the same license as the ceccomp package.
+# dbgbgtf1 <dudududumaxver@outlook.com>
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
+"Project-Id-Version: ceccomp 3.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2025-09-16 10:40+0800\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: \n"
+"PO-Revision-Date: 2025-09-16 10:37+0800\n"
+"Last-Translator: dbgbgtf1 <dudududumaxver@outlook.com>\n"
+"Language-Team: zh_CN <dudududumaxver@outlook.com>\n"
+"Language: zh_CN\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #: include/log/error.h:9
 msgid "Unable to open file"
-msgstr ""
+msgstr "无法打开文件"
 
 #: include/log/error.h:10
 msgid "Invalid arch"
-msgstr ""
+msgstr "无效的架构"
 
 #: include/log/error.h:11
 msgid "Invalid print mode"
-msgstr ""
+msgstr "无效的打印模式"
 
 #: include/log/error.h:12
 msgid "Invalid color mode"
-msgstr ""
+msgstr "无效的颜色模式"
 
 #: include/log/error.h:22
 msgid "Invalid syscall nr"
-msgstr ""
+msgstr "无效的系统调用号"
 
 #: include/log/error.h:23
 msgid "Invalid syscall args"
-msgstr ""
+msgstr "无效的系统调用参数"
 
 #: include/log/error.h:24
 msgid "Invalid instruction pointer"
-msgstr ""
+msgstr "无效的instruction pointer"
 
 #: include/log/error.h:25
 msgid "Invalid pid"
-msgstr ""
+msgstr "无效的pid"
 
 #: include/log/error.h:26
 msgid "Please input syscall_nr to emu"
-msgstr ""
+msgstr "请输入syscall_nr来模拟"
 
 #: include/log/error.h:29
 msgid "Invalid operator"
-msgstr ""
+msgstr "无效的运算符"
 
 #: include/log/error.h:30
 msgid "Inpossible cmp sym enum"
-msgstr ""
+msgstr "不可能的cmp enum"
 
 #: include/log/error.h:31
 msgid "Inpossible alu sym enum"
-msgstr ""
+msgstr "不可能的cmp enum"
 
 #: include/log/error.h:33
 msgid "Invalid right value"
-msgstr ""
+msgstr "无效的右值"
 
 #: include/log/error.h:34
 msgid "Invalid left valiable"
-msgstr ""
+msgstr "无效的左变量"
 
 #: include/log/error.h:36
 msgid "Invalid idx of $mem"
-msgstr ""
+msgstr "无效的mem索引"
 
 #: include/log/error.h:37
 msgid "Invalid mem statement"
-msgstr ""
+msgstr "无效的mem表达式"
 
 #: include/log/error.h:39
 msgid "Invalid if line"
-msgstr ""
+msgstr "无效的if语句"
 
 #: include/log/error.h:40
 msgid "Invalid return line"
-msgstr ""
+msgstr "无效的return语句"
 
 #: include/log/error.h:41
 msgid "Missing parentheses in return data, example: ERRNO(2)"
-msgstr ""
+msgstr "ret数值缺少括号，示例：ERRNO(2)"
 
 #: include/log/error.h:42
 msgid "Invalid return data"
-msgstr ""
+msgstr "无效的return数值"
 
 #: include/log/error.h:44
 msgid "Use parentheses to wrap condition, example: (condition)"
-msgstr ""
+msgstr "使用括号来包括条件判断，示例：(条件判断)"
 
 #: include/log/error.h:45
 msgid "Use 'goto' after (condition)"
-msgstr ""
+msgstr "在(条件判断)后使用'goto'"
 
 #: include/log/error.h:47
 msgid "Line number to go after 'goto'"
-msgstr ""
+msgstr "在'goto'后缺少行号"
 
 #: include/log/error.h:48
 msgid "Line number to go after ',else goto'"
-msgstr ""
+msgstr "在',else goto'后缺少行号"
 
 #: include/log/error.h:49
 msgid "Invalid line number after goto"
-msgstr ""
+msgstr "在'goto'后的行号无效"
 
 #: include/log/error.h:50
 msgid "Invalid jmp line number"
-msgstr ""
+msgstr "jmp的行号无效"
 
 #: include/log/error.h:51
 msgid "Invalid asm code"
-msgstr ""
+msgstr "无效的asm code"
 
 #: include/log/error.h:52
 msgid "Invalid return value"
-msgstr ""
+msgstr "无效的return值"
 
 #: include/log/error.h:55
 msgid "Invalid offset of seccomp_data"
-msgstr ""
+msgstr "seccomp data的偏移无效"
 
 #: include/log/error.h:56
 msgid "Store mem before ld or ldx"
-msgstr ""
+msgstr "在ld或ldx之前先store mem"
 
 #: include/log/error.h:57
 msgid "Jt and jf both 0"
-msgstr ""
+msgstr "jt和jf都是0"
 
 #: include/log/error.h:60
 msgid "Alu div by zero"
-msgstr ""
+msgstr "Alu 除以零"
 
 #: include/log/error.h:61
 msgid "Alu lsh or rsh out of range"
-msgstr ""
+msgstr "Alu 左移或右移超出范围"
 
 #: include/log/error.h:62
 msgid "Jmp out of bpf len"
-msgstr ""
+msgstr "jmp超出bpf长度"
 
 #: include/log/error.h:63
 msgid "Bpf filter must end with return"
-msgstr ""
+msgstr "bpf过滤器必须以return结尾"
 
 #: include/log/error.h:64
 msgid "Invalid opertion"
-msgstr ""
+msgstr "无效的操作"
 
 #: include/log/error.h:67
 msgid ""
 "The above code has errors, please check the warnings for specific details"
-msgstr ""
+msgstr "如上的代码出现错误，请从警告获取更多细节"
 
 #: include/log/error.h:71
 msgid ""
 "Run with CAP_SYS_ADMIN capability when trace pid\n"
 "and kernel pid can't be trace"
 msgstr ""
+"trace pid时需要CAP_SYS_ADMIN\n"
+"另外内核进程无法被trace"
 
 #: include/log/error.h:73
 #, c-format
 msgid "No such process with pid %d in the system"
-msgstr ""
+msgstr "不存在pid为%d的进程"
 
 #: include/log/error.h:74
 msgid "Non-cbpf found, can't resolve, but continue"
-msgstr ""
+msgstr "发现了无法解析的Non-cbpf，继续"
 
 #: include/log/error.h:75
 msgid "execv failed executing"
-msgstr ""
+msgstr "无法执行execv"
 
 #: include/log/error.h:76
 msgid "tracee syscall should be exiting here"
-msgstr ""
+msgstr "tracee系统调用在此处应该退出"
 
 #: include/log/error.h:78
 msgid "PTRACE_SECCOMP_GET_FILTER is not supported on your system"
-msgstr ""
+msgstr "PTRACE_SECCOMP_GET_FILTER在您的系统上不支持"
 
 #: include/log/error.h:79
 msgid "Error cause unknown, due to the followings"
-msgstr ""
+msgstr "发生未知的错误，由于如下的原因"
 
 #: include/log/error.h:80
 msgid "tracee in strict mode"
-msgstr ""
+msgstr "tracee处在strict mode"
 
 #: include/log/error.h:82
 msgid ""
 "Ceccomp is in seccomp, kernel forbid tracer in seccomp to get tracee filter"
-msgstr ""
+msgstr "Ceccomp处在沙箱中，内核不允许沙箱中的tracer获取tracee的bpf过滤器"
 
 #: include/help.h:21
 msgid ""
@@ -218,6 +219,13 @@ msgid ""
 "text\n"
 "version  -- Display ceccomp version\n"
 msgstr ""
+"asm      -- 把bpf text编译为raw bytes\n"
+"disasm   -- 把raw bytes编译为bpf text\n"
+"emu      -- 在给定的syscall和bpf text下模拟bpf程序的结果\n"
+"help     -- 显示帮助信息\n"
+"probe    -- trace程序，对程序中出现的第一个filter模拟常见的syscall\n"
+"trace    -- 运行程序或追踪指定pid，提取bpf过滤器，并打印text结果\n"
+"version  -- 显示ceccomp版本\n"
 
 #: include/help.h:33
 msgid ""
@@ -237,3 +245,18 @@ msgid ""
 "raw, text                        File with BPF RAW or BPF TEXT, see docs for "
 "detail, default as stdin\n"
 msgstr ""
+"Options:\n"
+"-a, --arch (x86_64|aarch64|...)  选择哪一个架构来解析syscall_nr, 默认为你的架"
+"构\n"
+"-f, --fmt (hexline|hexfmt|raw)   输出格式, 默认为hexline\n"
+"-p, --pid system_process_id      从进程中提取bpf过滤器，并打印为text格式; 需"
+"要CAP_SYS_ADMIN来运作\n"
+"-o, --output file                将结果打印到文件来避免混淆ceccomp输出和"
+"tracee程序输出，默认打印至stderr\n"
+"-q, --quiet                      只打印emulate结果\n"
+"-c, --color                      指定何时使用彩色输出, 默认为auto\n"
+"syscall_nr                       系统调用号或系统调用名 (示例 0|read)\n"
+"args[0-5], ip                    用来模拟的系统调用的参数和ip(instruction "
+"pointer)，默认为0\n"
+"raw, text                        raw或text文件，默认为stdin。更多细节请查阅文"
+"档\n"

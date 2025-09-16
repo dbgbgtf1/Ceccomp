@@ -8,3 +8,5 @@ result*
 CeccompBuild/
 diff_result
 Makefile
+po/*.po~
+SOURCES.txt
