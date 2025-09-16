@@ -1,10 +1,7 @@
 #ifndef ERROR
 #define ERROR
 
-#include <locale.h>
-#include <libintl.h>
-#define _(string) gettext(string)
-
+#include "i18n.h"
 // args err
 #define UNABLE_OPEN_FILE _("Unable to open file")
 #define INVALID_ARCH _("Invalid arch")

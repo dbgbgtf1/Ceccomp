@@ -1,3 +1,4 @@
+#include "i18n.h"
 #define ASM_HINT "ceccomp asm     [ -c WHEN ] [ -a ARCH ] [ -f FMT ] [ text ]"
 
 #define DISASM_HINT "disasm  [ -c WHEN ] [ -a ARCH ] [ raw ]"

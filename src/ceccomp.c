@@ -53,19 +53,18 @@ static struct argp_option options[] = {
   { "usage", 'u', NULL, 0, NULL, 0 },
 };
 
-// passed in Makefile
-#ifndef LOCALEDIR
-#define LOCALEDIR "/usr/share/locale/"
-#endif
 static void
 init_output ()
 {
   setbuf (stdin, NULL);
   setbuf (stdout, NULL);
   setbuf (stderr, NULL);
+// passed in Makefile
+#ifdef LOCALEDIR
   setlocale (LC_ALL, "");
   bindtextdomain ("ceccomp", LOCALEDIR);
   textdomain ("ceccomp");
+#endif
 }
 
 int
