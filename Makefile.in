@@ -64,7 +64,7 @@ CECCOMP_C := $(SRC_DIR)/ceccomp.c
 CC ?= {{CC}}
 
 LOCALE_DIR := {{LOCALEDIR}}
-CFLAGS := -fpie -fstack-protector -Wall -Wextra '-DVERSION_CODE="$(VERSION)"' '-DLOCALEDIR="$(LOCALE_DIR)"' {{EXTRA_CFLAGS}}
+CFLAGS := -fpie -fstack-protector -Wall -Wextra '-DVERSION_CODE="$(VERSION)"' {{I18N0_IF}}'-DLOCALEDIR="$(LOCALE_DIR)"'{{I18N0_ENDIF}} {{EXTRA_CFLAGS}}
 LDFLAGS := -z now -z noexecstack -fpie -fstack-protector -Wall -Wextra -lseccomp {{LIBARGP}} {{EXTRA_LDFLAGS}}
 DEBUG ?= {{DEBUG_LEVEL}}
 
@@ -81,33 +81,19 @@ else
 	LDFLAGS += -O2 -s
 endif
 
-all: ceccomp {{DOC1_IF}}doc{{DOC1_ENDIF}} {{I18N0_IF}}mo{{I18N0_ENDIF}}
+all: ceccomp {{DOC1_IF}}doc{{DOC1_ENDIF}} {{I18N1_IF}}mo{{I18N1_ENDIF}}
 
-{{I18N1_IF}}
+{{I18N2_IF}}
 ##### INTERNATIONALIZATION
 
 I18N_DIR := po
-SOURCES_LIST := $(I18N_DIR)/SOURCES.txt
-POT_FILE := $(I18N_DIR)/ceccomp.pot
+
 PO_ZHCN := $(I18N_DIR)/zh_CN.po
-
-$(SOURCES_LIST): $(INC_SRCS) $(C_SRCS) $(CECCOMP_C)
-	$Q$(call ECHO_NOPROG,TR,$@)
-	$Qecho $^ | tr ' ' '\n' > $@
-
-$(POT_FILE): $(SOURCES_LIST)
-	$Q$(call ECHO_NOPROG,XGETTEXT,$@)
-	$Qxgettext -k_ -o $@ -f $<
-
-$(PO_ZHCN): $(POT_FILE)
-	$Q$(call ECHO_NOPROG,MSGMERGE,$@)
-	$Qmsgmerge --previous --update $@ $< 2> /dev/null
-
-update-po: $(PO_ZHCN)
-	$Q$(call ECHO_NOPROG,$(GREEN)UPDATED,po$(RESET))
-
 MO_ZHCN := $(patsubst $(I18N_DIR)/%.po,$(BUILD_DIR)/%.mo,$(PO_ZHCN))
-$(MO_ZHCN): $(PO_ZHCN) | $(MARK)
+update-po:
+	$Q$(MAKE) -C $(I18N_DIR) --no-print-directory Q=$Q
+
+$(MO_ZHCN): $(PO_ZHCN) | $(BUILD_DIR) $(MARK)
 	$Q$(call ECHO,MSGFMT,$@)
 	$Qmsgfmt -o $@ $<
 
@@ -115,7 +101,7 @@ mo: $(MO_ZHCN)
 	$Q$(call ECHO_NOPROG,$(GREEN)BUILT,mo$(RESET))
 
 .PHONY: update-po mo
-{{I18N1_ENDIF}}
+{{I18N2_ENDIF}}
 
 ##### DOCUMENTATION PART #####
 {{DOC2_IF}}
@@ -160,7 +146,7 @@ BIN_DIR ?= {{BINDIR}}
 ZSH_FPATH ?= {{ZSH_FPATH}}
 ZSH_SRC := completions
 
-install: bin_install zsh_cmp_install {{DOC3_IF}}doc_install{{DOC3_ENDIF}}
+install: bin_install zsh_cmp_install {{DOC3_IF}}doc_install{{DOC3_ENDIF}} {{I18N3_IF}}mo_install{{I18N3_ENDIF}}
 
 bin_install: ceccomp $(BUILD_DIR)/ceccomp
 	$Q$(call ECHO_NOPROG,INSTALL,$< $(BIN_DIR))
@@ -179,7 +165,7 @@ MAN_CHN_DST ?= $(MAN_DIR)/zh_CN/man1
 DOC_INSTALL_DIR ?= {{DOCDIR}}
 HTML_DST ?= $(DOC_INSTALL_DIR)/html
 
-doc_install: doc doc_man_install doc_html_install {{I18N2_IF}}doc_man_cn_install{{I18N2_ENDIF}} doc_images_install
+doc_install: doc doc_man_install doc_html_install {{I18N4_IF}}doc_man_cn_install{{I18N4_ENDIF}} doc_images_install
 	$Q$(call ECHO_NOPROG,INSTALL,README.md $(DOC_INSTALL_DIR))
 	$Qinstall -Dm 0644 -t $(DOC_INSTALL_DIR) README.md
 
@@ -202,13 +188,13 @@ doc_images_install: $(IMG_SRCS)
 .PHONY: doc_man_install doc_html_install doc_man_cn_install doc_images_install doc_install 
 {{DOC4_ENDIF}}
 
-{{I18N3_IF}}
+{{I18N5_IF}}
 mo_install: $(MO_ZHCN)
 	$Q$(call ECHO_NOPROG,INSTALL,$< $(LOCALE_DIR))
 	$Qinstall -Dm 0644 $< $(patsubst $(BUILD_DIR)/%.mo,$(LOCALE_DIR)/%/LC_MESSAGES/ceccomp.mo,$<)
 
 .PHONY: mo_install
-{{I18N3_ENDIF}}
+{{I18N5_ENDIF}}
 
 UNINSTALL = test -f $(1) && rm -f $(1) || :
 UNINSTALL_RECURSIVE = test -d $(1) && rm -rf $(1) || :

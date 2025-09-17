@@ -184,13 +184,14 @@ class Makefile:
             self.s = self.s.replace(f'{{{{{placeholder}}}}}', filler) # {{PLACEHOLDER}}
             return
         if isinstance(filler, bool):
+            # automatically loop from 0 to perform substitution
             keep = filler
             i = 0
             while True:
                 if self.s.find(f'{{{{{placeholder}{i}_IF}}}}') == -1:
                     break
                 if keep:
-                    self.s = self.s.replace(f'{{{{{placeholder}{i}_IF}}}}', '')
+                    self.s = self.s.replace(f'{{{{{placeholder}{i}_IF}}}}', '') # {{PLACEHOLDER0_IF}}
                     self.s = self.s.replace(f'{{{{{placeholder}{i}_ENDIF}}}}', '')
                 else:
                     begin = self.s.find(f'{{{{{placeholder}{i}_IF}}}}')
