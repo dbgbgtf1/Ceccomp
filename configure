@@ -188,17 +188,17 @@ class Makefile:
             keep = filler
             i = 0
             while True:
-                if self.s.find(f'{{{{{placeholder}{i}_IF}}}}') == -1:
+                if self.s.find(f'{{{{{placeholder}_IF}}}}') == -1:
                     break
                 if keep:
-                    self.s = self.s.replace(f'{{{{{placeholder}{i}_IF}}}}', '') # {{PLACEHOLDER0_IF}}
-                    self.s = self.s.replace(f'{{{{{placeholder}{i}_ENDIF}}}}', '')
+                    self.s = self.s.replace(f'{{{{{placeholder}_IF}}}}', '') # {{PLACEHOLDER_IF}}
+                    self.s = self.s.replace(f'{{{{{placeholder}_ENDIF}}}}', '')
                 else:
-                    begin = self.s.find(f'{{{{{placeholder}{i}_IF}}}}')
-                    end   = self.s.find(f'{{{{{placeholder}{i}_ENDIF}}}}')
+                    begin = self.s.find(f'{{{{{placeholder}_IF}}}}')
+                    end   = self.s.find(f'{{{{{placeholder}_ENDIF}}}}')
                     assert begin != -1
                     assert end   != -1
-                    end += len(f'{{{{{placeholder}{i}_ENDIF}}}}')
+                    end += len(f'{{{{{placeholder}_ENDIF}}}}')
                     self.s = self.s[:begin] + self.s[end:]
                 i += 1
             return
