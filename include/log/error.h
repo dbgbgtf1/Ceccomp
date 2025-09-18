@@ -78,8 +78,8 @@
 #define CECCOMP_IN_SECCOMP                                                    \
   _("Ceccomp is in seccomp, kernel forbid tracer in seccomp to get tracee "     \
   "filter")
-#define PROCESS_FORK _ ("Process %d spawned a new pid %d\n")
-#define PROCESS_EXIT _ ("Process %d exited\n")
-#define PARSE_PID_BPF _ ("Parsing %d process seccomp\n")
+#define PROCESS_FORK _ ("Process %d spawned a new pid %d")
+#define PROCESS_EXIT _ ("Process %d exited")
+#define PARSE_PID_BPF _ ("Parsing %d process seccomp")
 
 #endif

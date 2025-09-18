@@ -119,7 +119,7 @@ child (char *argv[])
 }
 
 static void
-handle_fork (pid_t pid, int status, FILE *output_fp)
+handle_fork (pid_t pid, int status)
 {
   int event = (status >> 16) & 0xffff;
   if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK
@@ -127,7 +127,7 @@ handle_fork (pid_t pid, int status, FILE *output_fp)
     {
       uint64_t new_pid;
       ptrace (PTRACE_GETEVENTMSG, pid, NULL, &new_pid);
-      fprintf (output_fp, PROCESS_FORK, pid, (pid_t)new_pid);
+      info (PROCESS_FORK, pid, (pid_t)new_pid);
     }
 }
 
@@ -145,7 +145,7 @@ handle_syscall (pid_t pid, FILE *output_fp, bool oneshot)
   seccomp_mode = check_scmp_mode (Info, pid, &prog);
 
   if (seccomp_mode != LOAD_FAIL)
-    fprintf (output_fp, PARSE_PID_BPF, pid);
+    info (PARSE_PID_BPF, pid);
   if (seccomp_mode == SECCOMP_SET_MODE_STRICT)
     mode_strict ();
   else if (seccomp_mode == SECCOMP_SET_MODE_FILTER)
@@ -190,7 +190,7 @@ parent (pid_t child_pid, FILE *output_fp, bool oneshot)
 
       if (WIFEXITED (status) || WIFSIGNALED (status))
         {
-          fprintf (output_fp, PROCESS_EXIT, pid);
+          info (PROCESS_EXIT, pid);
           continue;
         }
 
@@ -207,7 +207,7 @@ parent (pid_t child_pid, FILE *output_fp, bool oneshot)
         }
       else if (sig == SIGTRAP)
         {
-          handle_fork (pid, status, output_fp);
+          handle_fork (pid, status);
           ptrace (PTRACE_SYSCALL, pid, 0, 0);
         }
       else
