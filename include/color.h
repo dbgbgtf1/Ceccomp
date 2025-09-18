@@ -7,10 +7,7 @@
 #define FORMAT "%04d"
 
 extern bool color_enable;
-
-extern void disable_color ();
-
-extern void enable_color ();
+extern bool log_color_enable;
 
 extern void set_color (ceccomp_args *args, FILE *output);
 

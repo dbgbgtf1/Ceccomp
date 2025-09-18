@@ -4,32 +4,32 @@
 #include <unistd.h>
 
 bool color_enable = true;
-
-void
-disable_color ()
-{
-  color_enable = false;
-}
-
-void
-enable_color ()
-{
-  color_enable = true;
-}
+bool log_color_enable = true;
 
 void
 set_color (ceccomp_args *args, FILE *output)
 {
   if (args->color == ALWAYS)
-    enable_color ();
+    {
+      color_enable = true;
+      log_color_enable = true;
+    }
   else if (args->color == NEVER)
-    disable_color ();
+    {
+      color_enable = false;
+      log_color_enable = false;
+    }
 
   else if (args->color == AUTO)
     {
       if (isatty (fileno (output)))
-        enable_color ();
+        color_enable = true;
       else
-        disable_color ();
+        color_enable = false;
+
+      if (isatty (STDERR_FILENO))
+        log_color_enable = true;
+      else
+        log_color_enable = false;
     }
 }

@@ -1,13 +1,21 @@
 #include "log/logger.h"
 #include "color.h"
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
-#define DEBUG_PREFIX "[DEBUG]: "
-#define INFO BLUE ("[INFO]: ")
-#define WARN YELLOW ("[WARN]: ")
-#define ERR RED ("[ERROR]: ")
+#define LOG_CYAN(str) ((log_color_enable) ? (CYANCLR str CLR) : str)
+#define LOG_BLUE(str) ((log_color_enable) ? (BLUECLR str CLR) : str)
+#define LOG_YELLOW(str) ((log_color_enable) ? (YELLOWCLR str CLR) : str)
+#define LOG_RED(str) ((log_color_enable) ? (REDCLR str CLR) : str)
+
+#define DEBUG_PREFIX LOG_CYAN ("[DEBUG]: ")
+#define INFO LOG_BLUE ("[INFO]: ")
+#define WARN LOG_YELLOW ("[WARN]: ")
+#define ERR LOG_RED ("[ERROR]: ")
+
+bool color_tmp;
 
 void
 debug_print (const char *caller_func, char *fmt, ...)

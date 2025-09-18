@@ -12,6 +12,7 @@ Items marked with :star: is the major change why we release a new version.
 * :star: Add support for internationalization/localization :link: [#1]
 * Fix potential misuse of `Info` in trace
 * Improve log system
+* Fix output bug
 
 [#3]: https://github.com/dbgbgtf1/Ceccomp/issues/3
 [#11]: https://github.com/dbgbgtf1/Ceccomp/issues/11
