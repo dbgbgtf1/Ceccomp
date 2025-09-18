@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <sys/prctl.h>
 #include <sys/syscall.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #define ARRAY_SIZE(arr) (sizeof (arr) / sizeof (arr[0]))
@@ -47,7 +48,13 @@ main ()
 {
   perror ("this is stderr msg");
   puts ("this is stdout msg");
-  load_filter ();
+
+  pid_t pid = fork ();
+  if (pid == 0)
+    load_filter ();
+
+  char buf[0x10];
+  read(0, buf, 0x10);
   // scmp_filter_ctx ctx = seccomp_init (SCMP_ACT_ALLOW);
   // seccomp_rule_add (ctx, SCMP_ACT_TRAP, SCMP_SYS (execve), 0);
   // seccomp_rule_add (ctx, SCMP_ACT_LOG, SCMP_SYS (execveat), 0);

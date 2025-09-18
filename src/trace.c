@@ -118,12 +118,48 @@ child (char *argv[])
   exit (0);
 }
 
-static int
-parent (pid_t child_pid, FILE *output_fp, bool oneshot)
+static void
+handle_fork (pid_t pid, int status, FILE *output_fp)
+{
+  int event = (status >> 16) & 0xffff;
+  if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK
+      || event == PTRACE_EVENT_CLONE)
+    {
+      uint64_t new_pid;
+      ptrace (PTRACE_GETEVENTMSG, pid, NULL, &new_pid);
+      fprintf (output_fp, PROCESS_FORK, pid, (pid_t)new_pid);
+    }
+}
+
+static bool
+handle_syscall (pid_t pid, FILE *output_fp, bool oneshot)
 {
   syscall_info Info;
   fprog prog;
   uint32_t seccomp_mode;
+
+  ptrace (PTRACE_GET_SYSCALL_INFO, pid, sizeof (Info), &Info);
+  if (Info.op != PTRACE_SYSCALL_INFO_ENTRY)
+    return false;
+
+  seccomp_mode = check_scmp_mode (Info, pid, &prog);
+
+  if (seccomp_mode != LOAD_FAIL)
+    fprintf (output_fp, PARSE_PID_BPF, pid);
+  if (seccomp_mode == SECCOMP_SET_MODE_STRICT)
+    mode_strict ();
+  else if (seccomp_mode == SECCOMP_SET_MODE_FILTER)
+    mode_filter (&Info, pid, &prog, output_fp);
+
+  if (oneshot && seccomp_mode != LOAD_FAIL)
+    return true;
+
+  return false;
+}
+
+static void
+parent (pid_t child_pid, FILE *output_fp, bool oneshot)
+{
   int status;
 
   waitpid (child_pid, &status, 0);
@@ -146,58 +182,36 @@ parent (pid_t child_pid, FILE *output_fp, bool oneshot)
       pid = waitpid (-1, &status, __WALL);
       if (pid == -1)
         {
-          if (errno == EINTR)
-            continue;
-          else
+          if (errno != EINTR)
             error ("waitpid: %s", strerror (errno));
+          else
+            continue;
         }
+
       if (WIFEXITED (status) || WIFSIGNALED (status))
         {
-          fprintf (output_fp, "Process %d exited\n", pid);
+          fprintf (output_fp, PROCESS_EXIT, pid);
           continue;
         }
 
-      if (WIFSTOPPED (status))
+      if (WIFCONTINUED (status))
+        continue;
+
+      int sig = WSTOPSIG (status);
+
+      if (sig == (SIGTRAP | 0x80))
         {
-          int sig = WSTOPSIG (status);
-
-          if (sig == (SIGTRAP | 0x80))
-            {
-              // 系统调用 stop
-              struct ptrace_syscall_info info;
-              ptrace (PTRACE_GET_SYSCALL_INFO, pid, sizeof (info), &info);
-              if (info.op == PTRACE_SYSCALL_INFO_ENTRY)
-                {
-                  seccomp_mode = check_scmp_mode (&Info, pid, &prog);
-
-                  if (seccomp_mode == LOAD_FAIL)
-                    continue;
-                  if (seccomp_mode == (SECCOMP_SET_MODE_STRICT))
-                    mode_strict ();
-                  else if (seccomp_mode == (SECCOMP_SET_MODE_FILTER))
-                    mode_filter (&Info, pid, &prog, output_fp);
-
-                  if (oneshot)
-                    return status;
-                }
-              ptrace (PTRACE_SYSCALL, pid, 0, 0);
-            }
-          else if (sig == SIGTRAP)
-            {
-              int event = (status >> 16) & 0xffff;
-              if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK
-                  || event == PTRACE_EVENT_CLONE)
-                {
-                  uint64_t new_pid;
-                  ptrace (PTRACE_GETEVENTMSG, pid, NULL, &new_pid);
-                  fprintf (output_fp, "Process %d spawned new pid %lu\n", pid,
-                           new_pid);
-                }
-              ptrace (PTRACE_SYSCALL, pid, 0, 0);
-            }
-          else
-            ptrace (PTRACE_SYSCALL, pid, 0, sig);
+          if (handle_syscall (pid, output_fp, oneshot))
+            return;
+          ptrace (PTRACE_SYSCALL, pid, 0, 0);
         }
+      else if (sig == SIGTRAP)
+        {
+          handle_fork (pid, status, output_fp);
+          ptrace (PTRACE_SYSCALL, pid, 0, 0);
+        }
+      else
+        ptrace (PTRACE_SYSCALL, pid, 0, sig);
     }
 }
 
