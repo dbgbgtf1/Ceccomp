@@ -33,8 +33,8 @@
 static void
 mode_strict ()
 {
-  printf (_ (RED ("Strict Mode Detected?!\n")));
-  printf (_ (RED ("Only read, write, _exit!\n")));
+  printf (RED ("%s\n"), _ ("STRICT MODE DETECTED!"));
+  printf (RED ("%s\n"), _ ("Only read, write, _exit, sigreturn available!"));
 }
 
 static uint64_t

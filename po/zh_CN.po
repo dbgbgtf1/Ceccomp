@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ceccomp 3.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-18 17:03+0800\n"
+"POT-Creation-Date: 2025-09-18 19:25+0800\n"
 "PO-Revision-Date: 2025-09-16 10:37+0800\n"
 "Last-Translator: dbgbgtf1 <dudududumaxver@outlook.com>\n"
 "Language-Team: zh_CN <dudududumaxver@outlook.com>\n"
@@ -301,3 +301,11 @@ msgstr ""
 "pointer)，默认为 0\n"
 "raw, text                        raw 或 text 文件，默认为 stdin。更多细节请查"
 "阅文档\n"
+
+#: ../src/trace.c:36
+msgid "STRICT MODE DETECTED!"
+msgstr "检测到 严格模式 ！"
+
+#: ../src/trace.c:37
+msgid "Only read, write, _exit, sigreturn available!"
+msgstr "只能使用 read, write, _exit, sigreturn 系统调用！"
