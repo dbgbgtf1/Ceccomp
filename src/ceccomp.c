@@ -3,6 +3,8 @@
 #include "color.h"
 #include "disasm.h"
 #include "emu.h"
+#include "log/error.h"
+#include "log/logger.h"
 #include "parseargs.h"
 #include "probe.h"
 #include "trace.h"
@@ -14,6 +16,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/utsname.h>
@@ -26,8 +29,9 @@ init_args (ceccomp_args *args)
 
   args->mode = HELP_ABNORMAL;
   args->arch_token = STR2ARCH (uts_name.machine);
-  args->output_fp = stderr;
   args->read_fp = stdin;
+  args->output_fp = stderr;
+  args->file_name = NULL;
   args->fmt_mode = HEXLINE;
   args->quiet = false;
   args->color = AUTO;
@@ -70,7 +74,7 @@ init_output ()
 int
 main (int argc, char **argv)
 {
-  init_output();
+  init_output ();
 
   ceccomp_args args;
   init_args (&args);
@@ -82,6 +86,13 @@ main (int argc, char **argv)
   uint32_t program_start_idx = -1;
   if (args.mode == TRACE_PROG_MODE || args.mode == PROBE_MODE)
     {
+      if (args.file_name)
+        {
+          args.output_fp = fopen (args.file_name, "w+");
+          free (args.file_name);
+          if (args.output_fp == NULL)
+            error ("%s: %s", UNABLE_OPEN_FILE, args.file_name);
+        }
       program_start_idx = args.program_idx;
       set_color (&args, args.output_fp);
     }

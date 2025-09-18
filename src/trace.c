@@ -176,15 +176,13 @@ parent (pid_t child_pid, FILE *output_fp, bool oneshot)
   // clang-format on
 
   ptrace (PTRACE_SYSCALL, child_pid, 0, 0);
-
   while (1)
     {
-      pid_t pid;
-      pid = waitpid (-1, &status, __WALL);
+      pid_t pid = waitpid (-1, &status, __WALL);
       if (pid == -1)
         {
-          if (errno != EINTR)
-            error ("waitpid: %s", strerror (errno));
+          if (errno == ECHILD)
+            exit (0);
           else
             continue;
         }
@@ -199,7 +197,6 @@ parent (pid_t child_pid, FILE *output_fp, bool oneshot)
         continue;
 
       int sig = WSTOPSIG (status);
-
       if (sig == (SIGTRAP | 0x80))
         {
           if (handle_syscall (pid, output_fp, oneshot))

@@ -44,13 +44,14 @@ load_filter ()
 int
 main ()
 {
-  fork ();
-  load_filter ();
-
-  char buf[0x10];
-  read (0, buf, 0x10);
-  // scmp_filter_ctx ctx = seccomp_init (SCMP_ACT_ALLOW);
-  // seccomp_rule_add (ctx, SCMP_ACT_TRAP, SCMP_SYS (execve), 0);
-  // seccomp_rule_add (ctx, SCMP_ACT_LOG, SCMP_SYS (execveat), 0);
-  // seccomp_load (ctx);
+  pid_t pid = fork ();
+  if (pid != 0)
+    load_filter ();
+  else
+    {
+      scmp_filter_ctx ctx = seccomp_init (SCMP_ACT_ALLOW);
+      seccomp_rule_add (ctx, SCMP_ACT_TRAP, SCMP_SYS (execve), 0);
+      seccomp_rule_add (ctx, SCMP_ACT_LOG, SCMP_SYS (execveat), 0);
+      seccomp_load (ctx);
+    }
 }

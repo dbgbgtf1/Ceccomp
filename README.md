@@ -20,7 +20,7 @@ Clone the whole repo, then run `./configure`.
 git clone https://github.com/dbgbgtf1/Ceccomp.git
 cd Ceccomp
 ./configure
-./configure # run this when Makefile is not generated
+./configure # run this again when Makefile is not generated
 make
 make install # install at /usr/bin
 ```

@@ -176,12 +176,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
       args_ptr->color = parse_color_mode (arg);
       return 0;
     case 'o':
-      if (args_ptr->mode == TRACE_PROG_MODE || args_ptr->mode == PROBE_MODE)
-        {
-          args_ptr->output_fp = fopen (arg, "w+");
-          if (args_ptr->output_fp == NULL)
-            error ("%s: %s", UNABLE_OPEN_FILE, arg);
-        }
+      args_ptr->file_name = strdup (arg);
       return 0;
     case 'a':
       args_ptr->arch_token = STR2ARCH (arg);

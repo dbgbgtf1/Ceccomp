@@ -39,8 +39,9 @@ struct ceccomp_args
   subcommand mode;
 
   uint32_t arch_token;
-  FILE *output_fp;
   FILE *read_fp;
+  FILE *output_fp;
+  char *file_name;
 
   print_mode fmt_mode;
 
