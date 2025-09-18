@@ -227,7 +227,7 @@ $(BUILD_DIR)/ceccomp: $(OBJS) $(CECCOMP_MAIN) | $(MARK)
 test: $(BUILD_DIR)/test
 	$Q$(call ECHO_NOPROG,$(GREEN)BUILT,$@$(RESET))
 
-$(BUILD_DIR)/test: $(TEST_OBJS) $(MARK)
+$(BUILD_DIR)/test: $(TEST_OBJS) | $(MARK)
 	$Q$(call ECHO,LD,$@)
 	$Q$(CC) $(LDFLAGS) $^ -o $@
 
