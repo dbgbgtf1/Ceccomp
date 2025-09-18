@@ -1,7 +1,7 @@
 #include "i18n.h"
 #define ASM_HINT "ceccomp asm     [ -c WHEN ] [ -a ARCH ] [ -f FMT ] [ text ]"
 
-#define DISASM_HINT "disasm  [ -c WHEN ] [ -a ARCH ] [ raw ]"
+#define DISASM_HINT "ceccomp disasm  [ -c WHEN ] [ -a ARCH ] [ raw ]"
 
 #define EMU_HINT                                                              \
   "ceccomp emu     [ -c WHEN ] [ -a ARCH ] [ -q ] text syscall_nr [ "         \
