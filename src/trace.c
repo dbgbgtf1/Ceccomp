@@ -28,8 +28,7 @@
 #include <unistd.h>
 // clang-format on
 
-#define LOAD_SUCCESS 0x0
-#define LOAD_FAIL 0x80000000
+#define LOAD_FAIL 2
 
 static void
 mode_strict ()
@@ -49,7 +48,7 @@ check_scmp_mode (syscall_info *Info, int pid, fprog *prog)
 
   if (nr == (uint64_t)seccomp_syscall_resolve_name_arch (arch, "seccomp")
       && (arg0 == SECCOMP_SET_MODE_FILTER || arg0 == SECCOMP_MODE_STRICT))
-    seccomp_mode = arg0 | LOAD_SUCCESS;
+    seccomp_mode = arg0;
   else if (nr == (uint64_t)seccomp_syscall_resolve_name_arch (arch, "prctl")
            && arg0 == PR_SET_SECCOMP)
     {
@@ -59,7 +58,7 @@ check_scmp_mode (syscall_info *Info, int pid, fprog *prog)
         arg1 = SECCOMP_SET_MODE_FILTER;
       // prctl use different macros
       // transfer it to seccomp macros
-      seccomp_mode = arg1 | LOAD_SUCCESS;
+      seccomp_mode = arg1;
     }
   else
     return seccomp_mode;
@@ -172,12 +171,11 @@ parent (pid_t child_pid, FILE *output_fp, bool oneshot)
                 {
                   seccomp_mode = check_scmp_mode (&Info, pid, &prog);
 
-                  if ((seccomp_mode & LOAD_FAIL) != 0)
+                  if (seccomp_mode == LOAD_FAIL)
                     continue;
-                  if (seccomp_mode == (SECCOMP_SET_MODE_STRICT | LOAD_SUCCESS))
+                  if (seccomp_mode == (SECCOMP_SET_MODE_STRICT))
                     mode_strict ();
-                  else if (seccomp_mode
-                           == (SECCOMP_SET_MODE_FILTER | LOAD_SUCCESS))
+                  else if (seccomp_mode == (SECCOMP_SET_MODE_FILTER))
                     mode_filter (&Info, pid, &prog, output_fp);
 
                   if (oneshot)
