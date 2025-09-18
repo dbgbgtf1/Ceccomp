@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ceccomp 3.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-18 19:25+0800\n"
+"POT-Creation-Date: 2025-09-18 19:41+0800\n"
 "PO-Revision-Date: 2025-09-16 10:37+0800\n"
 "Last-Translator: dbgbgtf1 <dudududumaxver@outlook.com>\n"
 "Language-Team: zh_CN <dudududumaxver@outlook.com>\n"
@@ -248,7 +248,11 @@ msgstr "可能缺少 CAP_SYS_ADMIN 权能或 ceccomp 处于 seccomp 模式"
 msgid "No seccomp filters found in pid %d\n"
 msgstr "在 pid %d 中没有找到 seccomp 过滤器\n"
 
-#: ../include/help.h:22
+#: ../include/help.h:2
+msgid "Usage: ceccomp <subcommand> <args> <options>\n"
+msgstr "用法： ceccomp <子命令> <参数> <选项>\n"
+
+#: ../include/help.h:23
 msgid ""
 "asm      -- Assemble bpf text to raw bytes\n"
 "disasm   -- Disassemble raw bytes to bpf text\n"
@@ -268,7 +272,7 @@ msgstr ""
 "trace    -- 运行程序或追踪指定 pid，提取 bpf 过滤器，并打印 text 结果\n"
 "version  -- 显示 ceccomp 版本\n"
 
-#: ../include/help.h:34
+#: ../include/help.h:35
 msgid ""
 "Options:\n"
 "-a, --arch (x86_64|aarch64|...)  Which architecture to resolve syscall_nr, "
