@@ -16,7 +16,7 @@
   " " STR_ARCH_PARISC64 " " STR_ARCH_PPC64 " " STR_ARCH_PPC                   \
   " " STR_ARCH_PPC64LE " " STR_ARCH_S390X " " STR_ARCH_S390                   \
   " " STR_ARCH_RISCV64
-#define INVALID_SYSNR _ ("Invalid syscall nr")
+#define INVALID_SYSNR _ ("Invalid syscall_nr")
 #define INVALID_SYS_ARGS _ ("Invalid syscall args")
 #define INVALID_IP _ ("Invalid instruction pointer")
 #define INVALID_PID _ ("Invalid pid")
@@ -24,8 +24,8 @@
 
 // text->raw err
 #define INVALID_OPERATOR _ ("Invalid operator")
-#define INPOSSIBLE_CMP_ENUM _ ("Inpossible cmp sym enum")
-#define INPOSSIBLE_ALU_ENUM _ ("Inpossible alu sym enum")
+#define INPOSSIBLE_CMP_ENUM _ ("Impossible cmp sym enum")
+#define INPOSSIBLE_ALU_ENUM _ ("Impossible alu sym enum")
 
 #define INVALID_RIGHT_VAL _ ("Invalid right value")
 #define INVALID_LEFT_VAR _ ("Invalid left valiable")
@@ -76,7 +76,8 @@
 
 // trace pid
 #define PROCFS_NOT_ACCESSIBLE _ ("Procfs not accessible, unable to perform")
-#define ACTION_PTRACE_SEIZE _ ("ptrace seizing")
+// no translation due to terms
+#define ACTION_PTRACE_SEIZE "ptrace seizing"
 #define REQUIRE_CAP_SYS_PTRACE                                                \
   _ ("Run with CAP_SYS_PTRACE capability to seize a foreign process")
 #define SEIZING_KERNEL_THREAD _ ("Kernel thread can not be seized")
@@ -85,14 +86,14 @@
 #define NO_SUCH_PROCESS _ ("No such process with pid %d in the system")
 #define NOT_AN_CBPF _ ("Non-cbpf found, can't resolve, but continue")
 
-#define ACTION_GET_FILTER _ ("ptrace get seccomp filters")
+// no translation due to terms
+#define ACTION_GET_FILTER "ptrace get seccomp filters"
 #define GET_FILTER_UNSUPPORTED_OR_NO_FILTER                                   \
-  _ ("perhaps PTRACE_GET_SECCOMP_FILTER is unsupported or no seccomp filter " \
+  _ ("perhaps PTRACE_GET_SECCOMP_FILTER is not supported or no seccomp filter " \
      "in target process")
 #define GET_FILTER_UNSUPPORTED                                                \
-  _ ("PTRACE_GET_SECCOMP_FILTER is not unsupported on your system")
+  _ ("PTRACE_GET_SECCOMP_FILTER is not supported on your system")
 #define POSSIBLE_ERRORS _ ("Error cause unknown, due to the followings")
-#define TRACEE_STRICT _ ("tracee in strict mode")
 #define CECCOMP_IN_SECCOMP                                                    \
   _ ("Ceccomp is in seccomp mode, fetch seccomp filters of other process is " \
      "not permitted")

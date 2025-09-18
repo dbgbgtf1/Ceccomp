@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-16 10:40+0800\n"
+"POT-Creation-Date: 2025-09-18 17:04+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,196 +17,237 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: include/log/error.h:9
+#: ../include/log/error.h:6
 msgid "Unable to open file"
 msgstr ""
 
-#: include/log/error.h:10
+#: ../include/log/error.h:7
 msgid "Invalid arch"
 msgstr ""
 
-#: include/log/error.h:11
+#: ../include/log/error.h:8
 msgid "Invalid print mode"
 msgstr ""
 
-#: include/log/error.h:12
+#: ../include/log/error.h:9
 msgid "Invalid color mode"
 msgstr ""
 
-#: include/log/error.h:22
-msgid "Invalid syscall nr"
+#: ../include/log/error.h:19
+msgid "Invalid syscall_nr"
 msgstr ""
 
-#: include/log/error.h:23
+#: ../include/log/error.h:20
 msgid "Invalid syscall args"
 msgstr ""
 
-#: include/log/error.h:24
+#: ../include/log/error.h:21
 msgid "Invalid instruction pointer"
 msgstr ""
 
-#: include/log/error.h:25
+#: ../include/log/error.h:22
 msgid "Invalid pid"
 msgstr ""
 
-#: include/log/error.h:26
+#: ../include/log/error.h:23
 msgid "Please input syscall_nr to emu"
 msgstr ""
 
-#: include/log/error.h:29
+#: ../include/log/error.h:26
 msgid "Invalid operator"
 msgstr ""
 
-#: include/log/error.h:30
-msgid "Inpossible cmp sym enum"
+#: ../include/log/error.h:27
+msgid "Impossible cmp sym enum"
 msgstr ""
 
-#: include/log/error.h:31
-msgid "Inpossible alu sym enum"
+#: ../include/log/error.h:28
+msgid "Impossible alu sym enum"
 msgstr ""
 
-#: include/log/error.h:33
+#: ../include/log/error.h:30
 msgid "Invalid right value"
 msgstr ""
 
-#: include/log/error.h:34
+#: ../include/log/error.h:31
 msgid "Invalid left valiable"
 msgstr ""
 
-#: include/log/error.h:36
+#: ../include/log/error.h:33
 msgid "Invalid idx of $mem"
 msgstr ""
 
-#: include/log/error.h:37
+#: ../include/log/error.h:34
 msgid "Invalid mem statement"
 msgstr ""
 
-#: include/log/error.h:39
+#: ../include/log/error.h:36
 msgid "Invalid if line"
 msgstr ""
 
-#: include/log/error.h:40
+#: ../include/log/error.h:37
 msgid "Invalid return line"
 msgstr ""
 
-#: include/log/error.h:41
+#: ../include/log/error.h:39
 msgid "Missing parentheses in return data, example: ERRNO(2)"
 msgstr ""
 
-#: include/log/error.h:42
+#: ../include/log/error.h:40
 msgid "Invalid return data"
 msgstr ""
 
-#: include/log/error.h:44
+#: ../include/log/error.h:43
 msgid "Use parentheses to wrap condition, example: (condition)"
 msgstr ""
 
-#: include/log/error.h:45
+#: ../include/log/error.h:44
 msgid "Use 'goto' after (condition)"
 msgstr ""
 
-#: include/log/error.h:47
+#: ../include/log/error.h:46
 msgid "Line number to go after 'goto'"
 msgstr ""
 
-#: include/log/error.h:48
+#: ../include/log/error.h:47
 msgid "Line number to go after ',else goto'"
 msgstr ""
 
-#: include/log/error.h:49
+#: ../include/log/error.h:48
 msgid "Invalid line number after goto"
 msgstr ""
 
-#: include/log/error.h:50
+#: ../include/log/error.h:49
 msgid "Invalid jmp line number"
 msgstr ""
 
-#: include/log/error.h:51
+#: ../include/log/error.h:50
 msgid "Invalid asm code"
 msgstr ""
 
-#: include/log/error.h:52
+#: ../include/log/error.h:51
 msgid "Invalid return value"
 msgstr ""
 
-#: include/log/error.h:55
+#: ../include/log/error.h:54
 msgid "Invalid offset of seccomp_data"
 msgstr ""
 
-#: include/log/error.h:56
+#: ../include/log/error.h:55
 msgid "Store mem before ld or ldx"
 msgstr ""
 
-#: include/log/error.h:57
+#: ../include/log/error.h:56
 msgid "Jt and jf both 0"
 msgstr ""
 
-#: include/log/error.h:60
+#: ../include/log/error.h:59
 msgid "Alu div by zero"
 msgstr ""
 
-#: include/log/error.h:61
+#: ../include/log/error.h:60
 msgid "Alu lsh or rsh out of range"
 msgstr ""
 
-#: include/log/error.h:62
+#: ../include/log/error.h:61
 msgid "Jmp out of bpf len"
 msgstr ""
 
-#: include/log/error.h:63
+#: ../include/log/error.h:62
 msgid "Bpf filter must end with return"
 msgstr ""
 
-#: include/log/error.h:64
+#: ../include/log/error.h:63
 msgid "Invalid opertion"
 msgstr ""
 
-#: include/log/error.h:67
+#: ../include/log/error.h:66
 msgid ""
 "The above code has errors, please check the warnings for specific details"
 msgstr ""
 
-#: include/log/error.h:71
-msgid ""
-"Run with CAP_SYS_ADMIN capability when trace pid\n"
-"and kernel pid can't be trace"
+#: ../include/log/error.h:71
+msgid "execv failed executing"
 msgstr ""
 
-#: include/log/error.h:73
+#: ../include/log/error.h:72
+msgid "tracee syscall should be exiting here"
+msgstr ""
+
+#: ../include/log/error.h:73
+#, c-format
+msgid "Process %d spawned a new pid %d"
+msgstr ""
+
+#: ../include/log/error.h:74
+#, c-format
+msgid "Process %d exited"
+msgstr ""
+
+#: ../include/log/error.h:75
+#, c-format
+msgid "Parsing %d process seccomp"
+msgstr ""
+
+#: ../include/log/error.h:78
+msgid "Procfs not accessible, unable to perform"
+msgstr ""
+
+#: ../include/log/error.h:82
+msgid "Run with CAP_SYS_PTRACE capability to seize a foreign process"
+msgstr ""
+
+#: ../include/log/error.h:83
+msgid "Kernel thread can not be seized"
+msgstr ""
+
+#: ../include/log/error.h:85
+msgid "perhaps seizing kthread or lacking CAP_SYS_PTRACE"
+msgstr ""
+
+#: ../include/log/error.h:86
 #, c-format
 msgid "No such process with pid %d in the system"
 msgstr ""
 
-#: include/log/error.h:74
+#: ../include/log/error.h:87
 msgid "Non-cbpf found, can't resolve, but continue"
 msgstr ""
 
-#: include/log/error.h:75
-msgid "execv failed executing"
+#: ../include/log/error.h:92
+msgid ""
+"perhaps PTRACE_GET_SECCOMP_FILTER is not supported or no seccomp filter in "
+"target process"
 msgstr ""
 
-#: include/log/error.h:76
-msgid "tracee syscall should be exiting here"
+#: ../include/log/error.h:95
+msgid "PTRACE_GET_SECCOMP_FILTER is not supported on your system"
 msgstr ""
 
-#: include/log/error.h:78
-msgid "PTRACE_SECCOMP_GET_FILTER is not supported on your system"
-msgstr ""
-
-#: include/log/error.h:79
+#: ../include/log/error.h:96
 msgid "Error cause unknown, due to the followings"
 msgstr ""
 
-#: include/log/error.h:80
-msgid "tracee in strict mode"
-msgstr ""
-
-#: include/log/error.h:82
+#: ../include/log/error.h:98
 msgid ""
-"Ceccomp is in seccomp, kernel forbid tracer in seccomp to get tracee filter"
+"Ceccomp is in seccomp mode, fetch seccomp filters of other process is not "
+"permitted"
 msgstr ""
 
-#: include/help.h:21
+#: ../include/log/error.h:102
+msgid "Run with CAP_SYS_ADMIN capability to fetch seccomp filters"
+msgstr ""
+
+#: ../include/log/error.h:104
+msgid "perhaps lacking CAP_SYS_ADMIN or ceccomp is in seccomp mode"
+msgstr ""
+
+#: ../include/log/error.h:106
+#, c-format
+msgid "No seccomp filters found in pid %d\n"
+msgstr ""
+
+#: ../include/help.h:22
 msgid ""
 "asm      -- Assemble bpf text to raw bytes\n"
 "disasm   -- Disassemble raw bytes to bpf text\n"
@@ -219,7 +260,7 @@ msgid ""
 "version  -- Display ceccomp version\n"
 msgstr ""
 
-#: include/help.h:33
+#: ../include/help.h:34
 msgid ""
 "Options:\n"
 "-a, --arch (x86_64|aarch64|...)  Which architecture to resolve syscall_nr, "
