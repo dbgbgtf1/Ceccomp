@@ -6,6 +6,16 @@ Items marked with :star: is the major change why we release a new version.
 <!-- write user/repo#num or user/repo!num to reference. Then run scripts/complete-url.py -->
 <!-- to format raw ref to URL. -->
 
+## 3.1 (INCOMING)
+* :star: Add support for multiple process tracing :link: [#3]
+* :star: Cover all cases of trace pid errors :link: [#11]
+* :star: Add support for internationalization/localization :link: [#1]
+* Fix potential misuse of `Info` in trace
+* Improve log system
+
+[#3]: https://github.com/dbgbgtf1/Ceccomp/issues/3
+[#11]: https://github.com/dbgbgtf1/Ceccomp/issues/11
+[#1]: https://github.com/dbgbgtf1/Ceccomp/issues/1
 ## 3.0
 * **BREAKING** Remove `-o FILE` for `trace` pid mode
 * :star: Add doc system powered by *asciidoc* :link: [#2]
