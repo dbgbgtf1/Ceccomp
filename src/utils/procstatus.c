@@ -30,8 +30,7 @@ get_proc_seccomp (pid_t pid)
     {
       if (STARTWITH (line, SECCOMP))
         {
-          line += strlen (SECCOMP);
-          mode = strtoull (line, &end, 10);
+          mode = strtoull (line + strlen(SECCOMP), &end, 10);
 
           if (end == line)
             return error;
