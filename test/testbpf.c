@@ -39,22 +39,16 @@ load_filter ()
       = { .len = ARRAY_SIZE (f) / sizeof (filter), .filter = (filter *)f };
 
   syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, NULL, &prog);
-
-  write (1, "this is program output\n", 24);
 }
 
 int
 main ()
 {
-  perror ("this is stderr msg");
-  puts ("this is stdout msg");
-
-  pid_t pid = fork ();
-  if (pid == 0)
-    load_filter ();
+  fork ();
+  load_filter ();
 
   char buf[0x10];
-  read(0, buf, 0x10);
+  read (0, buf, 0x10);
   // scmp_filter_ctx ctx = seccomp_init (SCMP_ACT_ALLOW);
   // seccomp_rule_add (ctx, SCMP_ACT_TRAP, SCMP_SYS (execve), 0);
   // seccomp_rule_add (ctx, SCMP_ACT_LOG, SCMP_SYS (execveat), 0);

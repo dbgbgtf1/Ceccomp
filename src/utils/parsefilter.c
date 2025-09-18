@@ -395,6 +395,7 @@ parse_filter (uint32_t arch_token, fprog *sock_prog, FILE *output_fp)
       fprintf (s_output_fp, "\n");
     }
   fprintf (s_output_fp, "---------------------------------\n");
+  parse_idx = 0;
 
   if (error_happen == true)
     warn ("%s", ERROR_HAPPEN);

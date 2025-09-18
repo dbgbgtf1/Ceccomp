@@ -104,6 +104,7 @@ mode_filter (syscall_info *Info, int pid, fprog *prog, FILE *output_fp)
   dump_filter (Info, pid, prog);
   parse_filter (Info->arch, prog, output_fp);
   free (prog->filter);
+  prog->filter = 0;
 }
 
 __attribute__ ((noreturn)) static void
