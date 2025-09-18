@@ -33,8 +33,8 @@
 static void
 mode_strict ()
 {
-  printf (RED ("Strict Mode Detected?!\n"));
-  printf (RED ("Only read, write, _exit!\n"));
+  printf (_ (RED ("Strict Mode Detected?!\n")));
+  printf (_ (RED ("Only read, write, _exit!\n")));
 }
 
 static uint64_t
@@ -242,30 +242,49 @@ program_trace (char *argv[], FILE *output_fp, bool oneshot)
     parent (pid, output_fp, oneshot);
 }
 
+__attribute__ ((noreturn)) static void
+eperm_seize (pid_t pid)
+{
+  // seizing a thread in the same thread group may cause EPERM
+  // but that will probably not happen
+  seccomp_mode mode = is_proc_kthread (pid);
+  if (mode == PROCFS_ERROR)
+    error ("%s %s, %s", PROCFS_NOT_ACCESSIBLE, ACTION_PTRACE_SEIZE,
+           CAP_SYS_PTRACE_OR_KTHREAD);
+  if (mode == STATUS_NONE) // no CAP_SYS_PTRACE
+    error ("%s", REQUIRE_CAP_SYS_PTRACE);
+  // mode == STATUS_KTHREAD
+  error ("%s", SEIZING_KERNEL_THREAD);
+}
+
 static void
 einval_get_filter (pid_t pid)
 {
   seccomp_mode mode = get_proc_seccomp (pid);
-  if (mode == error)
-    error ("ptrace: %s\n%s\n%s", POSSIBLE_ERRORS, TRACEE_STRICT,
-           TRACE_PID_UNSUPPORTED);
-  if (mode == strict_mode)
-    mode_strict ();
-  else if (mode == filter_mode)
-    error ("ptrace: %s", TRACE_PID_UNSUPPORTED);
+  if (mode == PROCFS_ERROR)
+    error ("%s %s, %s", PROCFS_NOT_ACCESSIBLE, ACTION_GET_FILTER,
+           GET_FILTER_UNSUPPORTED_OR_NO_FILTER);
+  if (mode == STATUS_STRICT_MODE)
+    {
+      mode_strict ();
+      exit (0);
+    }
+  else if (mode == STATUS_FILTER_MODE)
+    error ("%s", GET_FILTER_UNSUPPORTED);
+  // if mode == STATUS_NONE, return to print "no filters found"
 }
 
 __attribute__ ((noreturn)) static void
 eacces_get_filter (pid_t pid)
 {
   seccomp_mode mode = get_proc_seccomp (pid);
-  if (mode == error)
-    error ("ptrace: %s\n%s\n%s", POSSIBLE_ERRORS, CECCOMP_IN_SECCOMP,
-           SYS_ADMIN_OR_KERNEL);
-  if (mode != none)
-    error ("ptrace: %s", CECCOMP_IN_SECCOMP);
+  if (mode == PROCFS_ERROR)
+    error ("%s %s, %s", PROCFS_NOT_ACCESSIBLE, ACTION_GET_FILTER,
+           CAP_SYS_ADMIN_OR_IN_SECCOMP);
+  if (mode == STATUS_NONE)
+    error ("%s", REQUIRE_CAP_SYS_ADMIN);
   else
-    error ("%s", SYS_ADMIN_OR_KERNEL);
+    error ("%s", CECCOMP_IN_SECCOMP);
 }
 
 // return true means continue
@@ -303,7 +322,7 @@ pid_trace (int pid, uint32_t arch)
       switch (errno)
         {
         case EPERM:
-          error ("%s", SYS_ADMIN_OR_KERNEL);
+          eperm_seize (pid);
         case ESRCH:
           error (NO_SUCH_PROCESS, pid);
         default:
@@ -332,7 +351,7 @@ pid_trace (int pid, uint32_t arch)
   while (true);
 
   if (prog_idx == 0)
-    printf ("All filter printed\n");
+    printf (NO_FILTER_FOUND, pid);
   ptrace (PTRACE_DETACH, pid, 0, 0);
   free (prog.filter);
 }
