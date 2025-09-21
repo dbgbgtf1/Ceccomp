@@ -10,9 +10,11 @@ Items marked with :star: is the major change why we release a new version.
 * :star: Add support for multiple process tracing :link: [#3]
 * :star: Cover all cases of trace pid errors :link: [#11]
 * :star: Add support for internationalization/localization :link: [#1]
+* :star: Fix `ld` error when compiling on Kali Linux
 * Fix potential misuse of `Info` in trace
-* Improve log system
-* Fix output bug
+* Improve log system and related color management
+* Fix output file may not be opened correctly
+* Add a GitHub action to issue new release easily
 
 [#3]: https://github.com/dbgbgtf1/Ceccomp/issues/3
 [#11]: https://github.com/dbgbgtf1/Ceccomp/issues/11
