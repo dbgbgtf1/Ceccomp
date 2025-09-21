@@ -1,0 +1,29 @@
+name: New Release
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+      - name: Find the latest tag
+        run: |
+          git fetch --tags
+          LATEST_TAG=$(git describe --tags $(git rev-list --tags --max-count=1))
+          echo "The latest tag is:" $LATEST_TAG
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+      - name: Generate Changelog
+        run: |
+          echo "# What changed" > ${{ github.workspace }}-CHANGELOG.md
+          python3 scripts/release-changelog.py $LATEST_TAG >> ${{ github.workspace }}-CHANGELOG.md
+      - name: Preview Changelog
+        run: cat ${{ github.workspace }}-CHANGELOG.md
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: ${{ github.workspace }}-CHANGELOG.md
+          repository: RocketMaDev/Ceccomp
+          tag_name: ${{ env.LATEST_TAG }}
+          token: ${{ secrets.GITHUB_TOKEN }}
