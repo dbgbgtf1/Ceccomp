@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-18 19:41+0800\n"
+"POT-Creation-Date: 2025-09-22 14:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -193,56 +193,61 @@ msgstr ""
 msgid "Procfs not accessible, unable to perform"
 msgstr ""
 
-#: ../include/log/error.h:82
-msgid "Run with CAP_SYS_PTRACE capability to seize a foreign process"
+#: ../include/log/error.h:79
+#, c-format
+msgid "Target process is being traced by %d pid process"
 msgstr ""
 
 #: ../include/log/error.h:83
+msgid "Run with CAP_SYS_PTRACE capability to seize a foreign process"
+msgstr ""
+
+#: ../include/log/error.h:84
 msgid "Kernel thread can not be seized"
 msgstr ""
 
-#: ../include/log/error.h:85
+#: ../include/log/error.h:86
 msgid "perhaps seizing kthread or lacking CAP_SYS_PTRACE"
 msgstr ""
 
-#: ../include/log/error.h:86
+#: ../include/log/error.h:87
 #, c-format
 msgid "No such process with pid %d in the system"
 msgstr ""
 
-#: ../include/log/error.h:87
+#: ../include/log/error.h:88
 msgid "Non-cbpf found, can't resolve, but continue"
 msgstr ""
 
-#: ../include/log/error.h:92
+#: ../include/log/error.h:93
 msgid ""
 "perhaps PTRACE_GET_SECCOMP_FILTER is not supported or no seccomp filter in "
 "target process"
 msgstr ""
 
-#: ../include/log/error.h:95
+#: ../include/log/error.h:97
 msgid "PTRACE_GET_SECCOMP_FILTER is not supported on your system"
 msgstr ""
 
-#: ../include/log/error.h:96
+#: ../include/log/error.h:98
 msgid "Error cause unknown, due to the followings"
 msgstr ""
 
-#: ../include/log/error.h:98
+#: ../include/log/error.h:100
 msgid ""
 "Ceccomp is in seccomp mode, fetch seccomp filters of other process is not "
 "permitted"
 msgstr ""
 
-#: ../include/log/error.h:102
+#: ../include/log/error.h:104
 msgid "Run with CAP_SYS_ADMIN capability to fetch seccomp filters"
 msgstr ""
 
-#: ../include/log/error.h:104
+#: ../include/log/error.h:106
 msgid "perhaps lacking CAP_SYS_ADMIN or ceccomp is in seccomp mode"
 msgstr ""
 
-#: ../include/log/error.h:106
+#: ../include/log/error.h:108
 #, c-format
 msgid "No seccomp filters found in pid %d\n"
 msgstr ""
@@ -283,10 +288,10 @@ msgid ""
 "detail, default as stdin\n"
 msgstr ""
 
-#: ../src/trace.c:36
+#: ../src/trace.c:37
 msgid "STRICT MODE DETECTED!"
 msgstr ""
 
-#: ../src/trace.c:37
+#: ../src/trace.c:38
 msgid "Only read, write, _exit, sigreturn available!"
 msgstr ""

@@ -75,10 +75,8 @@
 #define PARSE_PID_BPF _ ("Parsing %d process seccomp")
 
 // trace pid
-#define CONFIG_NOT_ENABLED                                                    \
-  _ ("Config seccomp or checkpoint restore is not enabled")
 #define PROCFS_NOT_ACCESSIBLE _ ("Procfs not accessible, unable to perform")
-#define TARGET_TRACED_BY _ ("Target process traced by %d pid process")
+#define TARGET_TRACED_BY _ ("Target process is being traced by %d pid process")
 // no translation due to terms
 #define ACTION_PTRACE_SEIZE "ptrace seizing"
 #define REQUIRE_CAP_SYS_PTRACE                                                \

@@ -1,20 +1,22 @@
 # localization for ceccomp in Chinese simplified.
 # Copyright (C) 2025-present ceccomp contributors
 # This file is distributed under the same license as the ceccomp package.
-# dbgbgtf1 <dudududumaxver@outlook.com>
+# SPDX-FileCopyrightText: 2025 dbgbgtf 1
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: ceccomp 3.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-18 19:41+0800\n"
-"PO-Revision-Date: 2025-09-16 10:37+0800\n"
-"Last-Translator: dbgbgtf1 <dudududumaxver@outlook.com>\n"
-"Language-Team: zh_CN <dudududumaxver@outlook.com>\n"
+"POT-Creation-Date: 2025-09-22 14:42+0800\n"
+"PO-Revision-Date: 2025-09-22 14:45+0800\n"
+"Last-Translator: dbgbgtf <dudududumaxver@outlook.com>\n"
+"Language-Team: Chinese <kde-i18n-doc@kde.org>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+"X-Generator: Lokalize 25.08.1\n"
 
 #: ../include/log/error.h:6
 msgid "Unable to open file"
@@ -192,28 +194,33 @@ msgstr "正在解析 %d 进程的 seccomp"
 msgid "Procfs not accessible, unable to perform"
 msgstr "Procfs 无法访问，无法执行"
 
-#: ../include/log/error.h:82
+#: ../include/log/error.h:79
+#, c-format
+msgid "Target process is being traced by %d pid process"
+msgstr "目标进程正在被 %d 进程所追踪"
+
+#: ../include/log/error.h:83
 msgid "Run with CAP_SYS_PTRACE capability to seize a foreign process"
 msgstr "以 CAP_SYS_PTRACE 权能运行来附加到一个外部进程"
 
-#: ../include/log/error.h:83
+#: ../include/log/error.h:84
 msgid "Kernel thread can not be seized"
 msgstr "内核线程不能被附加"
 
-#: ../include/log/error.h:85
+#: ../include/log/error.h:86
 msgid "perhaps seizing kthread or lacking CAP_SYS_PTRACE"
 msgstr "可能正在附加到内核线程或缺少 CAP_SYS_PTRACE 权能"
 
-#: ../include/log/error.h:86
+#: ../include/log/error.h:87
 #, c-format
 msgid "No such process with pid %d in the system"
 msgstr "不存在 pid 为 %d 的进程"
 
-#: ../include/log/error.h:87
+#: ../include/log/error.h:88
 msgid "Non-cbpf found, can't resolve, but continue"
 msgstr "发现了无法解析的 non-cbpf，继续"
 
-#: ../include/log/error.h:92
+#: ../include/log/error.h:93
 msgid ""
 "perhaps PTRACE_GET_SECCOMP_FILTER is not supported or no seccomp filter in "
 "target process"
@@ -221,29 +228,29 @@ msgstr ""
 "可能 PTRACE_SECCOMP_GET_FILTER 在您的系统上不支持或目标进程没有 seccomp 过滤"
 "器"
 
-#: ../include/log/error.h:95
+#: ../include/log/error.h:97
 msgid "PTRACE_GET_SECCOMP_FILTER is not supported on your system"
 msgstr "PTRACE_SECCOMP_GET_FILTER 在您的系统上不支持"
 
-#: ../include/log/error.h:96
+#: ../include/log/error.h:98
 msgid "Error cause unknown, due to the followings"
 msgstr "发生未知的错误，由于如下的原因"
 
-#: ../include/log/error.h:98
+#: ../include/log/error.h:100
 msgid ""
 "Ceccomp is in seccomp mode, fetch seccomp filters of other process is not "
 "permitted"
 msgstr "Ceccomp 处在 seccomp 模式，不允许获取其他进程的 seccomp 过滤器"
 
-#: ../include/log/error.h:102
+#: ../include/log/error.h:104
 msgid "Run with CAP_SYS_ADMIN capability to fetch seccomp filters"
 msgstr "以 CAP_SYS_ADMIN 权能运行来获取 seccomp 过滤器"
 
-#: ../include/log/error.h:104
+#: ../include/log/error.h:106
 msgid "perhaps lacking CAP_SYS_ADMIN or ceccomp is in seccomp mode"
 msgstr "可能缺少 CAP_SYS_ADMIN 权能或 ceccomp 处于 seccomp 模式"
 
-#: ../include/log/error.h:106
+#: ../include/log/error.h:108
 #, c-format
 msgid "No seccomp filters found in pid %d\n"
 msgstr "在 pid %d 中没有找到 seccomp 过滤器\n"
@@ -290,7 +297,7 @@ msgid ""
 "raw, text                        File with BPF RAW or BPF TEXT, see docs for "
 "detail, default as stdin\n"
 msgstr ""
-"Options:\n"
+"选项:\n"
 "-a, --arch (x86_64|aarch64|...)  选择哪一个架构来解析 syscall_nr，默认为你的"
 "架构\n"
 "-f, --fmt (hexline|hexfmt|raw)   输出格式, 默认为 hexline\n"
@@ -306,10 +313,10 @@ msgstr ""
 "raw, text                        raw 或 text 文件，默认为 stdin。更多细节请查"
 "阅文档\n"
 
-#: ../src/trace.c:36
+#: ../src/trace.c:37
 msgid "STRICT MODE DETECTED!"
 msgstr "检测到 严格模式 ！"
 
-#: ../src/trace.c:37
+#: ../src/trace.c:38
 msgid "Only read, write, _exit, sigreturn available!"
 msgstr "只能使用 read, write, _exit, sigreturn 系统调用！"
