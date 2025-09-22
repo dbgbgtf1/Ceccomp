@@ -9,8 +9,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 # constants
-VERSION = '3.0'
-TAG_TIME = '2025-09-13'
+VERSION = '3.1'
+TAG_TIME = '2025-09-22'
 
 # color escape code definition
 def TXT_RED(s): return f'\x1b[31m{s}\x1b[0m'
