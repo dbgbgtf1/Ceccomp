@@ -12,26 +12,27 @@
 #define SECCOMP_OFFSET (sizeof (SECCOMP))
 #define KTHREAD "Kthread:"
 #define KTHREAD_OFFSET (sizeof (KTHREAD))
+#define TRACER_PID "TracerPid:"
+#define TRACER_PID_OFFSET (sizeof (TRACER_PID))
 
-// -1 for errors, else return fetched number
 static long
 access_proc_with_key (pid_t pid, const char *comparator, size_t strsize)
 {
-  long value = -1;
+  long value = PROCFS_ERROR;
   char buf[0x40];
   char *end;
   snprintf (buf, 0x40, "/proc/%d/status", pid);
 
   FILE *f = fopen (buf, "r");
   if (f == NULL)
-    return -1;
+    return PROCFS_ERROR;
 
   while (fgets (buf, 0x40, f))
     if (STARTWITH (buf, comparator))
       {
         value = strtoull (buf + strsize, &end, 10);
         if (end == buf + strsize)
-          value = -1;
+          value = PROCFS_ERROR;
         break;
       }
 
@@ -42,20 +43,17 @@ access_proc_with_key (pid_t pid, const char *comparator, size_t strsize)
 seccomp_mode
 get_proc_seccomp (pid_t pid)
 {
-  long ret = access_proc_with_key (pid, SECCOMP, SECCOMP_OFFSET);
-  if (ret == -1)
-    return PROCFS_ERROR;
-  return (seccomp_mode)ret;
+  return access_proc_with_key (pid, SECCOMP, SECCOMP_OFFSET);
 }
 
-seccomp_mode
+kthread_mode
 is_proc_kthread (pid_t pid)
 {
-  long ret = access_proc_with_key (pid, KTHREAD, KTHREAD_OFFSET);
-  if (ret == -1)
-    return PROCFS_ERROR;
-  if (ret == 1)
-    return STATUS_KTHREAD;
-  // ret == 0
-  return STATUS_NONE;
+  return access_proc_with_key (pid, KTHREAD, KTHREAD_OFFSET);
+}
+
+pid_t
+get_tracer_pid (pid_t pid)
+{
+  return access_proc_with_key (pid, TRACER_PID, TRACER_PID_OFFSET);
 }

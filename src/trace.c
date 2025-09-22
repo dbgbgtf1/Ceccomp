@@ -8,6 +8,7 @@
 #include "log/error.h"
 #include <asm-generic/errno-base.h>
 #include <asm-generic/errno.h>
+#include <assert.h>
 #include <complex.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -239,26 +240,11 @@ program_trace (char *argv[], FILE *output_fp, bool oneshot)
     parent (pid, output_fp, oneshot);
 }
 
-__attribute__ ((noreturn)) static void
-eperm_seize (pid_t pid)
-{
-  // seizing a thread in the same thread group may cause EPERM
-  // but that will probably not happen
-  seccomp_mode mode = is_proc_kthread (pid);
-  if (mode == PROCFS_ERROR)
-    error ("%s %s, %s", PROCFS_NOT_ACCESSIBLE, ACTION_PTRACE_SEIZE,
-           CAP_SYS_PTRACE_OR_KTHREAD);
-  if (mode == STATUS_NONE) // no CAP_SYS_PTRACE
-    error ("%s", REQUIRE_CAP_SYS_PTRACE);
-  // mode == STATUS_KTHREAD
-  error ("%s", SEIZING_KERNEL_THREAD);
-}
-
 static void
 einval_get_filter (pid_t pid)
 {
   seccomp_mode mode = get_proc_seccomp (pid);
-  if (mode == PROCFS_ERROR)
+  if ((int)mode == PROCFS_ERROR)
     error ("%s %s, %s", PROCFS_NOT_ACCESSIBLE, ACTION_GET_FILTER,
            GET_FILTER_UNSUPPORTED_OR_NO_FILTER);
   if (mode == STATUS_STRICT_MODE)
@@ -275,7 +261,7 @@ __attribute__ ((noreturn)) static void
 eacces_get_filter (pid_t pid)
 {
   seccomp_mode mode = get_proc_seccomp (pid);
-  if (mode == PROCFS_ERROR)
+  if ((int)mode == PROCFS_ERROR)
     error ("%s %s, %s", PROCFS_NOT_ACCESSIBLE, ACTION_GET_FILTER,
            CAP_SYS_ADMIN_OR_IN_SECCOMP);
   if (mode == STATUS_NONE)
@@ -302,7 +288,42 @@ error_get_filter (pid_t pid, int err)
       warn ("%s", NOT_AN_CBPF);
       return true;
     default:
-      error ("ptrace: %s", strerror (err));
+      error ("trace: %s", strerror (err));
+    }
+}
+
+__attribute__ ((noreturn)) static void
+eperm_seize (pid_t pid)
+{
+  // seizing a thread in the same thread group may cause EPERM
+  // but that will probably not happen
+  kthread_mode mode = is_proc_kthread (pid);
+  if ((int)mode == PROCFS_ERROR)
+    error ("%s %s, %s", PROCFS_NOT_ACCESSIBLE, ACTION_PTRACE_SEIZE,
+           CAP_SYS_PTRACE_OR_KTHREAD);
+  if (mode == STATUS_KTHREAD)
+    error ("%s", SEIZING_KERNEL_THREAD);
+
+  pid_t tracer = get_tracer_pid (pid);
+  assert (tracer != PROCFS_ERROR);
+
+  if (tracer)
+    error (TARGET_TRACED_BY, tracer);
+  else
+    error ("%s", REQUIRE_CAP_SYS_PTRACE);
+  // seize needs CAP_SYS_PTRACE
+  // get_filter needs CAP_SYS_ADMIN
+}
+
+static void
+error_seize (pid_t pid, int err)
+{
+  switch (err)
+    {
+    case EPERM:
+      eperm_seize (pid);
+    default:
+      error ("trace: %s", strerror (err));
     }
 }
 
@@ -315,17 +336,7 @@ pid_trace (int pid, uint32_t arch)
   int prog_idx = 0;
 
   if (ptrace (PTRACE_SEIZE, pid, 0, 0) != 0)
-    {
-      switch (errno)
-        {
-        case EPERM:
-          eperm_seize (pid);
-        case ESRCH:
-          error (NO_SUCH_PROCESS, pid);
-        default:
-          error ("ptrace: %s", strerror (errno));
-        }
-    }
+    error_seize (pid, errno);
 
   ptrace (PTRACE_INTERRUPT, pid, 0, 0);
   waitpid (pid, &status, 0);
