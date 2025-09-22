@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ceccomp 3.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-22 14:42+0800\n"
+"POT-Creation-Date: 2025-09-22 14:54+0800\n"
 "PO-Revision-Date: 2025-09-22 14:45+0800\n"
 "Last-Translator: dbgbgtf <dudududumaxver@outlook.com>\n"
 "Language-Team: Chinese <kde-i18n-doc@kde.org>\n"
@@ -186,9 +186,9 @@ msgid "Process %d exited"
 msgstr "进程 %d 退出"
 
 #: ../include/log/error.h:75
-#, c-format
-msgid "Parsing %d process seccomp"
-msgstr "正在解析 %d 进程的 seccomp"
+#, fuzzy, c-format
+msgid "Parsing %d process seccomp filter"
+msgstr "正在解析 %d 进程的 seccomp 过滤器"
 
 #: ../include/log/error.h:78
 msgid "Procfs not accessible, unable to perform"

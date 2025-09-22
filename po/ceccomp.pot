@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-22 14:42+0800\n"
+"POT-Creation-Date: 2025-09-22 14:54+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -186,7 +186,7 @@ msgstr ""
 
 #: ../include/log/error.h:75
 #, c-format
-msgid "Parsing %d process seccomp"
+msgid "Parsing %d process seccomp filter"
 msgstr ""
 
 #: ../include/log/error.h:78

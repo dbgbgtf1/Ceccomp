@@ -72,7 +72,7 @@
 #define SHOULD_BE_EXIT _ ("tracee syscall should be exiting here")
 #define PROCESS_FORK _ ("Process %d spawned a new pid %d")
 #define PROCESS_EXIT _ ("Process %d exited")
-#define PARSE_PID_BPF _ ("Parsing %d process seccomp")
+#define PARSE_PID_BPF _ ("Parsing %d process seccomp filter")
 
 // trace pid
 #define PROCFS_NOT_ACCESSIBLE _ ("Procfs not accessible, unable to perform")
