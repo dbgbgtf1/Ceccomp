@@ -254,15 +254,22 @@ ret_same_type (uint32_t val, char val_str[REG_BUF_LEN], reg_stat A_stat,
 {
   char *ret = NULL;
   if (A_stat == SYS_NR)
-    ret = seccomp_syscall_resolve_num_arch (arch, val);
+    {
+      ret = seccomp_syscall_resolve_num_arch (arch, val);
+      if (ret)
+        snprintf (val_str, REG_BUF_LEN, "%s.%s", ARCH2STR (arch), ret);
+      else
+        snprintf (val_str, REG_BUF_LEN, "0x%x", val);
+      free (ret);
+      return;
+    }
   if (A_stat == ARCH)
-    ret = ARCH2STR (val);
+    {
+      ret = ARCH2STR (val);
+      snprintf (val_str, REG_BUF_LEN, "%s", ret);
+      return;
+    }
   // ARCH2STR and seccomp_resolve return NULl if fail
-
-  if (ret != NULL)
-    strncpy (val_str, ret, REG_BUF_LEN - 1);
-  else
-    snprintf (val_str, REG_BUF_LEN, "0x%x", val);
 }
 
 static void
