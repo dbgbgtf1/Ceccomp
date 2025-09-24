@@ -25,8 +25,8 @@ strtoull_check (char *num, int base, char *err)
 void
 help (int exit_code)
 {
-  printf (CECCOMP_USAGE);
-  printf ("\n");
+  printf ("%s", CECCOMP_USAGE);
+  putchar('\n');
   printf ("%s\n", ASM_HINT);
   printf ("%s\n", DISASM_HINT);
   printf ("%s\n", EMU_HINT);
