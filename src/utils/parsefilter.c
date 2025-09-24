@@ -6,6 +6,7 @@
 #include "log/logger.h"
 #include "main.h"
 #include "transfer.h"
+#include <argp.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/bpf_common.h>
@@ -23,7 +24,6 @@
 static FILE *o_fp;
 
 static fprog *prog;
-static uint32_t arch;
 
 static char A[REG_BUF_LEN] = "0";
 static char X[REG_BUF_LEN] = "0";
@@ -31,10 +31,10 @@ static char mem[BPF_MEMWORDS][REG_BUF_LEN] = { "" };
 
 typedef enum
 {
+  UNKNOWN = -1,
   NONE = 0,
   ARCH = 1,
   SYS_NR = 2,
-  UNKNOWN = 3,
 } reg_stat;
 
 typedef struct
@@ -42,6 +42,7 @@ typedef struct
   reg_stat A_stat;
   reg_stat X_stat;
   reg_stat mem_stat[BPF_MEMWORDS];
+  uint32_t arch;
 } stat_ctx;
 
 static uint32_t pc = 0;
@@ -52,26 +53,36 @@ static void
 set_stat (reg_stat *dest, reg_stat src, bool force)
 {
   if (force)
-  {
-    *dest = src;
-    return;
-  }
+    {
+      *dest = src;
+      return;
+    }
 
   if (*dest == NONE)
     *dest = src;
-  else if (*dest == src)
-    *dest = src;
-  else
+  else if (*dest != src)
     *dest = UNKNOWN;
 }
 
 static void
-set_ctx (stat_ctx *dest, stat_ctx *src, bool force)
+set_arch (uint32_t *dest, uint32_t src, bool force)
 {
-  set_stat (&dest->A_stat, src->A_stat, force);
-  set_stat (&dest->X_stat, src->X_stat, force);
+  if (force)
+    *dest = src;
+
+  if (*dest == NONE)
+    *dest = src;
+  else if (*dest != src)
+    *dest = UNKNOWN;
+}
+
+static void
+set_ctx (stat_ctx *dest, stat_ctx src, bool force)
+{
+  set_stat (&dest->A_stat, src.A_stat, force);
+  set_stat (&dest->X_stat, src.X_stat, force);
   for (uint32_t i = 0; i < BPF_MEMWORDS; i++)
-    set_stat (&dest->mem_stat[i], src->mem_stat[i], force);
+    set_stat (&dest->mem_stat[i], src.mem_stat[i], force);
 }
 
 static char *
@@ -237,21 +248,17 @@ JMP_MODE (filter *f_ptr)
 }
 #pragma GCC diagnostic pop
 
-static char *
-try_transfer (uint32_t val, reg_stat A_stat)
-{
-  if (A_stat == SYS_NR)
-    return seccomp_syscall_resolve_num_arch (arch, val);
-  if (A_stat == ARCH)
-    return ARCH2STR (val);
-  else
-    return NULL;
-}
-
 static void
-ret_same_type (uint32_t val, char val_str[REG_BUF_LEN], reg_stat A_stat)
+ret_same_type (uint32_t val, char val_str[REG_BUF_LEN], reg_stat A_stat,
+               uint32_t arch)
 {
-  char *ret = try_transfer (val, A_stat);
+  char *ret = NULL;
+  if (A_stat == SYS_NR)
+    ret = seccomp_syscall_resolve_num_arch (arch, val);
+  if (A_stat == ARCH)
+    ret = ARCH2STR (val);
+  // ARCH2STR and seccomp_resolve return NULl if fail
+
   if (ret != NULL)
     strncpy (val_str, ret, REG_BUF_LEN - 1);
   else
@@ -259,7 +266,8 @@ ret_same_type (uint32_t val, char val_str[REG_BUF_LEN], reg_stat A_stat)
 }
 
 static void
-JMP_SRC (filter *f_ptr, char cmpval_str[REG_BUF_LEN], reg_stat A_stat)
+JMP_SRC (filter *f_ptr, char cmpval_str[REG_BUF_LEN], reg_stat A_stat,
+         uint32_t arch)
 {
   uint16_t src = BPF_SRC (f_ptr->code);
 
@@ -269,7 +277,7 @@ JMP_SRC (filter *f_ptr, char cmpval_str[REG_BUF_LEN], reg_stat A_stat)
       strcpy (cmpval_str, "$X");
       return;
     case BPF_K:
-      ret_same_type (f_ptr->k, cmpval_str, A_stat);
+      ret_same_type (f_ptr->k, cmpval_str, A_stat, arch);
       return;
     }
 }
@@ -286,22 +294,46 @@ print_condition (const char *sym, char *rval_str)
 }
 
 static void
-JMP (filter *f_ptr, stat_ctx *stat_ctx_list)
+JMP (filter *f_ptr, stat_ctx *stat_list)
 {
   uint8_t cmp_sym_idx;
   char cmp_rval_str[REG_BUF_LEN];
-  uint8_t jt = f_ptr->jt;
-  uint8_t jf = f_ptr->jf;
 
   if (BPF_OP (f_ptr->code) == BPF_JA)
     {
+      set_ctx (&stat_list[pc + f_ptr->k + 1], stat_list[pc], !FORCE);
+      set_arch (&stat_list[pc + f_ptr->k + 1].arch, stat_list[pc].arch,
+                !FORCE);
       fprintf (o_fp, "goto " FORMAT, pc + f_ptr->k + 2);
-      set_ctx (&stat_ctx_list[pc + f_ptr->k + 1], &stat_ctx_list[pc], !FORCE);
       return;
     }
 
+  uint8_t jt = f_ptr->jt;
+  uint8_t jf = f_ptr->jf;
+
+  set_ctx (&stat_list[pc + jt + 1], stat_list[pc], !FORCE);
+  set_ctx (&stat_list[pc + jf + 1], stat_list[pc], !FORCE);
+  // jmp always jmp to `pc + jt + 1` or `pc + jf + 1`
+
   cmp_sym_idx = JMP_MODE (f_ptr);
-  JMP_SRC (f_ptr, cmp_rval_str, stat_ctx_list[pc].A_stat);
+  JMP_SRC (f_ptr, cmp_rval_str, stat_list[pc].A_stat, stat_list[pc].arch);
+  // if cmp_sym_idx == 0, means cmp_sym is `==`
+  // if A_stat == ARCH, then try to predict
+  if (stat_list[pc].A_stat == ARCH)
+    {
+      if (cmp_sym_idx == 0)
+        {
+          // STR2ARCH fails with -1, which is UNKNOWN
+          set_arch (&stat_list[pc + jt + 1].arch, STR2ARCH (cmp_rval_str),
+                    !FORCE);
+          set_arch (&stat_list[pc + jf + 1].arch, UNKNOWN, !FORCE);
+        }
+    }
+  else
+    {
+      set_arch (&stat_list[pc + jt + 1].arch, stat_list[pc].arch, !FORCE);
+      set_arch (&stat_list[pc + jf + 1].arch, stat_list[pc].arch, !FORCE);
+    }
 
   fprintf (o_fp, "if ");
   if (jt == 0 && cmp_sym_idx == 3)
@@ -313,22 +345,16 @@ JMP (filter *f_ptr, stat_ctx *stat_ctx_list)
   if (jt == 0)
     {
       print_condition (false_cmp_sym_tbl[cmp_sym_idx], cmp_rval_str);
-      set_ctx (&stat_ctx_list[pc + 1], &stat_ctx_list[pc], !FORCE);
-      set_ctx (&stat_ctx_list[pc + jf + 1], &stat_ctx_list[pc], !FORCE);
       fprintf (o_fp, "goto " FORMAT, pc + jf + 2);
     }
   else if (jf == 0)
     {
       print_condition (true_cmp_sym_tbl[cmp_sym_idx], cmp_rval_str);
-      set_ctx (&stat_ctx_list[pc + 1], &stat_ctx_list[pc], !FORCE);
-      set_ctx (&stat_ctx_list[pc + jf + 1], &stat_ctx_list[pc], !FORCE);
       fprintf (o_fp, "goto " FORMAT, pc + jt + 2);
     }
   else
     {
       print_condition (true_cmp_sym_tbl[cmp_sym_idx], cmp_rval_str);
-      set_ctx (&stat_ctx_list[pc + jt + 1], &stat_ctx_list[pc], !FORCE);
-      set_ctx (&stat_ctx_list[pc + jf + 1], &stat_ctx_list[pc], !FORCE);
       fprintf (o_fp, "goto " FORMAT, pc + jt + 2);
       fprintf (o_fp, ", else goto " FORMAT, pc + jf + 2);
     }
@@ -407,7 +433,7 @@ parse_class (filter *f_ptr, stat_ctx *stat_list)
       break;
     case BPF_JMP:
       JMP (f_ptr, stat_list);
-      break;
+      return;
     case BPF_RET:
       RET (f_ptr);
       return;
@@ -415,14 +441,14 @@ parse_class (filter *f_ptr, stat_ctx *stat_list)
       MISC (f_ptr, ctx);
       break;
     }
-  if (cls != BPF_JMP)
-    set_ctx (&stat_list[pc + 1], &stat_list[pc], !FORCE);
+
+  set_ctx (&stat_list[pc + 1], stat_list[pc], !FORCE);
+  set_arch (&stat_list[pc + 1].arch, stat_list[pc].arch, !FORCE);
 }
 
 void
 parse_filter (uint32_t arch_token, fprog *sock_prog, FILE *output_fp)
 {
-  arch = arch_token;
   prog = sock_prog;
   uint32_t len = prog->len;
   o_fp = output_fp;
@@ -435,6 +461,7 @@ parse_filter (uint32_t arch_token, fprog *sock_prog, FILE *output_fp)
     error ("%s", strerror (errno));
   memset (stat_list, NONE, sizeof (stat_ctx) * len);
   // unknown is zero, so doing this is ok
+  stat_list[0].arch = arch_token;
 
   fprintf (o_fp, " Line  CODE  JT   JF      K\n");
   fprintf (o_fp, "---------------------------------\n");
