@@ -22,13 +22,16 @@
 #define REG_BUF_LEN 0x100
 
 static FILE *o_fp;
-
 static fprog *prog;
+
+static uint32_t pc = 0;
+static uint32_t default_arch;
 
 static char A[REG_BUF_LEN] = "0";
 static char X[REG_BUF_LEN] = "0";
 static char mem[BPF_MEMWORDS][REG_BUF_LEN] = { "" };
 
+// don't change these enum vals, I set them on purpose
 typedef enum
 {
   UNKNOWN = -1,
@@ -45,34 +48,28 @@ typedef struct
   uint32_t arch;
 } stat_ctx;
 
-static uint32_t pc = 0;
-
 #define FORCE true
 
 static void
 set_stat (reg_stat *dest, reg_stat src, bool force)
 {
-  if (force)
-    {
-      *dest = src;
-      return;
-    }
-
-  if (*dest == NONE)
+  if (force || *dest == NONE)
     *dest = src;
-  else if (*dest != src)
+  // after this, *dest == src, so the next judgement will be ignored
+
+  if (*dest != src)
     *dest = UNKNOWN;
+  // if *dest == src, nothing need to be done
 }
 
+// see set_stat for details
 static void
 set_arch (uint32_t *dest, uint32_t src, bool force)
 {
-  if (force)
+  if (force || *dest == NONE)
     *dest = src;
 
-  if (*dest == NONE)
-    *dest = src;
-  else if (*dest != src)
+  if (*dest != src)
     *dest = UNKNOWN;
 }
 
@@ -256,20 +253,21 @@ ret_same_type (uint32_t val, char val_str[REG_BUF_LEN], reg_stat A_stat,
   if (A_stat == SYS_NR)
     {
       ret = seccomp_syscall_resolve_num_arch (arch, val);
-      if (ret)
-        snprintf (val_str, REG_BUF_LEN, "%s.%s", ARCH2STR (arch), ret);
+      if (arch == default_arch && ret)
+        snprintf (val_str, REG_BUF_LEN, "%s", ret);
       else
         snprintf (val_str, REG_BUF_LEN, "0x%x", val);
       free (ret);
       return;
     }
-  if (A_stat == ARCH)
+  else if (A_stat == ARCH)
     {
       ret = ARCH2STR (val);
       snprintf (val_str, REG_BUF_LEN, "%s", ret);
       return;
     }
-  // ARCH2STR and seccomp_resolve return NULl if fail
+  else
+    snprintf (val_str, REG_BUF_LEN, "0x%x", val);
 }
 
 static void
@@ -301,19 +299,22 @@ print_condition (const char *sym, char *rval_str)
 }
 
 static void
+JMP_JA (stat_ctx *stat_list, uint32_t pc, uint32_t k)
+{
+  set_ctx (&stat_list[pc + k + 1], stat_list[pc], !FORCE);
+  set_arch (&stat_list[pc + k + 1].arch, stat_list[pc].arch, !FORCE);
+  fprintf (o_fp, "goto " FORMAT, pc + k + 2);
+  return;
+}
+
+static void
 JMP (filter *f_ptr, stat_ctx *stat_list)
 {
   uint8_t cmp_sym_idx;
   char cmp_rval_str[REG_BUF_LEN];
 
   if (BPF_OP (f_ptr->code) == BPF_JA)
-    {
-      set_ctx (&stat_list[pc + f_ptr->k + 1], stat_list[pc], !FORCE);
-      set_arch (&stat_list[pc + f_ptr->k + 1].arch, stat_list[pc].arch,
-                !FORCE);
-      fprintf (o_fp, "goto " FORMAT, pc + f_ptr->k + 2);
-      return;
-    }
+    return JMP_JA (stat_list, pc, f_ptr->k);
 
   uint8_t jt = f_ptr->jt;
   uint8_t jf = f_ptr->jf;
@@ -467,8 +468,9 @@ parse_filter (uint32_t arch_token, fprog *sock_prog, FILE *output_fp)
   if (stat_list == NULL)
     error ("%s", strerror (errno));
   memset (stat_list, NONE, sizeof (stat_ctx) * len);
-  // unknown is zero, so doing this is ok
+  // none is zero, so doing this is fine
   stat_list[0].arch = arch_token;
+  default_arch = arch_token;
 
   fprintf (o_fp, " Line  CODE  JT   JF      K\n");
   fprintf (o_fp, "---------------------------------\n");
