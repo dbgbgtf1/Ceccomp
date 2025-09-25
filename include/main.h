@@ -11,12 +11,6 @@
 #include "help.h"
 // clang-format on
 
-#ifndef VERSION_CODE
-#define VERSION_CODE "unknown"
-#endif
-
-#define CECCOMP_VERSION "ceccomp " VERSION_CODE
-
 typedef struct sock_fprog fprog;
 typedef struct sock_filter filter;
 typedef struct seccomp_data seccomp_data;

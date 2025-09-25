@@ -59,10 +59,6 @@ typedef struct ceccomp_args ceccomp_args;
 
 #define ARG_INIT_VAL (uint64_t)-1
 
-extern __attribute__ ((noreturn)) void version ();
-
-extern __attribute__ ((noreturn)) void help (int exit_code);
-
 extern uint64_t strtoull_check (char *num, int base, char *err);
 
 extern error_t parse_opt (int key, char *arg, struct argp_state *state);

@@ -217,6 +217,12 @@ uninstall:
 
 #### C OBJECTS ###
 
+CONFIG_HEADER := $(INC_DIR)/config.h
+$(CONFIG_HEADER): Makefile | $(MARK)
+	$Q$(call ECHO,SED,$@)
+	$Qsed 's/@@VERSION@@/$(VERSION)/;s/@@TAG_TIME@@/$(TAG_TIME)/;s/@@BUILDER@@/{{BUILDER}}/' \
+		$(CONFIG_HEADER).in > $(CONFIG_HEADER)
+
 ceccomp: $(BUILD_DIR)/ceccomp
 	$Q$(call ECHO_NOPROG,$(GREEN)BUILT,$@$(RESET))
 
@@ -230,6 +236,10 @@ test: $(BUILD_DIR)/test
 $(BUILD_DIR)/test: $(TEST_OBJS) | $(MARK)
 	$Q$(call ECHO,LD,$@)
 	$Q$(CC) $^ -o $@ $(LDFLAGS)
+
+$(BUILD_DIR)/ceccomp.c.o: $(SRC_DIR)/ceccomp.c $(CONFIG_HEADER) | $(BUILD_DIR) $(MARK)
+	$Q$(call ECHO,CC,$@)
+	$Q$(CC) -I$(INC_DIR) $(CFLAGS) $< -c -o $@
 
 $(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c | $(BUILD_DIR) $(MARK)
 	$Q$(call ECHO,CC,$@)

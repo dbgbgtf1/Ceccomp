@@ -10,3 +10,4 @@ diff_result
 Makefile
 po/*.po~
 SOURCES.txt
+include/config.h

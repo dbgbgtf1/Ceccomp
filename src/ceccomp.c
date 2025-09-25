@@ -1,10 +1,12 @@
 // this is for unit test
 #include "asm.h"
 #include "color.h"
+#include "config.h"
 #include "disasm.h"
 #include "emu.h"
 #include "log/error.h"
 #include "log/logger.h"
+#include "main.h"
 #include "parseargs.h"
 #include "probe.h"
 #include "trace.h"
@@ -12,7 +14,6 @@
 #include <argp.h>
 #include <assert.h>
 #include <libintl.h>
-#include <locale.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -69,6 +70,32 @@ init_output ()
   bindtextdomain ("ceccomp", LOCALEDIR);
   textdomain ("ceccomp");
 #endif
+}
+
+__attribute__ ((noreturn)) static void
+help (int exit_code)
+{
+  printf ("%s", CECCOMP_USAGE);
+  putchar ('\n');
+  printf ("%s\n", ASM_HINT);
+  printf ("%s\n", DISASM_HINT);
+  printf ("%s\n", EMU_HINT);
+  printf ("%s\n", PROBE_HINT);
+  printf ("%s\n", TRACE_HINT);
+  printf ("%s\n", HELP_HINT);
+  printf ("%s\n", VERSION_HINT);
+
+  printf ("\n%s\n", SUBCMD_HINT);
+
+  printf ("\n%s\n", OPTION_HINT);
+  exit (exit_code);
+}
+
+__attribute__ ((noreturn)) static void
+version ()
+{
+  printf (VERSION_FORMAT, CECCOMP_VERSION, CECCOMP_TAG_TIME, CECCOMP_BUILDER);
+  exit (0);
 }
 
 int

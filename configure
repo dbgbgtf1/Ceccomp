@@ -60,6 +60,7 @@ Copyright (C) 2025-present, distributed under GPLv3
     config_grp.add_argument('--without-doc', action='store_true', help='Do not install documentation')
     config_grp.add_argument('--without-i18n', action='store_true', help='Do not generate locale mo files')
     config_grp.add_argument('--devmode', action='store_true', help='Allow you to compile against any commit (only work in git mode)')
+    config_grp.add_argument('--builder', type=str, metavar='BY', default='manual', help='Who build the package (default: manual)')
     # argp is dynamically tested
 
     make_grp = parser.add_argument_group('Make-time options (can be overridden by make cli) [make var]')
@@ -100,6 +101,7 @@ class BuildOptions:
     doc: bool
     i18n: bool
     devmode: bool
+    builder: str
 
     cc: str | None
     asciidoc: str | None
@@ -167,6 +169,7 @@ buildopts = BuildOptions(
     doc=not args.without_doc,
     i18n=not args.without_i18n,
     devmode=args.devmode,
+    builder=args.builder,
 
     cc=os.getenv('CC'),
     asciidoc=os.getenv('ASCIIDOC'),
@@ -519,6 +522,7 @@ def check_version(makefile: Makefile):
 
     makefile.inject('VERSION', buildopts.version)
     makefile.inject('TAG_TIME', buildopts.tag_time)
+    makefile.inject('BUILDER', buildopts.builder)
     if buildopts.git_install and not buildopts.devmode:
         print(TXT_GREEN(buildopts.version))
     elif buildopts.git_install and buildopts.devmode:

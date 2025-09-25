@@ -1,7 +1,6 @@
 #include "parseargs.h"
 #include "log/error.h"
 #include "log/logger.h"
-#include "main.h"
 #include "transfer.h"
 #include <argp.h>
 #include <linux/ptrace.h>
@@ -20,32 +19,6 @@ strtoull_check (char *num, int base, char *err)
   if (num == end)
     error ("%s: %s", err, num);
   return ret;
-}
-
-void
-help (int exit_code)
-{
-  printf ("%s", CECCOMP_USAGE);
-  putchar('\n');
-  printf ("%s\n", ASM_HINT);
-  printf ("%s\n", DISASM_HINT);
-  printf ("%s\n", EMU_HINT);
-  printf ("%s\n", PROBE_HINT);
-  printf ("%s\n", TRACE_HINT);
-  printf ("%s\n", HELP_HINT);
-  printf ("%s\n", VERSION_HINT);
-
-  printf ("\n%s\n", SUBCMD_HINT);
-
-  printf ("\n%s\n", OPTION_HINT);
-  exit (exit_code);
-}
-
-void
-version ()
-{
-  printf ("%s\n", CECCOMP_VERSION);
-  exit (0);
 }
 
 static subcommand
