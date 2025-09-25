@@ -19,6 +19,7 @@ def TXT_YELLOW(s): return f'\x1b[33m{s}\x1b[0m'
 def TXT_BLUE(s): return f'\x1b[34m{s}\x1b[0m'
 def TXT_MAGENTA(s): return f'\x1b[35m{s}\x1b[0m'
 def TXT_CYAN(s): return f'\x1b[36m{s}\x1b[0m'
+def TXT_GRAY(s): return f'\x1b[90m{s}\x1b[0m'
 
 # error handling
 def warn(msg: any):
@@ -38,7 +39,7 @@ class GNUStyleHelpFormatter(argparse.RawDescriptionHelpFormatter):
         return ', '.join(f'{opt}={action.metavar}' if action.metavar else opt
                          for opt in action.option_strings)
 
-def parse_args():
+def parse_args() -> tuple[argparse.Namespace, list[str]]:
     epilog = '''Some influential environment variables:
     CC                 C compiler command
     CFLAGS             Extra C compiler flags
@@ -60,7 +61,12 @@ Copyright (C) 2025-present, distributed under GPLv3
     config_grp.add_argument('--without-doc', action='store_true', help='Do not install documentation')
     config_grp.add_argument('--without-i18n', action='store_true', help='Do not generate locale mo files')
     config_grp.add_argument('--devmode', action='store_true', help='Allow you to compile against any commit (only work in git mode)')
-    config_grp.add_argument('--builder', type=str, metavar='BY', default='manual', help='Who build the package (default: manual)')
+    config_grp.add_argument('--packager', type=str, metavar='BY', default='manual', help='Who build the package (default: manual)')
+    config_grp.add_argument('--disable-option-checking', action='store_true', help='Whether to throw an error when unknown options found')
+    config_grp.add_argument('--build', type=str, metavar='TARGET',
+        help='Which target to build against, optional. For instance, x86_64-linux-gnu')
+    config_grp.add_argument('--includedir', type=str, metavar='DIR', help='Optional system include directory')
+    config_grp.add_argument('--libdir', type=str, metavar='DIR', help='Optional system library directory')
     # argp is dynamically tested
 
     make_grp = parser.add_argument_group('Make-time options (can be overridden by make cli) [make var]')
@@ -76,6 +82,8 @@ Copyright (C) 2025-present, distributed under GPLv3
         help='Man pages directory (default: PREFIX/share/man) [MAN_DIR]')
     make_grp.add_argument('--localedir', type=str, metavar='DIR',
         help='Localization directory (default: PREFIX/share/locale) [LOCALE_DIR]')
+    make_grp.add_argument('--destdir', type=str, metavar='DIR',
+        help='Optional dir to install software, useful for package managers [DESTDIR]')
     make_grp.add_argument('--debug-level', type=int, metavar='LEVEL', default=1,
         help='Set debug symbol level (0: -O2 -s|1: -O2 -g, default|2: -O0 -g3 -DDEBUG) [DEBUG]')
     make_grp.add_argument('--version', type=str, metavar='VER',
@@ -83,7 +91,7 @@ Copyright (C) 2025-present, distributed under GPLv3
     make_grp.add_argument('--tag-time', type=str, metavar='TIME',
         help=f'Set the time of current tag. Use "CONFIG" for the time when running configure; or write in YYYY-mm-dd like default value {TAG_TIME} [TAG_TIME]')
 
-    return parser.parse_args()
+    return parser.parse_known_args()
 
 @dataclass
 class BuildOptions:
@@ -93,6 +101,7 @@ class BuildOptions:
     docdir: str
     mandir: str
     localedir: str
+    destdir: str
     debug_level: int
     version: str
     tag_time: str
@@ -102,11 +111,17 @@ class BuildOptions:
     i18n: bool
     devmode: bool
     builder: str
+    check_option: bool
+    target: str
+    sys_includedir: str
+    sys_libdir: str
 
     cc: str | None
     asciidoc: str | None
     cflags: str
     ldflags: str
+
+    unknown_options: list[str]
 
     git_install: bool = True
 
@@ -121,6 +136,20 @@ class BuildOptions:
             self.mandir = os.path.join(self.prefix, 'share', 'man')
         if self.localedir is None:
             self.localedir = os.path.join(self.prefix, 'share', 'locale')
+
+        def replace_prefix(dirent: str | None) -> str:
+            return dirent.replace('${prefix}', self.prefix) if dirent else ''
+
+        self.bindir = replace_prefix(self.bindir)
+        self.zshfpath = replace_prefix(self.zshfpath)
+        self.docdir = replace_prefix(self.docdir)
+        self.mandir = replace_prefix(self.mandir)
+        self.localedir = replace_prefix(self.localedir)
+        self.destdir = replace_prefix(self.destdir)
+
+        self.sys_includedir = replace_prefix(self.sys_includedir)
+        self.sys_libdir = replace_prefix(self.sys_libdir)
+
         if self.debug_level not in (0, 1, 2):
             error('debug_level option can only be 0, 1 or 2!')
 
@@ -139,7 +168,12 @@ class BuildOptions:
             return None
 
         # the None value will be processed in check
-        self.cc = check_cmd('cc', 'cc', 'gcc', 'clang')
+        if self.target:
+            self.cc = check_cmd('cc', f'{self.target}-cc', f'{self.target}-gcc', f'{self.target}-clang')
+            if not self.cc:
+                self.cc = check_cmd('cc', 'cc', 'gcc', 'clang')
+        else: # cc may be passed from environ, so we shall not merge the logic
+            self.cc = check_cmd('cc', 'cc', 'gcc', 'clang')
         self.asciidoc = check_cmd('asciidoc', 'asciidoctor')
         if self.cflags is None:
             self.cflags = ''
@@ -153,7 +187,16 @@ class BuildOptions:
             except ValueError:
                 error(f'Invalid tag-time {self.tag_time}, format is YYYY-mm-dd')
 
-args = parse_args()
+        # check the options
+        if self.unknown_options:
+            if self.check_option:
+                error(f'Unrecognized options: {" ".join(self.unknown_options)}, please pass --help to see correct options!')
+            else:
+                for opt in self.unknown_options:
+                    print(TXT_GRAY(f'Ignoring unknown option {opt}'))
+                warn(f'Discarding {len(self.unknown_options)} unknown options!')
+
+args, unknown = parse_args()
 buildopts = BuildOptions(
     prefix=args.prefix,
     bindir=args.bindir,
@@ -161,6 +204,7 @@ buildopts = BuildOptions(
     docdir=args.docdir,
     mandir=args.mandir,
     localedir=args.localedir,
+    destdir=args.destdir,
     debug_level=args.debug_level,
     version=args.version,
     tag_time=args.tag_time,
@@ -169,14 +213,20 @@ buildopts = BuildOptions(
     doc=not args.without_doc,
     i18n=not args.without_i18n,
     devmode=args.devmode,
-    builder=args.builder,
+    builder=args.packager,
+    check_option=not args.disable_option_checking,
+    target=args.build,
+    sys_includedir=args.includedir,
+    sys_libdir=args.libdir,
 
     cc=os.getenv('CC'),
     asciidoc=os.getenv('ASCIIDOC'),
     cflags=os.getenv('CFLAGS'),
     ldflags=os.getenv('LDFLAGS'),
+
+    unknown_options=unknown,
 )
-del args
+del args, unknown
 
 # gathering system information and check
 @dataclass
@@ -522,7 +572,6 @@ def check_version(makefile: Makefile):
 
     makefile.inject('VERSION', buildopts.version)
     makefile.inject('TAG_TIME', buildopts.tag_time)
-    makefile.inject('BUILDER', buildopts.builder)
     if buildopts.git_install and not buildopts.devmode:
         print(TXT_GREEN(buildopts.version))
     elif buildopts.git_install and buildopts.devmode:
@@ -530,9 +579,16 @@ def check_version(makefile: Makefile):
     else:
         print(TXT_CYAN(buildopts.version))
 
+@new_task
+def check_builder_name(makefile: Makefile):
+    pcheck('if builder name is valid')
+    if '/' in buildopts.builder:
+        error(f'Found \'/\' in builder name {buildopts.builder}, which is not allowed.')
+    makefile.inject('BUILDER', buildopts.builder)
+    print(TXT_GREEN('yes'))
 
 taskmgr.run_tasks()
-# vars not injected: EXTRA_CFLAGS EXTRA_LDFLAGS DEBUG_LEVEL PREFIX BINDIR ZSH_FPATH MANDIR DOCDIR
+# vars not injected: EXTRA_CFLAGS EXTRA_LDFLAGS DEBUG_LEVEL PREFIX BINDIR ZSH_FPATH MANDIR DOCDIR DESTDIR SYS_INC_DIR SYS_LIB_DIR
 taskmgr.makefile.inject('EXTRA_CFLAGS', buildopts.cflags)
 taskmgr.makefile.inject('EXTRA_LDFLAGS', buildopts.ldflags)
 taskmgr.makefile.inject('DEBUG_LEVEL', str(buildopts.debug_level))
@@ -541,6 +597,10 @@ taskmgr.makefile.inject('BINDIR', buildopts.bindir)
 taskmgr.makefile.inject('ZSH_FPATH', buildopts.zshfpath)
 taskmgr.makefile.inject('MANDIR', buildopts.mandir)
 taskmgr.makefile.inject('DOCDIR', buildopts.docdir)
+taskmgr.makefile.inject('DESTDIR', buildopts.destdir)
+
+taskmgr.makefile.inject('SYS_INC_DIR', f'-I{buildopts.sys_includedir}' if buildopts.sys_includedir else '')
+taskmgr.makefile.inject('SYS_LIB_DIR', f'-L{buildopts.sys_libdir}' if buildopts.sys_libdir else '')
 
 assert taskmgr.makefile.s.find('{{') == -1
 

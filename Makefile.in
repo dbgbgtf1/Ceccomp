@@ -64,8 +64,8 @@ CECCOMP_C := $(SRC_DIR)/ceccomp.c
 CC ?= {{CC}}
 
 LOCALE_DIR := {{LOCALEDIR}}
-CFLAGS := -fpie -fstack-protector -Wall -Wextra '-DVERSION_CODE="$(VERSION)"' {{I18N_IF}}'-DLOCALEDIR="$(LOCALE_DIR)"'{{I18N_ENDIF}} {{EXTRA_CFLAGS}}
-LDFLAGS := -z now -z noexecstack -fpie -fstack-protector -Wall -Wextra -lseccomp {{LIBARGP}} {{EXTRA_LDFLAGS}}
+CFLAGS := -fpie -fstack-protector -Wall -Wextra {{I18N_IF}}'-DLOCALEDIR="$(LOCALE_DIR)"'{{I18N_ENDIF}} {{SYS_INC_DIR}} {{EXTRA_CFLAGS}}
+LDFLAGS := -z now -z noexecstack -fpie -fstack-protector -Wall -Wextra {{SYS_LIB_DIR}} -lseccomp {{LIBARGP}} {{EXTRA_LDFLAGS}}
 DEBUG ?= {{DEBUG_LEVEL}}
 
 ifdef DEBUG
@@ -141,6 +141,7 @@ $(HTML_CHN): $(DOC_DIR)/ceccomp-cn.adoc | $(BUILD_DIR) $(MARK)
 
 ##### INSTALL CECCOMP #####
 
+DESTDIR ?= {{DESTDIR}}
 PREFIX ?= {{PREFIX}}
 BIN_DIR ?= {{BINDIR}}
 ZSH_FPATH ?= {{ZSH_FPATH}}
@@ -150,11 +151,11 @@ install: bin_install zsh_cmp_install {{DOC_IF}}doc_install{{DOC_ENDIF}} {{I18N_I
 
 bin_install: ceccomp $(BUILD_DIR)/ceccomp
 	$Q$(call ECHO_NOPROG,INSTALL,$< $(BIN_DIR))
-	$Qinstall -Dt $(BIN_DIR) $(BUILD_DIR)/ceccomp
+	$Qinstall -Dt $(DESTDIR)$(BIN_DIR) $(BUILD_DIR)/ceccomp
 
 zsh_cmp_install: $(ZSH_SRC)/_ceccomp
 	$Q$(call ECHO_NOPROG,INSTALL,$< $(ZSH_FPATH))
-	$Qinstall -Dm 0644 -t $(ZSH_FPATH) $<
+	$Qinstall -Dm 0644 -t $(DESTDIR)$(ZSH_FPATH) $<
 
 .PHONY: bin_install zsh_cmp_install install
 
@@ -167,23 +168,23 @@ HTML_DST ?= $(DOC_INSTALL_DIR)/html
 
 doc_install: doc doc_man_install doc_html_install {{I18N_IF}}doc_man_cn_install{{I18N_ENDIF}} doc_images_install
 	$Q$(call ECHO_NOPROG,INSTALL,README.md $(DOC_INSTALL_DIR))
-	$Qinstall -Dm 0644 -t $(DOC_INSTALL_DIR) README.md
+	$Qinstall -Dm 0644 -t $(DESTDIR)$(DOC_INSTALL_DIR) README.md
 
 doc_man_install: $(MAN_OBJ)
 	$Q$(call ECHO_NOPROG,INSTALL,$< $(MAN_DST))
-	$Qinstall -Dm 0644 -t $(MAN_DST) $<
+	$Qinstall -Dm 0644 -t $(DESTDIR)$(MAN_DST) $<
 
 doc_man_cn_install: $(MAN_CHN)
 	$Q$(call ECHO_NOPROG,INSTALL,$< $(MAN_CHN_DST))
-	$Qinstall -Dm 0644 -t $(MAN_CHN_DST) $<
+	$Qinstall -Dm 0644 -t $(DESTDIR)$(MAN_CHN_DST) $<
 
 doc_html_install: $(HTML_OBJ) $(HTML_CHN)
 	$Q$(call ECHO_NOPROG,INSTALL,$< $(HTML_DST))
-	$Qinstall -Dm 0644 -t $(HTML_DST) $^
+	$Qinstall -Dm 0644 -t $(DESTDIR)$(HTML_DST) $^
 
 doc_images_install: $(IMG_SRCS)
 	$Q$(call ECHO_NOPROG,INSTALL,images $(HTML_DST))
-	$Qinstall -Dm 0644 -t $(HTML_DST)/images $^
+	$Qinstall -Dm 0644 -t $(DESTDIR)$(HTML_DST)/images $^
 
 .PHONY: doc_man_install doc_html_install doc_man_cn_install doc_images_install doc_install 
 {{DOC_ENDIF}}
@@ -191,7 +192,7 @@ doc_images_install: $(IMG_SRCS)
 {{I18N_IF}}
 mo_install: $(MO_ZHCN)
 	$Q$(call ECHO_NOPROG,INSTALL,$< $(LOCALE_DIR))
-	$Qinstall -Dm 0644 $< $(patsubst $(BUILD_DIR)/%.mo,$(LOCALE_DIR)/%/LC_MESSAGES/ceccomp.mo,$<)
+	$Qinstall -Dm 0644 $< $(patsubst $(BUILD_DIR)/%.mo,$(DESTDIR)$(LOCALE_DIR)/%/LC_MESSAGES/ceccomp.mo,$<)
 
 .PHONY: mo_install
 {{I18N_ENDIF}}
@@ -200,16 +201,16 @@ UNINSTALL = test -f $(1) && rm -f $(1) || :
 UNINSTALL_RECURSIVE = test -d $(1) && rm -rf $(1) || :
 uninstall:
 	$Q$(call ECHO_NOPROG,UNINSTALL,$(BIN_DIR)/ceccomp)
-	$Q$(call UNINSTALL,$(BIN_DIR)/ceccomp)
+	$Q$(call UNINSTALL,$(DESTDIR)$(BIN_DIR)/ceccomp)
 	$Q$(call ECHO_NOPROG,UNINSTALL,$(ZSH_FPATH)/_ceccomp)
-	$Q$(call UNINSTALL,$(ZSH_FPATH)/_ceccomp)
+	$Q$(call UNINSTALL,$(DESTDIR)$(ZSH_FPATH)/_ceccomp)
 	{{DOC_IF}}
 	$Q$(call ECHO_NOPROG,UNINSTALL,$(MAN_DIR)/man1/ceccomp.1)
-	$Q$(call UNINSTALL,$(MAN_DIR)/man1/ceccomp.1)
+	$Q$(call UNINSTALL,$(DESTDIR)$(MAN_DIR)/man1/ceccomp.1)
 	$Q$(call ECHO_NOPROG,UNINSTALL,$(MAN_DIR)/zh_CN/man1/ceccomp.1)
-	$Q$(call UNINSTALL,$(MAN_DIR)/zh_CN/man1/ceccomp.1)
+	$Q$(call UNINSTALL,$(DESTDIR)$(MAN_DIR)/zh_CN/man1/ceccomp.1)
 	$Q$(call ECHO_NOPROG,UNINSTALL,$(DOC_INSTALL_DIR))
-	$Q$(call UNINSTALL_RECURSIVE,$(DOC_INSTALL_DIR)/../ceccomp) # in case DOC_INSTALL_DIR is not set...
+	$Q$(call UNINSTALL_RECURSIVE,$(DESTDIR)$(DOC_INSTALL_DIR)/../ceccomp) # in case DOC_INSTALL_DIR is not set...
 	{{DOC_ENDIF}}
 
 .PHONY: uninstall
