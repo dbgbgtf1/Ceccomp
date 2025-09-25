@@ -83,35 +83,35 @@ STR2ARCH (char *arch)
   else if (STARTWITH (arch, STR_ARCH_AARCH64))
     return SCMP_ARCH_AARCH64;
 
-  else if (STARTWITH (arch, STR_ARCH_MIPS))
-    return SCMP_ARCH_MIPS;
-  else if (STARTWITH (arch, STR_ARCH_MIPSEL))
-    return SCMP_ARCH_MIPSEL;
-  else if (STARTWITH (arch, STR_ARCH_MIPS64))
-    return SCMP_ARCH_MIPS64;
-  else if (STARTWITH (arch, STR_ARCH_MIPSEL64))
-    return SCMP_ARCH_MIPSEL64;
-  else if (STARTWITH (arch, STR_ARCH_MIPS64N32))
-    return SCMP_ARCH_MIPS64N32;
   else if (STARTWITH (arch, STR_ARCH_MIPSEL64N32))
     return SCMP_ARCH_MIPSEL64N32;
+  else if (STARTWITH (arch, STR_ARCH_MIPS64N32))
+    return SCMP_ARCH_MIPS64N32;
+  else if (STARTWITH (arch, STR_ARCH_MIPSEL64))
+    return SCMP_ARCH_MIPSEL64;
+  else if (STARTWITH (arch, STR_ARCH_MIPS64))
+    return SCMP_ARCH_MIPS64;
+  else if (STARTWITH (arch, STR_ARCH_MIPSEL))
+    return SCMP_ARCH_MIPSEL;
+  else if (STARTWITH (arch, STR_ARCH_MIPS))
+    return SCMP_ARCH_MIPS;
 
-  else if (STARTWITH (arch, STR_ARCH_PARISC))
-    return SCMP_ARCH_PARISC;
   else if (STARTWITH (arch, STR_ARCH_PARISC64))
     return SCMP_ARCH_PARISC64;
+  else if (STARTWITH (arch, STR_ARCH_PARISC))
+    return SCMP_ARCH_PARISC;
 
-  else if (STARTWITH (arch, STR_ARCH_PPC))
-    return SCMP_ARCH_PPC;
-  else if (STARTWITH (arch, STR_ARCH_PPC64))
-    return SCMP_ARCH_PPC64;
   else if (STARTWITH (arch, STR_ARCH_PPC64LE))
     return SCMP_ARCH_PPC64LE;
+  else if (STARTWITH (arch, STR_ARCH_PPC64))
+    return SCMP_ARCH_PPC64;
+  else if (STARTWITH (arch, STR_ARCH_PPC))
+    return SCMP_ARCH_PPC;
 
-  else if (STARTWITH (arch, STR_ARCH_S390))
-    return SCMP_ARCH_S390;
   else if (STARTWITH (arch, STR_ARCH_S390X))
     return SCMP_ARCH_S390X;
+  else if (STARTWITH (arch, STR_ARCH_S390))
+    return SCMP_ARCH_S390;
 
   else if (STARTWITH (arch, STR_ARCH_RISCV64))
     return SCMP_ARCH_RISCV64;
