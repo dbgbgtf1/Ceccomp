@@ -3,13 +3,14 @@
 # This file is distributed under the same license as the ceccomp package.
 # SPDX-FileCopyrightText: 2025 dbgbgtf 1
 #
+# SPDX-FileCopyrightText: 2025 RocketDev <ma2014119@outlook.com>
 msgid ""
 msgstr ""
 "Project-Id-Version: ceccomp 3.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-22 14:54+0800\n"
-"PO-Revision-Date: 2025-09-22 14:45+0800\n"
-"Last-Translator: dbgbgtf <dudududumaxver@outlook.com>\n"
+"POT-Creation-Date: 2025-09-25 19:46+0800\n"
+"PO-Revision-Date: 2025-09-25 20:01+0800\n"
+"Last-Translator: RocketDev <ma2014119@outlook.com>\n"
 "Language-Team: Chinese <kde-i18n-doc@kde.org>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
@@ -17,6 +18,14 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Lokalize 25.08.1\n"
+
+#: ../include/config.h:8
+#, c-format
+msgid ""
+"ceccomp %s\n"
+"Tag at %s\n"
+"Build by %s\n"
+msgstr "ceccomp %s\n在 %s 发布\n由 %s 构建\n"
 
 #: ../include/log/error.h:6
 msgid "Unable to open file"
