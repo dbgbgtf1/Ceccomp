@@ -8,7 +8,7 @@ files=(./bpf/*)
 for file in "${files[@]}"; do
   if [ -f "$file" ]; then
     filename=$(basename -s .bpf "$file")
-    ./build/ceccomp disasm $file | diff /dev/stdin ./text/$filename > diff_result > diff_result
+    ./build/ceccomp disasm $file --color always | diff /dev/stdin ./text/$filename > diff_result > diff_result
     if [ $(echo $?) == 0 ]; then
         echo "$filename passed"
     else
