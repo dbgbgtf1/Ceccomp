@@ -290,13 +290,18 @@ taskmgr = TaskManager('Makefile.in')
 def pcheck(txt: str):
     print(f'Checking {txt}... ', end='', flush=True)
 
-def run_command(argv: list[str], stdin: str | None=None) -> tuple[int, str, str]:
+def run_command(argv: list[str], stdin: str | None=None, push_sys_dir: bool=False) -> tuple[int, str, str]:
     """
     Run command with given argv and input, return process returncode, stdout and stderr
     Return -1, '', exception message if exception raised is known, or else return -2, '', message.
     """
     try:
         argv[0] = shutil.which(argv[0])
+        if push_sys_dir:
+            if buildopts.sys_includedir: # in case some include/lib is not accessible for current compiler
+                argv.append(f'-I{buildopts.sys_includedir}')
+            if buildopts.sys_libdir:
+                argv.append(f'-L{buildopts.sys_libdir}')
         proc = subprocess.run(argv, input=stdin, capture_output=True, text=True)
     except subprocess.SubprocessError as e:
         return -1, '', str(e)
@@ -412,7 +417,7 @@ int main() {
 @new_task
 def check_linux_headers(_: Makefile):
     pcheck('Linux-related headers')
-    code, _, stderr = run_command([buildopts.cc, '-x', 'c', '-', '-o', '/dev/null'], linux_headers)
+    code, _, stderr = run_command([buildopts.cc, '-x', 'c', '-', '-o', '/dev/null'], linux_headers, push_sys_dir=True)
     if code:
         print(TXT_MAGENTA('no'))
         if code == -1:
@@ -435,7 +440,7 @@ int main() {
 @new_task
 def check_libseccomp(_: Makefile):
     pcheck('libseccomp')
-    code, _, stderr = run_command([buildopts.cc, '-x', 'c', '-', '-lseccomp', '-o', '/dev/null'], libseccomp)
+    code, _, stderr = run_command([buildopts.cc, '-x', 'c', '-', '-lseccomp', '-o', '/dev/null'], libseccomp, push_sys_dir=True)
     if code:
         print(TXT_MAGENTA('no'))
         if code == -1:
@@ -456,7 +461,7 @@ int main(int argc, char **argv) {
 @new_task
 def check_argp(makefile: Makefile):
     pcheck('argp parser')
-    code, _, stderr = run_command([buildopts.cc, '-x', 'c', '-', '-o', '/dev/null'], argp)
+    code, _, stderr = run_command([buildopts.cc, '-x', 'c', '-', '-o', '/dev/null'], argp, push_sys_dir=True)
     if code:
         if code == -1:
             print(TXT_MAGENTA('no'))
