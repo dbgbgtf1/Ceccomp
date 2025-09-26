@@ -7,7 +7,10 @@ Items marked with :star: is the major change why we release a new version.
 <!-- to format raw ref to URL. -->
 
 ## 3.2 (INCOMING)
+* :star: Add support for Debian build system :link: [#13]
 * Fix `CECCOMP_USAGE` warning as it's a function call
+
+[#13]: https://github.com/dbgbgtf1/Ceccomp/issues/13
 ## 3.1
 * :star: Add support for multiple process tracing :link: [#3]
 * :star: Cover all cases of trace pid errors :link: [#11]
