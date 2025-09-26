@@ -6,6 +6,7 @@ dbgbgtf <dudududumaxver@outlook.com>; RocketDev <ma2014119@outlook.com>
 :manmanual: Ceccomp Manual
 :mansource: ceccomp {VERSION}
 :imagesdir: images/
+:stylesheet: boot-slate.css
 
 == NAME
 

@@ -3,9 +3,10 @@ dbgbgtf <dudududumaxver@outlook.com>; RocketDev <ma2014119@outlook.com>
 {VERSION}, {TAG_TIME}
 :doctype: manpage
 :docdatetime: {TAG_TIME}
-:manmanual: Ceccomp手册
+:manmanual: Ceccomp 手册
 :mansource: ceccomp {VERSION}
 :imagesdir: images/
+:stylesheet: boot-slate.css
 
 == 名称
 

@@ -47,6 +47,11 @@ make DEBUG=2
 
 Any Issue or Pr are welcome!
 
+# Credits
+
+- [seccomp-tools](https://github.com/david942j/seccomp-tools): The tool in Ruby inspires us to write ceccomp
+- [Bootswatch](https://bootswatch.com/slate/): Provides awesome css for html doc under MIT
+
 # License
 
 Copyright (C) 2025-present, ceccomp contributors, distributed under GNU General Public License v3.0

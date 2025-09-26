@@ -12,6 +12,7 @@ Items marked with :star: is the major change why we release a new version.
 * :star: Enhance arch/syscall prediction :link: [#12]
 * Hide unused bpf operation in emu :link: [#14]
 * Fix `CECCOMP_USAGE` warning as it's a function call
+* Add a dark-mode css for html doc
 
 [#13]: https://github.com/dbgbgtf1/Ceccomp/issues/13
 [#12]: https://github.com/dbgbgtf1/Ceccomp/issues/12
