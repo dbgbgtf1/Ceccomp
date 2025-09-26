@@ -41,7 +41,7 @@ make DEBUG=2
 
 # CheatSheet
 
-<img width="960" height="681" alt="image" src="https://github.com/user-attachments/assets/e35a1b6f-f3e0-436e-b022-6355b55fd9d7" />
+<img width="1185" height="649" alt="image" src="https://github.com/user-attachments/assets/7868a8ed-e6a9-42fa-a2f1-5955be358013" />
 
 # I need You
 
