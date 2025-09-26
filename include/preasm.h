@@ -7,6 +7,8 @@ typedef struct
 {
   char *clean_line;
   char *origin_line;
+
+  char *origin_start;
 } line_set;
 
 extern void pre_clear_color (char *clean_line);

@@ -275,7 +275,7 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
   else
     s_output_fp = stdout;
 
-  line_set Line = { NULL, NULL };
+  line_set Line = { NULL, NULL, NULL };
   reg_mem reg;
   init_regs (&reg);
 
@@ -294,7 +294,7 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
       if (read_idx < execute_idx)
         {
           pre_clear_color (origin_line);
-          LIGHTCOLORPRINTF (FORMAT ": %s", read_idx, origin_line);
+          LIGHTCOLORPRINTF (FORMAT ": %s", read_idx, Line.origin_start);
           continue;
         }
 

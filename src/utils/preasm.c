@@ -16,6 +16,8 @@ is_etc (char *Line)
 {
   if (STARTWITH (Line, "---------------------------------"))
     return true;
+  else if (STARTWITH (Line, " Line  CODE  JT   JF      K"))
+    return true;
   else if (STARTWITH (Line, "LineCODEJTJFK"))
     return true;
   return false;
@@ -71,25 +73,25 @@ pre_clear_space (char *clean_line)
 }
 
 static char *
-check_valid_line (char *clean_line)
+get_valid_line (char *text)
 {
   char *start = NULL;
-  if ((start = strstr (clean_line, "if")) != NULL)
+  if ((start = strstr (text, "if")) != NULL)
     return start;
 
-  if ((start = strstr (clean_line, "return")) != NULL)
+  if ((start = strstr (text, "return")) != NULL)
     return start;
 
-  if ((start = strstr (clean_line, "goto")) != NULL)
+  if ((start = strstr (text, "goto")) != NULL)
     return start;
 
-  if ((start = strchr (clean_line, '$')) != NULL)
+  if ((start = strchr (text, '$')) != NULL)
     return start;
 
-  if (is_etc (clean_line))
+  if (is_etc (text))
     return "";
 
-  error ("%s: %s", INVALID_ASM_CODE, clean_line);
+  error ("%s: %s", INVALID_ASM_CODE, text);
 }
 
 static char *copy_line;
@@ -111,13 +113,15 @@ pre_asm (FILE *read_fp, line_set *Line)
       Line->origin_line = pre_get_lines (read_fp);
       if (Line->origin_line == NULL)
         return;
+
+      Line->origin_start = get_valid_line (Line->origin_line);
       copy_line = strdup (Line->origin_line);
       Line->clean_line = copy_line;
 
       pre_clear_color (Line->clean_line);
       pre_clear_space (Line->clean_line);
 
-      Line->clean_line = check_valid_line (copy_line);
+      Line->clean_line = get_valid_line (copy_line);
     }
   while (*Line->clean_line == '\0');
 }
