@@ -1,21 +1,21 @@
  Line  CODE  JT   JF      K
 ---------------------------------
- 0001: 0x20 0x00 0x00 0x00000004 [33m$A[0m = [34m$arch[0m
- 0002: 0x15 0x00 0x10 0xc00000b7 if ([33m$A[0m != [36maarch64[0m) goto 0019
- 0003: 0x20 0x00 0x00 0x00000000 [33m$A[0m = [34m$syscall_nr[0m
- 0004: 0x15 0x0d 0x00 0x0000001d if ([33m$A[0m == [36maarch64.ioctl[0m) goto 0018
- 0005: 0x15 0x0c 0x00 0x0000003f if ([33m$A[0m == [36maarch64.read[0m) goto 0018
- 0006: 0x15 0x0b 0x00 0x00000040 if ([33m$A[0m == [36maarch64.write[0m) goto 0018
- 0007: 0x15 0x0a 0x00 0x00000049 if ([33m$A[0m == [36maarch64.ppoll[0m) goto 0018
- 0008: 0x15 0x09 0x00 0x0000005e if ([33m$A[0m == [36maarch64.exit_group[0m) goto 0018
- 0009: 0x15 0x08 0x00 0x00000062 if ([33m$A[0m == [36maarch64.futex[0m) goto 0018
- 0010: 0x15 0x07 0x00 0x00000084 if ([33m$A[0m == [36maarch64.sigaltstack[0m) goto 0018
- 0011: 0x15 0x06 0x00 0x00000086 if ([33m$A[0m == [36maarch64.rt_sigaction[0m) goto 0018
- 0012: 0x15 0x05 0x00 0x0000008b if ([33m$A[0m == [36maarch64.rt_sigreturn[0m) goto 0018
- 0013: 0x15 0x04 0x00 0x000000ce if ([33m$A[0m == [36maarch64.sendto[0m) goto 0018
- 0014: 0x15 0x03 0x00 0x000000cf if ([33m$A[0m == [36maarch64.recvfrom[0m) goto 0018
- 0015: 0x15 0x02 0x00 0x000000d0 if ([33m$A[0m == [36maarch64.setsockopt[0m) goto 0018
- 0016: 0x15 0x01 0x00 0x000000d7 if ([33m$A[0m == [36maarch64.munmap[0m) goto 0018
+ 0001: 0x20 0x00 0x00 0x00000004 [93m$A[0m = [34m$arch[0m
+ 0002: 0x15 0x00 0x10 0xc00000b7 if ([93m$A[0m != [36maarch64[0m) goto 0019
+ 0003: 0x20 0x00 0x00 0x00000000 [93m$A[0m = [34m$syscall_nr[0m
+ 0004: 0x15 0x0d 0x00 0x0000001d if ([93m$A[0m == [36maarch64.ioctl[0m) goto 0018
+ 0005: 0x15 0x0c 0x00 0x0000003f if ([93m$A[0m == [36maarch64.read[0m) goto 0018
+ 0006: 0x15 0x0b 0x00 0x00000040 if ([93m$A[0m == [36maarch64.write[0m) goto 0018
+ 0007: 0x15 0x0a 0x00 0x00000049 if ([93m$A[0m == [36maarch64.ppoll[0m) goto 0018
+ 0008: 0x15 0x09 0x00 0x0000005e if ([93m$A[0m == [36maarch64.exit_group[0m) goto 0018
+ 0009: 0x15 0x08 0x00 0x00000062 if ([93m$A[0m == [36maarch64.futex[0m) goto 0018
+ 0010: 0x15 0x07 0x00 0x00000084 if ([93m$A[0m == [36maarch64.sigaltstack[0m) goto 0018
+ 0011: 0x15 0x06 0x00 0x00000086 if ([93m$A[0m == [36maarch64.rt_sigaction[0m) goto 0018
+ 0012: 0x15 0x05 0x00 0x0000008b if ([93m$A[0m == [36maarch64.rt_sigreturn[0m) goto 0018
+ 0013: 0x15 0x04 0x00 0x000000ce if ([93m$A[0m == [36maarch64.sendto[0m) goto 0018
+ 0014: 0x15 0x03 0x00 0x000000cf if ([93m$A[0m == [36maarch64.recvfrom[0m) goto 0018
+ 0015: 0x15 0x02 0x00 0x000000d0 if ([93m$A[0m == [36maarch64.setsockopt[0m) goto 0018
+ 0016: 0x15 0x01 0x00 0x000000d7 if ([93m$A[0m == [36maarch64.munmap[0m) goto 0018
  0017: 0x06 0x00 0x00 0x80000000 return [31mKILL_PROCESS[0m
  0018: 0x06 0x00 0x00 0x7fff0000 return [32mALLOW[0m
  0019: 0x06 0x00 0x00 0x00000000 return [31mKILL[0m
