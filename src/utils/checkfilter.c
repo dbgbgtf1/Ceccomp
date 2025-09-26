@@ -49,10 +49,10 @@ scmp_check_filter (filter *f_ptr, uint32_t len)
           continue;
         case BPF_ALU | BPF_DIV | BPF_K:
           if (ftest->k == 0)
-          {
-            warn (FORMAT " %s", pc + 1, ALU_DIV_BY_ZERO);
-            error_happen = true;
-          }
+            {
+              warn (FORMAT " %s", pc + 1, ALU_DIV_BY_ZERO);
+              error_happen = true;
+            }
           continue;
         case BPF_ALU | BPF_DIV | BPF_X:
         case BPF_ALU | BPF_AND | BPF_K:
@@ -65,10 +65,10 @@ scmp_check_filter (filter *f_ptr, uint32_t len)
         case BPF_ALU | BPF_LSH | BPF_K:
         case BPF_ALU | BPF_RSH | BPF_K:
           if (ftest->k >= 32)
-          {
-            warn (FORMAT " %s", pc + 1, ALU_SH_OUT_OF_RANGE);
-            error_happen = true;
-          }
+            {
+              warn (FORMAT " %s", pc + 1, ALU_SH_OUT_OF_RANGE);
+              error_happen = true;
+            }
           continue;
         case BPF_ALU | BPF_LSH | BPF_X:
         case BPF_ALU | BPF_RSH | BPF_X:
@@ -78,10 +78,10 @@ scmp_check_filter (filter *f_ptr, uint32_t len)
           continue;
         case BPF_JMP | BPF_JA:
           if (ftest->k >= (unsigned int)(len - pc - 1))
-          {
-            warn (FORMAT " %s", pc + 1, JMP_OUT_OF_RANGE);
-            error_happen = true;
-          }
+            {
+              warn (FORMAT " %s", pc + 1, JMP_OUT_OF_RANGE);
+              error_happen = true;
+            }
           continue;
         case BPF_JMP | BPF_JEQ | BPF_K:
         case BPF_JMP | BPF_JEQ | BPF_X:
@@ -92,10 +92,10 @@ scmp_check_filter (filter *f_ptr, uint32_t len)
         case BPF_JMP | BPF_JSET | BPF_K:
         case BPF_JMP | BPF_JSET | BPF_X:
           if (pc + ftest->jt + 1 >= len || pc + ftest->jf + 1 >= len)
-          {
-            warn (FORMAT " %s", pc + 1, JMP_OUT_OF_RANGE);
-            error_happen = true;
-          }
+            {
+              warn (FORMAT " %s", pc + 1, JMP_OUT_OF_RANGE);
+              error_happen = true;
+            }
           continue;
         case BPF_RET | BPF_K:
         case BPF_RET | BPF_A:

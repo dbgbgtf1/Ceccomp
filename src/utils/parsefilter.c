@@ -258,7 +258,7 @@ ret_same_type (uint32_t val, char val_str[REG_BUF_LEN], reg_stat A_stat,
       else if (arch == default_arch)
         snprintf (val_str, REG_BUF_LEN, "%s", ret);
       else
-        snprintf (val_str, REG_BUF_LEN, "%s.%s", ARCH2STR(arch), ret);
+        snprintf (val_str, REG_BUF_LEN, "%s.%s", ARCH2STR (arch), ret);
       free (ret);
       return;
     }
