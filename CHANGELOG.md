@@ -8,9 +8,13 @@ Items marked with :star: is the major change why we release a new version.
 
 ## 3.2 (INCOMING)
 * :star: Add support for Debian build system :link: [#13]
+* :star: Enhance arch/syscall prediction :link: [#12]
+* Hide unused bpf operation in emu :link: [#14]
 * Fix `CECCOMP_USAGE` warning as it's a function call
 
 [#13]: https://github.com/dbgbgtf1/Ceccomp/issues/13
+[#12]: https://github.com/dbgbgtf1/Ceccomp/issues/12
+[#14]: https://github.com/dbgbgtf1/Ceccomp/issues/14
 ## 3.1
 * :star: Add support for multiple process tracing :link: [#3]
 * :star: Cover all cases of trace pid errors :link: [#11]
