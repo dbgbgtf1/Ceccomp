@@ -171,6 +171,7 @@ class BuildOptions:
         if self.target:
             self.cc = check_cmd('cc', f'{self.target}-cc', f'{self.target}-gcc', f'{self.target}-clang')
             if not self.cc:
+                warn(f'No C compiler with prefix {self.target} found')
                 self.cc = check_cmd('cc', 'cc', 'gcc', 'clang')
         else: # cc may be passed from environ, so we shall not merge the logic
             self.cc = check_cmd('cc', 'cc', 'gcc', 'clang')
