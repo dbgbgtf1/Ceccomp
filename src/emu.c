@@ -61,7 +61,7 @@ emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data)
   char *rval_str = sym_str + sym_len;
   uint32_t rval = right_val_ifline (rval_str, reg, data->arch);
 
-  fprintf (s_output_fp, CYAN_A);
+  fprintf (s_output_fp, REG_A);
   fprintf (s_output_fp, " %.*s ", sym_len, sym_str);
   fprintf (s_output_fp, CYAN_LS, (uint32_t)(strchr (rval_str, ')') - rval_str),
            rval_str);
@@ -226,7 +226,7 @@ static void
 emu_alu_neg (reg_mem *reg)
 {
   reg->A = -reg->A;
-  fprintf (s_output_fp, "%s = -%s\n", CYAN_A, CYAN_A);
+  fprintf (s_output_fp, "%s = -%s\n", REG_A, REG_A);
   return;
 }
 
@@ -253,7 +253,7 @@ emu_alu_line (char *clean_line, reg_mem *reg)
 
   emu_do_alu (A_ptr, sym_enum, rval);
 
-  fprintf (s_output_fp, "%s %.*s ", CYAN_A, sym_len, sym_str);
+  fprintf (s_output_fp, "%s %.*s ", REG_A, sym_len, sym_str);
   fprintf (s_output_fp, CYAN_S, rval_str);
   fprintf (s_output_fp, "\n");
 }

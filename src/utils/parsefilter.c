@@ -83,25 +83,25 @@ set_ctx (stat_ctx *dest, stat_ctx src, bool force)
 }
 
 static char *
-load_reg_abs (char reg[REG_BUF_LEN], reg_stat *status, filter *f_ptr)
+load_reg_abs (reg_stat *status, filter *f_ptr)
 {
-  char *abs_name = 0;
+  char *abs_name = NULL;
   abs_name = ABS2STR (f_ptr->k);
   if (!abs_name)
     error ("%d %s", pc, INVALID_OFFSET_ABS);
-  strcpy (reg, abs_name);
-  if (!strcmp (reg, ARCHITECTURE))
+
+  if (!strcmp (abs_name, ARCHITECTURE))
     set_stat (status, ARCH, FORCE);
-  else if (!strcmp (reg, SYSCALL_NR))
+  else if (!strcmp (abs_name, SYSCALL_NR))
     set_stat (status, SYS_NR, FORCE);
   else
     set_stat (status, UNKNOWN, FORCE);
-  return reg;
+  return abs_name;
 }
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wreturn-type"
-static char *
+static void
 load_reg (char reg[REG_BUF_LEN], reg_stat *reg_stat, filter *f_ptr,
           stat_ctx *ctx)
 {
@@ -112,16 +112,20 @@ load_reg (char reg[REG_BUF_LEN], reg_stat *reg_stat, filter *f_ptr,
     {
     case BPF_IMM:
       snprintf (reg, REG_BUF_LEN, "0x%x", k);
+      fprintf (o_fp, CYAN_H, k);
       set_stat (reg_stat, UNKNOWN, FORCE);
-      return reg;
+      return;
     case BPF_ABS:
-      return load_reg_abs (reg, reg_stat, f_ptr);
+      snprintf (reg, REG_BUF_LEN, "%s", load_reg_abs (reg_stat, f_ptr));
+      fprintf (o_fp, BLUE_S, reg);
+      return;
     case BPF_MEM:
       if (*mem[k] == '\0')
         error ("%d %s", pc, ST_MEM_BEFORE_LD);
+      snprintf (reg, REG_BUF_LEN, "%s", mem[k]);
+      fprintf (o_fp, YELLOW_S, REG_MEM2STR (offsetof (reg_mem, mem[k])));
       set_stat (reg_stat, ctx->mem_stat[k], FORCE);
-      strcpy (reg, mem[k]);
-      return REG_MEM2STR (offsetof (reg_mem, mem[k]));
+      return;
     }
 }
 #pragma GCC diagnostic pop
@@ -129,24 +133,22 @@ load_reg (char reg[REG_BUF_LEN], reg_stat *reg_stat, filter *f_ptr,
 static void
 LD (filter *f_ptr, stat_ctx *ctx)
 {
-  char *rval_str = load_reg (A, &ctx->A_stat, f_ptr, ctx);
-  fprintf (o_fp, "%s = ", CYAN_A);
-  fprintf (o_fp, CYAN_S, rval_str);
+  fprintf (o_fp, "%s = ", REG_A);
+  load_reg (A, &ctx->A_stat, f_ptr, ctx);
 }
 
 static void
 LDX (filter *f_ptr, stat_ctx *ctx)
 {
-  char *rval_str = load_reg (X, &ctx->X_stat, f_ptr, ctx);
-  fprintf (o_fp, "%s = ", CYAN_X);
-  fprintf (o_fp, CYAN_S, rval_str);
+  fprintf (o_fp, "%s = ", REG_X);
+  load_reg (X, &ctx->X_stat, f_ptr, ctx);
 }
 
 static void
 ST (filter *f_ptr, stat_ctx *ctx)
 {
-  fprintf (o_fp, CYAN_M, f_ptr->k);
-  fprintf (o_fp, " = %s", CYAN_A);
+  fprintf (o_fp, MEM_K, f_ptr->k);
+  fprintf (o_fp, " = %s", REG_A);
   strncpy (mem[f_ptr->k], A, REG_BUF_LEN);
   set_stat (&ctx->mem_stat[f_ptr->k], ctx->A_stat, FORCE);
 }
@@ -154,8 +156,8 @@ ST (filter *f_ptr, stat_ctx *ctx)
 static void
 STX (filter *f_ptr, stat_ctx *ctx)
 {
-  fprintf (o_fp, CYAN_M, f_ptr->k);
-  fprintf (o_fp, " = %s", CYAN_X);
+  fprintf (o_fp, MEM_K, f_ptr->k);
+  fprintf (o_fp, " = %s", REG_X);
   strncpy (mem[f_ptr->k], X, REG_BUF_LEN);
   set_stat (&ctx->mem_stat[f_ptr->k], ctx->X_stat, FORCE);
 }
@@ -206,7 +208,7 @@ ALU (filter *f_ptr, stat_ctx *ctx)
 
   alu_sym = ALU_OP (f_ptr);
 
-  fprintf (o_fp, CYAN_A);
+  fprintf (o_fp, REG_A);
   fprintf (o_fp, "%s", alu_sym);
 
   strcpy (A, "A");
@@ -350,7 +352,7 @@ JMP (filter *f_ptr, stat_ctx *stat_list)
     fprintf (o_fp, "!(");
   else
     fprintf (o_fp, "(");
-  fprintf (o_fp, CYAN_A);
+  fprintf (o_fp, REG_A);
 
   if (jt == 0)
     {
@@ -406,12 +408,12 @@ MISC (filter *f_ptr, stat_ctx *ctx)
   switch (mode)
     {
     case BPF_TAX:
-      fprintf (o_fp, "%s = %s", CYAN_X, CYAN_A);
+      fprintf (o_fp, "%s = %s", REG_X, REG_A);
       strncpy (X, A, REG_BUF_LEN);
       set_stat (&ctx->A_stat, ctx->X_stat, FORCE);
       return;
     case BPF_TXA:
-      fprintf (o_fp, "%s = %s", CYAN_A, CYAN_X);
+      fprintf (o_fp, "%s = %s", REG_A, REG_X);
       strncpy (A, X, REG_BUF_LEN);
       set_stat (&ctx->X_stat, ctx->A_stat, FORCE);
       return;
