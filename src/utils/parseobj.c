@@ -6,6 +6,7 @@
 #include "parseargs.h"
 #include "transfer.h"
 #include <seccomp.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -14,31 +15,56 @@
 #include <string.h>
 #include <unistd.h>
 
+uint32_t
+syscall_name (char *str, uint32_t arch)
+{
+  char *syscall_name = strndup (str, strchr (str, ')') - str);
+  uint32_t ret = seccomp_syscall_resolve_name_arch (arch, syscall_name);
+  free (syscall_name);
+  if (ret != (uint32_t)__NR_SCMP_ERROR)
+    return ret;
+  else
+    return -1;
+}
 // this is used in if line, right value only
 // if ($A == X86_64)
+// if ($A == X86_64.open)
 // if ($A > $X)
 // if ($A == write)
 // if ($A > 0xffffffff)
 uint32_t
 right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch)
 {
-  uint32_t rval = STR2ARCH (rval_str);
-  if (rval != (uint32_t)-1)
+  int32_t rval = syscall_name (rval_str, arch);
+  if (rval != -1)
     return rval;
+  // write
 
   if (STARTWITH (rval_str, "$X"))
     return reg->X;
+  // $X
 
-  char *syscall_name = strndup (rval_str, strchr (rval_str, ')') - rval_str);
-  rval = seccomp_syscall_resolve_name_arch (arch, syscall_name);
-  free (syscall_name);
-  if (rval != (uint32_t)__NR_SCMP_ERROR)
-    return rval;
+  rval = STR2ARCH (rval_str);
+  if (rval != -1)
+    {
+      char *syscall_str = STRAFTER (rval_str, ".");
+      if (!syscall_str)
+        return rval;
+      // X86_64
+
+      rval = syscall_name (syscall_str, rval);
+      if (rval == -1)
+        error ("%s", INVALID_RIGHT_VAL);
+      else
+        return rval;
+      // X86_64.open
+    }
 
   char *end;
   rval = strtoul (rval_str, &end, 0);
   if (rval_str != end)
     return rval;
+  // 0xffffffff
 
   error ("%s", INVALID_RIGHT_VAL);
 }
