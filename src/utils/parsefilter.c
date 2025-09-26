@@ -112,18 +112,19 @@ load_reg (char reg[REG_BUF_LEN], reg_stat *reg_stat, filter *f_ptr,
     {
     case BPF_IMM:
       snprintf (reg, REG_BUF_LEN, "0x%x", k);
-      fprintf (o_fp, CYAN_H, k);
+      fprintf (o_fp, BRIGHT_CYAN ("0x%x"), k);
       set_stat (reg_stat, UNKNOWN, FORCE);
       return;
     case BPF_ABS:
       snprintf (reg, REG_BUF_LEN, "%s", load_reg_abs (reg_stat, f_ptr));
-      fprintf (o_fp, BLUE_S, reg);
+      fprintf (o_fp, BRIGHT_BLUE ("%s"), reg);
       return;
     case BPF_MEM:
       if (*mem[k] == '\0')
         error ("%d %s", pc, ST_MEM_BEFORE_LD);
       snprintf (reg, REG_BUF_LEN, "%s", mem[k]);
-      fprintf (o_fp, BRIGHT_YELLOW("%s"), REG_MEM2STR (offsetof (reg_mem, mem[k])));
+      fprintf (o_fp, BRIGHT_YELLOW ("%s"),
+               REG_MEM2STR (offsetof (reg_mem, mem[k])));
       set_stat (reg_stat, ctx->mem_stat[k], FORCE);
       return;
     }
@@ -220,7 +221,7 @@ ALU (filter *f_ptr, stat_ctx *ctx)
     sprintf (rval, "0x%x", f_ptr->k);
   else if (src == BPF_X)
     strcpy (rval, "$X");
-  fprintf (o_fp, CYAN_S, rval);
+  fprintf (o_fp, BRIGHT_CYAN_S, rval);
   strcat (A, rval);
 
   set_stat (&ctx->A_stat, UNKNOWN, FORCE);
@@ -298,7 +299,7 @@ static void
 print_condition (const char *sym, char *rval_str)
 {
   fprintf (o_fp, "%s", sym);
-  fprintf (o_fp, CYAN_S, rval_str);
+  fprintf (o_fp, BRIGHT_CYAN_S, rval_str);
   fprintf (o_fp, ") ");
 }
 
@@ -388,7 +389,7 @@ RET (filter *f_ptr)
   switch (ret)
     {
     case BPF_A:
-      ret_str = CYAN ("$A");
+      ret_str = REG_A;
       break;
     case BPF_K:
       ret_str = RETVAL2STR (f_ptr->k);

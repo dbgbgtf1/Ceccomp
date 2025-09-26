@@ -63,7 +63,7 @@ emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data)
 
   fprintf (s_output_fp, REG_A);
   fprintf (s_output_fp, " %.*s ", sym_len, sym_str);
-  fprintf (s_output_fp, CYAN_LS, (uint32_t)(strchr (rval_str, ')') - rval_str),
+  fprintf (s_output_fp, BRIGHT_CYAN_LS, (uint32_t)(strchr (rval_str, ')') - rval_str),
            rval_str);
 
   return is_state_true (reg->A, sym_enum, rval);
@@ -148,9 +148,9 @@ emu_assign_line (char *clean_line, reg_mem *reg, seccomp_data *data)
   *lval_ptr = rval;
 
 print_result:
-  fprintf (s_output_fp, CYAN_LS, lval_len, clean_line);
+  fprintf (s_output_fp, BRIGHT_CYAN_LS, lval_len, clean_line);
   fprintf (s_output_fp, " = ");
-  fprintf (s_output_fp, CYAN_S, rval_str);
+  fprintf (s_output_fp, BRIGHT_CYAN_S, rval_str);
   fprintf (s_output_fp, "\n");
 }
 
@@ -254,7 +254,7 @@ emu_alu_line (char *clean_line, reg_mem *reg)
   emu_do_alu (A_ptr, sym_enum, rval);
 
   fprintf (s_output_fp, "%s %.*s ", REG_A, sym_len, sym_str);
-  fprintf (s_output_fp, CYAN_S, rval_str);
+  fprintf (s_output_fp, BRIGHT_CYAN_S, rval_str);
   fprintf (s_output_fp, "\n");
 }
 
@@ -356,6 +356,6 @@ emulate (ceccomp_args *args)
     retval_str = emu_lines (false, args->read_fp, &data);
 
   printf ("return ");
-  printf (CYAN_S, retval_str);
+  printf ("%s", retval_str);
   printf ("\n");
 }
