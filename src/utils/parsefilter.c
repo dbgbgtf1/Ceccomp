@@ -123,7 +123,7 @@ load_reg (char reg[REG_BUF_LEN], reg_stat *reg_stat, filter *f_ptr,
       if (*mem[k] == '\0')
         error ("%d %s", pc, ST_MEM_BEFORE_LD);
       snprintf (reg, REG_BUF_LEN, "%s", mem[k]);
-      fprintf (o_fp, YELLOW_S, REG_MEM2STR (offsetof (reg_mem, mem[k])));
+      fprintf (o_fp, BRIGHT_YELLOW("%s"), REG_MEM2STR (offsetof (reg_mem, mem[k])));
       set_stat (reg_stat, ctx->mem_stat[k], FORCE);
       return;
     }
