@@ -121,6 +121,10 @@ JMP (char *clean_line, uint32_t pc, uint32_t arch)
   uint16_t jt = GETJT (jmp_set);
   uint16_t jf = GETJF (jmp_set);
 
+  // if jt != 0 and jt <= pc, something mush be wrong
+  if ((jt && (jt <= pc)) || (jf && (jf <= pc)))
+    error ("%s", JMP_NR_LESS_THAN_PC);
+
   if (reverse)
     {
       filter.jt = jf ? (jf - pc - 1) : 0;

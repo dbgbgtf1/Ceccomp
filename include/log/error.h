@@ -47,6 +47,7 @@
 #define LINE_NR_AFTER_ELSE _ ("Line number to go after ',else goto'")
 #define INVALID_NR_AFTER_GOTO _ ("Invalid line number after goto")
 #define INVALID_JMP_NR _ ("Invalid jmp line number")
+#define JMP_NR_LESS_THAN_PC _ ("Jmp line number less than pc")
 #define INVALID_ASM_CODE _ ("Invalid asm code")
 #define INVALID_RET_VAL _ ("Invalid return value")
 
