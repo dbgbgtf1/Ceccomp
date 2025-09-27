@@ -22,7 +22,6 @@
 #include <sys/ptrace.h>
 #include <sys/types.h>
 
-static char *origin;
 static uint32_t idx;
 
 static filter
@@ -367,7 +366,6 @@ assemble (uint32_t arch, FILE *read_fp, print_mode p_mode)
     {
       filter f_current = { 0, 0, 0, 0 };
       char *clean_line = Line.clean_line;
-      origin = Line.origin_line;
       idx = prog.len;
 
       if (!strcmp (clean_line, "$A=$X"))
