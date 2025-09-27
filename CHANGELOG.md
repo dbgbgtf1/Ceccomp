@@ -6,7 +6,7 @@ Items marked with :star: is the major change why we release a new version.
 <!-- write user/repo#num or user/repo!num to reference. Then run scripts/complete-url.py -->
 <!-- to format raw ref to URL. -->
 
-## 3.2 (INCOMING)
+## 3.2
 * **BREAKING** :star: Enhance arch/syscall prediction :link: [#12]
 * :star: Add support for Debian build system :link: [#13]
 * :star: Improve syntax highlighting
