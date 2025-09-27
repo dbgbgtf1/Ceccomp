@@ -13,6 +13,7 @@ Items marked with :star: is the major change why we release a new version.
 * Hide unused bpf operation in emu :link: [#14]
 * Fix `CECCOMP_USAGE` warning as it's a function call
 * Add a dark-mode css for html doc
+* Sort source object for reproducible build
 
 [#13]: https://github.com/dbgbgtf1/Ceccomp/issues/13
 [#12]: https://github.com/dbgbgtf1/Ceccomp/issues/12
