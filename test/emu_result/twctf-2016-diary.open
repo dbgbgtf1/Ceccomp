@@ -1,0 +1,3 @@
+0001: [96m$A[0m = [96m$syscall_nr[0m
+0002: if ([93m$A[0m != [96mopen[0m) goto 0004
+0003: return [31mKILL[0m

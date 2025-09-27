@@ -6,7 +6,6 @@
 #include "parseargs.h"
 #include "transfer.h"
 #include <seccomp.h>
-#include <signal.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>

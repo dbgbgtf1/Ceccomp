@@ -1,0 +1,23 @@
+0001: [96m$A[0m = [96m$arch[0m
+0002: if ([93m$A[0m != [96mx86_64[0m) goto 0008
+0003: [96m$A[0m = [96m$syscall_nr[0m
+0004: if ([93m$A[0m >= [96m0x40000000[0m) goto 0023
+0005: if ([93m$A[0m == [96maccept[0m) goto 0024
+0006: if ([93m$A[0m == [96mlisten[0m) goto 0024
+0007: if ([93m$A[0m == [96mbind[0m) goto 0024, else goto 0023
+[90m0008: if ($A != i386) goto 0013
+[0m[90m0009: $syscall_nr
+[0m[90m0010: if ($A == i386.restart_syscall) goto 0024
+[0m[90m0011: if ($A == i386.exit) goto 0024
+[0m[90m0012: if ($A == i386.fork) goto 0024, else goto 0023
+[0m[90m0013: if ($A != aarch64) goto 0018
+[0m[90m0014: $syscall_nr
+[0m[90m0015: if ($A == aarch64.alarm) goto 0024
+[0m[90m0016: if ($A == aarch64.select) goto 0024
+[0m[90m0017: if ($A == aarch64.pipe) goto 0024, else goto 0023
+[0m[90m0018: if ($A != arm) goto 0023
+[0m[90m0019: $syscall_nr
+[0m[90m0020: if ($A == arm.restart_syscall) goto 0024
+[0m[90m0021: if ($A == arm.readv) goto 0024
+[0m[90m0022: if ($A == arm.clone) goto 0024
+[0m0023: return [31mKILL[0m
