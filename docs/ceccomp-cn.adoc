@@ -92,6 +92,10 @@ ARCH::
 例如，在 x86_64 上，在比较系统调用号时，数字 `0x3b` 将被翻译为 `execve` ，可以看上面的基本示例。
 你的系统上的默认值是 {ARCH} 。
 
+NOTE: 当且仅当在某一行的架构可以被确定时，ceccomp 才会尝试用那个架构解析那个系统调用号。
+如果是外部架构（不等于你设置的架构），它会被附加到系统调用名前。你可能会注意到在一些情况下，
+seccomp-tools 能解析一些系统调用名，而 ceccomp 不能，这可能是因为此时架构不能被确定。
+
 |===
 |命令|差别
 
@@ -99,7 +103,8 @@ ARCH::
 |用它自己的语法反汇编；永远不会检查 _RAW_ 是否合法
 
 |`ceccomp disasm`
-|用 ceccomp 语法反汇编，并且默认将 _标准输入_ 作为输入
+|用 ceccomp 语法反汇编，并且默认将 _标准输入_ 作为输入；严格检查架构，
+并且永远打印外部架构名
 |===
 
 === emu - 模拟
@@ -174,6 +179,10 @@ PID::
 NOTE: 要想从 *PID* 中提取过滤器，你需要 `CAP_SYS_ADMIN` ，同时还可能需要
 `CAP_SYS_PTRACE` ，最简单的获取它们的方法是用 `sudo` 运行 `ceccomp` 。
 
+NOTE: 从 _version 3.1_ 开始引入了多进程支持，并且当被调试进程 fork/resolve/exit
+时，将会打印一条额外的 INFO 信息。你可以使用像 `ceccomp trace -o $(tty) PROG 2>/dev/null`
+这样的命令丢弃它。
+
 |===
 |命令|差别
 
@@ -183,14 +192,14 @@ NOTE: 要想从 *PID* 中提取过滤器，你需要 `CAP_SYS_ADMIN` ，同时�
 
 |`ceccomp trace`
 |所有过滤器被输出到同一个文件；永远不会杀死 *PROGRAM* ； *PROGRAM* 是直接被执行的，
-所以不需要 `./`
+所以不需要 `./` ；当 fork 时，显式打印事件
 |===
 
 === probe - 快速测试常见的系统调用
 
     ceccomp probe [-c WHEN] [-a ARCH] [-o FILE] PROGRAM [program-args]
 
-以 *program-args* 为参数运行 *PROGRAM* 来捕获第一个 seccomp 过滤器，
+以 *program-args* 为参数运行 *PROGRAM* 来捕获 *第一个* seccomp 过滤器，
 然后杀死所有子进程。适用于快速测试一个程序的规则并检测潜在的 seccomp
 规则问题。
 
@@ -323,6 +332,17 @@ NOTE: `ceccomp disasm` 和 `seccomp-tools disasm` 的输出之间有很多细微
     if ($A > $X) goto 3, else goto 4
     if ($A >= 4567) goto 5, else goto 6
 
+只有在做条件判断时，你才能将数字替换为系统调用号。在以上的例子中， `0x3b`
+被 `execve` 替换。所有系统调用名将会以你设置的架构解析为系统调用号。
+如果你希望解析外部架构（不等于你设置的架构）的系统调用名，
+请在前面附加架构名和一个点。例如，你设置的架构是 x86_64，并且你正在写
+_aarch64_ 架构的规则，请这样写：
+
+    if ($A == aarch64.read) goto 5
+
+注意当你手动使用 `-a aarch64` 将架构设置为 _aarch64_ 时，
+你可以在伪代码中忽略 `aarch64.` 。
+
 === 返回码
 
 返回寄存器 `A` 的值：
@@ -381,4 +401,4 @@ endif::[]
 在 https://github.com/dbgbgtf1/Ceccomp 可以找到源代码。
 欢迎提交 Pull Requests 和 Issues ！
 
-Copyright (C) 2025-现在，基于 GPLv3 分发。
+Copyright (C) 2025-现在，基于 GPLv3 或更新版本分发。

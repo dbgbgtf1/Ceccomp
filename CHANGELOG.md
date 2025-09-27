@@ -7,9 +7,9 @@ Items marked with :star: is the major change why we release a new version.
 <!-- to format raw ref to URL. -->
 
 ## 3.2 (INCOMING)
+* **BREAKING** :star: Enhance arch/syscall prediction :link: [#12]
 * :star: Add support for Debian build system :link: [#13]
 * :star: Improve syntax highlighting
-* :star: Enhance arch/syscall prediction :link: [#12]
 * Hide unused bpf operation in emu :link: [#14]
 * Fix `CECCOMP_USAGE` warning as it's a function call
 * Add a dark-mode css for html doc
@@ -19,7 +19,7 @@ Items marked with :star: is the major change why we release a new version.
 [#12]: https://github.com/dbgbgtf1/Ceccomp/issues/12
 [#14]: https://github.com/dbgbgtf1/Ceccomp/issues/14
 ## 3.1
-* :star: Add support for multiple process tracing :link: [#3]
+* **BREAKING** :star: Add support for multiple process tracing :link: [#3]
 * :star: Cover all cases of trace pid errors :link: [#11]
 * :star: Add support for internationalization/localization :link: [#1]
 * :star: Fix `ld` error when compiling on Kali Linux

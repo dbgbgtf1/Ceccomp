@@ -100,6 +100,11 @@ how filtered syscall number in _RAW_ filter is translated to syscall name (for e
 on x86_64, the number `0x3b` is translated to `execve` if is comparing syscall_nr, see
 the basic example above). The default value on your system is {ARCH}.
 
+NOTE: ceccomp will try to resolve syscall number under an arch ONLY IF that at that line,
+arch can be determined. On foreign arch (not equal to the arch you set), the foreign arch
+will be prepended to syscall name. You may notice that in some cases, seccomp-tools is able
+to resolve the name while ceccomp is not, that may be intended as the arch is not determined.
+
 |===
 |Command|Difference
 
@@ -107,7 +112,8 @@ the basic example above). The default value on your system is {ARCH}.
 |Disassembles in its format; never check if the filter is valid
 
 |`ceccomp disasm`
-|Disassembles in ceccomp format, and takes `stdin` as input by default
+|Disassembles in ceccomp format, and takes `stdin` as input by default; check arch strictly
+and always display foreign arch name
 |===
 
 === emu - EMULATE
@@ -188,6 +194,10 @@ NOTE: To extract filters from *PID*, `CAP_SYS_ADMIN` is needed and
 `CAP_SYS_PTRACE` may also be needed, the easiest way to acquire them is
 calling `ceccomp` with `sudo`.
 
+NOTE: Since _version 3.1_, multiple process tracing is introduced, and when tracee
+forking/resolving/exiting, an extra INFO message is printed. You can discard
+it by running command like `ceccomp trace -o $(tty) PROG 2>/dev/null`.
+
 |===
 |Command|Difference
 
@@ -198,14 +208,14 @@ in `sh -c`
 
 |`ceccomp trace`
 |All filters are output to a single file; never kill *PROGRAM*; *PROGRAM* is
-launched directly, so `./` is not needed
+launched directly, so `./` is not needed; explicitly print when forking
 |===
 
 === probe - TEST COMMON SYSCALLS INSTANTLY
 
     ceccomp probe [-c WHEN] [-a ARCH] [-o FILE] PROGRAM [program-args]
 
-Run *PROGRAM* with *program-args* to captures first seccomp filter, and then
+Run *PROGRAM* with *program-args* to captures *FIRST* seccomp filter, and then
 kill all children. Use it when a quick check against a program is needed,
 and detect potential seccomp rule issues.
 
@@ -346,6 +356,18 @@ If true jump to ... if false jump to...:
     if ($A > $X) goto 3, else goto 4
     if ($A >= 4567) goto 5, else goto 6
 
+ONLY in conditions, you CAN replace number with syscall name. In example
+above, `0x3b` is replaced by `execve`. All the syscall name will be
+resolved to syscall number under your selected arch. If you want to resolve
+a syscall name in foreign arch (not equal to your selected arch), please
+prepend a arch and dot. For example, your arch is x86_64, and you are writing
+_aarch64_ rules, then please write like:
+
+    if ($A == aarch64.read) goto 5
+
+Note that if you manually set arch to _aarch64_ with `-a aarch64`,
+you can omit `aarch64.` in statement.
+
 === Return Code
 
 Return value of register `A`:
@@ -406,4 +428,4 @@ endif::[]
 Visit https://github.com/dbgbgtf1/Ceccomp to find the code.
 Pull Requests and Issues are welcome!
 
-Copyright (C) 2025-present, distributed under GPLv3.
+Copyright (C) 2025-present, distributed under GPLv3 or later.
