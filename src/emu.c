@@ -293,7 +293,7 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
 
       if (read_idx < execute_idx)
         {
-          pre_clear_color (Line.origin_start);
+          pre_clear_color (origin_line);
           LIGHTCOLORPRINTF (FORMAT ": %s", read_idx, Line.origin_start);
           continue;
         }
