@@ -300,11 +300,13 @@ def run_command(argv: list[str], stdin: str | None=None, push_sys_dir: bool=Fals
     """
     try:
         argv[0] = shutil.which(argv[0])
-        if push_sys_dir:
+        if push_sys_dir: # using C compiler!
             if buildopts.sys_includedir: # in case some include/lib is not accessible for current compiler
                 argv.append(f'-I{buildopts.sys_includedir}')
             if buildopts.sys_libdir:
                 argv.append(f'-L{buildopts.sys_libdir}')
+            if buildopts.is_static:
+                argv.append('-static')
         proc = subprocess.run(argv, input=stdin, capture_output=True, text=True)
     except subprocess.SubprocessError as e:
         return -1, '', str(e)
