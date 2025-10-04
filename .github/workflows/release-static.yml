@@ -26,7 +26,7 @@ jobs:
       - name: Set up cross compiler
         run: |
           sudo apt-get update
-          sudo apt-get install libseccomp2
+          sudo apt-get install -y libseccomp-dev make
           case "${{ matrix.arch }}" in
             x86_64)
               export CC=gcc
