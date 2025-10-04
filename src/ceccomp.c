@@ -56,6 +56,7 @@ static struct argp_option options[] = {
   { "fmt", 'f', "FMT", 0, NULL, 0 },
   { "help", 'h', NULL, 0, NULL, 0 },
   { "usage", 'u', NULL, 0, NULL, 0 },
+  { 0 },
 };
 
 static void
