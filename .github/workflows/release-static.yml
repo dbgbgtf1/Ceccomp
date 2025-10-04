@@ -1,0 +1,99 @@
+name: Build & Release (static)
+
+on:
+  # 手动触发
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'v3.2'
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Build for ${{ matrix.arch }}
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, i386, aarch64, arm, riscv64, loongarch64, ppc64, ppc64le, s390x]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up cross compiler
+        run: |
+          sudo apt-get update
+          case "${{ matrix.arch }}" in
+            x86_64)
+              export CC=gcc
+              ;;
+            i386)
+              sudo apt-get install -y gcc-multilib
+              export CC="gcc -m32"
+              ;;
+            aarch64)
+              sudo apt-get install -y gcc-aarch64-linux-gnu
+              export CC=aarch64-linux-gnu-gcc
+              ;;
+            arm)
+              sudo apt-get install -y gcc-arm-linux-gnueabihf
+              export CC=arm-linux-gnueabihf-gcc
+              ;;
+            riscv64)
+              sudo apt-get install -y gcc-riscv64-linux-gnu
+              export CC=riscv64-linux-gnu-gcc
+              ;;
+            loongarch64)
+              echo "LoongArch64 交叉编译器暂时需要自行配置或 Docker 构建"
+              exit 1
+              ;;
+            ppc64)
+              sudo apt-get install -y gcc-powerpc64-linux-gnu
+              export CC=powerpc64-linux-gnu-gcc
+              ;;
+            ppc64le)
+              sudo apt-get install -y gcc-powerpc64le-linux-gnu
+              export CC=powerpc64le-linux-gnu-gcc
+              ;;
+            s390x)
+              sudo apt-get install -y gcc-s390x-linux-gnu
+              export CC=s390x-linux-gnu-gcc
+              ;;
+          esac
+          echo "CC=${CC}" >> $GITHUB_ENV
+
+      - name: Build project
+        run: |
+          ./configure --debug-level=0 --enable-static --devmode --without-i18n --without-doc
+          make
+          mv build/ceccomp build/ceccomp-${{ matrix.arch }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ceccomp
+          path: build/ceccomp-${{ matrix.arch }}
+
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: Release ${{ github.event.inputs.version }}
+          prerelease: ${{ github.event.inputs.prerelease }}
+          files: dist/**
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
