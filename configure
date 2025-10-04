@@ -90,6 +90,7 @@ Copyright (C) 2025-present, distributed under GPLv3
         help=f'Set ceccomp version (default: {VERSION}) [VERSION]')
     make_grp.add_argument('--tag-time', type=str, metavar='TIME',
         help=f'Set the time of current tag. Use "CONFIG" for the time when running configure; or write in YYYY-mm-dd like default value {TAG_TIME} [TAG_TIME]')
+    make_grp.add_argument('--enable-static', action='store_true', help='Enable static build [STATIC]')
 
     return parser.parse_known_args()
 
@@ -105,6 +106,7 @@ class BuildOptions:
     debug_level: int
     version: str
     tag_time: str
+    is_static: bool
 
     verbose: bool
     doc: bool
@@ -209,6 +211,7 @@ buildopts = BuildOptions(
     debug_level=args.debug_level,
     version=args.version,
     tag_time=args.tag_time,
+    is_static=args.enable_static,
 
     verbose=args.enable_verbose,
     doc=not args.without_doc,
@@ -594,7 +597,7 @@ def check_builder_name(makefile: Makefile):
     print(TXT_GREEN('yes'))
 
 taskmgr.run_tasks()
-# vars not injected: EXTRA_CFLAGS EXTRA_LDFLAGS DEBUG_LEVEL PREFIX BINDIR ZSH_FPATH MANDIR DOCDIR DESTDIR SYS_INC_DIR SYS_LIB_DIR
+# vars not injected: EXTRA_CFLAGS EXTRA_LDFLAGS DEBUG_LEVEL PREFIX BINDIR ZSH_FPATH MANDIR DOCDIR DESTDIR SYS_INC_DIR SYS_LIB_DIR IS_STATIC
 taskmgr.makefile.inject('EXTRA_CFLAGS', buildopts.cflags)
 taskmgr.makefile.inject('EXTRA_LDFLAGS', buildopts.ldflags)
 taskmgr.makefile.inject('DEBUG_LEVEL', str(buildopts.debug_level))
@@ -604,6 +607,7 @@ taskmgr.makefile.inject('ZSH_FPATH', buildopts.zshfpath)
 taskmgr.makefile.inject('MANDIR', buildopts.mandir)
 taskmgr.makefile.inject('DOCDIR', buildopts.docdir)
 taskmgr.makefile.inject('DESTDIR', buildopts.destdir)
+taskmgr.makefile.inject('IS_STATIC', '1' if buildopts.is_static else '0')
 
 taskmgr.makefile.inject('SYS_INC_DIR', f'-I{buildopts.sys_includedir}' if buildopts.sys_includedir else '')
 taskmgr.makefile.inject('SYS_LIB_DIR', f'-L{buildopts.sys_libdir}' if buildopts.sys_libdir else '')

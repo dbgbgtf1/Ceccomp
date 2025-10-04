@@ -81,6 +81,12 @@ else
 	LDFLAGS += -O2 -s
 endif
 
+STATIC ?= {{IS_STATIC}}
+ifeq ($(STATIC), 1)
+	CFLAGS += -static
+	LDFLAGS += -static
+endif
+
 all: ceccomp {{DOC_IF}}doc{{DOC_ENDIF}} {{I18N_IF}}mo{{I18N_ENDIF}}
 
 {{I18N_IF}}
