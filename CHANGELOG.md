@@ -6,6 +6,11 @@ Items marked with :star: is the major change why we release a new version.
 <!-- write user/repo#num or user/repo!num to reference. Then run scripts/complete-url.py -->
 <!-- to format raw ref to URL. -->
 
+## 3.3(Incoming)
+* :star: Add `--enable-static` in `configure` to build statically
+* Fix not-null-terminated argp option array
+* Fix copyright as GPLv3 or later
+
 ## 3.2
 * **BREAKING** :star: Enhance arch/syscall prediction :link: [#12]
 * :star: Add support for Debian build system :link: [#13]
