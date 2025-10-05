@@ -54,4 +54,4 @@ Any Issue or Pr are welcome!
 
 # License
 
-Copyright (C) 2025-present, ceccomp contributors, distributed under GNU General Public License v3.0
+Copyright (C) 2025-present, ceccomp contributors, distributed under GNU General Public License v3.0 or Later

@@ -47,7 +47,7 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
     ASCIIDOC           Asciidoc document compiler
 
 Please report bug at https://github.com/dbgbgtf1/Ceccomp
-Copyright (C) 2025-present, distributed under GPLv3
+Copyright (C) 2025-present, distributed under GPLv3 or later
     '''
     parser = argparse.ArgumentParser(
         prog='configure.py',
