@@ -11,3 +11,8 @@ Makefile
 po/*.po~
 SOURCES.txt
 include/config.h
+py-temp/dist/
+py-temp/build/
+py-temp/ceccomp.egg-info/
+py-temp/wheelhouse
+py-temp/ceccomp/ceccomp

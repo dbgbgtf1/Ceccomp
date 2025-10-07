@@ -8,6 +8,7 @@ Items marked with :star: is the major change why we release a new version.
 
 ## 3.3(Incoming)
 * :star: Add `--enable-static` in `configure` to build statically
+* Portable release in pip, for x86_64, i386, aarch64, armhf, riscv64
 * Fix not-null-terminated argp option array
 * Fix copyright as GPLv3 or later
 

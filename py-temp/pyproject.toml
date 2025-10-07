@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ceccomp"
+version = "3.2.3"
+description = "A C-based seccomp analysis tool"
+authors = [{name = "dbgbgtf", email = "dudududumaxver@outlook.com"}]
+license = {text = "GPL 3.0+"}
+scripts = { "ceccomp" = "ceccomp:main"}
+
+[tool.setuptools]
+packages = ["ceccomp"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+ceccomp = ["ceccomp"]
