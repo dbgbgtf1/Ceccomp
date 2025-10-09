@@ -57,18 +57,25 @@ build_riscv64() {
 
 # 根据参数选择执行
 case "$1" in
-    aarch64)
-        build_aarch64
-        ;;
     x86_64)
-        build_x86_64
-        ;;
+        build_x86_64;;
+    i386)
+        build_i386;;
+    aarch64)
+        build_aarch64;;
+    armhf)
+        build_armhf;;
+    riscv64)
+        build_riscv64;;
     all)
-        build_aarch64
         build_x86_64
+        build_i386
+        build_aarch64
+        build_armhf
+        build_riscv64
         ;;
     *)
-        echo "用法: $0 {aarch64|x86_64|all}"
+        echo "用法: $0 {x86_64|i386|aarch64|armhf|riscv64|all}"
         exit 1
         ;;
 esac
