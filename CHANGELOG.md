@@ -6,7 +6,7 @@ Items marked with :star: is the major change why we release a new version.
 <!-- write user/repo#num or user/repo!num to reference. Then run scripts/complete-url.py -->
 <!-- to format raw ref to URL. -->
 
-## 3.3(Incoming)
+## 3.3
 * :star: Add `--enable-static` in `configure` to build statically
 * Portable release in pip, for x86_64, i386, aarch64, armhf, riscv64
 * Fix not-null-terminated argp option array
