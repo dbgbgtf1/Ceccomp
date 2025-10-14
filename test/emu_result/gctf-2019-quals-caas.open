@@ -17,47 +17,47 @@
 0017: if ([93m$A[0m == [96mexit[0m) goto 0062
 0018: if ([93m$A[0m == [96mexit_group[0m) goto 0062
 0019: if ([93m$A[0m != [96mclone[0m) goto 0024
-[90m0020: $high_args[0]
+[90m0020: $A = $high_args[0]
 [0m[90m0021: if ($A != 0x0) goto 0063
-[0m[90m0022: $low_args[0]
+[0m[90m0022: $A = $low_args[0]
 [0m[90m0023: if ($A == 0x10900) goto 0062, else goto 0063
 [0m0024: if ([93m$A[0m != [96msocket[0m) goto 0037
-[90m0025: $high_args[0]
+[90m0025: $A = $high_args[0]
 [0m[90m0026: if ($A != 0x0) goto 0063
-[0m[90m0027: $low_args[0]
+[0m[90m0027: $A = $low_args[0]
 [0m[90m0028: if ($A != 0x2) goto 0063
-[0m[90m0029: $high_args[1]
+[0m[90m0029: $A = $high_args[1]
 [0m[90m0030: if ($A != 0x0) goto 0063
-[0m[90m0031: $low_args[1]
+[0m[90m0031: $A = $low_args[1]
 [0m[90m0032: if ($A != 0x1) goto 0063
-[0m[90m0033: $high_args[2]
+[0m[90m0033: $A = $high_args[2]
 [0m[90m0034: if ($A != 0x0) goto 0063
-[0m[90m0035: $low_args[2]
+[0m[90m0035: $A = $low_args[2]
 [0m[90m0036: if ($A == 0x0) goto 0062, else goto 0063
 [0m0037: if ([93m$A[0m != [96mmmap[0m) goto 0063
-[90m0038: $high_args[0]
+[90m0038: $A = $high_args[0]
 [0m[90m0039: if ($A != 0x0) goto 0063
-[0m[90m0040: $low_args[0]
+[0m[90m0040: $A = $low_args[0]
 [0m[90m0041: if ($A != 0x0) goto 0063
-[0m[90m0042: $high_args[1]
+[0m[90m0042: $A = $high_args[1]
 [0m[90m0043: if ($A != 0x0) goto 0063
-[0m[90m0044: $low_args[1]
+[0m[90m0044: $A = $low_args[1]
 [0m[90m0045: if ($A != 0x1000) goto 0063
-[0m[90m0046: $high_args[2]
+[0m[90m0046: $A = $high_args[2]
 [0m[90m0047: if ($A != 0x0) goto 0063
-[0m[90m0048: $low_args[2]
+[0m[90m0048: $A = $low_args[2]
 [0m[90m0049: if ($A != 0x3) goto 0063
-[0m[90m0050: $high_args[3]
+[0m[90m0050: $A = $high_args[3]
 [0m[90m0051: if ($A != 0x0) goto 0063
-[0m[90m0052: $low_args[3]
+[0m[90m0052: $A = $low_args[3]
 [0m[90m0053: if ($A != 0x22) goto 0063
-[0m[90m0054: $high_args[4]
+[0m[90m0054: $A = $high_args[4]
 [0m[90m0055: if ($A != 0x0) goto 0063
-[0m[90m0056: $low_args[4]
+[0m[90m0056: $A = $low_args[4]
 [0m[90m0057: if ($A != 0x0) goto 0063
-[0m[90m0058: $high_args[5]
+[0m[90m0058: $A = $high_args[5]
 [0m[90m0059: if ($A != 0x0) goto 0063
-[0m[90m0060: $low_args[5]
+[0m[90m0060: $A = $low_args[5]
 [0m[90m0061: if ($A != 0x0) goto 0063
 [0m[90m0062: return ALLOW
 [0m0063: return [31mKILL[0m

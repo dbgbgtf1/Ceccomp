@@ -110,14 +110,14 @@ jmp_to (char *clean_line, reg_mem *reg, seccomp_data *data)
 }
 
 static void
-emu_if_line (char *clean_line, char *origin_line, reg_mem *reg,
+emu_if_line (char *clean_line, char *origin_start, reg_mem *reg,
              seccomp_data *data, uint32_t *execute_idx)
 {
   uint32_t tmp_idx = jmp_to (clean_line, reg, data);
   if (tmp_idx == 0)
     return;
   if (tmp_idx < *execute_idx)
-    error ("%s: %s", INVALID_JMP_NR, origin_line);
+    error ("%s: %s", INVALID_JMP_NR, origin_start);
   *execute_idx = tmp_idx;
 }
 
@@ -171,7 +171,7 @@ emu_ret_line (char *clean_line, reg_mem *reg)
 }
 
 static void
-emu_goto_line (char *clean_line, char *origin_line, uint32_t *execute_idx)
+emu_goto_line (char *clean_line, char *origin_start, uint32_t *execute_idx)
 {
   char *jmp_to_str = clean_line + strlen ("goto");
   char *end;
@@ -183,7 +183,7 @@ emu_goto_line (char *clean_line, char *origin_line, uint32_t *execute_idx)
   fprintf (s_output_fp, "goto %04d\n", jmp_to);
 
   if (jmp_to < *execute_idx)
-    error ("%s: %s", INVALID_JMP_NR, origin_line);
+    error ("%s: %s", INVALID_JMP_NR, origin_start);
 
   *execute_idx = jmp_to;
 }
@@ -289,11 +289,11 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
         break;
 
       char *clean_line = Line.clean_line;
-      char *origin_line = Line.origin_line;
+      char *origin_start = Line.origin_start;
 
       if (read_idx < execute_idx)
         {
-          pre_clear_color (origin_line);
+          pre_clear_color (Line.origin_line);
           LIGHTCOLORPRINTF (FORMAT ": %s", read_idx, Line.origin_start);
           continue;
         }
@@ -302,14 +302,14 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
       execute_idx++;
 
       if (STARTWITH (clean_line, "if"))
-        emu_if_line (clean_line, origin_line, &reg, data, &execute_idx);
+        emu_if_line (clean_line, origin_start, &reg, data, &execute_idx);
       else if (STARTWITH (clean_line, "return"))
         {
           ret = emu_ret_line (clean_line, &reg);
           break;
         }
       else if (STARTWITH (clean_line, "goto"))
-        emu_goto_line (clean_line, origin_line, &execute_idx);
+        emu_goto_line (clean_line, origin_start, &execute_idx);
       else if (STARTWITH (clean_line, "$A=-$A"))
         emu_alu_neg (&reg);
       else if ((STARTWITH (clean_line, "$") && *(clean_line + 2) == '='))

@@ -114,11 +114,12 @@ pre_asm (FILE *read_fp, line_set *Line)
       if (Line->origin_line == NULL)
         return;
 
+      pre_clear_color (Line->origin_line);
+
       Line->origin_start = get_valid_line (Line->origin_line);
       copy_line = strdup (Line->origin_line);
       Line->clean_line = copy_line;
 
-      pre_clear_color (Line->clean_line);
       pre_clear_space (Line->clean_line);
 
       Line->clean_line = get_valid_line (copy_line);

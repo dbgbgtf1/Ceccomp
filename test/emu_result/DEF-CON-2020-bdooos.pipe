@@ -1,6 +1,6 @@
 0001: [96m$A[0m = [96m$arch[0m
 0002: if ([93m$A[0m != [96maarch64[0m) goto 0019
-[90m0003: $syscall_nr
+[90m0003: $A = $syscall_nr
 [0m[90m0004: if ($A == aarch64.ioctl) goto 0018
 [0m[90m0005: if ($A == aarch64.read) goto 0018
 [0m[90m0006: if ($A == aarch64.write) goto 0018
