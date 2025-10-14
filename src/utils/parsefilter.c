@@ -50,6 +50,17 @@ typedef struct
 
 #define FORCE true
 
+typedef enum
+{
+  EQUAL = 0,
+  JG_JL = 1,
+  JGE_JLE = 2,
+  JSET = 3,
+} cmp_sym;
+
+const char *true_cmp_sym_tbl[4] = { " == ", " > ", " >= ", " & " };
+const char *false_cmp_sym_tbl[4] = { " != ", " < ", " <= ", " & " };
+
 static void
 set_stat (reg_stat *dest, reg_stat src, bool force)
 {
@@ -238,13 +249,13 @@ JMP_MODE (filter *f_ptr)
   switch (jmode)
     {
     case BPF_JEQ:
-      return 0;
+      return EQUAL;
     case BPF_JGT:
-      return 1;
+      return JG_JL;
     case BPF_JGE:
-      return 2;
+      return JGE_JLE;
     case BPF_JSET:
-      return 3;
+      return JSET;
     }
 }
 #pragma GCC diagnostic pop
@@ -253,24 +264,24 @@ static void
 ret_same_type (uint32_t val, char val_str[REG_BUF_LEN], reg_stat A_stat,
                uint32_t arch)
 {
-  char *ret = NULL;
+  char *rval_str = NULL;
   if (A_stat == SYS_NR)
     {
-      ret = seccomp_syscall_resolve_num_arch (arch, val);
-      if (!ret)
-        snprintf (val_str, REG_BUF_LEN, CYAN ("0x%x"), val);
+      rval_str = seccomp_syscall_resolve_num_arch (arch, val);
+      if (!rval_str)
+        snprintf (val_str, REG_BUF_LEN, BRIGHT_CYAN ("0x%x"), val);
       else if (arch == default_arch)
-        snprintf (val_str, REG_BUF_LEN, BRIGHT_BLUE ("%s"), ret);
+        snprintf (val_str, REG_BUF_LEN, BRIGHT_CYAN ("%s"), rval_str);
       else
-        snprintf (val_str, REG_BUF_LEN, BRIGHT_BLUE ("%s.%s"), ARCH2STR (arch),
-                  ret);
-      free (ret);
+        snprintf (val_str, REG_BUF_LEN, BRIGHT_CYAN ("%s.%s"), ARCH2STR (arch),
+                  rval_str);
+      free (rval_str);
       return;
     }
   else if (A_stat == ARCH)
     {
-      ret = ARCH2STR (val);
-      snprintf (val_str, REG_BUF_LEN, BRIGHT_BLUE ("%s"), ret);
+      rval_str = ARCH2STR (val);
+      snprintf (val_str, REG_BUF_LEN, BRIGHT_CYAN ("%s"), rval_str);
       return;
     }
   else
@@ -293,9 +304,6 @@ JMP_SRC (filter *f_ptr, char cmpval_str[REG_BUF_LEN], reg_stat A_stat,
       return;
     }
 }
-
-const char *true_cmp_sym_tbl[4] = { " == ", " > ", " >= ", " & " };
-const char *false_cmp_sym_tbl[4] = { " != ", " < ", " <= ", " & " };
 
 static void
 print_condition (const char *sym, char *rval_str)
@@ -332,15 +340,13 @@ JMP (filter *f_ptr, stat_ctx *stat_list)
 
   cmp_sym_idx = JMP_MODE (f_ptr);
   JMP_SRC (f_ptr, cmp_rval_str, stat_list[pc].A_stat, stat_list[pc].arch);
-  // if cmp_sym_idx == 0, means cmp_sym is `==`
   // if A_stat == ARCH, then try to predict
   if (stat_list[pc].A_stat == ARCH)
     {
-      if (cmp_sym_idx == 0)
+      if (cmp_sym_idx == EQUAL)
         {
-          // STR2ARCH fails with -1, which is UNKNOWN
-          set_arch (&stat_list[pc + jt + 1].arch, STR2ARCH (cmp_rval_str),
-                    !FORCE);
+          // if we take this branch, f_ptr->k here must be cmp_rval arch
+          set_arch (&stat_list[pc + jt + 1].arch, f_ptr->k, !FORCE);
           set_arch (&stat_list[pc + jf + 1].arch, UNKNOWN, !FORCE);
         }
     }

@@ -1,7 +1,7 @@
-0001: [96m$A[0m = [96m$arch[0m
+0001: [93m$A[0m = [94m$arch[0m
 0002: if ([93m$A[0m == [96mx86_64[0m) goto 0004
 [90m0003: return TRAP(10)
-[0m0004: [96m$A[0m = [96m$syscall_nr[0m
+[0m0004: [93m$A[0m = [94m$syscall_nr[0m
 0005: if !([93m$A[0m & [96m0x40000000[0m) goto 0007
 [90m0006: return TRAP(9)
 [0m0007: if ([93m$A[0m <= [96msched_get_priority_max[0m) goto 0082

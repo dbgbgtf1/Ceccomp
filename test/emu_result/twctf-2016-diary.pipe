@@ -1,4 +1,4 @@
-0001: [96m$A[0m = [96m$syscall_nr[0m
+0001: [93m$A[0m = [94m$syscall_nr[0m
 0002: if ([93m$A[0m != [96mopen[0m) goto 0004
 [90m0003: return KILL
 [0m0004: if ([93m$A[0m != [96mopenat[0m) goto 0006
