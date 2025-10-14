@@ -1,5 +1,6 @@
 #include "parseobj.h"
 #include "asm.h"
+#include "color.h"
 #include "log/error.h"
 #include "log/logger.h"
 #include "main.h"
@@ -75,32 +76,49 @@ right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch)
 // $X = $scmp_data_len
 // $X = $syscall_nr (this is wrong! $X can't be load with abs)
 uint32_t
-right_val_assignline (char *rval_str, reg_mem *reg_ptr)
+right_val_assignline (FILE *s_output_fp, char *rval_str, reg_mem *reg_ptr)
 {
   uint32_t offset;
+  char *print_fmt = "";
+  uint32_t rval = 0;
 
   offset = STR2REG (rval_str);
   if (offset != (uint32_t)-1)
-    return *(uint32_t *)((char *)reg_ptr + offset);
+    {
+      print_fmt = BRIGHT_YELLOW ("%s");
+      rval = *(uint32_t *)((char *)reg_ptr + offset);
+      goto print_rval;
+    }
 
   offset = STR2MEM (rval_str);
   if (offset != (uint32_t)-1)
     {
-      uint32_t retval = *(uint32_t *)((char *)reg_ptr + offset);
-      if (retval == (uint32_t)ARG_INIT_VAL)
+      print_fmt = BRIGHT_YELLOW ("%s");
+      rval = *(uint32_t *)((char *)reg_ptr + offset);
+      if (rval == (uint32_t)ARG_INIT_VAL)
         error ("%s", ST_MEM_BEFORE_LD);
-      return retval;
+      goto print_rval;
     }
 
   char *end = NULL;
-  uint32_t rval = strtoul (rval_str, &end, 0);
+  rval = strtoul (rval_str, &end, 0);
   if (end != rval_str)
-    return rval;
+    {
+      print_fmt = CYAN ("%s");
+      goto print_rval;
+    }
 
   if (!strcmp (rval_str, SCMP_DATA_LEN))
-    return 0x40;
+    {
+      rval = 0x40;
+      print_fmt = BRIGHT_BLUE ("%s");
+      goto print_rval;
+    }
 
   error ("%s", INVALID_RIGHT_VAL);
+print_rval:
+  fprintf (s_output_fp, print_fmt, rval_str);
+  return rval;
 }
 
 // this is used in assign line, left value only

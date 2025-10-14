@@ -44,7 +44,7 @@ typedef enum
 
 extern uint32_t right_val_ifline (char *val_str, reg_mem *reg, uint32_t arch);
 
-extern uint32_t right_val_assignline (char *rval_str, reg_mem *reg_ptr);
+extern uint32_t right_val_assignline (FILE *s_output_fp, char *rval_str, reg_mem *reg_ptr);
 
 extern void left_val_assignline (char *lval_str, reg_set *reg_len_ptr,
                                  reg_mem *reg_ptr);

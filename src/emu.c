@@ -63,8 +63,8 @@ emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data)
 
   fprintf (s_output_fp, REG_A);
   fprintf (s_output_fp, " %.*s ", sym_len, sym_str);
-  fprintf (s_output_fp, BRIGHT_CYAN_LS, (uint32_t)(strchr (rval_str, ')') - rval_str),
-           rval_str);
+  fprintf (s_output_fp, BRIGHT_CYAN_LS,
+           (uint32_t)(strchr (rval_str, ')') - rval_str), rval_str);
 
   return is_state_true (reg->A, sym_enum, rval);
 }
@@ -131,6 +131,7 @@ emu_assign_line (char *clean_line, reg_mem *reg, seccomp_data *data)
 
   if (*(clean_line + lval_len) != '=')
     error (FORMAT " %s", read_idx, INVALID_OPERATOR);
+  fprintf (s_output_fp, BRIGHT_YELLOW ("%.*s"), lval_len, clean_line);
 
   char *rval_str = clean_line + lval_len + 1;
 
@@ -140,18 +141,18 @@ emu_assign_line (char *clean_line, reg_mem *reg, seccomp_data *data)
       if (offset != (uint32_t)-1)
         {
           *lval_ptr = *(uint32_t *)((char *)data + offset);
-          goto print_result;
+          fprintf (s_output_fp, " = ");
+          fprintf (s_output_fp, BRIGHT_BLUE ("%s"), rval_str);
+          fprintf (s_output_fp, "\n");
+          return;
         }
     }
 
-  uint32_t rval = right_val_assignline (rval_str, reg);
-  *lval_ptr = rval;
-
-print_result:
-  fprintf (s_output_fp, BRIGHT_CYAN_LS, lval_len, clean_line);
   fprintf (s_output_fp, " = ");
-  fprintf (s_output_fp, BRIGHT_CYAN_S, rval_str);
+  uint32_t rval = right_val_assignline (s_output_fp, rval_str, reg);
   fprintf (s_output_fp, "\n");
+
+  *lval_ptr = rval;
 }
 
 static char *
