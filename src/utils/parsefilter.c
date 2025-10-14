@@ -258,22 +258,23 @@ ret_same_type (uint32_t val, char val_str[REG_BUF_LEN], reg_stat A_stat,
     {
       ret = seccomp_syscall_resolve_num_arch (arch, val);
       if (!ret)
-        snprintf (val_str, REG_BUF_LEN, "0x%x", val);
+        snprintf (val_str, REG_BUF_LEN, CYAN ("0x%x"), val);
       else if (arch == default_arch)
-        snprintf (val_str, REG_BUF_LEN, "%s", ret);
+        snprintf (val_str, REG_BUF_LEN, BRIGHT_BLUE ("%s"), ret);
       else
-        snprintf (val_str, REG_BUF_LEN, "%s.%s", ARCH2STR (arch), ret);
+        snprintf (val_str, REG_BUF_LEN, BRIGHT_BLUE ("%s.%s"), ARCH2STR (arch),
+                  ret);
       free (ret);
       return;
     }
   else if (A_stat == ARCH)
     {
       ret = ARCH2STR (val);
-      snprintf (val_str, REG_BUF_LEN, "%s", ret);
+      snprintf (val_str, REG_BUF_LEN, BRIGHT_BLUE ("%s"), ret);
       return;
     }
   else
-    snprintf (val_str, REG_BUF_LEN, "0x%x", val);
+    snprintf (val_str, REG_BUF_LEN, BRIGHT_CYAN ("0x%x"), val);
 }
 
 static void
@@ -285,7 +286,7 @@ JMP_SRC (filter *f_ptr, char cmpval_str[REG_BUF_LEN], reg_stat A_stat,
   switch (src)
     {
     case BPF_X:
-      strcpy (cmpval_str, "$X");
+      strcpy (cmpval_str, REG_X);
       return;
     case BPF_K:
       ret_same_type (f_ptr->k, cmpval_str, A_stat, arch);
@@ -300,7 +301,7 @@ static void
 print_condition (const char *sym, char *rval_str)
 {
   fprintf (o_fp, "%s", sym);
-  fprintf (o_fp, BRIGHT_CYAN_S, rval_str);
+  fprintf (o_fp, "%s", rval_str);
   fprintf (o_fp, ") ");
 }
 
