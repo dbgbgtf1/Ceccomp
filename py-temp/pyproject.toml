@@ -4,10 +4,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ceccomp"
-version = "3.2.3"
+version = "3.3"
 description = "A C-based seccomp analysis tool"
 authors = [{name = "dbgbgtf", email = "dudududumaxver@outlook.com"}]
-license = {text = "GPL 3.0+"}
+license = "GPL-3.0-or-later"
 scripts = { "ceccomp" = "ceccomp:main"}
 
 [tool.setuptools]
