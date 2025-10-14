@@ -216,12 +216,13 @@ ALU (filter *f_ptr, stat_ctx *ctx)
   strcat (A, alu_sym);
 
   if (BPF_OP (f_ptr->code) == BPF_NEG)
-    strcpy (rval, "$A");
+    strcpy (rval, REG_A);
   else if (src == BPF_K)
-    sprintf (rval, "0x%x", f_ptr->k);
+    sprintf (rval, BRIGHT_CYAN ("0x%x"), f_ptr->k);
   else if (src == BPF_X)
-    strcpy (rval, "$X");
-  fprintf (o_fp, BRIGHT_CYAN_S, rval);
+    strcpy (rval, REG_X);
+
+  fprintf (o_fp, "%s", rval);
   strcat (A, rval);
 
   set_stat (&ctx->A_stat, UNKNOWN, FORCE);
