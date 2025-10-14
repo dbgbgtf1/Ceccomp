@@ -43,6 +43,7 @@ init_args (ceccomp_args *args)
   args->sys_args[3] = 0;
   args->sys_args[4] = 0;
   args->sys_args[5] = 0;
+  args->ip = 0;
   args->program_idx = ARG_INIT_VAL;
   args->pid = (pid_t)ARG_INIT_VAL;
 }
