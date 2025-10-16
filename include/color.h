@@ -35,12 +35,4 @@ extern void set_color (ceccomp_args *args, FILE *output);
 #define PURPLE(str) ((color_enable) ? (PURPLECLR str CLR) : str)
 #define LIGHT(str) ((color_enable) ? (LIGHTCLR str CLR) : str)
 
-#define REG_A BRIGHT_YELLOW ("$A")
-#define REG_X BRIGHT_YELLOW ("$X")
-#define MEM_K BRIGHT_YELLOW ("$mem[0x%1x]")
-
-#define BRIGHT_CYAN_S BRIGHT_CYAN ("%s")
-
-#define BRIGHT_CYAN_LS BRIGHT_CYAN ("%.*s")
-
 #endif

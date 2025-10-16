@@ -145,22 +145,22 @@ load_reg (char reg[REG_BUF_LEN], reg_stat *reg_stat, filter *f_ptr,
 static void
 LD (filter *f_ptr, stat_ctx *ctx)
 {
-  fprintf (o_fp, "%s = ", REG_A);
+  fprintf (o_fp, "%s = ", BRIGHT_YELLOW ("$A"));
   load_reg (A, &ctx->A_stat, f_ptr, ctx);
 }
 
 static void
 LDX (filter *f_ptr, stat_ctx *ctx)
 {
-  fprintf (o_fp, "%s = ", REG_X);
+  fprintf (o_fp, "%s = ", BRIGHT_YELLOW ("$X"));
   load_reg (X, &ctx->X_stat, f_ptr, ctx);
 }
 
 static void
 ST (filter *f_ptr, stat_ctx *ctx)
 {
-  fprintf (o_fp, MEM_K, f_ptr->k);
-  fprintf (o_fp, " = %s", REG_A);
+  fprintf (o_fp, BRIGHT_YELLOW ("$mem[0x%1x]), f_ptr->k);
+  fprintf (o_fp, " = %s", BRIGHT_YELLOW ("$A"));
   strncpy (mem[f_ptr->k], A, REG_BUF_LEN);
   set_stat (&ctx->mem_stat[f_ptr->k], ctx->A_stat, FORCE);
 }
@@ -168,8 +168,8 @@ ST (filter *f_ptr, stat_ctx *ctx)
 static void
 STX (filter *f_ptr, stat_ctx *ctx)
 {
-  fprintf (o_fp, MEM_K, f_ptr->k);
-  fprintf (o_fp, " = %s", REG_X);
+  fprintf (o_fp, BRIGHT_YELLOW ("$mem[0x%1x]), f_ptr->k);
+  fprintf (o_fp, " = %s", BRIGHT_YELLOW ("$X"));
   strncpy (mem[f_ptr->k], X, REG_BUF_LEN);
   set_stat (&ctx->mem_stat[f_ptr->k], ctx->X_stat, FORCE);
 }
@@ -220,18 +220,18 @@ ALU (filter *f_ptr, stat_ctx *ctx)
 
   alu_sym = ALU_OP (f_ptr);
 
-  fprintf (o_fp, REG_A);
+  fprintf (o_fp, BRIGHT_YELLOW ("$A"));
   fprintf (o_fp, "%s", alu_sym);
 
   strcpy (A, "A");
   strcat (A, alu_sym);
 
   if (BPF_OP (f_ptr->code) == BPF_NEG)
-    strcpy (rval, REG_A);
+    strcpy (rval, BRIGHT_YELLOW ("$A"));
   else if (src == BPF_K)
     sprintf (rval, BRIGHT_CYAN ("0x%x"), f_ptr->k);
   else if (src == BPF_X)
-    strcpy (rval, REG_X);
+    strcpy (rval, BRIGHT_YELLOW ("$X"));
 
   fprintf (o_fp, "%s", rval);
   strcat (A, rval);
@@ -297,7 +297,7 @@ JMP_SRC (filter *f_ptr, char cmpval_str[REG_BUF_LEN], reg_stat A_stat,
   switch (src)
     {
     case BPF_X:
-      strcpy (cmpval_str, REG_X);
+      strcpy (cmpval_str, BRIGHT_YELLOW ("$X"));
       return;
     case BPF_K:
       ret_same_type (f_ptr->k, cmpval_str, A_stat, arch);
@@ -361,7 +361,7 @@ JMP (filter *f_ptr, stat_ctx *stat_list)
     fprintf (o_fp, "!(");
   else
     fprintf (o_fp, "(");
-  fprintf (o_fp, REG_A);
+  fprintf (o_fp, BRIGHT_YELLOW ("$A"));
 
   if (jt == 0)
     {
@@ -397,7 +397,7 @@ RET (filter *f_ptr)
   switch (ret)
     {
     case BPF_A:
-      ret_str = REG_A;
+      ret_str = BRIGHT_YELLOW ("$A");
       break;
     case BPF_K:
       ret_str = RETVAL2STR (f_ptr->k);
@@ -417,12 +417,12 @@ MISC (filter *f_ptr, stat_ctx *ctx)
   switch (mode)
     {
     case BPF_TAX:
-      fprintf (o_fp, "%s = %s", REG_X, REG_A);
+      fprintf (o_fp, "%s = %s", BRIGHT_YELLOW ("$X"), BRIGHT_YELLOW ("$A"));
       strncpy (X, A, REG_BUF_LEN);
       set_stat (&ctx->A_stat, ctx->X_stat, FORCE);
       return;
     case BPF_TXA:
-      fprintf (o_fp, "%s = %s", REG_A, REG_X);
+      fprintf (o_fp, "%s = %s", BRIGHT_YELLOW ("$A"), BRIGHT_YELLOW ("$X"));
       strncpy (A, X, REG_BUF_LEN);
       set_stat (&ctx->X_stat, ctx->A_stat, FORCE);
       return;

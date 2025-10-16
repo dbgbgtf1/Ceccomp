@@ -61,13 +61,13 @@ emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data)
   char *rval_str = sym_str + sym_len;
   uint32_t rval = right_val_ifline (rval_str, reg, data->arch);
 
-  fprintf (s_output_fp, REG_A);
+  fprintf (s_output_fp, BRIGHT_YELLOW ("$A"));
   fprintf (s_output_fp, " %.*s ", sym_len, sym_str);
   if (STARTWITH (rval_str, "$X"))
     fprintf (s_output_fp, BRIGHT_YELLOW ("%.*s"),
              (uint32_t)(strchr (rval_str, ')') - rval_str), rval_str);
   else
-    fprintf (s_output_fp, BRIGHT_CYAN_LS,
+    fprintf (s_output_fp, BRIGHT_CYAN ("%.*s"),
              (uint32_t)(strchr (rval_str, ')') - rval_str), rval_str);
 
   return is_state_true (reg->A, sym_enum, rval);
@@ -231,7 +231,7 @@ static void
 emu_alu_neg (reg_mem *reg)
 {
   reg->A = -reg->A;
-  fprintf (s_output_fp, "%s = -%s\n", REG_A, REG_A);
+  fprintf (s_output_fp, "%s = -%s\n", BRIGHT_YELLOW ("$A"), BRIGHT_YELLOW ("$A"));
   return;
 }
 
@@ -242,7 +242,7 @@ emu_alu_line (char *clean_line, reg_mem *reg)
   uint8_t sym_enum = parse_alu_sym (sym_str);
   uint8_t sym_len = GETSYMLEN (sym_enum);
 
-  fprintf (s_output_fp, "%s %.*s ", REG_A, sym_len, sym_str);
+  fprintf (s_output_fp, "%s %.*s ", BRIGHT_YELLOW ("$A"), sym_len, sym_str);
 
   uint32_t *A_ptr = &reg->A;
   char *rval_str = sym_str + sym_len;
@@ -259,7 +259,7 @@ emu_alu_line (char *clean_line, reg_mem *reg)
       rval = strtoul (rval_str, &end, 0);
       if (rval_str == end)
         error (FORMAT " %s", read_idx, INVALID_RIGHT_VAL);
-      fprintf (s_output_fp, BRIGHT_CYAN_S, rval_str);
+      fprintf (s_output_fp, BRIGHT_CYAN ("%s"), rval_str);
     }
 
   emu_do_alu (A_ptr, sym_enum, rval);
