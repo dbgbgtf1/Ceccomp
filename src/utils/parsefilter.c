@@ -159,7 +159,7 @@ LDX (filter *f_ptr, stat_ctx *ctx)
 static void
 ST (filter *f_ptr, stat_ctx *ctx)
 {
-  fprintf (o_fp, BRIGHT_YELLOW ("$mem[0x%1x]), f_ptr->k);
+  fprintf (o_fp, BRIGHT_YELLOW ("$mem[0x%1x]"), f_ptr->k);
   fprintf (o_fp, " = %s", BRIGHT_YELLOW ("$A"));
   strncpy (mem[f_ptr->k], A, REG_BUF_LEN);
   set_stat (&ctx->mem_stat[f_ptr->k], ctx->A_stat, FORCE);
@@ -168,7 +168,7 @@ ST (filter *f_ptr, stat_ctx *ctx)
 static void
 STX (filter *f_ptr, stat_ctx *ctx)
 {
-  fprintf (o_fp, BRIGHT_YELLOW ("$mem[0x%1x]), f_ptr->k);
+  fprintf (o_fp, BRIGHT_YELLOW ("$mem[0x%1x]"), f_ptr->k);
   fprintf (o_fp, " = %s", BRIGHT_YELLOW ("$X"));
   strncpy (mem[f_ptr->k], X, REG_BUF_LEN);
   set_stat (&ctx->mem_stat[f_ptr->k], ctx->X_stat, FORCE);
