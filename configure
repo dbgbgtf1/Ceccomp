@@ -548,21 +548,17 @@ def check_version(makefile: Makefile):
                 sys.exit(0)
 
         else: # devmode is True
-            code, stdout, stderr = run_command(['git', 'describe'])
+            code, stdout, stderr = run_command(['git', 'describe', '--long'])
             if code < 0:
                 print(TXT_MAGENTA('git failed'))
                 print(f'Git not accessible? {stderr}')
                 error('Can not run git, you may install git package')
 
             elif code == 0: # current commit get correctly resolved (tag-rev-gcommit or tag)
-                if '-' in stdout:
-                    tag, revision, commit = stdout.strip().split('-')
-                    ver = tag if not tag.startswith('v') else tag[1:]
-                    buildopts.version = f'{ver}.r{revision}_{commit[1:]}' # skip g
-                else:
-                    tag = stdout.strip()
-                    ver = tag if not tag.startswith('v') else tag[1:]
-                    buildopts.version = f'{ver}.r0'
+                # --long mode display in TAG-COMMITS-gCOMMIT
+                tag, revision, commit = stdout.strip().split('-')
+                ver = tag if not tag.startswith('v') else tag[1:]
+                buildopts.version = f'{ver}.r{revision}_{commit[1:]}' # skip g
                 code, stdout, _ = run_command(['git', 'log', '-1', '--format=format:%as'])
                 if code:
                     print(TXT_MAGENTA('get tag time failed'))

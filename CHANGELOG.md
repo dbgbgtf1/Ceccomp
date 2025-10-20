@@ -5,13 +5,13 @@ Items marked with :star: is the major change why we release a new version.
 <!-- and !num at the end of line for PRs. If the issue or PR is external, -->
 <!-- write user/repo#num or user/repo!num to reference. Then run scripts/complete-url.py -->
 <!-- to format raw ref to URL. -->
-
+## 3.4 (INCOMING)
+* Use `git describe --long` to have unified name scheme in `configure` devmode
 ## 3.3
 * :star: Add `--enable-static` in `configure` to build statically
 * Portable release in pip, for x86_64, i386, aarch64, armhf, riscv64
 * Fix not-null-terminated argp option array
 * Fix copyright as GPLv3 or later
-
 ## 3.2
 * **BREAKING** :star: Enhance arch/syscall prediction :link: [#12]
 * :star: Add support for Debian build system :link: [#13]
