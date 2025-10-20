@@ -6,7 +6,7 @@ Items marked with :star: is the major change why we release a new version.
 <!-- write user/repo#num or user/repo!num to reference. Then run scripts/complete-url.py -->
 <!-- to format raw ref to URL. -->
 ## 3.4 (INCOMING)
-* Use `git describe --long` to have unified name scheme in `configure` devmode
+* Use `git describe --long` to have unified name pattern in `configure` devmode
 ## 3.3
 * :star: Add `--enable-static` in `configure` to build statically
 * Portable release in pip, for x86_64, i386, aarch64, armhf, riscv64
