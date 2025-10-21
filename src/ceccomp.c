@@ -35,7 +35,6 @@ init_args (ceccomp_args *args)
   args->file_name = NULL;
   args->fmt_mode = HEXLINE;
   args->quiet = false;
-  args->color = AUTO;
   args->syscall_nr = (char *)ARG_INIT_VAL;
   args->sys_args[0] = 0;
   args->sys_args[1] = 0;
@@ -46,6 +45,10 @@ init_args (ceccomp_args *args)
   args->ip = 0;
   args->program_idx = ARG_INIT_VAL;
   args->pid = (pid_t)ARG_INIT_VAL;
+
+  char *no_color = getenv ("NO_COLOR");
+  if (no_color != NULL && no_color[0] != '\0')
+    args->color = NEVER;
 }
 
 static struct argp_option options[] = {
