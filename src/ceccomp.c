@@ -49,6 +49,8 @@ init_args (ceccomp_args *args)
   char *no_color = getenv ("NO_COLOR");
   if (no_color != NULL && no_color[0] != '\0')
     args->color = NEVER;
+  else
+    args->color = AUTO;
 }
 
 static struct argp_option options[] = {
