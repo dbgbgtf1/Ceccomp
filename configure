@@ -13,13 +13,22 @@ VERSION = '3.3'
 TAG_TIME = '2025-10-09'
 
 # color escape code definition
-def TXT_RED(s): return f'\x1b[31m{s}\x1b[0m'
-def TXT_GREEN(s): return f'\x1b[32m{s}\x1b[0m'
-def TXT_YELLOW(s): return f'\x1b[33m{s}\x1b[0m'
-def TXT_BLUE(s): return f'\x1b[34m{s}\x1b[0m'
-def TXT_MAGENTA(s): return f'\x1b[35m{s}\x1b[0m'
-def TXT_CYAN(s): return f'\x1b[36m{s}\x1b[0m'
-def TXT_GRAY(s): return f'\x1b[90m{s}\x1b[0m'
+if not os.getenv('NO_COLOR'):
+    def TXT_RED(s): return f'\x1b[31m{s}\x1b[0m'
+    def TXT_GREEN(s): return f'\x1b[32m{s}\x1b[0m'
+    def TXT_YELLOW(s): return f'\x1b[33m{s}\x1b[0m'
+    def TXT_BLUE(s): return f'\x1b[34m{s}\x1b[0m'
+    def TXT_MAGENTA(s): return f'\x1b[35m{s}\x1b[0m'
+    def TXT_CYAN(s): return f'\x1b[36m{s}\x1b[0m'
+    def TXT_GRAY(s): return f'\x1b[90m{s}\x1b[0m'
+else:
+    def TXT_RED(s): return s
+    def TXT_GREEN(s): return s
+    def TXT_YELLOW(s): return s
+    def TXT_BLUE(s): return s
+    def TXT_MAGENTA(s): return s
+    def TXT_CYAN(s): return s
+    def TXT_GRAY(s): return s
 
 # error handling
 def warn(msg: any):

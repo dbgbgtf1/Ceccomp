@@ -8,14 +8,17 @@ else
 		-nrRf $(firstword $(MAKEFILE_LIST)) \
 		ECHO="COUNTTHIS" | grep -c "COUNTTHIS")
 	L := $(shell echo -n $T | wc -m)
-	GREEN := $(shell printf '\033[32m')
-	RESET := $(shell printf '\033[0m')
+	ifeq ($(NO_COLOR),)
+		GREEN := $(shell printf '\033[32m')
+		RESET := $(shell printf '\033[0m')
+	endif
 	ECHO_NOPROG = printf "    $(1)\t$(2)\n"
 	ECHO = printf "    %-12s[%$Ld/%$Ld]\t$(2)\n" \
 		$(1) \
 		$(shell SHELL=$(SHELL) flock $(LOCK) -c 'read n < $(MARK); echo $$n; echo $$((n+1)) > $(MARK)') \
 		$T
 	endif
+	# end for progress block, but not for else in line 5
 
 V ?= {{VERBOSE}}
 ifeq ($V,1)
