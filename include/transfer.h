@@ -42,31 +42,22 @@
 #define STR_ARCH_S390 "s390"
 #define STR_ARCH_RISCV64 "riscv64"
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+extern char *ARCH2STR (uint32_t token);
 
-  extern char *ARCH2STR (uint32_t token);
+extern uint32_t STR2ARCH (char *);
 
-  extern uint32_t STR2ARCH (char *);
+extern char *ABS2STR (uint32_t offset);
 
-  extern char *ABS2STR (uint32_t offset);
+extern uint32_t STR2ABS (char *str);
 
-  extern uint32_t STR2ABS (char *str);
+extern char *RETVAL2STR (uint32_t retval);
 
-  extern char *RETVAL2STR (uint32_t retval);
+extern int32_t STR2RETVAL (char *str);
 
-  extern int32_t STR2RETVAL (char *str);
+extern int32_t STR2REG (char *str);
 
-  extern int32_t STR2REG (char *str);
+extern int32_t STR2MEM (char *str);
 
-  extern int32_t STR2MEM (char *str);
-
-  extern char *REG_MEM2STR (uint32_t offset);
-
-#ifdef __cplusplus
-}
-#endif
+extern char *REG_MEM2STR (uint32_t offset);
 
 #endif
