@@ -6,12 +6,14 @@
 #include "procstatus.h"
 #include "color.h"
 #include "log/error.h"
+#include "transfer.h"
 #include <asm-generic/errno-base.h>
 #include <asm-generic/errno.h>
 #include <assert.h>
 #include <complex.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <linux/audit.h>
 #include <linux/ptrace.h>
 #include <linux/seccomp.h>
 #include <seccomp.h>
@@ -19,6 +21,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/utsname.h>
 #include <sys/ptrace.h>
 #include <sys/prctl.h>
 #include <sys/types.h>
@@ -84,18 +87,44 @@ check_scmp_mode (syscall_info Info, int pid, fprog *prog)
   return seccomp_mode;
 }
 
+static size_t
+peek_data_check (pid_t pid, size_t *addr)
+{
+  errno = 0;
+  size_t result = ptrace (PTRACE_PEEKDATA, pid, addr, 0);
+  if (result == (size_t)-1 && errno != 0)
+    error (PEEKDATA_FAILED_ADR, addr);
+  return result;
+}
+
 static void
 dump_filter (syscall_info *Info, int pid, fprog *prog)
 {
   size_t *filters = (size_t *)prog->filter;
-  uint32_t offset = offsetof (fprog, filter);
+  // args2 is the prog addrs
   uint64_t args2 = Info->entry.args[2];
-  size_t *filter_adr
-      = (size_t *)ptrace (PTRACE_PEEKDATA, pid, args2 + offset, 0);
+
+  struct utsname uts_name;
+  uname (&uts_name);
+  uint32_t local_arch = STR2ARCH (uts_name.machine);
+
+  uint32_t offset = offsetof (fprog, filter);
+  bool is_local_64 = local_arch & __AUDIT_ARCH_64BIT;
+  bool is_target_64 = Info->arch & __AUDIT_ARCH_64BIT;
+
+  if (is_local_64 && !is_target_64)
+    offset = offsetof (fprog, filter) / 2;
+  else if (!is_local_64 && is_target_64)
+    error ("%s", CANNOT_WORK_FROM_32_TO_64);
+
+  size_t filter_adr
+      = peek_data_check (pid, (size_t *)((char *)args2 + offset));
+  if (is_local_64 && !is_target_64)
+    filter_adr &= 0xffffffff;
 
   // use size_t so that it can work in both 64 and 32 bits
   for (int i = 0; i * sizeof (size_t) < prog->len * sizeof (filter); i++)
-    filters[i] = ptrace (PTRACE_PEEKDATA, pid, &filter_adr[i], 0);
+    filters[i] = peek_data_check (pid, &((size_t *)filter_adr)[i]);
 }
 
 static void
