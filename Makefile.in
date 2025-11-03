@@ -47,7 +47,7 @@ MARK := $(BUILD_DIR)/progress
 
 C_SRCS := $(shell find $(SRC_DIR) ! -name 'ceccomp.c' -name '*.c' -or -name '*.s' | LC_ALL=C sort)
 INC_SRCS := $(shell find $(INC_DIR) -name '*.h' | LC_ALL=C sort)
-TEST_SRCS := $(shell find $(TEST_DIR) -name '*.c' | LC_ALL=C sort)
+TEST_SRCS := $(TEST_DIR)/unit_test.c
 
 OBJS := $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.c.o,$(C_SRCS))
 TEST_OBJS := $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.c.o,$(TEST_SRCS))

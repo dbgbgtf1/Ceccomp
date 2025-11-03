@@ -1,17 +1,19 @@
 // this is for separately function testing
-// #include "main.h"
 #include "main.h"
 #include <linux/audit.h>
 #include <linux/filter.h>
 #include <linux/seccomp.h>
 #include <seccomp.h>
+#include <signal.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/prctl.h>
 #include <sys/syscall.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #define ARRAY_SIZE(arr) (sizeof (arr) / sizeof (arr[0]))
@@ -39,6 +41,7 @@ load_filter ()
       = { .len = ARRAY_SIZE (f) / sizeof (filter), .filter = (filter *)f };
 
   syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, NULL, &prog);
+  sleep (1000);
 }
 
 int
@@ -46,12 +49,22 @@ main ()
 {
   pid_t pid = fork ();
   if (pid != 0)
-    load_filter ();
+    {
+      wait (NULL);
+      exit (0);
+    }
   else
     {
       scmp_filter_ctx ctx = seccomp_init (SCMP_ACT_ALLOW);
       seccomp_rule_add (ctx, SCMP_ACT_TRAP, SCMP_SYS (execve), 0);
       seccomp_rule_add (ctx, SCMP_ACT_LOG, SCMP_SYS (execveat), 0);
       seccomp_load (ctx);
+
+      pid = fork ();
+      if (pid != 0)
+        exit (0);
+      signal (SIGINT, SIG_IGN);
+      sleep (100);
+      perror ("sleep");
     }
 }
