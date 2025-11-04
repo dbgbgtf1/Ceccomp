@@ -386,6 +386,8 @@ assemble (uint32_t arch, FILE *read_fp, print_mode p_mode)
         f_current = LD_LDX (clean_line, arch);
       else if (STARTWITH (clean_line, "$A"))
         f_current = ALU (clean_line);
+      else
+        error("%s: %s", INVALID_ASM_CODE, Line.origin_line);
 
       prog.filter[prog.len] = f_current;
       format_print (prog.filter[prog.len], format);
