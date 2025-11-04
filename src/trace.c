@@ -243,9 +243,18 @@ parent (pid_t child_pid, FILE *output_fp, bool oneshot)
     }
 }
 
+static void
+exit_on_sig (int signo)
+{
+  // flush files when recved normal signals
+  exit (signo);
+}
+
 void
 program_trace (char *argv[], FILE *output_fp, bool oneshot)
 {
+  signal (SIGINT, exit_on_sig);
+  signal (SIGTERM, exit_on_sig);
   int pid = fork ();
   if (pid == 0)
     child (argv);
