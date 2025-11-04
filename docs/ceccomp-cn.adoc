@@ -16,7 +16,7 @@ ceccomp - 一个分析安全计算(seccomp)过滤器的工具
 
     usage: ceccomp <asm|disasm|emu|trace|probe|version|help> [FILE] [-q|--quiet]
                    [-f|--format FMT] [-a|--arch ARCH] [-p|--pid PID]
-                   [-o|--output FILE] ...
+                   [-o|--output FILE] [-c|--color WHEN] ...
 
 == 概念
 
