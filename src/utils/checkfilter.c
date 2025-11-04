@@ -11,7 +11,7 @@
 #include <stdint.h>
 
 bool
-scmp_check_filter (filter *f_ptr, uint32_t len)
+scmp_check_filter (filter *f_ptr, uint32_t len, uint32_t *jmp_len)
 {
   bool error_happen = false;
 
@@ -79,7 +79,10 @@ scmp_check_filter (filter *f_ptr, uint32_t len)
         case BPF_JMP | BPF_JA:
           if (ftest->k >= (unsigned int)(len - pc - 1))
             {
-              warn (FORMAT " %s", pc + 1, JMP_OUT_OF_RANGE);
+              if (pc + ftest->k + 2 > *jmp_len)
+                *jmp_len = pc + ftest->k + 2;
+              // protect stat_list from heap overflow
+              warn (FORMAT " %s", pc + 2, JMP_OUT_OF_RANGE);
               error_happen = true;
             }
           continue;
@@ -91,8 +94,13 @@ scmp_check_filter (filter *f_ptr, uint32_t len)
         case BPF_JMP | BPF_JGT | BPF_X:
         case BPF_JMP | BPF_JSET | BPF_K:
         case BPF_JMP | BPF_JSET | BPF_X:
-          if (pc + ftest->jt + 1 >= len || pc + ftest->jf + 1 >= len)
+          if (pc + ftest->jt + 2 > len || pc + ftest->jf + 2 > len)
             {
+              if (pc + ftest->jt + 2 > *jmp_len)
+                *jmp_len = pc + ftest->jt + 2;
+              if (pc + ftest->jf + 2 > *jmp_len)
+                *jmp_len = pc + ftest->jf + 2;
+              // protect stat_list from heap overflow
               warn (FORMAT " %s", pc + 1, JMP_OUT_OF_RANGE);
               error_happen = true;
             }

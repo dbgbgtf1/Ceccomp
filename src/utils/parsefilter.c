@@ -472,15 +472,16 @@ parse_filter (uint32_t arch_token, fprog *sock_prog, FILE *output_fp)
 {
   prog = sock_prog;
   uint32_t len = prog->len;
+  uint32_t jmp_len = len;
   o_fp = output_fp;
 
-  bool error_happen = scmp_check_filter (prog->filter, len);
+  bool error_happen = scmp_check_filter (prog->filter, len, &jmp_len);
 
   stat_ctx *stat_list;
-  stat_list = malloc (sizeof (stat_ctx) * len);
+  stat_list = malloc (sizeof (stat_ctx) * jmp_len);
   if (stat_list == NULL)
     error ("%s", strerror (errno));
-  memset (stat_list, NONE, sizeof (stat_ctx) * len);
+  memset (stat_list, NONE, sizeof (stat_ctx) * jmp_len);
   // none is zero, so doing this is fine
   stat_list[0].arch = arch_token;
   default_arch = arch_token;
