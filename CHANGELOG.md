@@ -8,8 +8,10 @@ Items marked with :star: is the major change why we release a new version.
 ## 3.4 (INCOMING)
 * :star: Fix cross arch trace problems :link: [#16]
 * :star: Add support for NO_COLOR env check :link: [#15]
+* :star: Fix heap oob write if `goto` exceeds bpf range
 * Fix color display in emu
 * Use `git describe --long` to have unified name pattern in `configure` devmode
+* Add more tests to check ceccomp behaviour
 
 [#15]: https://github.com/dbgbgtf1/Ceccomp/issues/15
 [#16]: https://github.com/dbgbgtf1/Ceccomp/issues/16
