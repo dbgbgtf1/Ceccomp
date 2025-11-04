@@ -85,12 +85,12 @@ set_arch (uint32_t *dest, uint32_t src, bool force)
 }
 
 static void
-set_ctx (stat_ctx *dest, stat_ctx src, bool force)
+set_ctx (stat_ctx *dest, stat_ctx *src, bool force)
 {
-  set_stat (&dest->A_stat, src.A_stat, force);
-  set_stat (&dest->X_stat, src.X_stat, force);
+  set_stat (&dest->A_stat, src->A_stat, force);
+  set_stat (&dest->X_stat, src->X_stat, force);
   for (uint32_t i = 0; i < BPF_MEMWORDS; i++)
-    set_stat (&dest->mem_stat[i], src.mem_stat[i], force);
+    set_stat (&dest->mem_stat[i], src->mem_stat[i], force);
 }
 
 static char *
@@ -316,7 +316,7 @@ print_condition (const char *sym, char *rval_str)
 static void
 JMP_JA (stat_ctx *stat_list, uint32_t pc, uint32_t k)
 {
-  set_ctx (&stat_list[pc + k + 1], stat_list[pc], !FORCE);
+  set_ctx (&stat_list[pc + k + 1], &stat_list[pc], !FORCE);
   set_arch (&stat_list[pc + k + 1].arch, stat_list[pc].arch, !FORCE);
   fprintf (o_fp, "goto " FORMAT, pc + k + 2);
   return;
@@ -334,8 +334,8 @@ JMP (filter *f_ptr, stat_ctx *stat_list)
   uint8_t jt = f_ptr->jt;
   uint8_t jf = f_ptr->jf;
 
-  set_ctx (&stat_list[pc + jt + 1], stat_list[pc], !FORCE);
-  set_ctx (&stat_list[pc + jf + 1], stat_list[pc], !FORCE);
+  set_ctx (&stat_list[pc + jt + 1], &stat_list[pc], !FORCE);
+  set_ctx (&stat_list[pc + jf + 1], &stat_list[pc], !FORCE);
   // jmp always jmp to `pc + jt + 1` or `pc + jf + 1`
 
   cmp_sym_idx = JMP_MODE (f_ptr);
@@ -463,7 +463,7 @@ parse_class (filter *f_ptr, stat_ctx *stat_list)
       break;
     }
 
-  set_ctx (&stat_list[pc + 1], stat_list[pc], !FORCE);
+  set_ctx (&stat_list[pc + 1], &stat_list[pc], !FORCE);
   set_arch (&stat_list[pc + 1].arch, stat_list[pc].arch, !FORCE);
 }
 
