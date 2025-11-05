@@ -9,6 +9,9 @@ Items marked with :star: is the major change why we release a new version.
 * :star: Fix cross arch trace problems :link: [#16]
 * :star: Add support for NO_COLOR env check :link: [#15]
 * :star: Fix heap oob write if `goto` exceeds bpf range
+* :star: Correctly kill children processes when recved signals
+* :star: Fix potential invalid `%s` access in `ALU` and `ST_STX`
+* Fix ambiguous `idx` in `ST_STX`
 * Fix color display in emu
 * Use `git describe --long` to have unified name pattern in `configure` devmode
 * Add more tests to check ceccomp behaviour
