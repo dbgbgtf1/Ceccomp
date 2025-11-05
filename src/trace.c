@@ -194,7 +194,7 @@ parent (pid_t child_pid, FILE *output_fp, bool oneshot)
   int status;
 
   waitpid (child_pid, &status, 0);
-  // child is stopped after PTRAEC_TRACEME
+  // child is stopped after PTRACE_TRACEME
 
   // clang-format off
   ptrace (PTRACE_SETOPTIONS, child_pid, 0,

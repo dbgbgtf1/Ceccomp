@@ -501,6 +501,7 @@ parse_filter (uint32_t arch_token, fprog *sock_prog, FILE *output_fp)
       fprintf (o_fp, "\n");
     }
   fprintf (o_fp, "---------------------------------\n");
+  fflush (o_fp);
   pc = 0;
 
   free (stat_list);
