@@ -250,18 +250,18 @@ ST_STX (char *clean_line)
 
   char *idx_str = clean_line + strlen ("$mem[");
   char *end;
-  uint32_t idx = strtol (idx_str, &end, 0);
+  uint32_t mem_idx = strtol (idx_str, &end, 0);
   if (*end != ']')
     error (FORMAT " %s", idx, INVALID_MEM);
   if (*(end + 1) != '=')
     error (FORMAT " %s", idx, INVALID_OPERATOR);
-  if (idx >= BPF_MEMWORDS)
+  if (mem_idx >= BPF_MEMWORDS)
     error (FORMAT " %s", idx, INVALID_MEM_IDX);
 
-  filter.k = idx;
+  filter.k = mem_idx;
 
   if (*(end + 2) != '$')
-    error (FORMAT " %s", INVALID_RIGHT_VAL);
+    error (FORMAT " %s", idx, INVALID_RIGHT_VAL);
 
   if (*(end + 3) == 'A')
     filter.code |= BPF_ST;
@@ -327,7 +327,7 @@ ALU (char *clean_line)
   char *end;
   filter.k = strtol (rval_str, &end, 0);
   if (rval_str == end)
-    error (FORMAT " %s", INVALID_RIGHT_VAL);
+    error (FORMAT " %s", idx, INVALID_RIGHT_VAL);
   return filter;
 }
 
