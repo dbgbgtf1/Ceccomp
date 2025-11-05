@@ -51,6 +51,8 @@
 #define INVALID_ASM_CODE _ ("Invalid asm code")
 #define INVALID_RET_VAL _ ("Invalid return value")
 
+#define LINE_TOO_LONG _ ("Line length exceeds 0x400, which shouldn't happen")
+
 // raw
 #define INVALID_OFFSET_ABS _ ("Invalid offset of seccomp_data")
 #define ST_MEM_BEFORE_LD _ ("Store mem before ld or ldx")
@@ -74,7 +76,7 @@
 #define PROCESS_FORK _ ("Process %d spawned a new pid %d")
 #define PROCESS_EXIT _ ("Process %d exited")
 #define PARSE_PID_BPF _ ("Parsing %d process seccomp filter")
-#define PEEKDATA_FAILED_ADR _ ("Peekdata failed in address: 0x%lx")
+#define PEEKDATA_FAILED_ADR _ ("Peekdata failed in address: 0x%p")
 #define CANNOT_WORK_FROM_32_TO_64                                             \
   _ ("Ptrace from 32-bit tracer to 64-bit tracee is limited")
 
