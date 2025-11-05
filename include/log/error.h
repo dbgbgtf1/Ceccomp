@@ -76,7 +76,7 @@
 #define PROCESS_FORK _ ("Process %d spawned a new pid %d")
 #define PROCESS_EXIT _ ("Process %d exited")
 #define PARSE_PID_BPF _ ("Parsing %d process seccomp filter")
-#define PEEKDATA_FAILED_ADR _ ("Peekdata failed in address: 0x%p")
+#define PEEKDATA_FAILED_ADR _ ("Peekdata failed in address: %p")
 #define CANNOT_WORK_FROM_32_TO_64                                             \
   _ ("Ptrace from 32-bit tracer to 64-bit tracee is limited")
 
