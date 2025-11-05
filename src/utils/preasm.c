@@ -50,9 +50,9 @@ pre_clear_color (char *clean_line)
 
   for (char *cursor = clean_line; *cursor != '\0'; cursor++)
     {
-      if (!colorstart && *cursor != '\e')
+      if (!colorstart && *cursor != '\x1b')
         *clear++ = *cursor;
-      else if (!colorstart && *cursor == '\e')
+      else if (!colorstart && *cursor == '\x1b')
         colorstart = cursor;
       else if (colorstart && *cursor == 'm')
         colorstart = NULL;

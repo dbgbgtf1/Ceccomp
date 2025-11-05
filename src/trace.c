@@ -93,7 +93,7 @@ peek_data_check (pid_t pid, size_t *addr)
   errno = 0;
   size_t result = ptrace (PTRACE_PEEKDATA, pid, addr, 0);
   if (result == (size_t)-1 && errno != 0)
-    error (PEEKDATA_FAILED_ADR, addr);
+    error (PEEKDATA_FAILED_ADR, (void *)addr);
   return result;
 }
 

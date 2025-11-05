@@ -11,18 +11,18 @@ extern bool log_color_enable;
 
 extern void set_color (ceccomp_args *args, FILE *output);
 
-#define CLR "\e[0m"
+#define CLR "\x1b[0m"
 
-#define REDCLR "\e[31m"
-#define GREENCLR "\e[32m"
-#define YELLOWCLR "\e[33m"
-#define BLUECLR "\e[34m"
-#define CYANCLR "\e[36m"
-#define PURPLECLR "\e[95m"
-#define LIGHTCLR "\e[90m"
-#define BRIGHT_YELLOWCLR "\e[93m"
-#define BRIGHT_BLUECLR "\e[94m"
-#define BRIGHT_CYANCLR "\e[96m"
+#define REDCLR "\x1b[31m"
+#define GREENCLR "\x1b[32m"
+#define YELLOWCLR "\x1b[33m"
+#define BLUECLR "\x1b[34m"
+#define CYANCLR "\x1b[36m"
+#define PURPLECLR "\x1b[95m"
+#define LIGHTCLR "\x1b[90m"
+#define BRIGHT_YELLOWCLR "\x1b[93m"
+#define BRIGHT_BLUECLR "\x1b[94m"
+#define BRIGHT_CYANCLR "\x1b[96m"
 
 #define RED(str) ((color_enable) ? (REDCLR str CLR) : str)
 #define GREEN(str) ((color_enable) ? (GREENCLR str CLR) : str)
