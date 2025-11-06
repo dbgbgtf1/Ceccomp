@@ -72,6 +72,8 @@ echo ""
 echo "=====dynamic test====="
 echo ""
 
+make test
+
 filename="trace test"
 LC_ALL=C timeout 0.2 ./build/ceccomp trace -o ./build/dyn_result -c always ./build/test &>/dev/null
 diff ./build/dyn_result ./test/trace.log > ./build/diff_result
@@ -82,7 +84,7 @@ LC_ALL=C ./build/ceccomp probe -o ./build/dyn_result -c always -a x86_64 ./build
 diff ./build/dyn_result ./test/probe.log > ./build/diff_result
 check_pass $?
 
-if [ "z$(pgrep -f "^./build/test$")z" != "zz" ]; then
+if [ "z$(pgrep -f '^./build/test$')z" != "zz" ]; then
   echo "[x] ptrace jail escaped"
   pkill -f "^./build/test$" -9
   exit 1
