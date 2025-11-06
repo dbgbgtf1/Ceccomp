@@ -9,8 +9,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 # constants
-VERSION = '3.3'
-TAG_TIME = '2025-10-09'
+VERSION = '3.4'
+TAG_TIME = '2025-11-06'
 
 # color escape code definition
 if not os.getenv('NO_COLOR'):
