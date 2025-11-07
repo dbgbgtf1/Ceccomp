@@ -190,7 +190,7 @@ LD_LDX_IMM (char *rval_str, filter *f_ptr, uint32_t arch)
   if (f_ptr->k != (uint32_t)__NR_SCMP_ERROR)
     return true;
 
-  f_ptr->k = strtol (rval_str, &end, 0);
+  f_ptr->k = strtoul (rval_str, &end, 0);
   if (end == rval_str)
     return false;
   return true;
@@ -325,7 +325,7 @@ ALU (char *clean_line)
   filter.code |= BPF_K;
 
   char *end;
-  filter.k = strtol (rval_str, &end, 0);
+  filter.k = strtoul (rval_str, &end, 0);
   if (rval_str == end)
     error (FORMAT " %s", idx, INVALID_RIGHT_VAL);
   return filter;
