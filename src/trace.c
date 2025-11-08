@@ -104,12 +104,12 @@ dump_filter (syscall_info *Info, int pid, fprog *prog)
   // args2 is the prog addrs
   uint64_t args2 = Info->entry.args[2];
 
-  struct utsname uts_name;
-  uname (&uts_name);
-  uint32_t local_arch = STR2ARCH (uts_name.machine);
-
   uint32_t offset = offsetof (fprog, filter);
-  bool is_local_64 = local_arch & __AUDIT_ARCH_64BIT;
+  bool is_local_64;
+  if (sizeof (void *) == 8)
+    is_local_64 = true;
+  else
+    is_local_64 = false;
   bool is_target_64 = Info->arch & __AUDIT_ARCH_64BIT;
 
   if (is_local_64 && !is_target_64)
