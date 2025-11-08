@@ -70,7 +70,7 @@ ARCH2STR (uint32_t token)
 uint32_t
 STR2ARCH (char *arch)
 {
-  if (STARTWITH (arch, STR_ARCH_X86))
+  if (STARTWITH (arch, STR_ARCH_X86) || STARTWITH(arch, STR_ARCH_I686))
     return SCMP_ARCH_X86;
   else if (STARTWITH (arch, STR_ARCH_X86_64))
     return SCMP_ARCH_X86_64;

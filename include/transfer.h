@@ -21,6 +21,7 @@
 #define HIGH_ARG5 "$high_args[5]"
 
 #define STR_ARCH_X86 "i386"
+#define STR_ARCH_I686 "i686"
 #define STR_ARCH_X86_64 "x86_64"
 #define STR_ARCH_X32 "x32"
 #define STR_ARCH_ARM "arm"
