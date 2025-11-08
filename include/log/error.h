@@ -21,6 +21,9 @@
 #define INVALID_IP _ ("Invalid instruction pointer")
 #define INVALID_PID _ ("Invalid pid")
 #define INPUT_SYS_NR _ ("Please input syscall_nr to emu")
+#define SYSTEM_ARCH_NOT_SUPPORTED                                             \
+  _ ("Your system arch (%s) does not match any arch supported by "            \
+     "libseccomp, please set an arch by -a manually")
 
 // text->raw err
 #define INVALID_OPERATOR _ ("Invalid operator")

@@ -22,10 +22,10 @@
 #include <sys/types.h>
 #include <sys/utsname.h>
 
+static struct utsname uts_name;
 static void
 init_args (ceccomp_args *args)
 {
-  struct utsname uts_name;
   uname (&uts_name);
 
   args->mode = HELP_ABNORMAL;
@@ -105,6 +105,14 @@ version ()
   exit (0);
 }
 
+static void
+error_if_arch_not_supported (uint32_t arch_token)
+{
+  // only if token is converted from uts, it would be -1 here
+  if (arch_token == (uint32_t)-1)
+    error (SYSTEM_ARCH_NOT_SUPPORTED, uts_name.machine);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -136,12 +144,15 @@ main (int argc, char **argv)
   switch (args.mode)
     {
     case ASM_MODE:
+      error_if_arch_not_supported (args.arch_token);
       assemble (args.arch_token, args.read_fp, args.fmt_mode);
       return 0;
     case DISASM_MODE:
+      error_if_arch_not_supported (args.arch_token);
       disasm (args.arch_token, args.read_fp);
       return 0;
     case EMU_MODE:
+      error_if_arch_not_supported (args.arch_token);
       emulate (&args);
       return 0;
     case PROBE_MODE:
