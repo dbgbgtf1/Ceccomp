@@ -105,11 +105,7 @@ dump_filter (syscall_info *Info, int pid, fprog *prog)
   uint64_t args2 = Info->entry.args[2];
 
   uint32_t offset = offsetof (fprog, filter);
-  bool is_local_64;
-  if (sizeof (void *) == 8)
-    is_local_64 = true;
-  else
-    is_local_64 = false;
+  bool is_local_64 = (sizeof (void *) == 8);
   bool is_target_64 = Info->arch & __AUDIT_ARCH_64BIT;
 
   if (is_local_64 && !is_target_64)
@@ -118,7 +114,7 @@ dump_filter (syscall_info *Info, int pid, fprog *prog)
     error ("%s", CANNOT_WORK_FROM_32_TO_64);
 
   size_t filter_adr
-      = peek_data_check (pid, (size_t *)((char *)args2 + offset));
+      = peek_data_check (pid, (size_t *)((size_t)args2 + offset));
   if (is_local_64 && !is_target_64)
     filter_adr &= 0xffffffff;
 
