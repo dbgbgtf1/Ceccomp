@@ -79,6 +79,8 @@
 #define PEEKDATA_FAILED_ADR _ ("Peekdata failed in address: %p")
 #define CANNOT_WORK_FROM_32_TO_64                                             \
   _ ("Ptrace from 32-bit tracer to 64-bit tracee is limited")
+#define TRACEE_ARCH_NOT_SUPPORTED                                             \
+  _ ("libseccomp does not support the tracee's arch (%#x)")
 
 // trace pid
 #define PROCFS_NOT_ACCESSIBLE _ ("Procfs not accessible, unable to perform")

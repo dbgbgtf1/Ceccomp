@@ -41,20 +41,22 @@ mode_strict ()
   printf (RED ("%s\n"), _ ("Only read, write, _exit, sigreturn available!"));
 }
 
+static uint64_t seccomp_nr;
+static uint64_t prctl_nr;
+static uint32_t saved_arch = -1;
+
 static uint64_t
 check_scmp_mode (syscall_info Info, int pid, fprog *prog)
 {
   uint64_t seccomp_mode = LOAD_FAIL;
-  uint32_t arch = Info.arch;
   uint64_t nr = Info.entry.nr;
   uint64_t arg0 = Info.entry.args[0];
   uint64_t arg1 = Info.entry.args[1];
 
-  if (nr == (uint64_t)seccomp_syscall_resolve_name_arch (arch, "seccomp")
+  if (nr == seccomp_nr
       && (arg0 == SECCOMP_SET_MODE_FILTER || arg0 == SECCOMP_MODE_STRICT))
     seccomp_mode = arg0;
-  else if (nr == (uint64_t)seccomp_syscall_resolve_name_arch (arch, "prctl")
-           && arg0 == PR_SET_SECCOMP)
+  else if (nr == prctl_nr && arg0 == PR_SET_SECCOMP)
     {
       if (arg1 == SECCOMP_MODE_STRICT)
         arg1 = SECCOMP_SET_MODE_STRICT;
@@ -168,6 +170,16 @@ handle_syscall (pid_t pid, FILE *output_fp, bool oneshot)
   ptrace (PTRACE_GET_SYSCALL_INFO, pid, sizeof (Info), &Info);
   if (Info.op != PTRACE_SYSCALL_INFO_ENTRY)
     return false;
+
+  if (Info.arch != saved_arch)
+    {
+      saved_arch = Info.arch;
+      seccomp_nr = seccomp_syscall_resolve_name_arch (saved_arch, "seccomp");
+      prctl_nr = seccomp_syscall_resolve_name_arch (saved_arch, "prctl");
+      // every arch has prctl, so if prctl has no nr, seccomp has no nr, either
+      if (prctl_nr == (uint64_t)__NR_SCMP_ERROR)
+        error (TRACEE_ARCH_NOT_SUPPORTED, saved_arch);
+    }
 
   seccomp_mode = check_scmp_mode (Info, pid, &prog);
 
