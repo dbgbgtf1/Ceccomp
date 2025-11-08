@@ -20,7 +20,7 @@ else
 	endif
 	# end for progress block, but not for else in line 5
 
-V ?= {{VERBOSE}}
+V := {{VERBOSE}}
 ifeq ($V,1)
 	Q :=
 	ECHO :=
@@ -30,8 +30,8 @@ else
 endif
 
 
-VERSION ?= {{VERSION}}
-TAG_TIME ?= {{TAG_TIME}}
+VERSION := {{VERSION}}
+TAG_TIME := {{TAG_TIME}}
 ARCH := $(shell uname -m)
 
 TARGET := ceccomp test
@@ -64,12 +64,12 @@ IMG_OBJS := $(patsubst $(SRC_IMG_DIR)/%.png,$(BUILD_IMG_DIR)/%.png,$(IMG_SRCS))
 CECCOMP_MAIN := $(BUILD_DIR)/ceccomp.c.o
 CECCOMP_C := $(SRC_DIR)/ceccomp.c
 
-CC ?= {{CC}}
+CC := {{CC}}
 
 LOCALE_DIR := {{LOCALEDIR}}
 CFLAGS := -fpie -fstack-protector -Wall -Wextra {{I18N_IF}}'-DLOCALEDIR="$(LOCALE_DIR)"'{{I18N_ENDIF}} {{SYS_INC_DIR}} {{EXTRA_CFLAGS}}
 LDFLAGS := -z now -z noexecstack -fpie -fstack-protector -Wall -Wextra {{SYS_LIB_DIR}} -lseccomp {{LIBARGP}} {{EXTRA_LDFLAGS}}
-DEBUG ?= {{DEBUG_LEVEL}}
+DEBUG := {{DEBUG_LEVEL}}
 
 ifdef DEBUG
 	ifeq ($(DEBUG),1)
@@ -84,7 +84,7 @@ else
 	LDFLAGS += -O2 -s
 endif
 
-STATIC ?= {{IS_STATIC}}
+STATIC := {{IS_STATIC}}
 ifeq ($(STATIC), 1)
 	CFLAGS += -static
 	LDFLAGS += -static
@@ -150,10 +150,10 @@ $(HTML_CHN): $(DOC_DIR)/ceccomp-cn.adoc | $(BUILD_DIR) $(MARK)
 
 ##### INSTALL CECCOMP #####
 
-DESTDIR ?= {{DESTDIR}}
-PREFIX ?= {{PREFIX}}
-BIN_DIR ?= {{BINDIR}}
-ZSH_FPATH ?= {{ZSH_FPATH}}
+DESTDIR := {{DESTDIR}}
+PREFIX := {{PREFIX}}
+BIN_DIR := {{BINDIR}}
+ZSH_FPATH := {{ZSH_FPATH}}
 ZSH_SRC := completions
 
 install: bin_install zsh_cmp_install {{DOC_IF}}doc_install{{DOC_ENDIF}} {{I18N_IF}}mo_install{{I18N_ENDIF}}
@@ -169,11 +169,11 @@ zsh_cmp_install: $(ZSH_SRC)/_ceccomp
 .PHONY: bin_install zsh_cmp_install install
 
 {{DOC_IF}}
-MAN_DIR ?= {{MANDIR}}
-MAN_DST ?= $(MAN_DIR)/man1
-MAN_CHN_DST ?= $(MAN_DIR)/zh_CN/man1
-DOC_INSTALL_DIR ?= {{DOCDIR}}
-HTML_DST ?= $(DOC_INSTALL_DIR)/html
+MAN_DIR := {{MANDIR}}
+MAN_DST := $(MAN_DIR)/man1
+MAN_CHN_DST := $(MAN_DIR)/zh_CN/man1
+DOC_INSTALL_DIR := {{DOCDIR}}
+HTML_DST := $(DOC_INSTALL_DIR)/html
 
 doc_install: doc doc_man_install doc_html_install {{I18N_IF}}doc_man_cn_install{{I18N_ENDIF}} doc_images_install
 	$Q$(call ECHO_NOPROG,INSTALL,README.md $(DOC_INSTALL_DIR))
