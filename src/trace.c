@@ -6,7 +6,6 @@
 #include "procstatus.h"
 #include "color.h"
 #include "log/error.h"
-#include "transfer.h"
 #include <asm-generic/errno-base.h>
 #include <asm-generic/errno.h>
 #include <assert.h>
@@ -161,7 +160,7 @@ handle_fork (pid_t pid, int status)
 }
 
 static bool
-handle_syscall (pid_t pid, FILE *output_fp, bool oneshot)
+handle_syscall (pid_t pid, FILE *output_fp, uint32_t *arch_token, bool oneshot)
 {
   syscall_info Info;
   fprog prog;
@@ -190,16 +189,18 @@ handle_syscall (pid_t pid, FILE *output_fp, bool oneshot)
   else if (seccomp_mode == SECCOMP_SET_MODE_FILTER)
     mode_filter (&Info, pid, &prog, output_fp);
 
-  if (oneshot && seccomp_mode != LOAD_FAIL)
-    return true;
+  if (!oneshot || seccomp_mode == LOAD_FAIL)
+    return false;
 
-  return false;
+  *arch_token = saved_arch;
+  return true;
 }
 
-static void
+static uint32_t
 parent (pid_t child_pid, FILE *output_fp, bool oneshot)
 {
   int status;
+  uint32_t arch_token;
 
   waitpid (child_pid, &status, 0);
   // child is stopped after PTRACE_TRACEME
@@ -237,8 +238,8 @@ parent (pid_t child_pid, FILE *output_fp, bool oneshot)
       int sig = WSTOPSIG (status);
       if (sig == (SIGTRAP | 0x80))
         {
-          if (handle_syscall (pid, output_fp, oneshot))
-            return;
+          if (handle_syscall (pid, output_fp, &arch_token, oneshot))
+            return arch_token;
           ptrace (PTRACE_SYSCALL, pid, 0, 0);
         }
       else if (sig == SIGTRAP)
@@ -257,8 +258,7 @@ exit_on_sig (int signo)
   // flush files when recved normal signals
   exit (signo);
 }
-
-void
+uint32_t
 program_trace (char *argv[], FILE *output_fp, bool oneshot)
 {
   signal (SIGINT, exit_on_sig);
@@ -267,7 +267,7 @@ program_trace (char *argv[], FILE *output_fp, bool oneshot)
   if (pid == 0)
     child (argv);
   else
-    parent (pid, output_fp, oneshot);
+    return parent (pid, output_fp, oneshot);
 }
 
 static void
@@ -358,9 +358,8 @@ error_seize (pid_t pid, int err)
 }
 
 void
-pid_trace (int pid, uint32_t arch)
+pid_trace (int pid)
 {
-  int status;
   fprog prog;
   prog.filter = malloc (sizeof (filter) * 1024);
   int prog_idx = 0;
@@ -369,16 +368,20 @@ pid_trace (int pid, uint32_t arch)
     error_seize (pid, errno);
 
   ptrace (PTRACE_INTERRUPT, pid, 0, 0);
-  waitpid (pid, &status, 0);
+  waitpid (pid, NULL, 0);
 
-  do
+  syscall_info info;
+  ptrace (PTRACE_GET_SYSCALL_INFO, pid, sizeof (info), &info);
+  uint32_t arch_token = info.arch;
+
+  while (true)
     {
       prog.len
           = ptrace (PTRACE_SECCOMP_GET_FILTER, pid, prog_idx, prog.filter);
 
       if (prog.len != (unsigned short)-1)
         {
-          parse_filter (arch, &prog, stdout);
+          parse_filter (arch_token, &prog, stdout);
           prog_idx++;
           continue;
         }
@@ -386,7 +389,6 @@ pid_trace (int pid, uint32_t arch)
       if (!error_get_filter (pid, errno))
         break;
     }
-  while (true);
 
   if (prog_idx == 0)
     printf (NO_FILTER_FOUND, pid);

@@ -17,12 +17,12 @@ char *to_test_list[]
         "mmap", "mprotect", "sendfile", "ptrace", "fork" };
 
 void
-probe (char *argv[], uint32_t arch_token, FILE *output_fp)
+probe (char *argv[], FILE *output_fp)
 {
   FILE *tmp_fp = tmpfile ();
   if (tmp_fp == NULL)
     error ("open: %s", strerror (errno));
-  program_trace (argv, tmp_fp, true);
+  uint32_t arch_token = program_trace (argv, tmp_fp, true);
 
   for (size_t i = 0; i < ARRAY_SIZE (to_test_list); i++)
     {

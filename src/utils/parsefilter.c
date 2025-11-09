@@ -329,7 +329,10 @@ JMP (filter *f_ptr, stat_ctx *stat_list)
   char cmp_rval_str[REG_BUF_LEN];
 
   if (BPF_OP (f_ptr->code) == BPF_JA)
-    return JMP_JA (stat_list, pc, f_ptr->k);
+    {
+      JMP_JA (stat_list, pc, f_ptr->k);
+      return;
+    }
 
   uint8_t jt = f_ptr->jt;
   uint8_t jf = f_ptr->jf;

@@ -9,12 +9,12 @@
   "args[0-5] ip ]"
 
 #define PROBE_HINT                                                            \
-  "ceccomp probe   [ -c WHEN ] [ -a ARCH ] [ -o FILE ] PROGRAM [ "            \
+  "ceccomp probe   [ -c WHEN ] [ -o FILE ] PROGRAM [ "            \
   "program-args ]"
 
 #define TRACE_HINT                                                            \
-  "ceccomp trace   [ -c WHEN ] [ -a ARCH ] [ -o FILE ] -p PID\n"              \
-  "                [ -c WHEN ] [ -o FILE ] PROGRAM [ program-args ]"
+  "ceccomp trace   [ -c WHEN ] [ -o FILE ] PROGRAM [ program-args ]\n"              \
+  "                [ -c WHEN ] [ -o FILE ] -p PID"
 
 #define HELP_HINT "ceccomp help"
 #define VERSION_HINT "ceccomp version"
