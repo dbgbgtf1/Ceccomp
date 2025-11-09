@@ -6,7 +6,7 @@ Items marked with :star: is the major change why we release a new version.
 <!-- write user/repo#num or user/repo!num to reference. Then run scripts/complete-url.py -->
 <!-- to format raw ref to URL. -->
 ## 3.5 (INCOMING)
-* **BREAKING** :star: Now `trace` and `probe` no more accepts `-a`
+* **BREAKING** :star: Now `trace` and `probe` no more accepts `-a`; arch is automatically retrieved via ptrace
 * :star: Add `i686` arch support
 * :star: Handle unknown system arch
 * Fix 32-bit ceccomp `strtol` error
