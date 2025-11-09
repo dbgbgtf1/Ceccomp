@@ -39,6 +39,17 @@ cd Ceccomp
 make DEBUG=2
 ```
 
+# Run Test
+
+Run configure and make, then invoke `scripts/check.sh` from repo root. We expect the script could pass all checks.
+If you find some checks failed, please submit an issue to report your case.
+
+`check.sh` stops if any error occurs by default, you can override this behavior by adding a `--tolerant` flag,
+which allows `check.sh` to run through the whole test.
+
+To run the test, you need 3 extra packages: `pkgconf` (required by `pkg-config`), `diffutils` (required by `diff`)
+and `procps` (required by `pgrep` and `pkill`).
+
 # CheatSheet
 
 <img width="1185" height="649" alt="image" src="https://github.com/user-attachments/assets/7868a8ed-e6a9-42fa-a2f1-5955be358013" />

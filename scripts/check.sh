@@ -47,7 +47,7 @@ for file in "${files[@]}"; do
         skip_test "$TOO_OLD_MSG"
         continue
     fi
-    diff <(./build/ceccomp disasm $file --color always -a x86_64) ./test/text/$filename
+    diff -u <(./build/ceccomp disasm $file --color always -a x86_64) ./test/text/$filename
     check_pass $?
   fi
 done
@@ -65,7 +65,7 @@ for file in "${files[@]}"; do
         skip_test "$TOO_OLD_MSG"
         continue
     fi
-    diff <(./build/ceccomp asm $file --fmt raw -a x86_64) test/bpf/$filename.bpf
+    diff -u <(./build/ceccomp asm $file --fmt raw -a x86_64) test/bpf/$filename.bpf
     check_pass $?
   fi
 done
@@ -81,11 +81,11 @@ for file in "${files[@]}"; do
         skip_test "$TOO_OLD_MSG"
         continue
     fi
-    diff <(./build/ceccomp emu -c always -a x86_64 $file open 1 2 3 4 5 6) ./test/emu_result/$filename.open
+    diff -u <(./build/ceccomp emu -c always -a x86_64 $file open 1 2 3 4 5 6) ./test/emu_result/$filename.open
     check_pass $?
-    diff <(./build/ceccomp emu -c always -a x86_64 $file pipe 1 2 3 4 5 6) ./test/emu_result/$filename.pipe
+    diff -u <(./build/ceccomp emu -c always -a x86_64 $file pipe 1 2 3 4 5 6) ./test/emu_result/$filename.pipe
     check_pass $?
-    diff <(./build/ceccomp emu -c always -a x86_64 $file accept 1 2 3 4 5 6) ./test/emu_result/$filename.accept
+    diff -u <(./build/ceccomp emu -c always -a x86_64 $file accept 1 2 3 4 5 6) ./test/emu_result/$filename.accept
     check_pass $?
   fi
 done
@@ -99,7 +99,7 @@ files=(./test/errors/*.bpf)
 for file in "${files[@]}"; do
   if [ -f "$file" ]; then
     filename=$(basename "$file")
-    diff <(./build/ceccomp disasm -c always -a x86_64 $file 2>&1) ./test/errors/$filename.err
+    diff -u <(./build/ceccomp disasm -c always -a x86_64 $file 2>&1) ./test/errors/$filename.err
     check_pass $?
   fi
 done
@@ -112,12 +112,12 @@ make test
 
 filename="trace test"
 timeout 0.2 ./build/ceccomp trace -o ./build/dyn_result -c always ./build/test &>/dev/null
-diff ./build/dyn_result ./test/trace.log
+diff -u ./build/dyn_result ./test/trace.log
 check_pass $?
 
 filename="probe test"
 ./build/ceccomp probe -o ./build/dyn_result -c always ./build/test &>/dev/null
-diff ./build/dyn_result ./test/probe.log
+diff -u ./build/dyn_result ./test/probe.log
 check_pass $?
 
 if [ "z$(pgrep -f '^./build/test$')z" != "zz" ]; then
