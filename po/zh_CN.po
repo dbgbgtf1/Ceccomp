@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ceccomp 3.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-30 13:27+0800\n"
+"POT-Creation-Date: 2025-11-05 12:21+0800\n"
 "PO-Revision-Date: 2025-09-25 20:01+0800\n"
 "Last-Translator: RocketDev <ma2014119@outlook.com>\n"
 "Language-Team: Chinese <kde-i18n-doc@kde.org>\n"
@@ -146,107 +146,111 @@ msgstr "无效的 asm code"
 msgid "Invalid return value"
 msgstr "无效的 return 值"
 
-#: ../include/log/error.h:55
+#: ../include/log/error.h:54
+msgid "Line length exceeds 0x400, which shouldn't happen"
+msgstr "行长度超过0x400，这不应该发生"
+
+#: ../include/log/error.h:57
 msgid "Invalid offset of seccomp_data"
 msgstr "seccomp data 的偏移无效"
 
-#: ../include/log/error.h:56
+#: ../include/log/error.h:58
 msgid "Store mem before ld or ldx"
 msgstr "在 ld 或 ldx 之前先 store mem"
 
-#: ../include/log/error.h:57
+#: ../include/log/error.h:59
 msgid "Jt and jf both 0"
 msgstr "jt 和 jf 都是 0"
 
-#: ../include/log/error.h:60
+#: ../include/log/error.h:62
 msgid "Alu div by zero"
 msgstr "ALU 除以零"
 
-#: ../include/log/error.h:61
+#: ../include/log/error.h:63
 msgid "Alu lsh or rsh out of range"
 msgstr "ALU 左移或右移超出范围"
 
-#: ../include/log/error.h:62
+#: ../include/log/error.h:64
 msgid "Jmp out of bpf len"
 msgstr "jmp 超出 BPF 长度"
 
-#: ../include/log/error.h:63
+#: ../include/log/error.h:65
 msgid "Bpf filter must end with return"
 msgstr "BPF 过滤器必须以 return 结尾"
 
-#: ../include/log/error.h:64
+#: ../include/log/error.h:66
 msgid "Invalid opertion"
 msgstr "无效的操作"
 
-#: ../include/log/error.h:67
+#: ../include/log/error.h:69
 msgid ""
 "The above code has errors, please check the warnings for specific details"
 msgstr "如上的代码出现错误，请从警告获取更多细节"
 
-#: ../include/log/error.h:72
+#: ../include/log/error.h:74
 msgid "execv failed executing"
 msgstr "无法执行 execv"
 
-#: ../include/log/error.h:73
+#: ../include/log/error.h:75
 msgid "tracee syscall should be exiting here"
 msgstr "tracee 系统调用在此处应该退出"
 
-#: ../include/log/error.h:74
+#: ../include/log/error.h:76
 #, c-format
 msgid "Process %d spawned a new pid %d"
 msgstr "进程 %d 派生了新进程 %d"
 
-#: ../include/log/error.h:75
+#: ../include/log/error.h:77
 #, c-format
 msgid "Process %d exited"
 msgstr "进程 %d 退出"
 
-#: ../include/log/error.h:76
+#: ../include/log/error.h:78
 #, c-format
 msgid "Parsing %d process seccomp filter"
 msgstr "正在解析 %d 进程的 seccomp 过滤器"
 
-#: ../include/log/error.h:77
-#, c-format
-msgid "Peekdata failed in address: 0x%lx"
+#: ../include/log/error.h:79
+#, fuzzy, c-format
+#| msgid "Peekdata failed in address: 0x%lx"
+msgid "Peekdata failed in address: 0x%p"
 msgstr "Peekdata 在 0x%lx 处失败"
 
-#: ../include/log/error.h:79
-#| msgid "Ptrace from 32 to 64 is limited"
+#: ../include/log/error.h:81
 msgid "Ptrace from 32-bit tracer to 64-bit tracee is limited"
 msgstr "从 32位tracer 到 64位tracee 的 Ptrace 受到限制"
 
-#: ../include/log/error.h:82
+#: ../include/log/error.h:84
 msgid "Procfs not accessible, unable to perform"
 msgstr "Procfs 无法访问，无法执行"
 
-#: ../include/log/error.h:83
+#: ../include/log/error.h:85
 #, c-format
 msgid "Target process is being traced by %d pid process"
 msgstr "目标进程正在被 %d 进程所追踪"
 
-#: ../include/log/error.h:87
+#: ../include/log/error.h:89
 msgid "Run with CAP_SYS_PTRACE capability to seize a foreign process"
 msgstr "以 CAP_SYS_PTRACE 权能运行来附加到一个外部进程"
 
-#: ../include/log/error.h:88
+#: ../include/log/error.h:90
 msgid "Kernel thread can not be seized"
 msgstr "内核线程不能被附加"
 
-#: ../include/log/error.h:90
+#: ../include/log/error.h:92
 msgid "perhaps seizing kthread or lacking CAP_SYS_PTRACE"
 msgstr "可能正在附加到内核线程或缺少 CAP_SYS_PTRACE 权能"
 
-#: ../include/log/error.h:91
+#: ../include/log/error.h:93
 #, c-format
 msgid "No such process with pid %d in the system"
 msgstr "不存在 pid 为 %d 的进程"
 
-#: ../include/log/error.h:92
+#: ../include/log/error.h:94
 msgid "Non-cbpf found, can't resolve, but continue"
 msgstr "发现了无法解析的 non-cbpf，继续"
 
-#: ../include/log/error.h:97
+#: ../include/log/error.h:99
 msgid ""
 "perhaps PTRACE_GET_SECCOMP_FILTER is not supported or no seccomp filter in "
 "target process"
@@ -254,29 +258,29 @@ msgstr ""
 "可能 PTRACE_SECCOMP_GET_FILTER 在您的系统上不支持或目标进程没有 seccomp 过滤"
 "器"
 
-#: ../include/log/error.h:101
+#: ../include/log/error.h:103
 msgid "PTRACE_GET_SECCOMP_FILTER is not supported on your system"
 msgstr "PTRACE_SECCOMP_GET_FILTER 在您的系统上不支持"
 
-#: ../include/log/error.h:102
+#: ../include/log/error.h:104
 msgid "Error cause unknown, due to the followings"
 msgstr "发生未知的错误，由于如下的原因"
 
-#: ../include/log/error.h:104
+#: ../include/log/error.h:106
 msgid ""
 "Ceccomp is in seccomp mode, fetch seccomp filters of other process is not "
 "permitted"
 msgstr "Ceccomp 处在 seccomp 模式，不允许获取其他进程的 seccomp 过滤器"
 
-#: ../include/log/error.h:108
+#: ../include/log/error.h:110
 msgid "Run with CAP_SYS_ADMIN capability to fetch seccomp filters"
 msgstr "以 CAP_SYS_ADMIN 权能运行来获取 seccomp 过滤器"
 
-#: ../include/log/error.h:110
+#: ../include/log/error.h:112
 msgid "perhaps lacking CAP_SYS_ADMIN or ceccomp is in seccomp mode"
 msgstr "可能缺少 CAP_SYS_ADMIN 权能或 ceccomp 处于 seccomp 模式"
 
-#: ../include/log/error.h:112
+#: ../include/log/error.h:114
 #, c-format
 msgid "No seccomp filters found in pid %d\n"
 msgstr "在 pid %d 中没有找到 seccomp 过滤器\n"

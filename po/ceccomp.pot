@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-10-30 13:27+0800\n"
+"POT-Creation-Date: 2025-11-05 12:21+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -141,134 +141,138 @@ msgstr ""
 msgid "Invalid return value"
 msgstr ""
 
-#: ../include/log/error.h:55
-msgid "Invalid offset of seccomp_data"
-msgstr ""
-
-#: ../include/log/error.h:56
-msgid "Store mem before ld or ldx"
+#: ../include/log/error.h:54
+msgid "Line length exceeds 0x400, which shouldn't happen"
 msgstr ""
 
 #: ../include/log/error.h:57
+msgid "Invalid offset of seccomp_data"
+msgstr ""
+
+#: ../include/log/error.h:58
+msgid "Store mem before ld or ldx"
+msgstr ""
+
+#: ../include/log/error.h:59
 msgid "Jt and jf both 0"
 msgstr ""
 
-#: ../include/log/error.h:60
+#: ../include/log/error.h:62
 msgid "Alu div by zero"
 msgstr ""
 
-#: ../include/log/error.h:61
+#: ../include/log/error.h:63
 msgid "Alu lsh or rsh out of range"
 msgstr ""
 
-#: ../include/log/error.h:62
+#: ../include/log/error.h:64
 msgid "Jmp out of bpf len"
 msgstr ""
 
-#: ../include/log/error.h:63
+#: ../include/log/error.h:65
 msgid "Bpf filter must end with return"
 msgstr ""
 
-#: ../include/log/error.h:64
+#: ../include/log/error.h:66
 msgid "Invalid opertion"
 msgstr ""
 
-#: ../include/log/error.h:67
+#: ../include/log/error.h:69
 msgid ""
 "The above code has errors, please check the warnings for specific details"
 msgstr ""
 
-#: ../include/log/error.h:72
+#: ../include/log/error.h:74
 msgid "execv failed executing"
 msgstr ""
 
-#: ../include/log/error.h:73
-msgid "tracee syscall should be exiting here"
-msgstr ""
-
-#: ../include/log/error.h:74
-#, c-format
-msgid "Process %d spawned a new pid %d"
-msgstr ""
-
 #: ../include/log/error.h:75
-#, c-format
-msgid "Process %d exited"
+msgid "tracee syscall should be exiting here"
 msgstr ""
 
 #: ../include/log/error.h:76
 #, c-format
-msgid "Parsing %d process seccomp filter"
+msgid "Process %d spawned a new pid %d"
 msgstr ""
 
 #: ../include/log/error.h:77
 #, c-format
-msgid "Peekdata failed in address: 0x%lx"
+msgid "Process %d exited"
+msgstr ""
+
+#: ../include/log/error.h:78
+#, c-format
+msgid "Parsing %d process seccomp filter"
 msgstr ""
 
 #: ../include/log/error.h:79
+#, c-format
+msgid "Peekdata failed in address: 0x%p"
+msgstr ""
+
+#: ../include/log/error.h:81
 msgid "Ptrace from 32-bit tracer to 64-bit tracee is limited"
 msgstr ""
 
-#: ../include/log/error.h:82
+#: ../include/log/error.h:84
 msgid "Procfs not accessible, unable to perform"
 msgstr ""
 
-#: ../include/log/error.h:83
+#: ../include/log/error.h:85
 #, c-format
 msgid "Target process is being traced by %d pid process"
 msgstr ""
 
-#: ../include/log/error.h:87
+#: ../include/log/error.h:89
 msgid "Run with CAP_SYS_PTRACE capability to seize a foreign process"
 msgstr ""
 
-#: ../include/log/error.h:88
+#: ../include/log/error.h:90
 msgid "Kernel thread can not be seized"
 msgstr ""
 
-#: ../include/log/error.h:90
+#: ../include/log/error.h:92
 msgid "perhaps seizing kthread or lacking CAP_SYS_PTRACE"
 msgstr ""
 
-#: ../include/log/error.h:91
+#: ../include/log/error.h:93
 #, c-format
 msgid "No such process with pid %d in the system"
 msgstr ""
 
-#: ../include/log/error.h:92
+#: ../include/log/error.h:94
 msgid "Non-cbpf found, can't resolve, but continue"
 msgstr ""
 
-#: ../include/log/error.h:97
+#: ../include/log/error.h:99
 msgid ""
 "perhaps PTRACE_GET_SECCOMP_FILTER is not supported or no seccomp filter in "
 "target process"
 msgstr ""
 
-#: ../include/log/error.h:101
+#: ../include/log/error.h:103
 msgid "PTRACE_GET_SECCOMP_FILTER is not supported on your system"
 msgstr ""
 
-#: ../include/log/error.h:102
+#: ../include/log/error.h:104
 msgid "Error cause unknown, due to the followings"
 msgstr ""
 
-#: ../include/log/error.h:104
+#: ../include/log/error.h:106
 msgid ""
 "Ceccomp is in seccomp mode, fetch seccomp filters of other process is not "
 "permitted"
 msgstr ""
 
-#: ../include/log/error.h:108
+#: ../include/log/error.h:110
 msgid "Run with CAP_SYS_ADMIN capability to fetch seccomp filters"
 msgstr ""
 
-#: ../include/log/error.h:110
+#: ../include/log/error.h:112
 msgid "perhaps lacking CAP_SYS_ADMIN or ceccomp is in seccomp mode"
 msgstr ""
 
-#: ../include/log/error.h:112
+#: ../include/log/error.h:114
 #, c-format
 msgid "No seccomp filters found in pid %d\n"
 msgstr ""

@@ -2,7 +2,6 @@
 #define PARSEOBJ
 
 #include "emu.h"
-#include "main.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -42,9 +41,12 @@ typedef enum
   ALU_RS = 0x31
 } Sym;
 
+extern void set_origin_line (char *origin);
+
 extern uint32_t right_val_ifline (char *val_str, reg_mem *reg, uint32_t arch);
 
-extern uint32_t right_val_assignline (FILE *s_output_fp, char *rval_str, reg_mem *reg_ptr);
+extern uint32_t right_val_assignline (FILE *s_output_fp, char *rval_str,
+                                      reg_mem *reg_ptr);
 
 extern void left_val_assignline (char *lval_str, reg_set *reg_len_ptr,
                                  reg_mem *reg_ptr);

@@ -1,5 +1,4 @@
 #include "asm.h"
-#include "color.h"
 #include "log/error.h"
 #include "log/logger.h"
 #include "main.h"
@@ -23,6 +22,8 @@
 #include <sys/types.h>
 
 static uint32_t idx;
+char *origin_line;
+char *clean_line;
 
 static filter
 MISC_TXA ()
@@ -72,7 +73,7 @@ jmp_mode (uint8_t cmp_enum, bool *reverse)
 }
 
 static filter
-JMP_GOTO (char *clean_line, uint32_t pc)
+JMP_GOTO (uint32_t pc)
 {
   char *jmp_nr = clean_line + strlen ("goto");
 
@@ -81,13 +82,13 @@ JMP_GOTO (char *clean_line, uint32_t pc)
   filter.k = strtol (jmp_nr, &end, 10) - pc - 1;
 
   if (jmp_nr == end)
-    error (FORMAT " %s", idx, INVALID_NR_AFTER_GOTO);
+    error ("%s: %s", INVALID_NR_AFTER_GOTO, origin_line);
 
   return filter;
 }
 
 static filter
-JMP (char *clean_line, uint32_t pc, uint32_t arch)
+JMP (uint32_t pc, uint32_t arch)
 {
   filter filter = BPF_JUMP (BPF_JMP, 0, 0, 0);
 
@@ -114,7 +115,7 @@ JMP (char *clean_line, uint32_t pc, uint32_t arch)
 
   char *right_paren = strchr (rval, ')');
   if (right_paren == NULL)
-    error (FORMAT " %s", idx, PAREN_WRAP_CONDITION);
+    error ("%s: %s", PAREN_WRAP_CONDITION, origin_line);
 
   uint32_t jmp_set = parse_goto (right_paren + 1);
   uint16_t jt = GETJT (jmp_set);
@@ -122,7 +123,7 @@ JMP (char *clean_line, uint32_t pc, uint32_t arch)
 
   // if jt != 0 and jt <= pc, something mush be wrong
   if ((jt && (jt <= pc)) || (jf && (jf <= pc)))
-    error ("%s", JMP_NR_LESS_THAN_PC);
+    error ("%s: %s", JMP_NR_LESS_THAN_PC, origin_line);
 
   if (reverse)
     {
@@ -172,9 +173,9 @@ LD_LDX_MEM (char *rval_str, filter *f_ptr)
   uint32_t mem_idx = strtol (rval_str, &end, 0);
 
   if (*end != ']')
-    error (FORMAT " %s", idx, INVALID_MEM);
+    error ("%s: %s", INVALID_MEM, origin_line);
   if (mem_idx >= BPF_MEMWORDS)
-    error (FORMAT " %s", idx, INVALID_MEM_IDX);
+    error ("%s: %s", INVALID_MEM_IDX, origin_line);
 
   f_ptr->code |= BPF_MEM;
   f_ptr->k = mem_idx;
@@ -197,7 +198,7 @@ LD_LDX_IMM (char *rval_str, filter *f_ptr, uint32_t arch)
 }
 
 static filter
-LD_LDX (char *clean_line, uint32_t arch)
+LD_LDX (uint32_t arch)
 {
   filter filter = { 0, 0, 0, 0 };
   char *rval_str = clean_line + 3;
@@ -210,7 +211,7 @@ LD_LDX (char *clean_line, uint32_t arch)
   else if (*(clean_line + 1) == 'X')
     filter.code |= BPF_LDX;
   else
-    error (FORMAT " %s", idx, INVALID_LEFT_VAR);
+    error ("%s: %s", INVALID_LEFT_VAR, origin_line);
 
   if (LD_LDX_MEM (rval_str, &filter))
     return filter;
@@ -219,11 +220,11 @@ LD_LDX (char *clean_line, uint32_t arch)
   else if (LD_LDX_LEN (rval_str, &filter))
     return filter;
 
-  error (FORMAT " %s", idx, INVALID_RIGHT_VAL);
+  error ("%s: %s", INVALID_RIGHT_VAL, origin_line);
 }
 
 static filter
-RET (char *clean_line)
+RET ()
 {
   filter filter = { BPF_RET, 0, 0, 0 };
 
@@ -238,13 +239,13 @@ RET (char *clean_line)
   else if (STARTWITH (retval_str, "$A"))
     filter.code |= BPF_A;
   else
-    error (FORMAT " %s", idx, INVALID_RET);
+    error ("%s: %s", INVALID_RET, origin_line);
 
   return filter;
 }
 
 static filter
-ST_STX (char *clean_line)
+ST_STX ()
 {
   filter filter = { 0, 0, 0, 0 };
 
@@ -252,23 +253,23 @@ ST_STX (char *clean_line)
   char *end;
   uint32_t mem_idx = strtol (idx_str, &end, 0);
   if (*end != ']')
-    error (FORMAT " %s", idx, INVALID_MEM);
+    error ("%s: %s", INVALID_MEM, origin_line);
   if (*(end + 1) != '=')
-    error (FORMAT " %s", idx, INVALID_OPERATOR);
-  if (mem_idx >= BPF_MEMWORDS)
-    error (FORMAT " %s", idx, INVALID_MEM_IDX);
+    error ("%s: %s", INVALID_OPERATOR, origin_line);
+  if (idx >= BPF_MEMWORDS)
+    error ("%s: %s", INVALID_MEM_IDX, origin_line);
 
   filter.k = mem_idx;
 
   if (*(end + 2) != '$')
-    error (FORMAT " %s", idx, INVALID_RIGHT_VAL);
+    error ("%s: %s", INVALID_RIGHT_VAL, origin_line);
 
   if (*(end + 3) == 'A')
     filter.code |= BPF_ST;
   else if (*(end + 3) == 'X')
     filter.code |= BPF_STX;
   else
-    error (FORMAT " %s", idx, INVALID_RIGHT_VAL);
+    error ("%s: %s", INVALID_RIGHT_VAL, origin_line);
 
   return filter;
 }
@@ -300,7 +301,7 @@ alu_mode (uint8_t alu_enum)
 }
 
 static filter
-ALU (char *clean_line)
+ALU ()
 {
   filter filter = BPF_STMT (BPF_ALU, 0);
 
@@ -327,9 +328,23 @@ ALU (char *clean_line)
   char *end;
   filter.k = strtoul (rval_str, &end, 0);
   if (rval_str == end)
-    error (FORMAT " %s", idx, INVALID_RIGHT_VAL);
+    error ("%s: %s", INVALID_RIGHT_VAL, origin_line);
   return filter;
 }
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wreturn-type"
+static char *
+set_print_format (print_mode p_mode)
+{
+  if (p_mode == HEXFMT)
+    return "\"\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\",\n";
+  else if (p_mode == HEXLINE)
+    return "\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x";
+  else if (p_mode == RAW)
+    return "%c%c%c%c%c%c%c%c";
+}
+#pragma GCC diagnostic pop
 
 static void
 format_print (filter filter, char *format)
@@ -349,54 +364,39 @@ format_print (filter filter, char *format)
 void
 assemble (uint32_t arch, FILE *read_fp, print_mode p_mode)
 {
-  line_set Line;
-  fprog prog;
-  prog.len = 1;
-  prog.filter = malloc (sizeof (filter) * 1024);
+  idx = 1;
 
-  char *format = NULL;
-  if (p_mode == HEXFMT)
-    format = "\"\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\",\n";
-  else if (p_mode == HEXLINE)
-    format = "\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x";
-  else if (p_mode == RAW)
-    format = "%c%c%c%c%c%c%c%c";
+  char *format = set_print_format (p_mode);
 
-  while (pre_asm (read_fp, &Line), Line.origin_line != NULL)
+  while (pre_asm (read_fp, &origin_line, &clean_line), origin_line != NULL)
     {
       filter f_current = { 0, 0, 0, 0 };
-      char *clean_line = Line.clean_line;
-      idx = prog.len;
 
       if (!strcmp (clean_line, "$A=$X"))
         f_current = MISC_TXA ();
       else if (!strcmp (clean_line, "$X=$A"))
         f_current = MISC_TAX ();
       else if (STARTWITH (clean_line, "if"))
-        f_current = JMP (clean_line, prog.len, arch);
+        f_current = JMP (idx, arch);
       else if (STARTWITH (clean_line, "goto"))
-        f_current = JMP_GOTO (clean_line, prog.len);
+        f_current = JMP_GOTO (idx);
       else if (STARTWITH (clean_line, "return"))
-        f_current = RET (clean_line);
+        f_current = RET ();
       else if (STARTWITH (clean_line, "$A=-$A"))
-        f_current = ALU (clean_line);
+        f_current = ALU ();
       else if (STARTWITH (clean_line, "$mem["))
-        f_current = ST_STX (clean_line);
+        f_current = ST_STX ();
       else if (STARTWITH (clean_line, "$") && *(clean_line + 2) == '=')
-        f_current = LD_LDX (clean_line, arch);
+        f_current = LD_LDX (arch);
       else if (STARTWITH (clean_line, "$A"))
-        f_current = ALU (clean_line);
+        f_current = ALU ();
       else
-        error("%s: %s", INVALID_ASM_CODE, Line.origin_line);
+        error ("%s: %s", INVALID_ASM_CODE, origin_line);
 
-      prog.filter[prog.len] = f_current;
-      format_print (prog.filter[prog.len], format);
-      prog.len++;
-
-      free_line (&Line);
+      format_print (f_current, format);
+      idx++;
     }
 
   if (p_mode != RAW)
     putchar ('\n');
-  free (prog.filter);
 }

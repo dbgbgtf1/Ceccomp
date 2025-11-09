@@ -8,7 +8,6 @@
 #include "preasm.h"
 #include "transfer.h"
 #include <fcntl.h>
-#include <iso646.h>
 #include <libintl.h>
 #include <linux/filter.h>
 #include <seccomp.h>
@@ -23,7 +22,8 @@
 
 static uint32_t read_idx;
 static uint32_t execute_idx;
-
+static char *clean_line;
+static char *origin_line;
 static FILE *s_output_fp;
 
 #define LIGHTCOLORPRINTF(str, ...)                                            \
@@ -74,7 +74,7 @@ emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data)
 }
 
 static uint32_t
-jmp_to (char *clean_line, reg_mem *reg, seccomp_data *data)
+jmp_to (reg_mem *reg, seccomp_data *data)
 {
   char *sym_str;
   bool reverse = maybe_reverse (clean_line);
@@ -94,7 +94,7 @@ jmp_to (char *clean_line, reg_mem *reg, seccomp_data *data)
 
   char *right_paren = strchr (sym_str, ')');
   if (right_paren == NULL)
-    error (FORMAT " %s", read_idx, PAREN_WRAP_CONDITION);
+    error ("%s: %s", PAREN_WRAP_CONDITION, origin_line);
 
   uint32_t jmp_set = parse_goto (right_paren + 1);
   uint16_t jf = GETJF (jmp_set);
@@ -114,19 +114,18 @@ jmp_to (char *clean_line, reg_mem *reg, seccomp_data *data)
 }
 
 static void
-emu_if_line (char *clean_line, char *origin_start, reg_mem *reg,
-             seccomp_data *data, uint32_t *execute_idx)
+emu_if_line (reg_mem *reg, seccomp_data *data, uint32_t *execute_idx)
 {
-  uint32_t tmp_idx = jmp_to (clean_line, reg, data);
+  uint32_t tmp_idx = jmp_to (reg, data);
   if (tmp_idx == 0)
     return;
   if (tmp_idx < *execute_idx)
-    error ("%s: %s", INVALID_JMP_NR, origin_start);
+    error ("%s: %s", INVALID_JMP_NR, origin_line);
   *execute_idx = tmp_idx;
 }
 
 static void
-emu_assign_line (char *clean_line, reg_mem *reg, seccomp_data *data)
+emu_assign_line (reg_mem *reg, seccomp_data *data)
 {
   reg_set lval;
   left_val_assignline (clean_line, &lval, reg);
@@ -153,14 +152,15 @@ emu_assign_line (char *clean_line, reg_mem *reg, seccomp_data *data)
     }
 
   fprintf (s_output_fp, " = ");
-  uint32_t rval = right_val_assignline (s_output_fp, rval_str, reg);
+  uint32_t rval
+      = right_val_assignline (s_output_fp, rval_str, reg);
   fprintf (s_output_fp, "\n");
 
   *lval_ptr = rval;
 }
 
 static char *
-emu_ret_line (char *clean_line, reg_mem *reg)
+emu_ret_line (reg_mem *reg)
 {
   char *retval_str = clean_line + strlen ("return");
 
@@ -176,7 +176,7 @@ emu_ret_line (char *clean_line, reg_mem *reg)
 }
 
 static void
-emu_goto_line (char *clean_line, char *origin_start, uint32_t *execute_idx)
+emu_goto_line (uint32_t *execute_idx)
 {
   char *jmp_to_str = clean_line + strlen ("goto");
   char *end;
@@ -188,7 +188,7 @@ emu_goto_line (char *clean_line, char *origin_start, uint32_t *execute_idx)
   fprintf (s_output_fp, "goto %04d\n", jmp_to);
 
   if (jmp_to < *execute_idx)
-    error ("%s: %s", INVALID_JMP_NR, origin_start);
+    error ("%s: %s", INVALID_JMP_NR, origin_line);
 
   *execute_idx = jmp_to;
 }
@@ -231,12 +231,13 @@ static void
 emu_alu_neg (reg_mem *reg)
 {
   reg->A = -reg->A;
-  fprintf (s_output_fp, "%s = -%s\n", BRIGHT_YELLOW ("$A"), BRIGHT_YELLOW ("$A"));
+  fprintf (s_output_fp, "%s = -%s\n", BRIGHT_YELLOW ("$A"),
+           BRIGHT_YELLOW ("$A"));
   return;
 }
 
 static void
-emu_alu_line (char *clean_line, reg_mem *reg)
+emu_alu_line (reg_mem *reg)
 {
   char *sym_str = clean_line + strlen ("$A");
   uint8_t sym_enum = parse_alu_sym (sym_str);
@@ -258,7 +259,7 @@ emu_alu_line (char *clean_line, reg_mem *reg)
     {
       rval = strtoul (rval_str, &end, 0);
       if (rval_str == end)
-        error (FORMAT " %s", read_idx, INVALID_RIGHT_VAL);
+        error ("%s: %s", INVALID_RIGHT_VAL, origin_line);
       fprintf (s_output_fp, BRIGHT_CYAN ("%s"), rval_str);
     }
 
@@ -283,26 +284,19 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
   else
     s_output_fp = stdout;
 
-  line_set Line = { NULL, NULL, NULL };
   reg_mem reg;
   init_regs (&reg);
 
   char *ret = NULL;
   for (read_idx = 1, execute_idx = 1;; read_idx++)
     {
-      if (Line.origin_line)
-        free_line (&Line);
-      pre_asm (read_fp, &Line);
-      if (Line.origin_line == NULL)
+      pre_asm (read_fp, &origin_line, &clean_line);
+      if (origin_line == NULL)
         break;
-
-      char *clean_line = Line.clean_line;
-      char *origin_start = Line.origin_start;
 
       if (read_idx < execute_idx)
         {
-          pre_clear_color (Line.origin_line);
-          LIGHTCOLORPRINTF (FORMAT ": %s", read_idx, Line.origin_start);
+          LIGHTCOLORPRINTF (FORMAT ": %s", read_idx, origin_line);
           continue;
         }
 
@@ -310,30 +304,29 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
       execute_idx++;
 
       if (STARTWITH (clean_line, "if"))
-        emu_if_line (clean_line, origin_start, &reg, data, &execute_idx);
+        emu_if_line (&reg, data, &execute_idx);
       else if (STARTWITH (clean_line, "return"))
         {
-          ret = emu_ret_line (clean_line, &reg);
+          ret = emu_ret_line (&reg);
           break;
         }
       else if (STARTWITH (clean_line, "goto"))
-        emu_goto_line (clean_line, origin_start, &execute_idx);
+        emu_goto_line (&execute_idx);
       else if (STARTWITH (clean_line, "$A=-$A"))
         emu_alu_neg (&reg);
       else if ((STARTWITH (clean_line, "$") && *(clean_line + 2) == '='))
-        emu_assign_line (clean_line, &reg, data);
+        emu_assign_line (&reg, data);
       else if (STARTWITH (clean_line, "$mem["))
-        emu_assign_line (clean_line, &reg, data);
+        emu_assign_line (&reg, data);
       else if (STARTWITH (clean_line, "$A"))
-        emu_alu_line (clean_line, &reg);
+        emu_alu_line (&reg);
       else
-        error (FORMAT " %s", read_idx, INVALID_ASM_CODE);
+        error ("%s: %s", INVALID_ASM_CODE, origin_line);
     }
 
   if (quiet)
     fclose (s_output_fp);
 
-  free_line (&Line);
   if (ret == NULL)
     error ("%s", MUST_END_WITH_RET);
   return ret;
