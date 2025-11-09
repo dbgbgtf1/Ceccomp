@@ -1,5 +1,6 @@
 #include "probe.h"
 #include "emu.h"
+#include "log/error.h"
 #include "log/logger.h"
 #include "main.h"
 #include "trace.h"
@@ -27,6 +28,8 @@ probe (char *argv[], FILE *output_fp)
   for (size_t i = 0; i < ARRAY_SIZE (to_test_list); i++)
     {
       int nr = seccomp_syscall_resolve_name_arch (arch_token, to_test_list[i]);
+      if (nr == __NR_SCMP_ERROR)
+        error (TRACEE_ARCH_NOT_SUPPORTED, arch_token);
       seccomp_data data = { nr, arch_token, 0, { 0, 0, 0, 0, 0, 0 } };
 
       fseek (tmp_fp, 0, SEEK_SET);
