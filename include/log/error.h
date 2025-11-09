@@ -54,7 +54,7 @@
 #define INVALID_ASM_CODE _ ("Invalid asm code")
 #define INVALID_RET_VAL _ ("Invalid return value")
 
-#define LINE_TOO_LONG _ ("Line length exceeds 0x400, which shouldn't happen")
+#define LINE_TOO_LONG _ ("Line length shall not exceeds 0x400")
 
 // raw
 #define INVALID_OFFSET_ABS _ ("Invalid offset of seccomp_data")
@@ -79,7 +79,7 @@
 #define PROCESS_FORK _ ("Process %d spawned a new pid %d")
 #define PROCESS_EXIT _ ("Process %d exited")
 #define PARSE_PID_BPF _ ("Parsing %d process seccomp filter")
-#define PEEKDATA_FAILED_ADR _ ("Peekdata failed in address: %p")
+#define PEEKDATA_FAILED_ADR _ ("Peekdata failed at %p")
 #define CANNOT_WORK_FROM_32_TO_64                                             \
   _ ("Ptrace from 32-bit tracer to 64-bit tracee is limited")
 #define TRACEE_ARCH_NOT_SUPPORTED                                             \
@@ -102,8 +102,7 @@
 #define ACTION_GET_FILTER "ptrace get seccomp filters"
 #define GET_FILTER_UNSUPPORTED_OR_NO_FILTER                                   \
   _ ("perhaps PTRACE_GET_SECCOMP_FILTER is not supported or no seccomp "      \
-     "filter "                                                                \
-     "in target process")
+     "filter in target process")
 #define GET_FILTER_UNSUPPORTED                                                \
   _ ("PTRACE_GET_SECCOMP_FILTER is not supported on your system")
 #define POSSIBLE_ERRORS _ ("Error cause unknown, due to the followings")

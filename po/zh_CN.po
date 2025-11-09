@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ceccomp 3.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-05 12:21+0800\n"
-"PO-Revision-Date: 2025-09-25 20:01+0800\n"
+"POT-Creation-Date: 2025-11-09 16:15+0800\n"
+"PO-Revision-Date: 2025-11-09 16:16+0800\n"
 "Last-Translator: RocketDev <ma2014119@outlook.com>\n"
 "Language-Team: Chinese <kde-i18n-doc@kde.org>\n"
 "Language: zh_CN\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Lokalize 25.08.1\n"
+"X-Generator: Lokalize 25.08.3\n"
 
 #: ../include/config.h:8
 #, c-format
@@ -66,191 +66,204 @@ msgstr "无效的 pid"
 msgid "Please input syscall_nr to emu"
 msgstr "请输入 syscall_nr 来模拟"
 
-#: ../include/log/error.h:26
+#: ../include/log/error.h:25
+#, c-format
+msgid ""
+"Your system arch (%s) does not match any arch supported by libseccomp, "
+"please set an arch by -a manually"
+msgstr ""
+"您的系统架构 (%s) 没有匹配到任何受 libseccomp 支持的架构。请使用 -a 手动设置"
+"架构"
+
+#: ../include/log/error.h:29
 msgid "Invalid operator"
 msgstr "无效的运算符"
 
-#: ../include/log/error.h:27
+#: ../include/log/error.h:30
 msgid "Impossible cmp sym enum"
 msgstr "不可能的 cmp enum"
 
-#: ../include/log/error.h:28
+#: ../include/log/error.h:31
 msgid "Impossible alu sym enum"
 msgstr "不可能的 alu enum"
 
-#: ../include/log/error.h:30
+#: ../include/log/error.h:33
 msgid "Invalid right value"
 msgstr "无效的右值"
 
-#: ../include/log/error.h:31
+#: ../include/log/error.h:34
 msgid "Invalid left valiable"
 msgstr "无效的左变量"
 
-#: ../include/log/error.h:33
+#: ../include/log/error.h:36
 msgid "Invalid idx of $mem"
 msgstr "无效的 mem 索引"
 
-#: ../include/log/error.h:34
+#: ../include/log/error.h:37
 msgid "Invalid mem statement"
 msgstr "无效的 mem 表达式"
 
-#: ../include/log/error.h:36
+#: ../include/log/error.h:39
 msgid "Invalid if line"
 msgstr "无效的 if 语句"
 
-#: ../include/log/error.h:37
+#: ../include/log/error.h:40
 msgid "Invalid return line"
 msgstr "无效的 return 语句"
 
-#: ../include/log/error.h:39
+#: ../include/log/error.h:42
 msgid "Missing parentheses in return data, example: ERRNO(2)"
 msgstr "return 数值缺少括号，示例： ERRNO(2)"
 
-#: ../include/log/error.h:40
+#: ../include/log/error.h:43
 msgid "Invalid return data"
 msgstr "无效的 return 数值"
 
-#: ../include/log/error.h:43
+#: ../include/log/error.h:46
 msgid "Use parentheses to wrap condition, example: (condition)"
 msgstr "使用括号来包括条件判断，示例： (条件判断)"
 
-#: ../include/log/error.h:44
+#: ../include/log/error.h:47
 msgid "Use 'goto' after (condition)"
 msgstr "在 (条件判断) 后使用 'goto'"
 
-#: ../include/log/error.h:46
+#: ../include/log/error.h:49
 msgid "Line number to go after 'goto'"
 msgstr "在 'goto' 后缺少行号"
 
-#: ../include/log/error.h:47
+#: ../include/log/error.h:50
 msgid "Line number to go after ',else goto'"
 msgstr "在 ',else goto' 后缺少行号"
 
-#: ../include/log/error.h:48
+#: ../include/log/error.h:51
 msgid "Invalid line number after goto"
 msgstr "在 'goto' 后的行号无效"
 
-#: ../include/log/error.h:49
+#: ../include/log/error.h:52
 msgid "Invalid jmp line number"
 msgstr "jmp 的行号无效"
 
-#: ../include/log/error.h:50
+#: ../include/log/error.h:53
 msgid "Jmp line number less than pc"
 msgstr "jmp 的行号小于 PC"
 
-#: ../include/log/error.h:51
+#: ../include/log/error.h:54
 msgid "Invalid asm code"
 msgstr "无效的 asm code"
 
-#: ../include/log/error.h:52
+#: ../include/log/error.h:55
 msgid "Invalid return value"
 msgstr "无效的 return 值"
 
-#: ../include/log/error.h:54
-msgid "Line length exceeds 0x400, which shouldn't happen"
-msgstr "行长度超过0x400，这不应该发生"
-
 #: ../include/log/error.h:57
+msgid "Line length shall not exceeds 0x400"
+msgstr "一行的长度不应超过 0x400"
+
+#: ../include/log/error.h:60
 msgid "Invalid offset of seccomp_data"
 msgstr "seccomp data 的偏移无效"
 
-#: ../include/log/error.h:58
+#: ../include/log/error.h:61
 msgid "Store mem before ld or ldx"
 msgstr "在 ld 或 ldx 之前先 store mem"
 
-#: ../include/log/error.h:59
+#: ../include/log/error.h:62
 msgid "Jt and jf both 0"
 msgstr "jt 和 jf 都是 0"
 
-#: ../include/log/error.h:62
+#: ../include/log/error.h:65
 msgid "Alu div by zero"
 msgstr "ALU 除以零"
 
-#: ../include/log/error.h:63
+#: ../include/log/error.h:66
 msgid "Alu lsh or rsh out of range"
 msgstr "ALU 左移或右移超出范围"
 
-#: ../include/log/error.h:64
+#: ../include/log/error.h:67
 msgid "Jmp out of bpf len"
 msgstr "jmp 超出 BPF 长度"
 
-#: ../include/log/error.h:65
+#: ../include/log/error.h:68
 msgid "Bpf filter must end with return"
 msgstr "BPF 过滤器必须以 return 结尾"
 
-#: ../include/log/error.h:66
+#: ../include/log/error.h:69
 msgid "Invalid opertion"
 msgstr "无效的操作"
 
-#: ../include/log/error.h:69
+#: ../include/log/error.h:72
 msgid ""
 "The above code has errors, please check the warnings for specific details"
 msgstr "如上的代码出现错误，请从警告获取更多细节"
 
-#: ../include/log/error.h:74
+#: ../include/log/error.h:77
 msgid "execv failed executing"
 msgstr "无法执行 execv"
 
-#: ../include/log/error.h:75
+#: ../include/log/error.h:78
 msgid "tracee syscall should be exiting here"
 msgstr "tracee 系统调用在此处应该退出"
 
-#: ../include/log/error.h:76
+#: ../include/log/error.h:79
 #, c-format
 msgid "Process %d spawned a new pid %d"
 msgstr "进程 %d 派生了新进程 %d"
 
-#: ../include/log/error.h:77
+#: ../include/log/error.h:80
 #, c-format
 msgid "Process %d exited"
 msgstr "进程 %d 退出"
 
-#: ../include/log/error.h:78
+#: ../include/log/error.h:81
 #, c-format
 msgid "Parsing %d process seccomp filter"
 msgstr "正在解析 %d 进程的 seccomp 过滤器"
 
-#: ../include/log/error.h:79
-#, fuzzy, c-format
-#| msgid "Peekdata failed in address: 0x%lx"
-msgid "Peekdata failed in address: 0x%p"
-msgstr "Peekdata 在 0x%lx 处失败"
+#: ../include/log/error.h:82
+#, c-format
+msgid "Peekdata failed at %p"
+msgstr "无法在 %p peekdata"
 
-#: ../include/log/error.h:81
+#: ../include/log/error.h:84
 msgid "Ptrace from 32-bit tracer to 64-bit tracee is limited"
 msgstr "从 32位tracer 到 64位tracee 的 Ptrace 受到限制"
 
-#: ../include/log/error.h:84
+#: ../include/log/error.h:86
+#, c-format
+msgid "libseccomp does not support the tracee's arch (%#x)"
+msgstr "libseccomp 不支持 tracee 的架构 (%#x)"
+
+#: ../include/log/error.h:89
 msgid "Procfs not accessible, unable to perform"
 msgstr "Procfs 无法访问，无法执行"
 
-#: ../include/log/error.h:85
+#: ../include/log/error.h:90
 #, c-format
 msgid "Target process is being traced by %d pid process"
 msgstr "目标进程正在被 %d 进程所追踪"
 
-#: ../include/log/error.h:89
+#: ../include/log/error.h:94
 msgid "Run with CAP_SYS_PTRACE capability to seize a foreign process"
 msgstr "以 CAP_SYS_PTRACE 权能运行来附加到一个外部进程"
 
-#: ../include/log/error.h:90
+#: ../include/log/error.h:95
 msgid "Kernel thread can not be seized"
 msgstr "内核线程不能被附加"
 
-#: ../include/log/error.h:92
+#: ../include/log/error.h:97
 msgid "perhaps seizing kthread or lacking CAP_SYS_PTRACE"
 msgstr "可能正在附加到内核线程或缺少 CAP_SYS_PTRACE 权能"
 
-#: ../include/log/error.h:93
+#: ../include/log/error.h:98
 #, c-format
 msgid "No such process with pid %d in the system"
 msgstr "不存在 pid 为 %d 的进程"
 
-#: ../include/log/error.h:94
+#: ../include/log/error.h:99
 msgid "Non-cbpf found, can't resolve, but continue"
 msgstr "发现了无法解析的 non-cbpf，继续"
 
-#: ../include/log/error.h:99
+#: ../include/log/error.h:104
 msgid ""
 "perhaps PTRACE_GET_SECCOMP_FILTER is not supported or no seccomp filter in "
 "target process"
@@ -258,29 +271,29 @@ msgstr ""
 "可能 PTRACE_SECCOMP_GET_FILTER 在您的系统上不支持或目标进程没有 seccomp 过滤"
 "器"
 
-#: ../include/log/error.h:103
+#: ../include/log/error.h:107
 msgid "PTRACE_GET_SECCOMP_FILTER is not supported on your system"
 msgstr "PTRACE_SECCOMP_GET_FILTER 在您的系统上不支持"
 
-#: ../include/log/error.h:104
+#: ../include/log/error.h:108
 msgid "Error cause unknown, due to the followings"
 msgstr "发生未知的错误，由于如下的原因"
 
-#: ../include/log/error.h:106
+#: ../include/log/error.h:110
 msgid ""
 "Ceccomp is in seccomp mode, fetch seccomp filters of other process is not "
 "permitted"
 msgstr "Ceccomp 处在 seccomp 模式，不允许获取其他进程的 seccomp 过滤器"
 
-#: ../include/log/error.h:110
+#: ../include/log/error.h:114
 msgid "Run with CAP_SYS_ADMIN capability to fetch seccomp filters"
 msgstr "以 CAP_SYS_ADMIN 权能运行来获取 seccomp 过滤器"
 
-#: ../include/log/error.h:112
+#: ../include/log/error.h:116
 msgid "perhaps lacking CAP_SYS_ADMIN or ceccomp is in seccomp mode"
 msgstr "可能缺少 CAP_SYS_ADMIN 权能或 ceccomp 处于 seccomp 模式"
 
-#: ../include/log/error.h:114
+#: ../include/log/error.h:118
 #, c-format
 msgid "No seccomp filters found in pid %d\n"
 msgstr "在 pid %d 中没有找到 seccomp 过滤器\n"
@@ -289,7 +302,7 @@ msgstr "在 pid %d 中没有找到 seccomp 过滤器\n"
 msgid "Usage: ceccomp <subcommand> <args> <options>\n"
 msgstr "用法： ceccomp <子命令> <参数> <选项>\n"
 
-#: ../include/help.h:23
+#: ../include/help.h:22
 msgid ""
 "asm      -- Assemble bpf text to raw bytes\n"
 "disasm   -- Disassemble raw bytes to bpf text\n"
@@ -309,7 +322,7 @@ msgstr ""
 "trace    -- 运行程序或追踪指定 pid，提取 bpf 过滤器，并打印 text 结果\n"
 "version  -- 显示 ceccomp 版本\n"
 
-#: ../include/help.h:35
+#: ../include/help.h:34
 msgid ""
 "Options:\n"
 "-a, --arch (x86_64|aarch64|...)  Which architecture to resolve syscall_nr, "
@@ -343,10 +356,10 @@ msgstr ""
 "raw, text                        raw 或 text 文件，默认为 stdin。更多细节请查"
 "阅文档\n"
 
-#: ../src/trace.c:40
+#: ../src/trace.c:39
 msgid "STRICT MODE DETECTED!"
 msgstr "检测到 严格模式 ！"
 
-#: ../src/trace.c:41
+#: ../src/trace.c:40
 msgid "Only read, write, _exit, sigreturn available!"
 msgstr "只能使用 read, write, _exit, sigreturn 系统调用！"
