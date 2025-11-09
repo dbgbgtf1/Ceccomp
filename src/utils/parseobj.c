@@ -16,11 +16,13 @@
 #include <unistd.h>
 
 static char *origin_line;
+static uint32_t idx;
 
 void
-set_origin_line (char *origin)
+set_error_log (char *origin, uint32_t pc)
 {
   origin_line = origin;
+  idx = pc;
 }
 
 uint32_t
@@ -62,7 +64,7 @@ right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch)
 
       rval = syscall_name (syscall_str, rval);
       if (rval == -1)
-        error ("%s: %s", INVALID_RIGHT_VAL, origin_line);
+        error (FORMAT " %s: %s", idx, INVALID_RIGHT_VAL, origin_line);
       else
         return rval;
       // X86_64.open
@@ -74,7 +76,7 @@ right_val_ifline (char *rval_str, reg_mem *reg, uint32_t arch)
     return rval;
   // 0xffffffff
 
-  error ("%s: %s", INVALID_RIGHT_VAL, origin_line);
+  error (FORMAT " %s: %s", idx, INVALID_RIGHT_VAL, origin_line);
 }
 
 // this is used in assign line, right value only
@@ -104,7 +106,7 @@ right_val_assignline (FILE *s_output_fp, char *rval_str, reg_mem *reg_ptr)
       print_fmt = BRIGHT_YELLOW ("%s");
       rval = *(uint32_t *)((char *)reg_ptr + offset);
       if (rval == (uint32_t)ARG_INIT_VAL)
-        error ("%s: %s", ST_MEM_BEFORE_LD, origin_line);
+        error (FORMAT " %s: %s", idx, ST_MEM_BEFORE_LD, origin_line);
       goto print_rval;
     }
 
@@ -123,7 +125,7 @@ right_val_assignline (FILE *s_output_fp, char *rval_str, reg_mem *reg_ptr)
       goto print_rval;
     }
 
-  error ("%s: %s", INVALID_RIGHT_VAL, origin_line);
+  error (FORMAT " %s: %s", idx, INVALID_RIGHT_VAL, origin_line);
 print_rval:
   fprintf (s_output_fp, print_fmt, rval_str);
   return rval;
@@ -153,7 +155,7 @@ left_val_assignline (char *lval_str, reg_set *reg_set, reg_mem *reg_ptr)
       return;
     }
   else
-    error ("%s: %s", INVALID_LEFT_VAR, origin_line);
+    error (FORMAT " %s: %s", idx, INVALID_LEFT_VAR, origin_line);
 }
 
 // return JMP ENUM, GETSYMLEN and GETSYMIDX to use it
@@ -177,7 +179,7 @@ parse_cmp_sym (char *sym_str)
   else if (!strncmp (sym_str, "<", 1))
     return CMP_LT;
 
-  error ("%s: %s", INVALID_OPERATOR, origin_line);
+  error (FORMAT " %s: %s", idx, INVALID_OPERATOR, origin_line);
 }
 
 uint8_t
@@ -202,14 +204,14 @@ parse_alu_sym (char *cmp_str)
   else if (!strncmp (cmp_str, ">>=", 3))
     return ALU_RS;
 
-  error ("%s: %s", INVALID_OPERATOR, origin_line);
+  error (FORMAT " %s: %s", idx, INVALID_OPERATOR, origin_line);
 }
 
 uint32_t
 parse_goto (char *goto_str)
 {
   if (!STARTWITH (goto_str, "goto"))
-    error ("%s: %s", GOTO_AFTER_CONDITION, origin_line);
+    error (FORMAT " %s: %s", idx, GOTO_AFTER_CONDITION, origin_line);
 
   char *jt_str = goto_str + strlen ("goto");
   char *jf_str = NULL;
@@ -218,14 +220,14 @@ parse_goto (char *goto_str)
 
   jt = strtoul (jt_str, &jf_str, 10);
   if (jf_str == jt_str)
-    error ("%s: %s", LINE_NR_AFTER_GOTO, origin_line);
+    error (FORMAT " %s: %s", idx, LINE_NR_AFTER_GOTO, origin_line);
 
   if (STARTWITH (jf_str, ",elsegoto"))
     {
       jf_str += strlen (",elsegoto");
       jf = strtoul (jf_str, &jt_str, 10);
       if (jt_str == jf_str)
-        error ("%s: %s", LINE_NR_AFTER_ELSE, origin_line);
+        error (FORMAT " %s: %s", idx, LINE_NR_AFTER_ELSE, origin_line);
     }
 
   return JMPSET (jt, jf);
@@ -242,5 +244,5 @@ maybe_reverse (char *clean_line)
   else if (STARTWITH (clean_line, "if!($A"))
     return true;
   else
-    error ("%s: %s", INVALID_IF, origin_line);
+    error (FORMAT " %s: %s", idx, INVALID_IF, origin_line);
 }

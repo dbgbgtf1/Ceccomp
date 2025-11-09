@@ -32,7 +32,7 @@ get_line (FILE *fp)
 
   if (origin_line[len - 1] == '\n')
     origin_line[len - 1] = '\0';
-  else
+  else if (len == (LINE_LEN - 1))
     error ("%s: %s", LINE_TOO_LONG, origin_line);
 
   return origin_line;

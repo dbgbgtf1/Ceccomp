@@ -48,7 +48,7 @@ is_state_true (uint32_t A, uint32_t cmp_enum, uint32_t rval)
     case CMP_NE:
       return (A != rval);
     default:
-      error ("%s: %d", INPOSSIBLE_CMP_ENUM, cmp_enum);
+      error ("%s", INPOSSIBLE_CMP_ENUM);
     }
 }
 
@@ -94,7 +94,7 @@ jmp_to (reg_mem *reg, seccomp_data *data)
 
   char *right_paren = strchr (sym_str, ')');
   if (right_paren == NULL)
-    error ("%s: %s", PAREN_WRAP_CONDITION, origin_line);
+    error (FORMAT " %s: %s", execute_idx, PAREN_WRAP_CONDITION, origin_line);
 
   uint32_t jmp_set = parse_goto (right_paren + 1);
   uint16_t jf = GETJF (jmp_set);
@@ -120,7 +120,7 @@ emu_if_line (reg_mem *reg, seccomp_data *data, uint32_t *execute_idx)
   if (tmp_idx == 0)
     return;
   if (tmp_idx < *execute_idx)
-    error ("%s: %s", INVALID_JMP_NR, origin_line);
+    error (FORMAT " %s: %s", *execute_idx, INVALID_JMP_NR, origin_line);
   *execute_idx = tmp_idx;
 }
 
@@ -133,7 +133,7 @@ emu_assign_line (reg_mem *reg, seccomp_data *data)
   uint32_t *lval_ptr = lval.reg_ptr;
 
   if (*(clean_line + lval_len) != '=')
-    error (FORMAT " %s", read_idx, INVALID_OPERATOR);
+    error (FORMAT " %s %s", execute_idx, INVALID_OPERATOR, origin_line);
   fprintf (s_output_fp, BRIGHT_YELLOW ("%.*s"), lval_len, clean_line);
 
   char *rval_str = clean_line + lval_len + 1;
@@ -152,8 +152,7 @@ emu_assign_line (reg_mem *reg, seccomp_data *data)
     }
 
   fprintf (s_output_fp, " = ");
-  uint32_t rval
-      = right_val_assignline (s_output_fp, rval_str, reg);
+  uint32_t rval = right_val_assignline (s_output_fp, rval_str, reg);
   fprintf (s_output_fp, "\n");
 
   *lval_ptr = rval;
@@ -169,7 +168,7 @@ emu_ret_line (reg_mem *reg)
 
   int32_t retval = STR2RETVAL (retval_str);
   if (retval == -1)
-    error (FORMAT " %s", read_idx, INVALID_RET_VAL);
+    error (FORMAT " %s %s", execute_idx, INVALID_RET_VAL, origin_line);
 
   retval_str = RETVAL2STR (retval);
   return retval_str;
@@ -183,12 +182,12 @@ emu_goto_line (uint32_t *execute_idx)
   uint32_t jmp_to = strtoul (jmp_to_str, &end, 10);
 
   if (jmp_to_str == end)
-    error (FORMAT " %s", read_idx, INVALID_NR_AFTER_GOTO);
+    error (FORMAT " %s %s", *execute_idx, INVALID_NR_AFTER_GOTO, origin_line);
 
   fprintf (s_output_fp, "goto %04d\n", jmp_to);
 
   if (jmp_to < *execute_idx)
-    error ("%s: %s", INVALID_JMP_NR, origin_line);
+    error (FORMAT " %s: %s", *execute_idx, INVALID_JMP_NR, origin_line);
 
   *execute_idx = jmp_to;
 }
@@ -223,7 +222,7 @@ emu_do_alu (uint32_t *A_ptr, uint8_t alu_enum, uint32_t rval)
       *A_ptr >>= rval;
       return;
     default:
-      error ("%s: %d", INPOSSIBLE_ALU_ENUM, alu_enum);
+      error ("%s", INPOSSIBLE_ALU_ENUM);
     }
 }
 
@@ -259,7 +258,7 @@ emu_alu_line (reg_mem *reg)
     {
       rval = strtoul (rval_str, &end, 0);
       if (rval_str == end)
-        error ("%s: %s", INVALID_RIGHT_VAL, origin_line);
+        error (FORMAT " %s: %s", execute_idx, INVALID_RIGHT_VAL, origin_line);
       fprintf (s_output_fp, BRIGHT_CYAN ("%s"), rval_str);
     }
 
@@ -301,8 +300,9 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
         }
 
       fprintf (s_output_fp, FORMAT ": ", read_idx);
-      execute_idx++;
 
+      execute_idx++;
+      set_error_log (origin_line, execute_idx);
       if (STARTWITH (clean_line, "if"))
         emu_if_line (&reg, data, &execute_idx);
       else if (STARTWITH (clean_line, "return"))
@@ -321,7 +321,7 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
       else if (STARTWITH (clean_line, "$A"))
         emu_alu_line (&reg);
       else
-        error ("%s: %s", INVALID_ASM_CODE, origin_line);
+        error (FORMAT " %s: %s", execute_idx, INVALID_ASM_CODE, origin_line);
     }
 
   if (quiet)
@@ -335,7 +335,7 @@ emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
 void
 emulate (ceccomp_args *args)
 {
-  seccomp_data data = { 0, 0, 0, { 0, 0, 0, 0, 0, 0 } };
+  seccomp_data data = {};
   data.arch = args->arch_token;
 
   if (args->syscall_nr == (char *)ARG_INIT_VAL)

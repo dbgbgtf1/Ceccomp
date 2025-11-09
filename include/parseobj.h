@@ -41,7 +41,7 @@ typedef enum
   ALU_RS = 0x31
 } Sym;
 
-extern void set_origin_line (char *origin);
+extern void set_error_log (char *origin, uint32_t pc);
 
 extern uint32_t right_val_ifline (char *val_str, reg_mem *reg, uint32_t arch);
 
