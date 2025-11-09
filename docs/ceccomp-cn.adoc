@@ -147,7 +147,7 @@ TEXT::
 === trace - 运行时捕获过滤器
 
     ceccomp trace [-c WHEN] [-o FILE] PROGRAM [program-args]
-                  [-c WHEN] [-a ARCH] -p PID
+                  [-c WHEN] -p PID
 
 使用第一行的命令可以利用调试在 *PROGRAM* 运行中加载过滤器时动态捕获过滤器；
 第二行的命令可以从 *PID* 对应的进程中提取出 seccomp 过滤器；一旦捕获到了过滤器，
@@ -168,9 +168,6 @@ _TEXT_ 的话请设置 *FILE* 。
 PROGRAM::
 设置为你想运行的程序，并且 *program-args* 将作为它的参数，
 就像运行 shell 命令 `exec PROGRAM program-args` 。
-
-ARCH::
-参数描述可以在 <<disasm - 反汇编>> 一节中找到。
 
 PID::
 设置为你想检查的 pid。 *PID* 和 *PROGRAM* 相冲突；你只能在一条命令中动态运行一个程序，
@@ -197,7 +194,7 @@ NOTE: 从 _version 3.1_ 开始引入了多进程支持，并且当被调试进�
 
 === probe - 快速测试常见的系统调用
 
-    ceccomp probe [-c WHEN] [-a ARCH] [-o FILE] PROGRAM [program-args]
+    ceccomp probe [-c WHEN] [-o FILE] PROGRAM [program-args]
 
 以 *program-args* 为参数运行 *PROGRAM* 来捕获 *第一个* seccomp 过滤器，
 然后杀死所有子进程。适用于快速测试一个程序的规则并检测潜在的 seccomp

@@ -161,7 +161,7 @@ possible
 === trace - TRACE FILTER IN RUNTIME
 
     ceccomp trace [-c WHEN] [-o FILE] PROGRAM [program-args]
-                  [-c WHEN] [-a ARCH] -p PID
+                  [-c WHEN] -p PID
 
 The first line captures filters *PROGRAM* loads in runtime by tracing it;
 the second line extract seccomp filters from *PID*; once fetched filters,
@@ -182,9 +182,6 @@ set *FILE* if you want to see _TEXT_ in some other file.
 PROGRAM::
 Set to the program you want to run, and *program-args* are its
 arguments just like running shell command `exec PROGRAM program-args`.
-
-ARCH::
-Argument description can be found in <<disasm - DISASSEMBLE>> section.
 
 PID::
 Set to the pid you want to inspect. *PID* is conflict with *PROGRAM*;
@@ -213,7 +210,7 @@ launched directly, so `./` is not needed; explicitly print when forking
 
 === probe - TEST COMMON SYSCALLS INSTANTLY
 
-    ceccomp probe [-c WHEN] [-a ARCH] [-o FILE] PROGRAM [program-args]
+    ceccomp probe [-c WHEN] [-o FILE] PROGRAM [program-args]
 
 Run *PROGRAM* with *program-args* to captures *FIRST* seccomp filter, and then
 kill all children. Use it when a quick check against a program is needed,
