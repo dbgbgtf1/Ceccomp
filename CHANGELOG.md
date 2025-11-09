@@ -5,10 +5,14 @@ Items marked with :star: is the major change why we release a new version.
 <!-- and !num at the end of line for PRs. If the issue or PR is external, -->
 <!-- write user/repo#num or user/repo!num to reference. Then run scripts/complete-url.py -->
 <!-- to format raw ref to URL. -->
-## 3.5(Incoming)
-* :star: Fix cross arch trace problems again
-* Add more tests to check ceccomp behaviour
-
+## 3.5 (INCOMING)
+* **BREAKING** :star: Now `trace` and `probe` no more accepts `-a`
+* :star: Add `i686` arch support
+* :star: Handle unknown system arch
+* Fix 32-bit ceccomp `strtol` error
+* Generalize test script to for different archs
+* `trace` now follows tracee's arch instead of system's
+* Fix Makefile implicit rules
 ## 3.4
 * :star: Fix cross arch trace problems :link: [#16]
 * :star: Add support for NO_COLOR env check :link: [#15]
