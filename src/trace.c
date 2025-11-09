@@ -160,7 +160,7 @@ handle_fork (pid_t pid, int status)
 }
 
 static bool
-handle_syscall (pid_t pid, FILE *output_fp, uint32_t *arch_token, bool oneshot)
+handle_syscall (pid_t pid, FILE *output_fp, bool oneshot)
 {
   syscall_info Info;
   fprog prog;
@@ -192,7 +192,6 @@ handle_syscall (pid_t pid, FILE *output_fp, uint32_t *arch_token, bool oneshot)
   if (!oneshot || seccomp_mode == LOAD_FAIL)
     return false;
 
-  *arch_token = saved_arch;
   return true;
 }
 
@@ -200,7 +199,6 @@ static uint32_t
 parent (pid_t child_pid, FILE *output_fp, bool oneshot)
 {
   int status;
-  uint32_t arch_token;
 
   waitpid (child_pid, &status, 0);
   // child is stopped after PTRACE_TRACEME
@@ -238,8 +236,8 @@ parent (pid_t child_pid, FILE *output_fp, bool oneshot)
       int sig = WSTOPSIG (status);
       if (sig == (SIGTRAP | 0x80))
         {
-          if (handle_syscall (pid, output_fp, &arch_token, oneshot))
-            return arch_token;
+          if (handle_syscall (pid, output_fp, oneshot))
+            return saved_arch;
           ptrace (PTRACE_SYSCALL, pid, 0, 0);
         }
       else if (sig == SIGTRAP)
