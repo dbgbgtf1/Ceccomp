@@ -36,7 +36,7 @@ make install # install at /usr/bin
 git clone https://github.com/dbgbgtf1/Ceccomp.git
 cd Ceccomp
 ./configure --devmode
-make DEBUG=2
+make
 ```
 
 # Run Test
