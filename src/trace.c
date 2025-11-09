@@ -34,7 +34,7 @@
 #define LOAD_FAIL 2
 
 static void
-mode_strict ()
+mode_strict (void)
 {
   printf (RED ("%s\n"), _ ("STRICT MODE DETECTED!"));
   printf (RED ("%s\n"), _ ("Only read, write, _exit, sigreturn available!"));

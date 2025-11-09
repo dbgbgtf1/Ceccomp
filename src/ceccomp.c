@@ -66,7 +66,7 @@ static struct argp_option options[] = {
 };
 
 static void
-init_output ()
+init_output (void)
 {
   setbuf (stdin, NULL);
   setbuf (stdout, NULL);
@@ -99,7 +99,7 @@ help (int exit_code)
 }
 
 __attribute__ ((noreturn)) static void
-version ()
+version (void)
 {
   printf (VERSION_FORMAT, CECCOMP_VERSION, CECCOMP_TAG_TIME, CECCOMP_BUILDER);
   exit (0);

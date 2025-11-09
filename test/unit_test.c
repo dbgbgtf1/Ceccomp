@@ -3,12 +3,10 @@
 #include <linux/audit.h>
 #include <linux/filter.h>
 #include <linux/seccomp.h>
-#include <seccomp.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <sys/prctl.h>
 #include <sys/syscall.h>
@@ -18,8 +16,8 @@
 
 #define ARRAY_SIZE(arr) (sizeof (arr) / sizeof (arr[0]))
 
-void
-load_filter ()
+static void
+load_filter (void)
 {
   prctl (PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
   /* Assume that AUDIT_ARCH_X86_64 means the normal x86-64 ABI
@@ -38,7 +36,7 @@ load_filter ()
 }
 
 int
-main ()
+main (void)
 {
   pid_t pid = fork ();
   if (pid != 0)

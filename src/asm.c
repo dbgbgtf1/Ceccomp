@@ -27,13 +27,13 @@ char *origin_line;
 char *clean_line;
 
 static filter
-MISC_TXA ()
+MISC_TXA (void)
 {
   return (filter)BPF_STMT (BPF_MISC | BPF_TXA, 0);
 }
 
 static filter
-MISC_TAX ()
+MISC_TAX (void)
 {
   return (filter)BPF_STMT (BPF_MISC | BPF_TAX, 0);
 }
@@ -225,7 +225,7 @@ LD_LDX (uint32_t arch)
 }
 
 static filter
-RET ()
+RET (void)
 {
   filter filter = { BPF_RET, 0, 0, 0 };
 
@@ -246,9 +246,9 @@ RET ()
 }
 
 static filter
-ST_STX ()
+ST_STX (void)
 {
-  filter filter = {};
+  filter filter = { 0 };
 
   char *idx_str = clean_line + strlen ("$mem[");
   char *end;
@@ -302,7 +302,7 @@ alu_mode (uint8_t alu_enum)
 }
 
 static filter
-ALU ()
+ALU (void)
 {
   filter filter = BPF_STMT (BPF_ALU, 0);
 
@@ -371,7 +371,7 @@ assemble (uint32_t arch, FILE *read_fp, print_mode p_mode)
 
   while (pre_asm (read_fp, &origin_line, &clean_line), origin_line != NULL)
     {
-      filter f_current = {};
+      filter f_current = { 0 };
       set_error_log (origin_line, idx);
 
       if (!strcmp (clean_line, "$A=$X"))
