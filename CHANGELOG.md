@@ -5,7 +5,7 @@ Items marked with :star: is the major change why we release a new version.
 <!-- and !num at the end of line for PRs. If the issue or PR is external, -->
 <!-- write user/repo#num or user/repo!num to reference. Then run scripts/complete-url.py -->
 <!-- to format raw ref to URL. -->
-## 3.5 (INCOMING)
+## 3.5
 * **BREAKING** :star: Now `trace` and `probe` no more accepts `-a`; arch is automatically retrieved via ptrace
 * :star: Add `i686` arch support
 * :star: Handle unknown system arch
