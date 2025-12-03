@@ -1,12 +1,12 @@
 L0001: [93m$A[0m = [94m$arch[0m
 L0002: if ([93m$A[0m != [96mi386[0m) goto L0004
-[90mL0003: goto 0014
+[90mL0003: goto L0014
 [0mL0004: [93m$A[0m = [94m$low_args[5][0m
 L0005: [93m$mem[0x0][0m = [93m$A[0m
 L0006: [93m$A[0m = [94m$high_args[5][0m
 L0007: [93m$mem[0x1][0m = [93m$A[0m
 L0008: if ([93m$A[0m != [96m0x3133731[0m) goto L0012
 [90mL0009: $A = $mem[0x0]
-[0m[90mL0010: if ($A == 0x33731337) goto 0013
+[0m[90mL0010: if ($A == 0x33731337) goto L0013
 [0m[90mL0011: $A = $mem[0x1]
 [0mL0012: return [31mKILL[0m

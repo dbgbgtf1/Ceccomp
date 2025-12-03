@@ -76,7 +76,7 @@ jmp_mode (uint8_t cmp_enum, bool *reverse)
 static filter
 JMP_GOTO (uint32_t pc)
 {
-  char *jmp_nr = clean_line + strlen ("goto");
+  char *jmp_nr = clean_line + strlen ("gotoL");
 
   filter filter = BPF_JUMP (BPF_JMP | BPF_JA, 0, 0, 0);
   char *end;

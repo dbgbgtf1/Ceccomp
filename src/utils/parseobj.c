@@ -210,10 +210,10 @@ parse_alu_sym (char *cmp_str)
 uint32_t
 parse_goto (char *goto_str)
 {
-  if (!STARTWITH (goto_str, "goto"))
+  if (!STARTWITH (goto_str, "gotoL"))
     error (FORMAT " %s: %s", idx, GOTO_AFTER_CONDITION, origin_line);
 
-  char *jt_str = goto_str + strlen ("goto");
+  char *jt_str = goto_str + strlen ("gotoL");
   char *jf_str = NULL;
   uint16_t jt = 0;
   uint16_t jf = 0;
@@ -222,9 +222,9 @@ parse_goto (char *goto_str)
   if (jf_str == jt_str)
     error (FORMAT " %s: %s", idx, LINE_NR_AFTER_GOTO, origin_line);
 
-  if (STARTWITH (jf_str, ",elsegoto"))
+  if (STARTWITH (jf_str, ",elsegotoL"))
     {
-      jf_str += strlen (",elsegoto");
+      jf_str += strlen (",elsegotoL");
       jf = strtoul (jf_str, &jt_str, 10);
       if (jt_str == jf_str)
         error (FORMAT " %s: %s", idx, LINE_NR_AFTER_ELSE, origin_line);

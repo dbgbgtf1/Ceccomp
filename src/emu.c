@@ -177,14 +177,14 @@ emu_ret_line (reg_mem *reg)
 static void
 emu_goto_line (uint32_t *execute_idx)
 {
-  char *jmp_to_str = clean_line + strlen ("goto");
+  char *jmp_to_str = clean_line + strlen ("gotoL");
   char *end;
   uint32_t jmp_to = strtoul (jmp_to_str, &end, 10);
 
   if (jmp_to_str == end)
     error (FORMAT " %s %s", *execute_idx, INVALID_NR_AFTER_GOTO, origin_line);
 
-  fprintf (s_output_fp, "goto %04d\n", jmp_to);
+  fprintf (s_output_fp, "goto " FORMAT "\n", jmp_to);
 
   if (jmp_to < *execute_idx)
     error (FORMAT " %s: %s", *execute_idx, INVALID_JMP_NR, origin_line);

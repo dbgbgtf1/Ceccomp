@@ -41,11 +41,11 @@ get_line (FILE *fp)
 static bool
 is_etc (char *Line)
 {
-  if (STARTWITH (Line, "---------------------------------"))
+  if (STARTWITH (Line, "----------------------------------"))
     return true;
-  else if (STARTWITH (Line, " Line  CODE  JT   JF      K"))
+  else if (STARTWITH (Line, " Label  CODE  JT   JF      K"))
     return true;
-  else if (STARTWITH (Line, "LineCODEJTJFK"))
+  else if (STARTWITH (Line, "LabelCODEJTJFK"))
     return true;
   return false;
 }

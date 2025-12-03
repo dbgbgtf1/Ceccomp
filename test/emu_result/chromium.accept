@@ -5,598 +5,598 @@ L0002: if ([93m$A[0m == [96mx86_64[0m) goto L0004
 L0005: if !([93m$A[0m & [96m0x40000000[0m) goto L0007
 [90mL0006: return TRAP(9)
 [0mL0007: if ([93m$A[0m <= [96msched_get_priority_max[0m) goto L0082
-[90mL0008: if ($A <= pselect6) goto 0045
-[0m[90mL0009: if ($A <= name_to_handle_at) goto 0028
-[0m[90mL0010: if ($A <= io_pgetevents) goto 0020
-[0m[90mL0011: if ($A <= close_range) goto 0017
-[0m[90mL0012: if ($A <= process_madvise) goto 0016
-[0m[90mL0013: if ($A <= mseal) goto 0015
-[0m[90mL0014: if ($A <= setxattrat) goto 0081
-[0m[90mL0015: goto 0604
-[0m[90mL0016: if ($A >= faccessat2) goto 0171, else goto 0272
-[0m[90mL0017: if ($A <= uretprobe) goto 0019
-[0m[90mL0018: if ($A >= pidfd_open) goto 0172, else goto 0272
-[0m[90mL0019: if ($A >= rseq) goto 0081, else goto 0272
-[0m[90mL0020: if ($A <= kexec_file_load) goto 0025
-[0m[90mL0021: if ($A <= pkey_alloc) goto 0024
-[0m[90mL0022: if ($A <= pkey_free) goto 0173
-[0m[90mL0023: if ($A >= statx) goto 0164, else goto 0081
-[0m[90mL0024: if ($A >= pkey_mprotect) goto 0159, else goto 0272
-[0m[90mL0025: if ($A <= getrandom) goto 0027
-[0m[90mL0026: if ($A >= memfd_create) goto 0081, else goto 0180
-[0m[90mL0027: if ($A >= renameat2) goto 0171, else goto 0272
-[0m[90mL0028: if ($A <= timerfd_settime) goto 0037
-[0m[90mL0029: if ($A <= pipe2) goto 0034
-[0m[90mL0030: if ($A <= rt_tgsigqueueinfo) goto 0033
-[0m[90mL0031: if ($A <= perf_event_open) goto 0194
-[0m[90mL0032: if ($A >= prlimit64) goto 0187, else goto 0272
-[0m[90mL0033: if ($A >= inotify_init1) goto 0272, else goto 0201
-[0m[90mL0034: if ($A <= signalfd4) goto 0036
-[0m[90mL0035: if ($A >= eventfd2) goto 0081, else goto 0272
-[0m[90mL0036: if ($A >= accept4) goto 0171, else goto 0272
-[0m[90mL0037: if ($A <= utimensat) goto 0042
-[0m[90mL0038: if ($A <= signalfd) goto 0041
-[0m[90mL0039: if ($A <= eventfd) goto 0272
-[0m[90mL0040: if ($A >= fallocate) goto 0171, else goto 0081
-[0m[90mL0041: if ($A >= epoll_pwait) goto 0081, else goto 0171
-[0m[90mL0042: if ($A <= set_robust_list) goto 0044
-[0m[90mL0043: if ($A >= get_robust_list) goto 0272, else goto 0081
-[0m[90mL0044: if ($A >= unshare) goto 0272, else goto 0081
-[0m[90mL0045: if ($A <= lookup_dcookie) goto 0063
-[0m[90mL0046: if ($A <= exit_group) goto 0055
-[0m[90mL0047: if ($A <= waitid) goto 0052
-[0m[90mL0048: if ($A <= openat) goto 0051
-[0m[90mL0049: if ($A <= newfstatat) goto 0171
-[0m[90mL0050: if ($A >= unlinkat) goto 0171, else goto 0208
-[0m[90mL0051: if ($A >= add_key) goto 0272, else goto 0081
-[0m[90mL0052: if ($A <= utimes) goto 0054
-[0m[90mL0053: if ($A >= vserver) goto 0272, else goto 0171
-[0m[90mL0054: if ($A >= tgkill) goto 0130, else goto 0081
-[0m[90mL0055: if ($A <= set_tid_address) goto 0060
-[0m[90mL0056: if ($A <= semtimedop) goto 0059
-[0m[90mL0057: if ($A <= fadvise64) goto 0171
-[0m[90mL0058: if ($A >= clock_gettime) goto 0209, else goto 0272
-[0m[90mL0059: if ($A >= restart_syscall) goto 0081, else goto 0272
-[0m[90mL0060: if ($A <= epoll_ctl_old) goto 0062
-[0m[90mL0061: if ($A >= getdents64) goto 0171, else goto 0272
-[0m[90mL0062: if ($A >= epoll_create) goto 0081, else goto 0171
-[0m[90mL0063: if ($A <= create_module) goto 0073
-[0m[90mL0064: if ($A <= time) goto 0069
-[0m[90mL0065: if ($A <= sched_setaffinity) goto 0068
-[0m[90mL0066: if ($A <= sched_getaffinity) goto 0272
-[0m[90mL0067: if ($A >= set_thread_area) goto 0272, else goto 0090
-[0m[90mL0068: if ($A >= futex) goto 0273, else goto 0081
-[0m[90mL0069: if ($A <= readahead) goto 0072
-[0m[90mL0070: if ($A <= tkill) goto 0272
-[0m[90mL0071: goto 0507
-[0m[90mL0072: if ($A >= gettid) goto 0081, else goto 0272
-[0m[90mL0073: if ($A <= prctl) goto 0078
-[0m[90mL0074: if ($A <= setrlimit) goto 0077
-[0m[90mL0075: if ($A <= chroot) goto 0081
-[0m[90mL0076: if ($A >= iopl) goto 0171, else goto 0272
-[0m[90mL0077: if ($A >= arch_prctl) goto 0272, else goto 0329
-[0m[90mL0078: if ($A <= mlock) goto 0080
-[0m[90mL0079: if ($A >= mlockall) goto 0272, else goto 0081
-[0m[90mL0080: if ($A >= sched_rr_get_interval) goto 0272
-[0m[90mL0081: goto 0603
+[90mL0008: if ($A <= pselect6) goto L0045
+[0m[90mL0009: if ($A <= name_to_handle_at) goto L0028
+[0m[90mL0010: if ($A <= io_pgetevents) goto L0020
+[0m[90mL0011: if ($A <= close_range) goto L0017
+[0m[90mL0012: if ($A <= process_madvise) goto L0016
+[0m[90mL0013: if ($A <= mseal) goto L0015
+[0m[90mL0014: if ($A <= setxattrat) goto L0081
+[0m[90mL0015: goto L0604
+[0m[90mL0016: if ($A >= faccessat2) goto L0171, else goto L0272
+[0m[90mL0017: if ($A <= uretprobe) goto L0019
+[0m[90mL0018: if ($A >= pidfd_open) goto L0172, else goto L0272
+[0m[90mL0019: if ($A >= rseq) goto L0081, else goto L0272
+[0m[90mL0020: if ($A <= kexec_file_load) goto L0025
+[0m[90mL0021: if ($A <= pkey_alloc) goto L0024
+[0m[90mL0022: if ($A <= pkey_free) goto L0173
+[0m[90mL0023: if ($A >= statx) goto L0164, else goto L0081
+[0m[90mL0024: if ($A >= pkey_mprotect) goto L0159, else goto L0272
+[0m[90mL0025: if ($A <= getrandom) goto L0027
+[0m[90mL0026: if ($A >= memfd_create) goto L0081, else goto L0180
+[0m[90mL0027: if ($A >= renameat2) goto L0171, else goto L0272
+[0m[90mL0028: if ($A <= timerfd_settime) goto L0037
+[0m[90mL0029: if ($A <= pipe2) goto L0034
+[0m[90mL0030: if ($A <= rt_tgsigqueueinfo) goto L0033
+[0m[90mL0031: if ($A <= perf_event_open) goto L0194
+[0m[90mL0032: if ($A >= prlimit64) goto L0187, else goto L0272
+[0m[90mL0033: if ($A >= inotify_init1) goto L0272, else goto L0201
+[0m[90mL0034: if ($A <= signalfd4) goto L0036
+[0m[90mL0035: if ($A >= eventfd2) goto L0081, else goto L0272
+[0m[90mL0036: if ($A >= accept4) goto L0171, else goto L0272
+[0m[90mL0037: if ($A <= utimensat) goto L0042
+[0m[90mL0038: if ($A <= signalfd) goto L0041
+[0m[90mL0039: if ($A <= eventfd) goto L0272
+[0m[90mL0040: if ($A >= fallocate) goto L0171, else goto L0081
+[0m[90mL0041: if ($A >= epoll_pwait) goto L0081, else goto L0171
+[0m[90mL0042: if ($A <= set_robust_list) goto L0044
+[0m[90mL0043: if ($A >= get_robust_list) goto L0272, else goto L0081
+[0m[90mL0044: if ($A >= unshare) goto L0272, else goto L0081
+[0m[90mL0045: if ($A <= lookup_dcookie) goto L0063
+[0m[90mL0046: if ($A <= exit_group) goto L0055
+[0m[90mL0047: if ($A <= waitid) goto L0052
+[0m[90mL0048: if ($A <= openat) goto L0051
+[0m[90mL0049: if ($A <= newfstatat) goto L0171
+[0m[90mL0050: if ($A >= unlinkat) goto L0171, else goto L0208
+[0m[90mL0051: if ($A >= add_key) goto L0272, else goto L0081
+[0m[90mL0052: if ($A <= utimes) goto L0054
+[0m[90mL0053: if ($A >= vserver) goto L0272, else goto L0171
+[0m[90mL0054: if ($A >= tgkill) goto L0130, else goto L0081
+[0m[90mL0055: if ($A <= set_tid_address) goto L0060
+[0m[90mL0056: if ($A <= semtimedop) goto L0059
+[0m[90mL0057: if ($A <= fadvise64) goto L0171
+[0m[90mL0058: if ($A >= clock_gettime) goto L0209, else goto L0272
+[0m[90mL0059: if ($A >= restart_syscall) goto L0081, else goto L0272
+[0m[90mL0060: if ($A <= epoll_ctl_old) goto L0062
+[0m[90mL0061: if ($A >= getdents64) goto L0171, else goto L0272
+[0m[90mL0062: if ($A >= epoll_create) goto L0081, else goto L0171
+[0m[90mL0063: if ($A <= create_module) goto L0073
+[0m[90mL0064: if ($A <= time) goto L0069
+[0m[90mL0065: if ($A <= sched_setaffinity) goto L0068
+[0m[90mL0066: if ($A <= sched_getaffinity) goto L0272
+[0m[90mL0067: if ($A >= set_thread_area) goto L0272, else goto L0090
+[0m[90mL0068: if ($A >= futex) goto L0273, else goto L0081
+[0m[90mL0069: if ($A <= readahead) goto L0072
+[0m[90mL0070: if ($A <= tkill) goto L0272
+[0m[90mL0071: goto L0507
+[0m[90mL0072: if ($A >= gettid) goto L0081, else goto L0272
+[0m[90mL0073: if ($A <= prctl) goto L0078
+[0m[90mL0074: if ($A <= setrlimit) goto L0077
+[0m[90mL0075: if ($A <= chroot) goto L0081
+[0m[90mL0076: if ($A >= iopl) goto L0171, else goto L0272
+[0m[90mL0077: if ($A >= arch_prctl) goto L0272, else goto L0329
+[0m[90mL0078: if ($A <= mlock) goto L0080
+[0m[90mL0079: if ($A >= mlockall) goto L0272, else goto L0081
+[0m[90mL0080: if ($A >= sched_rr_get_interval) goto L0272
+[0m[90mL0081: goto L0603
 [0mL0082: if ([93m$A[0m <= [96mtruncate[0m) goto L0120
-[90mL0083: if ($A <= getresuid) goto 0103
-[0m[90mL0084: if ($A <= rt_sigqueueinfo) goto 0095
-[0m[90mL0085: if ($A <= ustat) goto 0092
-[0m[90mL0086: if ($A <= getpriority) goto 0091
-[0m[90mL0087: if ($A >= sched_setparam) goto 0089
-[0m[90mL0088: goto 0396
-[0m[90mL0089: if ($A <= sched_getparam) goto 0272
-[0m[90mL0090: goto 0381
-[0m[90mL0091: if ($A >= fstatfs) goto 0272, else goto 0171
-[0m[90mL0092: if ($A <= utime) goto 0094
-[0m[90mL0093: if ($A >= personality) goto 0272, else goto 0171
-[0m[90mL0094: if ($A >= sigaltstack) goto 0344, else goto 0272
-[0m[90mL0095: if ($A <= setfsuid) goto 0100
-[0m[90mL0096: if ($A <= capset) goto 0099
-[0m[90mL0097: if ($A <= rt_sigpending) goto 0171
-[0m[90mL0098: if ($A >= rt_sigtimedwait) goto 0344, else goto 0272
-[0m[90mL0099: if ($A >= getsid) goto 0344, else goto 0171
-[0m[90mL0100: if ($A <= getresgid) goto 0102
-[0m[90mL0101: if ($A >= getpgid) goto 0272, else goto 0344
-[0m[90mL0102: if ($A >= setresgid) goto 0171, else goto 0344
-[0m[90mL0103: if ($A <= getgid) goto 0112
-[0m[90mL0104: if ($A <= getppid) goto 0109
-[0m[90mL0105: if ($A <= setreuid) goto 0108
-[0m[90mL0106: if ($A <= getgroups) goto 0171
-[0m[90mL0107: if ($A >= setgroups) goto 0171, else goto 0344
-[0m[90mL0108: if ($A >= getpgrp) goto 0272, else goto 0344
-[0m[90mL0109: if ($A <= geteuid) goto 0111
-[0m[90mL0110: if ($A >= setpgid) goto 0272, else goto 0344
-[0m[90mL0111: if ($A >= setuid) goto 0171, else goto 0344
-[0m[90mL0112: if ($A <= getrusage) goto 0117
-[0m[90mL0113: if ($A <= ptrace) goto 0116
-[0m[90mL0114: if ($A <= getuid) goto 0272
-[0m[90mL0115: if ($A >= syslog) goto 0272, else goto 0344
-[0m[90mL0116: if ($A >= sysinfo) goto 0344, else goto 0272
-[0m[90mL0117: if ($A <= getdents) goto 0119
-[0m[90mL0118: if ($A >= gettimeofday) goto 0344, else goto 0171
-[0m[90mL0119: if ($A >= ftruncate) goto 0344, else goto 0171
+[90mL0083: if ($A <= getresuid) goto L0103
+[0m[90mL0084: if ($A <= rt_sigqueueinfo) goto L0095
+[0m[90mL0085: if ($A <= ustat) goto L0092
+[0m[90mL0086: if ($A <= getpriority) goto L0091
+[0m[90mL0087: if ($A >= sched_setparam) goto L0089
+[0m[90mL0088: goto L0396
+[0m[90mL0089: if ($A <= sched_getparam) goto L0272
+[0m[90mL0090: goto L0381
+[0m[90mL0091: if ($A >= fstatfs) goto L0272, else goto L0171
+[0m[90mL0092: if ($A <= utime) goto L0094
+[0m[90mL0093: if ($A >= personality) goto L0272, else goto L0171
+[0m[90mL0094: if ($A >= sigaltstack) goto L0344, else goto L0272
+[0m[90mL0095: if ($A <= setfsuid) goto L0100
+[0m[90mL0096: if ($A <= capset) goto L0099
+[0m[90mL0097: if ($A <= rt_sigpending) goto L0171
+[0m[90mL0098: if ($A >= rt_sigtimedwait) goto L0344, else goto L0272
+[0m[90mL0099: if ($A >= getsid) goto L0344, else goto L0171
+[0m[90mL0100: if ($A <= getresgid) goto L0102
+[0m[90mL0101: if ($A >= getpgid) goto L0272, else goto L0344
+[0m[90mL0102: if ($A >= setresgid) goto L0171, else goto L0344
+[0m[90mL0103: if ($A <= getgid) goto L0112
+[0m[90mL0104: if ($A <= getppid) goto L0109
+[0m[90mL0105: if ($A <= setreuid) goto L0108
+[0m[90mL0106: if ($A <= getgroups) goto L0171
+[0m[90mL0107: if ($A >= setgroups) goto L0171, else goto L0344
+[0m[90mL0108: if ($A >= getpgrp) goto L0272, else goto L0344
+[0m[90mL0109: if ($A <= geteuid) goto L0111
+[0m[90mL0110: if ($A >= setpgid) goto L0272, else goto L0344
+[0m[90mL0111: if ($A >= setuid) goto L0171, else goto L0344
+[0m[90mL0112: if ($A <= getrusage) goto L0117
+[0m[90mL0113: if ($A <= ptrace) goto L0116
+[0m[90mL0114: if ($A <= getuid) goto L0272
+[0m[90mL0115: if ($A >= syslog) goto L0272, else goto L0344
+[0m[90mL0116: if ($A >= sysinfo) goto L0344, else goto L0272
+[0m[90mL0117: if ($A <= getdents) goto L0119
+[0m[90mL0118: if ($A >= gettimeofday) goto L0344, else goto L0171
+[0m[90mL0119: if ($A >= ftruncate) goto L0344, else goto L0171
 [0mL0120: if ([93m$A[0m <= [96mdup[0m) goto L0143
 L0121: if ([93m$A[0m <= [96mclone[0m) goto L0133
-[90mL0122: if ($A <= uname) goto 0128
-[0m[90mL0123: if ($A <= fcntl) goto 0127
-[0m[90mL0124: if ($A >= flock) goto 0126
-[0m[90mL0125: goto 0417
-[0m[90mL0126: if ($A >= fsync) goto 0344, else goto 0272
-[0m[90mL0127: if ($A >= semget) goto 0171, else goto 0344
-[0m[90mL0128: if ($A <= exit) goto 0131
-[0m[90mL0129: if ($A <= kill) goto 0344
-[0m[90mL0130: goto 0500
-[0m[90mL0131: if ($A >= fork) goto 0171
-[0m[90mL0132: goto 0508
+[90mL0122: if ($A <= uname) goto L0128
+[0m[90mL0123: if ($A <= fcntl) goto L0127
+[0m[90mL0124: if ($A >= flock) goto L0126
+[0m[90mL0125: goto L0417
+[0m[90mL0126: if ($A >= fsync) goto L0344, else goto L0272
+[0m[90mL0127: if ($A >= semget) goto L0171, else goto L0344
+[0m[90mL0128: if ($A <= exit) goto L0131
+[0m[90mL0129: if ($A <= kill) goto L0344
+[0m[90mL0130: goto L0500
+[0m[90mL0131: if ($A >= fork) goto L0171
+[0m[90mL0132: goto L0508
 [0mL0133: if ([93m$A[0m <= [96msendto[0m) goto L0140
-[90mL0134: if ($A <= getsockname) goto 0139
-[0m[90mL0135: if ($A <= socketpair) goto 0272
-[0m[90mL0136: if ($A >= setsockopt) goto 0138
-[0m[90mL0137: goto 0532
-[0m[90mL0138: goto 0518
-[0m[90mL0139: if ($A >= bind) goto 0171, else goto 0344
+[90mL0134: if ($A <= getsockname) goto L0139
+[0m[90mL0135: if ($A <= socketpair) goto L0272
+[0m[90mL0136: if ($A >= setsockopt) goto L0138
+[0m[90mL0137: goto L0532
+[0m[90mL0138: goto L0518
+[0m[90mL0139: if ($A >= bind) goto L0171, else goto L0344
 [0mL0140: if ([93m$A[0m <= [96mgetpid[0m) goto L0142
 L0141: if ([93m$A[0m >= [96msendfile[0m) goto L0171, else goto L0344
-[90mL0142: if ($A >= getitimer) goto 0272, else goto 0344
-[0m[90mL0143: if ($A <= munmap) goto 0154
-[0m[90mL0144: if ($A <= pipe) goto 0150
-[0m[90mL0145: if ($A <= mincore) goto 0149
-[0m[90mL0146: if ($A <= madvise) goto 0344
-[0m[90mL0147: if ($A >= shmget) goto 0171
-[0m[90mL0148: goto 0539
-[0m[90mL0149: if ($A >= msync) goto 0272, else goto 0344
-[0m[90mL0150: if ($A <= pread64) goto 0152
-[0m[90mL0151: if ($A >= access) goto 0171, else goto 0344
-[0m[90mL0152: if ($A <= ioctl) goto 0344
-[0m[90mL0153: goto 0574
-[0m[90mL0154: if ($A <= fstat) goto 0161
-[0m[90mL0155: if ($A <= poll) goto 0160
-[0m[90mL0156: if ($A <= mmap) goto 0344
-[0m[90mL0157: if ($A >= mprotect) goto 0159
-[0m[90mL0158: goto 0594
-[0m[90mL0159: goto 0587
-[0m[90mL0160: if ($A >= lstat) goto 0171, else goto 0344
-[0m[90mL0161: if ($A <= close) goto 0163
-[0m[90mL0162: if ($A >= stat) goto 0171, else goto 0344
-[0m[90mL0163: if ($A >= open) goto 0171, else goto 0344
+[90mL0142: if ($A >= getitimer) goto L0272, else goto L0344
+[0m[90mL0143: if ($A <= munmap) goto L0154
+[0m[90mL0144: if ($A <= pipe) goto L0150
+[0m[90mL0145: if ($A <= mincore) goto L0149
+[0m[90mL0146: if ($A <= madvise) goto L0344
+[0m[90mL0147: if ($A >= shmget) goto L0171
+[0m[90mL0148: goto L0539
+[0m[90mL0149: if ($A >= msync) goto L0272, else goto L0344
+[0m[90mL0150: if ($A <= pread64) goto L0152
+[0m[90mL0151: if ($A >= access) goto L0171, else goto L0344
+[0m[90mL0152: if ($A <= ioctl) goto L0344
+[0m[90mL0153: goto L0574
+[0m[90mL0154: if ($A <= fstat) goto L0161
+[0m[90mL0155: if ($A <= poll) goto L0160
+[0m[90mL0156: if ($A <= mmap) goto L0344
+[0m[90mL0157: if ($A >= mprotect) goto L0159
+[0m[90mL0158: goto L0594
+[0m[90mL0159: goto L0587
+[0m[90mL0160: if ($A >= lstat) goto L0171, else goto L0344
+[0m[90mL0161: if ($A <= close) goto L0163
+[0m[90mL0162: if ($A >= stat) goto L0171, else goto L0344
+[0m[90mL0163: if ($A >= open) goto L0171, else goto L0344
 [0m[90mL0164: $A = $high_args[3]
-[0m[90mL0165: if ($A == 0x0) goto 0169
-[0m[90mL0166: if ($A != 0xffffffff) goto 0341
+[0m[90mL0165: if ($A == 0x0) goto L0169
+[0m[90mL0166: if ($A != 0xffffffff) goto L0341
 [0m[90mL0167: $A = $low_args[3]
-[0m[90mL0168: if !($A & 0x80000000) goto 0341
+[0m[90mL0168: if !($A & 0x80000000) goto L0341
 [0m[90mL0169: $A = $low_args[3]
-[0m[90mL0170: if ($A == 0x7ff) goto 0172
-[0mL0171: goto 0602
+[0m[90mL0170: if ($A == 0x7ff) goto L0172
+[0mL0171: goto L0602
 [90mL0172: return ERRNO(38)
 [0m[90mL0173: $A = $high_args[0]
-[0m[90mL0174: if ($A == 0x0) goto 0178
-[0m[90mL0175: if ($A != 0xffffffff) goto 0341
+[0m[90mL0174: if ($A == 0x0) goto L0178
+[0m[90mL0175: if ($A != 0xffffffff) goto L0341
 [0m[90mL0176: $A = $low_args[0]
-[0m[90mL0177: if !($A & 0x80000000) goto 0341
+[0m[90mL0177: if !($A & 0x80000000) goto L0341
 [0m[90mL0178: $A = $low_args[0]
-[0m[90mL0179: if ($A == 0x0) goto 0344, else goto 0272
+[0m[90mL0179: if ($A == 0x0) goto L0344, else goto L0272
 [0m[90mL0180: $A = $high_args[2]
-[0m[90mL0181: if ($A == 0x0) goto 0185
-[0m[90mL0182: if ($A != 0xffffffff) goto 0341
+[0m[90mL0181: if ($A == 0x0) goto L0185
+[0m[90mL0182: if ($A != 0xffffffff) goto L0341
 [0m[90mL0183: $A = $low_args[2]
-[0m[90mL0184: if !($A & 0x80000000) goto 0341
+[0m[90mL0184: if !($A & 0x80000000) goto L0341
 [0m[90mL0185: $A = $low_args[2]
-[0m[90mL0186: if ($A & 0xfffffffa) goto 0272, else goto 0344
+[0m[90mL0186: if ($A & 0xfffffffa) goto L0272, else goto L0344
 [0m[90mL0187: $A = $high_args[0]
-[0m[90mL0188: if ($A == 0x0) goto 0192
-[0m[90mL0189: if ($A != 0xffffffff) goto 0341
+[0m[90mL0188: if ($A == 0x0) goto L0192
+[0m[90mL0189: if ($A != 0xffffffff) goto L0341
 [0m[90mL0190: $A = $low_args[0]
-[0m[90mL0191: if !($A & 0x80000000) goto 0341
+[0m[90mL0191: if !($A & 0x80000000) goto L0341
 [0m[90mL0192: $A = $low_args[0]
-[0m[90mL0193: if ($A == 0x0) goto 0344
+[0m[90mL0193: if ($A == 0x0) goto L0344
 [0m[90mL0194: $A = $high_args[0]
-[0m[90mL0195: if ($A == 0x0) goto 0199
-[0m[90mL0196: if ($A != 0xffffffff) goto 0341
+[0m[90mL0195: if ($A == 0x0) goto L0199
+[0m[90mL0196: if ($A != 0xffffffff) goto L0341
 [0m[90mL0197: $A = $low_args[0]
-[0m[90mL0198: if !($A & 0x80000000) goto 0341
+[0m[90mL0198: if !($A & 0x80000000) goto L0341
 [0m[90mL0199: $A = $low_args[0]
-[0m[90mL0200: goto 0416
+[0m[90mL0200: goto L0416
 [0m[90mL0201: $A = $high_args[1]
-[0m[90mL0202: if ($A == 0x0) goto 0206
-[0m[90mL0203: if ($A != 0xffffffff) goto 0341
+[0m[90mL0202: if ($A == 0x0) goto L0206
+[0m[90mL0203: if ($A != 0xffffffff) goto L0341
 [0m[90mL0204: $A = $low_args[1]
-[0m[90mL0205: if !($A & 0x80000000) goto 0341
+[0m[90mL0205: if !($A & 0x80000000) goto L0341
 [0m[90mL0206: $A = $low_args[1]
-[0m[90mL0207: if ($A & 0xfff7b7ff) goto 0272, else goto 0344
+[0m[90mL0207: if ($A & 0xfff7b7ff) goto L0272, else goto L0344
 [0m[90mL0208: return TRAP(8)
 [0m[90mL0209: $A = $high_args[0]
-[0m[90mL0210: if ($A == 0x0) goto 0214
-[0m[90mL0211: if ($A != 0xffffffff) goto 0341
+[0m[90mL0210: if ($A == 0x0) goto L0214
+[0m[90mL0211: if ($A != 0xffffffff) goto L0341
 [0m[90mL0212: $A = $low_args[0]
-[0m[90mL0213: if !($A & 0x80000000) goto 0341
+[0m[90mL0213: if !($A & 0x80000000) goto L0341
 [0m[90mL0214: $A = $low_args[0]
-[0m[90mL0215: if ($A & 0x80000000) goto 0272
+[0m[90mL0215: if ($A & 0x80000000) goto L0272
 [0m[90mL0216: $A = $high_args[0]
-[0m[90mL0217: if ($A == 0x0) goto 0221
-[0m[90mL0218: if ($A != 0xffffffff) goto 0341
+[0m[90mL0217: if ($A == 0x0) goto L0221
+[0m[90mL0218: if ($A != 0xffffffff) goto L0341
 [0m[90mL0219: $A = $low_args[0]
-[0m[90mL0220: if !($A & 0x80000000) goto 0341
+[0m[90mL0220: if !($A & 0x80000000) goto L0341
 [0m[90mL0221: $A = $low_args[0]
-[0m[90mL0222: if ($A == 0x7) goto 0344
+[0m[90mL0222: if ($A == 0x7) goto L0344
 [0m[90mL0223: $A = $high_args[0]
-[0m[90mL0224: if ($A == 0x0) goto 0228
-[0m[90mL0225: if ($A != 0xffffffff) goto 0341
+[0m[90mL0224: if ($A == 0x0) goto L0228
+[0m[90mL0225: if ($A != 0xffffffff) goto L0341
 [0m[90mL0226: $A = $low_args[0]
-[0m[90mL0227: if !($A & 0x80000000) goto 0341
+[0m[90mL0227: if !($A & 0x80000000) goto L0341
 [0m[90mL0228: $A = $low_args[0]
-[0m[90mL0229: if ($A == 0x1) goto 0344
+[0m[90mL0229: if ($A == 0x1) goto L0344
 [0m[90mL0230: $A = $high_args[0]
-[0m[90mL0231: if ($A == 0x0) goto 0235
-[0m[90mL0232: if ($A != 0xffffffff) goto 0341
+[0m[90mL0231: if ($A == 0x0) goto L0235
+[0m[90mL0232: if ($A != 0xffffffff) goto L0341
 [0m[90mL0233: $A = $low_args[0]
-[0m[90mL0234: if !($A & 0x80000000) goto 0341
+[0m[90mL0234: if !($A & 0x80000000) goto L0341
 [0m[90mL0235: $A = $low_args[0]
-[0m[90mL0236: if ($A == 0x6) goto 0344
+[0m[90mL0236: if ($A == 0x6) goto L0344
 [0m[90mL0237: $A = $high_args[0]
-[0m[90mL0238: if ($A == 0x0) goto 0242
-[0m[90mL0239: if ($A != 0xffffffff) goto 0341
+[0m[90mL0238: if ($A == 0x0) goto L0242
+[0m[90mL0239: if ($A != 0xffffffff) goto L0341
 [0m[90mL0240: $A = $low_args[0]
-[0m[90mL0241: if !($A & 0x80000000) goto 0341
+[0m[90mL0241: if !($A & 0x80000000) goto L0341
 [0m[90mL0242: $A = $low_args[0]
-[0m[90mL0243: if ($A == 0x4) goto 0344
+[0m[90mL0243: if ($A == 0x4) goto L0344
 [0m[90mL0244: $A = $high_args[0]
-[0m[90mL0245: if ($A == 0x0) goto 0249
-[0m[90mL0246: if ($A != 0xffffffff) goto 0341
+[0m[90mL0245: if ($A == 0x0) goto L0249
+[0m[90mL0246: if ($A != 0xffffffff) goto L0341
 [0m[90mL0247: $A = $low_args[0]
-[0m[90mL0248: if !($A & 0x80000000) goto 0341
+[0m[90mL0248: if !($A & 0x80000000) goto L0341
 [0m[90mL0249: $A = $low_args[0]
-[0m[90mL0250: if ($A == 0x2) goto 0344
+[0m[90mL0250: if ($A == 0x2) goto L0344
 [0m[90mL0251: $A = $high_args[0]
-[0m[90mL0252: if ($A == 0x0) goto 0256
-[0m[90mL0253: if ($A != 0xffffffff) goto 0341
+[0m[90mL0252: if ($A == 0x0) goto L0256
+[0m[90mL0253: if ($A != 0xffffffff) goto L0341
 [0m[90mL0254: $A = $low_args[0]
-[0m[90mL0255: if !($A & 0x80000000) goto 0341
+[0m[90mL0255: if !($A & 0x80000000) goto L0341
 [0m[90mL0256: $A = $low_args[0]
-[0m[90mL0257: if ($A == 0x0) goto 0344
+[0m[90mL0257: if ($A == 0x0) goto L0344
 [0m[90mL0258: $A = $high_args[0]
-[0m[90mL0259: if ($A == 0x0) goto 0263
-[0m[90mL0260: if ($A != 0xffffffff) goto 0341
+[0m[90mL0259: if ($A == 0x0) goto L0263
+[0m[90mL0260: if ($A != 0xffffffff) goto L0341
 [0m[90mL0261: $A = $low_args[0]
-[0m[90mL0262: if !($A & 0x80000000) goto 0341
+[0m[90mL0262: if !($A & 0x80000000) goto L0341
 [0m[90mL0263: $A = $low_args[0]
-[0m[90mL0264: if ($A == 0x5) goto 0344
+[0m[90mL0264: if ($A == 0x5) goto L0344
 [0m[90mL0265: $A = $high_args[0]
-[0m[90mL0266: if ($A == 0x0) goto 0270
-[0m[90mL0267: if ($A != 0xffffffff) goto 0341
+[0m[90mL0266: if ($A == 0x0) goto L0270
+[0m[90mL0267: if ($A != 0xffffffff) goto L0341
 [0m[90mL0268: $A = $low_args[0]
-[0m[90mL0269: if !($A & 0x80000000) goto 0341
+[0m[90mL0269: if !($A & 0x80000000) goto L0341
 [0m[90mL0270: $A = $low_args[0]
-[0m[90mL0271: if ($A == 0x3) goto 0344
-[0m[90mL0272: goto 0604
+[0m[90mL0271: if ($A == 0x3) goto L0344
+[0m[90mL0272: goto L0604
 [0m[90mL0273: $A = $high_args[1]
-[0m[90mL0274: if ($A == 0x0) goto 0278
-[0m[90mL0275: if ($A != 0xffffffff) goto 0341
+[0m[90mL0274: if ($A == 0x0) goto L0278
+[0m[90mL0275: if ($A != 0xffffffff) goto L0341
 [0m[90mL0276: $A = $low_args[1]
-[0m[90mL0277: if !($A & 0x80000000) goto 0341
+[0m[90mL0277: if !($A & 0x80000000) goto L0341
 [0m[90mL0278: $A = $low_args[1]
-[0m[90mL0279: if !($A & 0xfffffe7f) goto 0344
+[0m[90mL0279: if !($A & 0xfffffe7f) goto L0344
 [0m[90mL0280: $A = $high_args[1]
-[0m[90mL0281: if ($A == 0x0) goto 0285
-[0m[90mL0282: if ($A != 0xffffffff) goto 0341
+[0m[90mL0281: if ($A == 0x0) goto L0285
+[0m[90mL0282: if ($A != 0xffffffff) goto L0341
 [0m[90mL0283: $A = $low_args[1]
-[0m[90mL0284: if !($A & 0x80000000) goto 0341
+[0m[90mL0284: if !($A & 0x80000000) goto L0341
 [0m[90mL0285: $A = $low_args[1]
 [0m[90mL0286: $A &= 0xfffffe7f
-[0m[90mL0287: if ($A == 0x1) goto 0344
+[0m[90mL0287: if ($A == 0x1) goto L0344
 [0m[90mL0288: $A = $high_args[1]
-[0m[90mL0289: if ($A == 0x0) goto 0293
-[0m[90mL0290: if ($A != 0xffffffff) goto 0341
+[0m[90mL0289: if ($A == 0x0) goto L0293
+[0m[90mL0290: if ($A != 0xffffffff) goto L0341
 [0m[90mL0291: $A = $low_args[1]
-[0m[90mL0292: if !($A & 0x80000000) goto 0341
+[0m[90mL0292: if !($A & 0x80000000) goto L0341
 [0m[90mL0293: $A = $low_args[1]
 [0m[90mL0294: $A &= 0xfffffe7f
-[0m[90mL0295: if ($A == 0x3) goto 0344
+[0m[90mL0295: if ($A == 0x3) goto L0344
 [0m[90mL0296: $A = $high_args[1]
-[0m[90mL0297: if ($A == 0x0) goto 0301
-[0m[90mL0298: if ($A != 0xffffffff) goto 0341
+[0m[90mL0297: if ($A == 0x0) goto L0301
+[0m[90mL0298: if ($A != 0xffffffff) goto L0341
 [0m[90mL0299: $A = $low_args[1]
-[0m[90mL0300: if !($A & 0x80000000) goto 0341
+[0m[90mL0300: if !($A & 0x80000000) goto L0341
 [0m[90mL0301: $A = $low_args[1]
 [0m[90mL0302: $A &= 0xfffffe7f
-[0m[90mL0303: if ($A == 0x4) goto 0344
+[0m[90mL0303: if ($A == 0x4) goto L0344
 [0m[90mL0304: $A = $high_args[1]
-[0m[90mL0305: if ($A == 0x0) goto 0309
-[0m[90mL0306: if ($A != 0xffffffff) goto 0341
+[0m[90mL0305: if ($A == 0x0) goto L0309
+[0m[90mL0306: if ($A != 0xffffffff) goto L0341
 [0m[90mL0307: $A = $low_args[1]
-[0m[90mL0308: if !($A & 0x80000000) goto 0341
+[0m[90mL0308: if !($A & 0x80000000) goto L0341
 [0m[90mL0309: $A = $low_args[1]
 [0m[90mL0310: $A &= 0xfffffe7f
-[0m[90mL0311: if ($A == 0x5) goto 0344
+[0m[90mL0311: if ($A == 0x5) goto L0344
 [0m[90mL0312: $A = $high_args[1]
-[0m[90mL0313: if ($A == 0x0) goto 0317
-[0m[90mL0314: if ($A != 0xffffffff) goto 0341
+[0m[90mL0313: if ($A == 0x0) goto L0317
+[0m[90mL0314: if ($A != 0xffffffff) goto L0341
 [0m[90mL0315: $A = $low_args[1]
-[0m[90mL0316: if !($A & 0x80000000) goto 0341
+[0m[90mL0316: if !($A & 0x80000000) goto L0341
 [0m[90mL0317: $A = $low_args[1]
 [0m[90mL0318: $A &= 0xfffffe7f
-[0m[90mL0319: if ($A == 0x9) goto 0344
+[0m[90mL0319: if ($A == 0x9) goto L0344
 [0m[90mL0320: $A = $high_args[1]
-[0m[90mL0321: if ($A == 0x0) goto 0325
-[0m[90mL0322: if ($A != 0xffffffff) goto 0341
+[0m[90mL0321: if ($A == 0x0) goto L0325
+[0m[90mL0322: if ($A != 0xffffffff) goto L0341
 [0m[90mL0323: $A = $low_args[1]
-[0m[90mL0324: if !($A & 0x80000000) goto 0341
+[0m[90mL0324: if !($A & 0x80000000) goto L0341
 [0m[90mL0325: $A = $low_args[1]
 [0m[90mL0326: $A &= 0xfffffe7f
-[0m[90mL0327: if ($A == 0xa) goto 0344
+[0m[90mL0327: if ($A == 0xa) goto L0344
 [0m[90mL0328: return ERRNO(22)
 [0m[90mL0329: $A = $high_args[0]
-[0m[90mL0330: if ($A == 0x0) goto 0334
-[0m[90mL0331: if ($A != 0xffffffff) goto 0341
+[0m[90mL0330: if ($A == 0x0) goto L0334
+[0m[90mL0331: if ($A != 0xffffffff) goto L0341
 [0m[90mL0332: $A = $low_args[0]
-[0m[90mL0333: if !($A & 0x80000000) goto 0341
+[0m[90mL0333: if !($A & 0x80000000) goto L0341
 [0m[90mL0334: $A = $low_args[0]
-[0m[90mL0335: if ($A == 0x10) goto 0344
+[0m[90mL0335: if ($A == 0x10) goto L0344
 [0m[90mL0336: $A = $high_args[0]
-[0m[90mL0337: if ($A == 0x0) goto 0342
-[0m[90mL0338: if ($A != 0xffffffff) goto 0341
+[0m[90mL0337: if ($A == 0x0) goto L0342
+[0m[90mL0338: if ($A != 0xffffffff) goto L0341
 [0m[90mL0339: $A = $low_args[0]
-[0m[90mL0340: if ($A & 0x80000000) goto 0342
-[0m[90mL0341: goto 0599
+[0m[90mL0340: if ($A & 0x80000000) goto L0342
+[0m[90mL0341: goto L0599
 [0m[90mL0342: $A = $low_args[0]
-[0m[90mL0343: if ($A != 0xf) goto 0345
-[0m[90mL0344: goto 0603
+[0m[90mL0343: if ($A != 0xf) goto L0345
+[0m[90mL0344: goto L0603
 [0m[90mL0345: $A = $high_args[0]
-[0m[90mL0346: if ($A == 0x0) goto 0350
-[0m[90mL0347: if ($A != 0xffffffff) goto 0599
+[0m[90mL0346: if ($A == 0x0) goto L0350
+[0m[90mL0347: if ($A != 0xffffffff) goto L0599
 [0m[90mL0348: $A = $low_args[0]
-[0m[90mL0349: if !($A & 0x80000000) goto 0599
+[0m[90mL0349: if !($A & 0x80000000) goto L0599
 [0m[90mL0350: $A = $low_args[0]
-[0m[90mL0351: if ($A == 0x3) goto 0603
+[0m[90mL0351: if ($A == 0x3) goto L0603
 [0m[90mL0352: $A = $high_args[0]
-[0m[90mL0353: if ($A == 0x0) goto 0357
-[0m[90mL0354: if ($A != 0xffffffff) goto 0599
+[0m[90mL0353: if ($A == 0x0) goto L0357
+[0m[90mL0354: if ($A != 0xffffffff) goto L0599
 [0m[90mL0355: $A = $low_args[0]
-[0m[90mL0356: if !($A & 0x80000000) goto 0599
+[0m[90mL0356: if !($A & 0x80000000) goto L0599
 [0m[90mL0357: $A = $low_args[0]
-[0m[90mL0358: if ($A == 0x4) goto 0603
+[0m[90mL0358: if ($A == 0x4) goto L0603
 [0m[90mL0359: $A = $high_args[0]
-[0m[90mL0360: if ($A == 0x0) goto 0364
-[0m[90mL0361: if ($A != 0xffffffff) goto 0599
+[0m[90mL0360: if ($A == 0x0) goto L0364
+[0m[90mL0361: if ($A != 0xffffffff) goto L0599
 [0m[90mL0362: $A = $low_args[0]
-[0m[90mL0363: if !($A & 0x80000000) goto 0599
+[0m[90mL0363: if !($A & 0x80000000) goto L0599
 [0m[90mL0364: $A = $low_args[0]
-[0m[90mL0365: if ($A == 0x53564d41) goto 0373
+[0m[90mL0365: if ($A == 0x53564d41) goto L0373
 [0m[90mL0366: $A = $high_args[0]
-[0m[90mL0367: if ($A == 0x0) goto 0371
-[0m[90mL0368: if ($A != 0xffffffff) goto 0599
+[0m[90mL0367: if ($A == 0x0) goto L0371
+[0m[90mL0368: if ($A != 0xffffffff) goto L0599
 [0m[90mL0369: $A = $low_args[0]
-[0m[90mL0370: if !($A & 0x80000000) goto 0599
+[0m[90mL0370: if !($A & 0x80000000) goto L0599
 [0m[90mL0371: $A = $low_args[0]
-[0m[90mL0372: if ($A == 0x59616d61) goto 0602, else goto 0380
+[0m[90mL0372: if ($A == 0x59616d61) goto L0602, else goto L0380
 [0m[90mL0373: $A = $high_args[1]
-[0m[90mL0374: if ($A == 0x0) goto 0378
-[0m[90mL0375: if ($A != 0xffffffff) goto 0599
+[0m[90mL0374: if ($A == 0x0) goto L0378
+[0m[90mL0375: if ($A != 0xffffffff) goto L0599
 [0m[90mL0376: $A = $low_args[1]
-[0m[90mL0377: if !($A & 0x80000000) goto 0599
+[0m[90mL0377: if !($A & 0x80000000) goto L0599
 [0m[90mL0378: $A = $low_args[1]
-[0m[90mL0379: if ($A == 0x0) goto 0603
+[0m[90mL0379: if ($A == 0x0) goto L0603
 [0m[90mL0380: return TRAP(7)
 [0m[90mL0381: $A = $high_args[0]
-[0m[90mL0382: if ($A == 0x0) goto 0386
-[0m[90mL0383: if ($A != 0xffffffff) goto 0599
+[0m[90mL0382: if ($A == 0x0) goto L0386
+[0m[90mL0383: if ($A != 0xffffffff) goto L0599
 [0m[90mL0384: $A = $low_args[0]
-[0m[90mL0385: if !($A & 0x80000000) goto 0599
+[0m[90mL0385: if !($A & 0x80000000) goto L0599
 [0m[90mL0386: $A = $low_args[0]
-[0m[90mL0387: if ($A == 0x0) goto 0603
+[0m[90mL0387: if ($A == 0x0) goto L0603
 [0m[90mL0388: $A = $high_args[0]
-[0m[90mL0389: if ($A == 0x0) goto 0393
-[0m[90mL0390: if ($A != 0xffffffff) goto 0599
+[0m[90mL0389: if ($A == 0x0) goto L0393
+[0m[90mL0390: if ($A != 0xffffffff) goto L0599
 [0m[90mL0391: $A = $low_args[0]
-[0m[90mL0392: if !($A & 0x80000000) goto 0599
+[0m[90mL0392: if !($A & 0x80000000) goto L0599
 [0m[90mL0393: $A = $low_args[0]
-[0m[90mL0394: if ($A == 0x1) goto 0603
+[0m[90mL0394: if ($A == 0x1) goto L0603
 [0m[90mL0395: return TRAP(6)
 [0m[90mL0396: $A = $high_args[0]
-[0m[90mL0397: if ($A == 0x0) goto 0401
-[0m[90mL0398: if ($A != 0xffffffff) goto 0599
+[0m[90mL0397: if ($A == 0x0) goto L0401
+[0m[90mL0398: if ($A != 0xffffffff) goto L0599
 [0m[90mL0399: $A = $low_args[0]
-[0m[90mL0400: if !($A & 0x80000000) goto 0599
+[0m[90mL0400: if !($A & 0x80000000) goto L0599
 [0m[90mL0401: $A = $low_args[0]
-[0m[90mL0402: if ($A != 0x0) goto 0604
+[0m[90mL0402: if ($A != 0x0) goto L0604
 [0m[90mL0403: $A = $high_args[1]
-[0m[90mL0404: if ($A == 0x0) goto 0408
-[0m[90mL0405: if ($A != 0xffffffff) goto 0599
+[0m[90mL0404: if ($A == 0x0) goto L0408
+[0m[90mL0405: if ($A != 0xffffffff) goto L0599
 [0m[90mL0406: $A = $low_args[1]
-[0m[90mL0407: if !($A & 0x80000000) goto 0599
+[0m[90mL0407: if !($A & 0x80000000) goto L0599
 [0m[90mL0408: $A = $low_args[1]
-[0m[90mL0409: if ($A == 0x0) goto 0603
+[0m[90mL0409: if ($A == 0x0) goto L0603
 [0m[90mL0410: $A = $high_args[1]
-[0m[90mL0411: if ($A == 0x0) goto 0415
-[0m[90mL0412: if ($A != 0xffffffff) goto 0599
+[0m[90mL0411: if ($A == 0x0) goto L0415
+[0m[90mL0412: if ($A != 0xffffffff) goto L0599
 [0m[90mL0413: $A = $low_args[1]
-[0m[90mL0414: if !($A & 0x80000000) goto 0599
+[0m[90mL0414: if !($A & 0x80000000) goto L0599
 [0m[90mL0415: $A = $low_args[1]
-[0m[90mL0416: if ($A == 0x1) goto 0603, else goto 0602
+[0m[90mL0416: if ($A == 0x1) goto L0603, else goto L0602
 [0m[90mL0417: $A = $high_args[1]
-[0m[90mL0418: if ($A == 0x0) goto 0422
-[0m[90mL0419: if ($A != 0xffffffff) goto 0599
+[0m[90mL0418: if ($A == 0x0) goto L0422
+[0m[90mL0419: if ($A != 0xffffffff) goto L0599
 [0m[90mL0420: $A = $low_args[1]
-[0m[90mL0421: if !($A & 0x80000000) goto 0599
+[0m[90mL0421: if !($A & 0x80000000) goto L0599
 [0m[90mL0422: $A = $low_args[1]
-[0m[90mL0423: if ($A == 0x3) goto 0603
+[0m[90mL0423: if ($A == 0x3) goto L0603
 [0m[90mL0424: $A = $high_args[1]
-[0m[90mL0425: if ($A == 0x0) goto 0429
-[0m[90mL0426: if ($A != 0xffffffff) goto 0599
+[0m[90mL0425: if ($A == 0x0) goto L0429
+[0m[90mL0426: if ($A != 0xffffffff) goto L0599
 [0m[90mL0427: $A = $low_args[1]
-[0m[90mL0428: if !($A & 0x80000000) goto 0599
+[0m[90mL0428: if !($A & 0x80000000) goto L0599
 [0m[90mL0429: $A = $low_args[1]
-[0m[90mL0430: if ($A == 0x1) goto 0603
+[0m[90mL0430: if ($A == 0x1) goto L0603
 [0m[90mL0431: $A = $high_args[1]
-[0m[90mL0432: if ($A == 0x0) goto 0436
-[0m[90mL0433: if ($A != 0xffffffff) goto 0599
+[0m[90mL0432: if ($A == 0x0) goto L0436
+[0m[90mL0433: if ($A != 0xffffffff) goto L0599
 [0m[90mL0434: $A = $low_args[1]
-[0m[90mL0435: if !($A & 0x80000000) goto 0599
+[0m[90mL0435: if !($A & 0x80000000) goto L0599
 [0m[90mL0436: $A = $low_args[1]
-[0m[90mL0437: if ($A == 0x40a) goto 0603
+[0m[90mL0437: if ($A == 0x40a) goto L0603
 [0m[90mL0438: $A = $high_args[1]
-[0m[90mL0439: if ($A == 0x0) goto 0443
-[0m[90mL0440: if ($A != 0xffffffff) goto 0599
+[0m[90mL0439: if ($A == 0x0) goto L0443
+[0m[90mL0440: if ($A != 0xffffffff) goto L0599
 [0m[90mL0441: $A = $low_args[1]
-[0m[90mL0442: if !($A & 0x80000000) goto 0599
+[0m[90mL0442: if !($A & 0x80000000) goto L0599
 [0m[90mL0443: $A = $low_args[1]
-[0m[90mL0444: if ($A == 0x2) goto 0603
+[0m[90mL0444: if ($A == 0x2) goto L0603
 [0m[90mL0445: $A = $high_args[1]
-[0m[90mL0446: if ($A == 0x0) goto 0450
-[0m[90mL0447: if ($A != 0xffffffff) goto 0599
+[0m[90mL0446: if ($A == 0x0) goto L0450
+[0m[90mL0447: if ($A != 0xffffffff) goto L0599
 [0m[90mL0448: $A = $low_args[1]
-[0m[90mL0449: if !($A & 0x80000000) goto 0599
+[0m[90mL0449: if !($A & 0x80000000) goto L0599
 [0m[90mL0450: $A = $low_args[1]
-[0m[90mL0451: if ($A == 0x6) goto 0603
+[0m[90mL0451: if ($A == 0x6) goto L0603
 [0m[90mL0452: $A = $high_args[1]
-[0m[90mL0453: if ($A == 0x0) goto 0457
-[0m[90mL0454: if ($A != 0xffffffff) goto 0599
+[0m[90mL0453: if ($A == 0x0) goto L0457
+[0m[90mL0454: if ($A != 0xffffffff) goto L0599
 [0m[90mL0455: $A = $low_args[1]
-[0m[90mL0456: if !($A & 0x80000000) goto 0599
+[0m[90mL0456: if !($A & 0x80000000) goto L0599
 [0m[90mL0457: $A = $low_args[1]
-[0m[90mL0458: if ($A == 0x7) goto 0603
+[0m[90mL0458: if ($A == 0x7) goto L0603
 [0m[90mL0459: $A = $high_args[1]
-[0m[90mL0460: if ($A == 0x0) goto 0464
-[0m[90mL0461: if ($A != 0xffffffff) goto 0599
+[0m[90mL0460: if ($A == 0x0) goto L0464
+[0m[90mL0461: if ($A != 0xffffffff) goto L0599
 [0m[90mL0462: $A = $low_args[1]
-[0m[90mL0463: if !($A & 0x80000000) goto 0599
+[0m[90mL0463: if !($A & 0x80000000) goto L0599
 [0m[90mL0464: $A = $low_args[1]
-[0m[90mL0465: if ($A == 0x5) goto 0603
+[0m[90mL0465: if ($A == 0x5) goto L0603
 [0m[90mL0466: $A = $high_args[1]
-[0m[90mL0467: if ($A == 0x0) goto 0471
-[0m[90mL0468: if ($A != 0xffffffff) goto 0599
+[0m[90mL0467: if ($A == 0x0) goto L0471
+[0m[90mL0468: if ($A != 0xffffffff) goto L0599
 [0m[90mL0469: $A = $low_args[1]
-[0m[90mL0470: if !($A & 0x80000000) goto 0599
+[0m[90mL0470: if !($A & 0x80000000) goto L0599
 [0m[90mL0471: $A = $low_args[1]
-[0m[90mL0472: if ($A == 0x0) goto 0603
+[0m[90mL0472: if ($A == 0x0) goto L0603
 [0m[90mL0473: $A = $high_args[1]
-[0m[90mL0474: if ($A == 0x0) goto 0478
-[0m[90mL0475: if ($A != 0xffffffff) goto 0599
+[0m[90mL0474: if ($A == 0x0) goto L0478
+[0m[90mL0475: if ($A != 0xffffffff) goto L0599
 [0m[90mL0476: $A = $low_args[1]
-[0m[90mL0477: if !($A & 0x80000000) goto 0599
+[0m[90mL0477: if !($A & 0x80000000) goto L0599
 [0m[90mL0478: $A = $low_args[1]
-[0m[90mL0479: if ($A == 0x406) goto 0603
+[0m[90mL0479: if ($A == 0x406) goto L0603
 [0m[90mL0480: $A = $high_args[1]
-[0m[90mL0481: if ($A == 0x0) goto 0485
-[0m[90mL0482: if ($A != 0xffffffff) goto 0599
+[0m[90mL0481: if ($A == 0x0) goto L0485
+[0m[90mL0482: if ($A != 0xffffffff) goto L0599
 [0m[90mL0483: $A = $low_args[1]
-[0m[90mL0484: if !($A & 0x80000000) goto 0599
+[0m[90mL0484: if !($A & 0x80000000) goto L0599
 [0m[90mL0485: $A = $low_args[1]
-[0m[90mL0486: if ($A == 0x4) goto 0496
+[0m[90mL0486: if ($A == 0x4) goto L0496
 [0m[90mL0487: $A = $high_args[1]
-[0m[90mL0488: if ($A == 0x0) goto 0492
-[0m[90mL0489: if ($A != 0xffffffff) goto 0599
+[0m[90mL0488: if ($A == 0x0) goto L0492
+[0m[90mL0489: if ($A != 0xffffffff) goto L0599
 [0m[90mL0490: $A = $low_args[1]
-[0m[90mL0491: if !($A & 0x80000000) goto 0599
+[0m[90mL0491: if !($A & 0x80000000) goto L0599
 [0m[90mL0492: $A = $low_args[1]
-[0m[90mL0493: if ($A != 0x409) goto 0604
+[0m[90mL0493: if ($A != 0x409) goto L0604
 [0m[90mL0494: $A = $high_args[2]
-[0m[90mL0495: if ($A == 0x0) goto 0592, else goto 0604
+[0m[90mL0495: if ($A == 0x0) goto L0592, else goto L0604
 [0m[90mL0496: $A = $high_args[2]
-[0m[90mL0497: if ($A != 0x0) goto 0604
+[0m[90mL0497: if ($A != 0x0) goto L0604
 [0m[90mL0498: $A = $low_args[2]
-[0m[90mL0499: if ($A & 0xffe363fc) goto 0604, else goto 0603
+[0m[90mL0499: if ($A & 0xffe363fc) goto L0604, else goto L0603
 [0m[90mL0500: $A = $high_args[0]
-[0m[90mL0501: if ($A == 0x0) goto 0505
-[0m[90mL0502: if ($A != 0xffffffff) goto 0599
+[0m[90mL0501: if ($A == 0x0) goto L0505
+[0m[90mL0502: if ($A != 0xffffffff) goto L0599
 [0m[90mL0503: $A = $low_args[0]
-[0m[90mL0504: if !($A & 0x80000000) goto 0599
+[0m[90mL0504: if !($A & 0x80000000) goto L0599
 [0m[90mL0505: $A = $low_args[0]
-[0m[90mL0506: if ($A == 0x1) goto 0603
+[0m[90mL0506: if ($A == 0x1) goto L0603
 [0m[90mL0507: return TRAP(5)
 [0m[90mL0508: $A = $high_args[0]
-[0m[90mL0509: if ($A != 0x0) goto 0512
+[0m[90mL0509: if ($A != 0x0) goto L0512
 [0m[90mL0510: $A = $low_args[0]
-[0m[90mL0511: if ($A == 0x3d0f00) goto 0603
+[0m[90mL0511: if ($A == 0x3d0f00) goto L0603
 [0m[90mL0512: $A = $low_args[0]
-[0m[90mL0513: if !($A & 0x10100) goto 0602
+[0m[90mL0513: if !($A & 0x10100) goto L0602
 [0m[90mL0514: $A = $low_args[0]
 [0m[90mL0515: $A &= 0x4100
-[0m[90mL0516: if ($A == 0x4100) goto 0602
+[0m[90mL0516: if ($A == 0x4100) goto L0602
 [0m[90mL0517: return TRAP(4)
 [0m[90mL0518: $A = $high_args[1]
-[0m[90mL0519: if ($A == 0x0) goto 0523
-[0m[90mL0520: if ($A != 0xffffffff) goto 0599
+[0m[90mL0519: if ($A == 0x0) goto L0523
+[0m[90mL0520: if ($A != 0xffffffff) goto L0599
 [0m[90mL0521: $A = $low_args[1]
-[0m[90mL0522: if !($A & 0x80000000) goto 0599
+[0m[90mL0522: if !($A & 0x80000000) goto L0599
 [0m[90mL0523: $A = $low_args[1]
-[0m[90mL0524: if ($A != 0x1) goto 0604
+[0m[90mL0524: if ($A != 0x1) goto L0604
 [0m[90mL0525: $A = $high_args[2]
-[0m[90mL0526: if ($A == 0x0) goto 0530
-[0m[90mL0527: if ($A != 0xffffffff) goto 0599
+[0m[90mL0526: if ($A == 0x0) goto L0530
+[0m[90mL0527: if ($A != 0xffffffff) goto L0599
 [0m[90mL0528: $A = $low_args[2]
-[0m[90mL0529: if !($A & 0x80000000) goto 0599
+[0m[90mL0529: if !($A & 0x80000000) goto L0599
 [0m[90mL0530: $A = $low_args[2]
-[0m[90mL0531: if ($A == 0x2a) goto 0603, else goto 0604
+[0m[90mL0531: if ($A == 0x2a) goto L0603, else goto L0604
 [0m[90mL0532: $A = $high_args[0]
-[0m[90mL0533: if ($A == 0x0) goto 0537
-[0m[90mL0534: if ($A != 0xffffffff) goto 0599
+[0m[90mL0533: if ($A == 0x0) goto L0537
+[0m[90mL0534: if ($A != 0xffffffff) goto L0599
 [0m[90mL0535: $A = $low_args[0]
-[0m[90mL0536: if !($A & 0x80000000) goto 0599
+[0m[90mL0536: if !($A & 0x80000000) goto L0599
 [0m[90mL0537: $A = $low_args[0]
-[0m[90mL0538: if ($A == 0x1) goto 0603, else goto 0604
+[0m[90mL0538: if ($A == 0x1) goto L0603, else goto L0604
 [0m[90mL0539: $A = $high_args[2]
-[0m[90mL0540: if ($A == 0x0) goto 0544
-[0m[90mL0541: if ($A != 0xffffffff) goto 0599
+[0m[90mL0540: if ($A == 0x0) goto L0544
+[0m[90mL0541: if ($A != 0xffffffff) goto L0599
 [0m[90mL0542: $A = $low_args[2]
-[0m[90mL0543: if !($A & 0x80000000) goto 0599
+[0m[90mL0543: if !($A & 0x80000000) goto L0599
 [0m[90mL0544: $A = $low_args[2]
-[0m[90mL0545: if ($A == 0x4) goto 0603
+[0m[90mL0545: if ($A == 0x4) goto L0603
 [0m[90mL0546: $A = $high_args[2]
-[0m[90mL0547: if ($A == 0x0) goto 0551
-[0m[90mL0548: if ($A != 0xffffffff) goto 0599
+[0m[90mL0547: if ($A == 0x0) goto L0551
+[0m[90mL0548: if ($A != 0xffffffff) goto L0599
 [0m[90mL0549: $A = $low_args[2]
-[0m[90mL0550: if !($A & 0x80000000) goto 0599
+[0m[90mL0550: if !($A & 0x80000000) goto L0599
 [0m[90mL0551: $A = $low_args[2]
-[0m[90mL0552: if ($A == 0x1) goto 0603
+[0m[90mL0552: if ($A == 0x1) goto L0603
 [0m[90mL0553: $A = $high_args[2]
-[0m[90mL0554: if ($A == 0x0) goto 0558
-[0m[90mL0555: if ($A != 0xffffffff) goto 0599
+[0m[90mL0554: if ($A == 0x0) goto L0558
+[0m[90mL0555: if ($A != 0xffffffff) goto L0599
 [0m[90mL0556: $A = $low_args[2]
-[0m[90mL0557: if !($A & 0x80000000) goto 0599
+[0m[90mL0557: if !($A & 0x80000000) goto L0599
 [0m[90mL0558: $A = $low_args[2]
-[0m[90mL0559: if ($A == 0x9) goto 0603
+[0m[90mL0559: if ($A == 0x9) goto L0603
 [0m[90mL0560: $A = $high_args[2]
-[0m[90mL0561: if ($A == 0x0) goto 0565
-[0m[90mL0562: if ($A != 0xffffffff) goto 0599
+[0m[90mL0561: if ($A == 0x0) goto L0565
+[0m[90mL0562: if ($A != 0xffffffff) goto L0599
 [0m[90mL0563: $A = $low_args[2]
-[0m[90mL0564: if !($A & 0x80000000) goto 0599
+[0m[90mL0564: if !($A & 0x80000000) goto L0599
 [0m[90mL0565: $A = $low_args[2]
-[0m[90mL0566: if ($A == 0x0) goto 0603
+[0m[90mL0566: if ($A == 0x0) goto L0603
 [0m[90mL0567: $A = $high_args[2]
-[0m[90mL0568: if ($A == 0x0) goto 0572
-[0m[90mL0569: if ($A != 0xffffffff) goto 0599
+[0m[90mL0568: if ($A == 0x0) goto L0572
+[0m[90mL0569: if ($A != 0xffffffff) goto L0599
 [0m[90mL0570: $A = $low_args[2]
-[0m[90mL0571: if !($A & 0x80000000) goto 0599
+[0m[90mL0571: if !($A & 0x80000000) goto L0599
 [0m[90mL0572: $A = $low_args[2]
-[0m[90mL0573: if ($A == 0x8) goto 0603, else goto 0602
+[0m[90mL0573: if ($A == 0x8) goto L0603, else goto L0602
 [0m[90mL0574: $A = $high_args[1]
-[0m[90mL0575: if ($A != 0x0) goto 0578
+[0m[90mL0575: if ($A != 0x0) goto L0578
 [0m[90mL0576: $A = $low_args[1]
-[0m[90mL0577: if ($A == 0x5401) goto 0603
+[0m[90mL0577: if ($A == 0x5401) goto L0603
 [0m[90mL0578: $A = $high_args[1]
-[0m[90mL0579: if ($A != 0x0) goto 0582
+[0m[90mL0579: if ($A != 0x0) goto L0582
 [0m[90mL0580: $A = $low_args[1]
-[0m[90mL0581: if ($A == 0x541b) goto 0603
+[0m[90mL0581: if ($A == 0x541b) goto L0603
 [0m[90mL0582: $A = $high_args[1]
-[0m[90mL0583: if ($A != 0x0) goto 0586
+[0m[90mL0583: if ($A != 0x0) goto L0586
 [0m[90mL0584: $A = $low_args[1]
-[0m[90mL0585: if ($A == 0x40086200) goto 0603
+[0m[90mL0585: if ($A == 0x40086200) goto L0603
 [0m[90mL0586: return TRAP(3)
 [0m[90mL0587: $A = $high_args[2]
-[0m[90mL0588: if ($A == 0x0) goto 0592
-[0m[90mL0589: if ($A != 0xffffffff) goto 0599
+[0m[90mL0588: if ($A == 0x0) goto L0592
+[0m[90mL0589: if ($A != 0xffffffff) goto L0599
 [0m[90mL0590: $A = $low_args[2]
-[0m[90mL0591: if !($A & 0x80000000) goto 0599
+[0m[90mL0591: if !($A & 0x80000000) goto L0599
 [0m[90mL0592: $A = $low_args[2]
-[0m[90mL0593: if ($A & 0xfffffff8) goto 0604, else goto 0603
+[0m[90mL0593: if ($A & 0xfffffff8) goto L0604, else goto L0603
 [0m[90mL0594: $A = $high_args[3]
-[0m[90mL0595: if ($A == 0x0) goto 0600
-[0m[90mL0596: if ($A != 0xffffffff) goto 0599
+[0m[90mL0595: if ($A == 0x0) goto L0600
+[0m[90mL0596: if ($A != 0xffffffff) goto L0599
 [0m[90mL0597: $A = $low_args[3]
-[0m[90mL0598: if ($A & 0x80000000) goto 0600
+[0m[90mL0598: if ($A & 0x80000000) goto L0600
 [0m[90mL0599: return TRAP(2)
 [0m[90mL0600: $A = $low_args[3]
-[0m[90mL0601: if ($A & 0xfffd97cc) goto 0604, else goto 0603
+[0m[90mL0601: if ($A & 0xfffd97cc) goto L0604, else goto L0603
 [0mL0602: return [31mERRNO[0m(1)
