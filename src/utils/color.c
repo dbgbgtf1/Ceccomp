@@ -7,20 +7,20 @@ bool color_enable = true;
 bool log_color_enable = true;
 
 void
-set_color (ceccomp_args *args, FILE *output)
+set_color (color_mode color, FILE *output)
 {
-  if (args->color == ALWAYS)
+  if (color == ALWAYS)
     {
       color_enable = true;
       log_color_enable = true;
     }
-  else if (args->color == NEVER)
+  else if (color == NEVER)
     {
       color_enable = false;
       log_color_enable = false;
     }
 
-  else if (args->color == AUTO)
+  else if (color == AUTO)
     {
       if (isatty (fileno (output)))
         color_enable = true;
