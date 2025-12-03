@@ -1,19 +1,19 @@
-0001: [93m$A[0m = [94m$arch[0m
-0002: if ([93m$A[0m != [96maarch64[0m) goto 0019
-[90m0003: $A = $syscall_nr
-[0m[90m0004: if ($A == aarch64.ioctl) goto 0018
-[0m[90m0005: if ($A == aarch64.read) goto 0018
-[0m[90m0006: if ($A == aarch64.write) goto 0018
-[0m[90m0007: if ($A == aarch64.ppoll) goto 0018
-[0m[90m0008: if ($A == aarch64.exit_group) goto 0018
-[0m[90m0009: if ($A == aarch64.futex) goto 0018
-[0m[90m0010: if ($A == aarch64.sigaltstack) goto 0018
-[0m[90m0011: if ($A == aarch64.rt_sigaction) goto 0018
-[0m[90m0012: if ($A == aarch64.rt_sigreturn) goto 0018
-[0m[90m0013: if ($A == aarch64.sendto) goto 0018
-[0m[90m0014: if ($A == aarch64.recvfrom) goto 0018
-[0m[90m0015: if ($A == aarch64.setsockopt) goto 0018
-[0m[90m0016: if ($A == aarch64.munmap) goto 0018
-[0m[90m0017: return KILL_PROCESS
-[0m[90m0018: return ALLOW
-[0m0019: return [31mKILL[0m
+L0001: [93m$A[0m = [94m$arch[0m
+L0002: if ([93m$A[0m != [96maarch64[0m) goto L0019
+[90mL0003: $A = $syscall_nr
+[0m[90mL0004: if ($A == aarch64.ioctl) goto 0018
+[0m[90mL0005: if ($A == aarch64.read) goto 0018
+[0m[90mL0006: if ($A == aarch64.write) goto 0018
+[0m[90mL0007: if ($A == aarch64.ppoll) goto 0018
+[0m[90mL0008: if ($A == aarch64.exit_group) goto 0018
+[0m[90mL0009: if ($A == aarch64.futex) goto 0018
+[0m[90mL0010: if ($A == aarch64.sigaltstack) goto 0018
+[0m[90mL0011: if ($A == aarch64.rt_sigaction) goto 0018
+[0m[90mL0012: if ($A == aarch64.rt_sigreturn) goto 0018
+[0m[90mL0013: if ($A == aarch64.sendto) goto 0018
+[0m[90mL0014: if ($A == aarch64.recvfrom) goto 0018
+[0m[90mL0015: if ($A == aarch64.setsockopt) goto 0018
+[0m[90mL0016: if ($A == aarch64.munmap) goto 0018
+[0m[90mL0017: return KILL_PROCESS
+[0m[90mL0018: return ALLOW
+[0mL0019: return [31mKILL[0m

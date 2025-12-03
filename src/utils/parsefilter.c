@@ -489,8 +489,8 @@ parse_filter (uint32_t arch_token, fprog *sock_prog, FILE *output_fp)
   stat_list[0].arch = arch_token;
   default_arch = arch_token;
 
-  fprintf (o_fp, " Line  CODE  JT   JF      K\n");
-  fprintf (o_fp, "---------------------------------\n");
+  fprintf (o_fp, " Label  CODE  JT   JF      K\n");
+  fprintf (o_fp, "----------------------------------\n");
   for (; pc < len; pc++)
     {
       filter *f_ptr = &prog->filter[pc];
@@ -503,7 +503,7 @@ parse_filter (uint32_t arch_token, fprog *sock_prog, FILE *output_fp)
 
       fprintf (o_fp, "\n");
     }
-  fprintf (o_fp, "---------------------------------\n");
+  fprintf (o_fp, "----------------------------------\n");
   fflush (o_fp);
   pc = 0;
 

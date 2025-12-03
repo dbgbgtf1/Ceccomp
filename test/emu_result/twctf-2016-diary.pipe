@@ -1,18 +1,18 @@
-0001: [93m$A[0m = [94m$syscall_nr[0m
-0002: if ([93m$A[0m != [96mopen[0m) goto 0004
-[90m0003: return KILL
-[0m0004: if ([93m$A[0m != [96mopenat[0m) goto 0006
-[90m0005: return KILL
-[0m0006: if ([93m$A[0m != [96mexecve[0m) goto 0008
-[90m0007: return KILL
-[0m0008: if ([93m$A[0m != [96mclone[0m) goto 0010
-[90m0009: return KILL
-[0m0010: if ([93m$A[0m != [96mfork[0m) goto 0012
-[90m0011: return KILL
-[0m0012: if ([93m$A[0m != [96mvfork[0m) goto 0014
-[90m0013: return KILL
-[0m0014: if ([93m$A[0m != [96mcreat[0m) goto 0016
-[90m0015: return KILL
-[0m0016: if ([93m$A[0m != [96mexecveat[0m) goto 0018
-[90m0017: return KILL
-[0m0018: return [32mALLOW[0m
+L0001: [93m$A[0m = [94m$syscall_nr[0m
+L0002: if ([93m$A[0m != [96mopen[0m) goto L0004
+[90mL0003: return KILL
+[0mL0004: if ([93m$A[0m != [96mopenat[0m) goto L0006
+[90mL0005: return KILL
+[0mL0006: if ([93m$A[0m != [96mexecve[0m) goto L0008
+[90mL0007: return KILL
+[0mL0008: if ([93m$A[0m != [96mclone[0m) goto L0010
+[90mL0009: return KILL
+[0mL0010: if ([93m$A[0m != [96mfork[0m) goto L0012
+[90mL0011: return KILL
+[0mL0012: if ([93m$A[0m != [96mvfork[0m) goto L0014
+[90mL0013: return KILL
+[0mL0014: if ([93m$A[0m != [96mcreat[0m) goto L0016
+[90mL0015: return KILL
+[0mL0016: if ([93m$A[0m != [96mexecveat[0m) goto L0018
+[90mL0017: return KILL
+[0mL0018: return [32mALLOW[0m

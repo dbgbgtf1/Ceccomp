@@ -1,9 +1,9 @@
-0001: [93m$A[0m = [94m$low_pc[0m
-0002: [93m$X[0m = [93m$A[0m
-0003: [93m$A[0m = [94m$high_pc[0m
-0004: [93m$A[0m = [94m$high_args[0][0m
-0005: [93m$A[0m = [94m$low_args[5][0m
-0006: [93m$A[0m += [93m$X[0m
-0007: [93m$A[0m &= [96m0xfff[0m
-0008: if ([93m$A[0m == [96m0x0[0m) goto 0010
-0009: return [31mKILL[0m
+L0001: [93m$A[0m = [94m$low_pc[0m
+L0002: [93m$X[0m = [93m$A[0m
+L0003: [93m$A[0m = [94m$high_pc[0m
+L0004: [93m$A[0m = [94m$high_args[0][0m
+L0005: [93m$A[0m = [94m$low_args[5][0m
+L0006: [93m$A[0m += [93m$X[0m
+L0007: [93m$A[0m &= [96m0xfff[0m
+L0008: if ([93m$A[0m == [96m0x0[0m) goto L0010
+L0009: return [31mKILL[0m

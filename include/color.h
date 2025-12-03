@@ -4,7 +4,7 @@
 #include "parseargs.h"
 #include <stdbool.h>
 
-#define FORMAT "%04d"
+#define FORMAT "L%04d"
 
 extern bool color_enable;
 extern bool log_color_enable;

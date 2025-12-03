@@ -1,27 +1,27 @@
- Line  CODE  JT   JF      K
----------------------------------
- 0001: 0x20 0x00 0x00 0x00000004 [93m$A[0m = [94m$arch[0m
- 0002: 0x15 0x00 0x05 0xc000003e if ([93m$A[0m != [96mx86_64[0m) goto 0008
- 0003: 0x20 0x00 0x00 0x00000000 [93m$A[0m = [94m$syscall_nr[0m
- 0004: 0x35 0x12 0x00 0x40000000 if ([93m$A[0m >= [96m0x40000000[0m) goto 0023
- 0005: 0x15 0x12 0x00 0x0000002b if ([93m$A[0m == [96maccept[0m) goto 0024
- 0006: 0x15 0x11 0x00 0x00000032 if ([93m$A[0m == [96mlisten[0m) goto 0024
- 0007: 0x15 0x10 0x0f 0x00000031 if ([93m$A[0m == [96mbind[0m) goto 0024, else goto 0023
- 0008: 0x15 0x00 0x04 0x40000003 if ([93m$A[0m != [96mi386[0m) goto 0013
- 0009: 0x20 0x00 0x00 0x00000000 [93m$A[0m = [94m$syscall_nr[0m
- 0010: 0x15 0x0d 0x00 0x00000000 if ([93m$A[0m == [96mi386.restart_syscall[0m) goto 0024
- 0011: 0x15 0x0c 0x00 0x00000001 if ([93m$A[0m == [96mi386.exit[0m) goto 0024
- 0012: 0x15 0x0b 0x0a 0x00000002 if ([93m$A[0m == [96mi386.fork[0m) goto 0024, else goto 0023
- 0013: 0x15 0x00 0x04 0xc00000b7 if ([93m$A[0m != [96maarch64[0m) goto 0018
- 0014: 0x20 0x00 0x00 0x00000000 [93m$A[0m = [94m$syscall_nr[0m
- 0015: 0x15 0x08 0x00 0xffffd85c if ([93m$A[0m == [96maarch64.alarm[0m) goto 0024
- 0016: 0x15 0x07 0x00 0xffffd88b if ([93m$A[0m == [96maarch64.select[0m) goto 0024
- 0017: 0x15 0x06 0x05 0xffffd848 if ([93m$A[0m == [96maarch64.pipe[0m) goto 0024, else goto 0023
- 0018: 0x15 0x00 0x04 0x40000028 if ([93m$A[0m != [96marm[0m) goto 0023
- 0019: 0x20 0x00 0x00 0x00000000 [93m$A[0m = [94m$syscall_nr[0m
- 0020: 0x15 0x03 0x00 0x00000000 if ([93m$A[0m == [96marm.restart_syscall[0m) goto 0024
- 0021: 0x15 0x02 0x00 0x00000091 if ([93m$A[0m == [96marm.readv[0m) goto 0024
- 0022: 0x15 0x01 0x00 0x00000078 if ([93m$A[0m == [96marm.clone[0m) goto 0024
- 0023: 0x06 0x00 0x00 0x00000000 return [31mKILL[0m
- 0024: 0x06 0x00 0x00 0x7fff0000 return [32mALLOW[0m
----------------------------------
+ Label  CODE  JT   JF      K
+----------------------------------
+ L0001: 0x20 0x00 0x00 0x00000004 [93m$A[0m = [94m$arch[0m
+ L0002: 0x15 0x00 0x05 0xc000003e if ([93m$A[0m != [96mx86_64[0m) goto L0008
+ L0003: 0x20 0x00 0x00 0x00000000 [93m$A[0m = [94m$syscall_nr[0m
+ L0004: 0x35 0x12 0x00 0x40000000 if ([93m$A[0m >= [96m0x40000000[0m) goto L0023
+ L0005: 0x15 0x12 0x00 0x0000002b if ([93m$A[0m == [96maccept[0m) goto L0024
+ L0006: 0x15 0x11 0x00 0x00000032 if ([93m$A[0m == [96mlisten[0m) goto L0024
+ L0007: 0x15 0x10 0x0f 0x00000031 if ([93m$A[0m == [96mbind[0m) goto L0024, else goto L0023
+ L0008: 0x15 0x00 0x04 0x40000003 if ([93m$A[0m != [96mi386[0m) goto L0013
+ L0009: 0x20 0x00 0x00 0x00000000 [93m$A[0m = [94m$syscall_nr[0m
+ L0010: 0x15 0x0d 0x00 0x00000000 if ([93m$A[0m == [96mi386.restart_syscall[0m) goto L0024
+ L0011: 0x15 0x0c 0x00 0x00000001 if ([93m$A[0m == [96mi386.exit[0m) goto L0024
+ L0012: 0x15 0x0b 0x0a 0x00000002 if ([93m$A[0m == [96mi386.fork[0m) goto L0024, else goto L0023
+ L0013: 0x15 0x00 0x04 0xc00000b7 if ([93m$A[0m != [96maarch64[0m) goto L0018
+ L0014: 0x20 0x00 0x00 0x00000000 [93m$A[0m = [94m$syscall_nr[0m
+ L0015: 0x15 0x08 0x00 0xffffd85c if ([93m$A[0m == [96maarch64.alarm[0m) goto L0024
+ L0016: 0x15 0x07 0x00 0xffffd88b if ([93m$A[0m == [96maarch64.select[0m) goto L0024
+ L0017: 0x15 0x06 0x05 0xffffd848 if ([93m$A[0m == [96maarch64.pipe[0m) goto L0024, else goto L0023
+ L0018: 0x15 0x00 0x04 0x40000028 if ([93m$A[0m != [96marm[0m) goto L0023
+ L0019: 0x20 0x00 0x00 0x00000000 [93m$A[0m = [94m$syscall_nr[0m
+ L0020: 0x15 0x03 0x00 0x00000000 if ([93m$A[0m == [96marm.restart_syscall[0m) goto L0024
+ L0021: 0x15 0x02 0x00 0x00000091 if ([93m$A[0m == [96marm.readv[0m) goto L0024
+ L0022: 0x15 0x01 0x00 0x00000078 if ([93m$A[0m == [96marm.clone[0m) goto L0024
+ L0023: 0x06 0x00 0x00 0x00000000 return [31mKILL[0m
+ L0024: 0x06 0x00 0x00 0x7fff0000 return [32mALLOW[0m
+----------------------------------

@@ -1,62 +1,62 @@
-0001: [93m$A[0m = [94m$arch[0m
-0002: if ([93m$A[0m != [96mx86_64[0m) goto 0063
-0003: [93m$A[0m = [94m$syscall_nr[0m
-0004: if ([93m$A[0m >= [96m0x40000000[0m) goto 0063
-0005: if ([93m$A[0m == [96mread[0m) goto 0062
-0006: if ([93m$A[0m == [96mwrite[0m) goto 0062
-0007: if ([93m$A[0m == [96mclose[0m) goto 0062
-0008: if ([93m$A[0m == [96mmunmap[0m) goto 0062
-0009: if ([93m$A[0m == [96msched_yield[0m) goto 0062
-0010: if ([93m$A[0m == [96mdup[0m) goto 0062
-0011: if ([93m$A[0m == [96mdup2[0m) goto 0062
-0012: if ([93m$A[0m == [96mnanosleep[0m) goto 0062
-0013: if ([93m$A[0m == [96mconnect[0m) goto 0062
-0014: if ([93m$A[0m == [96maccept[0m) goto 0062
-[90m0015: if ($A == recvmsg) goto 0062
-[0m[90m0016: if ($A == bind) goto 0062
-[0m[90m0017: if ($A == exit) goto 0062
-[0m[90m0018: if ($A == exit_group) goto 0062
-[0m[90m0019: if ($A != clone) goto 0024
-[0m[90m0020: $A = $high_args[0]
-[0m[90m0021: if ($A != 0x0) goto 0063
-[0m[90m0022: $A = $low_args[0]
-[0m[90m0023: if ($A == 0x10900) goto 0062, else goto 0063
-[0m[90m0024: if ($A != socket) goto 0037
-[0m[90m0025: $A = $high_args[0]
-[0m[90m0026: if ($A != 0x0) goto 0063
-[0m[90m0027: $A = $low_args[0]
-[0m[90m0028: if ($A != 0x2) goto 0063
-[0m[90m0029: $A = $high_args[1]
-[0m[90m0030: if ($A != 0x0) goto 0063
-[0m[90m0031: $A = $low_args[1]
-[0m[90m0032: if ($A != 0x1) goto 0063
-[0m[90m0033: $A = $high_args[2]
-[0m[90m0034: if ($A != 0x0) goto 0063
-[0m[90m0035: $A = $low_args[2]
-[0m[90m0036: if ($A == 0x0) goto 0062, else goto 0063
-[0m[90m0037: if ($A != mmap) goto 0063
-[0m[90m0038: $A = $high_args[0]
-[0m[90m0039: if ($A != 0x0) goto 0063
-[0m[90m0040: $A = $low_args[0]
-[0m[90m0041: if ($A != 0x0) goto 0063
-[0m[90m0042: $A = $high_args[1]
-[0m[90m0043: if ($A != 0x0) goto 0063
-[0m[90m0044: $A = $low_args[1]
-[0m[90m0045: if ($A != 0x1000) goto 0063
-[0m[90m0046: $A = $high_args[2]
-[0m[90m0047: if ($A != 0x0) goto 0063
-[0m[90m0048: $A = $low_args[2]
-[0m[90m0049: if ($A != 0x3) goto 0063
-[0m[90m0050: $A = $high_args[3]
-[0m[90m0051: if ($A != 0x0) goto 0063
-[0m[90m0052: $A = $low_args[3]
-[0m[90m0053: if ($A != 0x22) goto 0063
-[0m[90m0054: $A = $high_args[4]
-[0m[90m0055: if ($A != 0x0) goto 0063
-[0m[90m0056: $A = $low_args[4]
-[0m[90m0057: if ($A != 0x0) goto 0063
-[0m[90m0058: $A = $high_args[5]
-[0m[90m0059: if ($A != 0x0) goto 0063
-[0m[90m0060: $A = $low_args[5]
-[0m[90m0061: if ($A != 0x0) goto 0063
-[0m0062: return [32mALLOW[0m
+L0001: [93m$A[0m = [94m$arch[0m
+L0002: if ([93m$A[0m != [96mx86_64[0m) goto L0063
+L0003: [93m$A[0m = [94m$syscall_nr[0m
+L0004: if ([93m$A[0m >= [96m0x40000000[0m) goto L0063
+L0005: if ([93m$A[0m == [96mread[0m) goto L0062
+L0006: if ([93m$A[0m == [96mwrite[0m) goto L0062
+L0007: if ([93m$A[0m == [96mclose[0m) goto L0062
+L0008: if ([93m$A[0m == [96mmunmap[0m) goto L0062
+L0009: if ([93m$A[0m == [96msched_yield[0m) goto L0062
+L0010: if ([93m$A[0m == [96mdup[0m) goto L0062
+L0011: if ([93m$A[0m == [96mdup2[0m) goto L0062
+L0012: if ([93m$A[0m == [96mnanosleep[0m) goto L0062
+L0013: if ([93m$A[0m == [96mconnect[0m) goto L0062
+L0014: if ([93m$A[0m == [96maccept[0m) goto L0062
+[90mL0015: if ($A == recvmsg) goto 0062
+[0m[90mL0016: if ($A == bind) goto 0062
+[0m[90mL0017: if ($A == exit) goto 0062
+[0m[90mL0018: if ($A == exit_group) goto 0062
+[0m[90mL0019: if ($A != clone) goto 0024
+[0m[90mL0020: $A = $high_args[0]
+[0m[90mL0021: if ($A != 0x0) goto 0063
+[0m[90mL0022: $A = $low_args[0]
+[0m[90mL0023: if ($A == 0x10900) goto 0062, else goto 0063
+[0m[90mL0024: if ($A != socket) goto 0037
+[0m[90mL0025: $A = $high_args[0]
+[0m[90mL0026: if ($A != 0x0) goto 0063
+[0m[90mL0027: $A = $low_args[0]
+[0m[90mL0028: if ($A != 0x2) goto 0063
+[0m[90mL0029: $A = $high_args[1]
+[0m[90mL0030: if ($A != 0x0) goto 0063
+[0m[90mL0031: $A = $low_args[1]
+[0m[90mL0032: if ($A != 0x1) goto 0063
+[0m[90mL0033: $A = $high_args[2]
+[0m[90mL0034: if ($A != 0x0) goto 0063
+[0m[90mL0035: $A = $low_args[2]
+[0m[90mL0036: if ($A == 0x0) goto 0062, else goto 0063
+[0m[90mL0037: if ($A != mmap) goto 0063
+[0m[90mL0038: $A = $high_args[0]
+[0m[90mL0039: if ($A != 0x0) goto 0063
+[0m[90mL0040: $A = $low_args[0]
+[0m[90mL0041: if ($A != 0x0) goto 0063
+[0m[90mL0042: $A = $high_args[1]
+[0m[90mL0043: if ($A != 0x0) goto 0063
+[0m[90mL0044: $A = $low_args[1]
+[0m[90mL0045: if ($A != 0x1000) goto 0063
+[0m[90mL0046: $A = $high_args[2]
+[0m[90mL0047: if ($A != 0x0) goto 0063
+[0m[90mL0048: $A = $low_args[2]
+[0m[90mL0049: if ($A != 0x3) goto 0063
+[0m[90mL0050: $A = $high_args[3]
+[0m[90mL0051: if ($A != 0x0) goto 0063
+[0m[90mL0052: $A = $low_args[3]
+[0m[90mL0053: if ($A != 0x22) goto 0063
+[0m[90mL0054: $A = $high_args[4]
+[0m[90mL0055: if ($A != 0x0) goto 0063
+[0m[90mL0056: $A = $low_args[4]
+[0m[90mL0057: if ($A != 0x0) goto 0063
+[0m[90mL0058: $A = $high_args[5]
+[0m[90mL0059: if ($A != 0x0) goto 0063
+[0m[90mL0060: $A = $low_args[5]
+[0m[90mL0061: if ($A != 0x0) goto 0063
+[0mL0062: return [32mALLOW[0m
