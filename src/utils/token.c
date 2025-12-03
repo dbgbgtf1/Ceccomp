@@ -23,6 +23,9 @@ char *token_pairs[] = {
 
   [RETURN] = "return", [IF] = "if", [GOTO] = "goto", [COMMA] = ",", [ELSE] = "else",
 
+  [DOT] = ".", [NEWLINE] = "\n",
+  [USELESS0] = "Label  CODE  JT   JF      K", [USELESS1] = "----------------------------------",
+
   [LEFT_BRACKET] = "[", [RIGHT_BRACKET] = "]",
   [LEFT_PAREN] = "(", [RIGHT_PAREN] = ")",
   [EQUAL_EQUAL] = "==", [EQUAL] = "=",
@@ -30,10 +33,7 @@ char *token_pairs[] = {
   [GREATER_EQUAL] = ">=", [GREATER_THAN] = ">",
   [LESS_EQUAL] = "<=", [LESS_THAN] = "<",
   [ADD_TO] = "+=", [SUB_TO] = "-=", [MULTI_TO] = "*=", [DIVIDE_TO] = "/=", [AND_TO] = "&=",
-  [AND] = "&",
-
-  [DOT] = ".", [NEWLINE] = "\n",
-  [USELESS0] = "Label  CODE  JT   JF      K", [USELESS1] = "----------------------------------",
+  [AND] = "&", [NEGATIVE] = "-",
 
   [UNKNOWN] = "unknown", [COMMENT] = "#", [TOKEN_EOF] = "EOF",
   [IDENTIFIER] = "identifier", [LABEL_DECL] = "label_decl", [NUMBER] = "number",

@@ -103,7 +103,7 @@ scan_token ()
     }
 
   // ARCH_X86 : TOKEN_EOF
-  for (uint32_t enum_idx = (int)ARCH_X86; enum_idx < (int)USELESS1 + 1;
+  for (uint32_t enum_idx = (int)ARCH_X86; enum_idx < (int)UNKNOWN;
        enum_idx++)
     {
       if (match_string (token_pairs[enum_idx]))
