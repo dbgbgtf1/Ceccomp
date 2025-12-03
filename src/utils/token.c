@@ -25,13 +25,15 @@ char *token_pairs[] = {
 
   [LEFT_BRACKET] = "[", [RIGHT_BRACKET] = "]",
   [LEFT_PAREN] = "(", [RIGHT_PAREN] = ")",
-  [EQUAL] = "=", [EQUAL_EQUAL] = "==",
-  [BANG] = "!", [BANG_EQUAL] = "!=",
-  [GREATER_THAN] = ">", [GREATER_EQUAL] = ">=",
-  [LESS_THAN] = "<", [LESS_EQUAL] = "<=",
+  [EQUAL_EQUAL] = "==", [EQUAL] = "=",
+  [BANG_EQUAL] = "!=", [BANG] = "!",
+  [GREATER_EQUAL] = ">=", [GREATER_THAN] = ">",
+  [LESS_EQUAL] = "<=", [LESS_THAN] = "<",
   [ADD_TO] = "+=", [SUB_TO] = "-=", [MULTI_TO] = "*=", [DIVIDE_TO] = "/=", [AND_TO] = "&=",
+  [AND] = "&",
 
   [DOT] = ".", [NEWLINE] = "\n",
+  [USELESS0] = "Label  CODE  JT   JF      K", [USELESS1] = "----------------------------------",
 
   [UNKNOWN] = "unknown", [COMMENT] = "#", [TOKEN_EOF] = "EOF",
   [IDENTIFIER] = "identifier", [LABEL_DECL] = "label_decl", [NUMBER] = "number",
@@ -47,16 +49,10 @@ init_token (scanner_t *scanner, token_type type)
   token.token_len = scanner->current_char - scanner->token_start;
   token.line_nr = scanner->line_nr;
 
-  if (*token_pairs[type] != '\n')
-    {
-      debug ("At %04d: %s", token.line_nr, token_pairs[type]);
-      debug ("       | %.*s\n", token.token_len, token.token_start);
-    }
+  if (type == NEWLINE)
+    debug ("At %04d: NEWLINE", token.line_nr);
   else
-    {
-      debug ("At %04d: NEWLINE", token.line_nr);
-      debug ("%s", "       | \n");
-    }
+    debug ("At %04d: %s", token.line_nr, token_pairs[type]);
 
   return token;
 }

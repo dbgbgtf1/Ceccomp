@@ -4,9 +4,9 @@
 #include <stdio.h>
 
 int
-main ()
+main (int argc, char *argv[])
 {
-  FILE *fp = fopen ("/home/dbgbgtf/Main/work/Ceccomp/test/text/chromium", "r");
+  FILE *fp = fopen (argv[1], "r");
 
   char *source = read_source (fp);
   init_scanner (source);
