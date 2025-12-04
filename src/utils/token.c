@@ -16,7 +16,7 @@ char *token_pairs[] = {
   [KILL_PROC] = "KILL_PROCESS", [KILL] = "KILL", [ALLOW] = "ALLOW", [NOTIFY] = "NOTIFY",
   [LOG] = "LOG", [TRAP] = "TRAP", [ERRNO] = "ERRNO", [TRACE] = "TRACE",
 
-  [A] = "$A", [X] = "$X", [MEM] = "$mem",
+  [A] = "$A", [X] = "$X", [MEM] = "$mem", [ATTR_LEN] = "$scmp_data_len",
   [ATTR_SYSCALL] = "$syscall_nr", [ATTR_ARCH] = "$arch", [ATTR_LOWPC] = "$low_pc",
   [ATTR_HIGHPC] = "$high_pc", [ATTR_LOWARG] = "$low_arg", [ATTR_HIGHARG] = "$high_arg",
 
@@ -30,6 +30,7 @@ char *token_pairs[] = {
   [ADD_TO] = "+=", [SUB_TO] = "-=", [MULTI_TO] = "*=",
   [DIVIDE_TO] = "/=", [LSH_TO] = "<<=", [RSH_TO] = ">>=",
   [AND_TO] = "&=", [OR_TO] = "|=", [XOR_TO] = "^=",
+
   [EQUAL_EQUAL] = "==", [EQUAL] = "=",
   [BANG_EQUAL] = "!=", [BANG] = "!",
   [GREATER_EQUAL] = ">=", [GREATER_THAN] = ">",
@@ -38,6 +39,7 @@ char *token_pairs[] = {
 
   [UNKNOWN] = "unknown", [COMMENT] = "#", [TOKEN_EOF] = "EOF",
   [IDENTIFIER] = "identifier", [LABEL_DECL] = "label_decl", [NUMBER] = "number",
+  // label_decl ::= IDENTIFIER + ":"
 };
 // clang-format on
 
