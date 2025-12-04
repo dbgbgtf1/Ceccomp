@@ -34,8 +34,7 @@ creat_bucket (char *key, uint16_t len, uint16_t line_nr)
   bucket_t *bucket = NULL;
   bucket = reallocate (bucket, sizeof (bucket_t) + len + 1);
 
-  memcpy (bucket->string, key, len);
-  bucket->string[len] = '\0';
+  bucket->string = key;
 
   bucket->line_nr = line_nr;
   bucket->next = NULL;

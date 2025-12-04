@@ -11,7 +11,7 @@ struct bucket_t
   bucket_t *next;
   uint16_t line_nr;
   uint16_t len;
-  char string[];
+  char *string;
 };
 
 typedef struct
