@@ -1,5 +1,4 @@
 #include "token.h"
-#include "log/logger.h"
 #include "scanner.h"
 #include <stddef.h>
 
@@ -18,8 +17,8 @@ char *token_pairs[] = {
   [LOG] = "LOG", [TRAP] = "TRAP", [ERRNO] = "ERRNO", [TRACE] = "TRACE",
 
   [A] = "$A", [X] = "$X", [MEM] = "$mem",
-  [VAR_SYSCALL] = "$syscall_nr", [VAR_ARCH] = "$arch", [VAR_LOWPC] = "$low_pc",
-  [VAR_HIGHPC] = "$high_pc", [VAR_LOWARG] = "$low_arg", [VAR_HIGHARG] = "$high_arg",
+  [ATTR_SYSCALL] = "$syscall_nr", [ATTR_ARCH] = "$arch", [ATTR_LOWPC] = "$low_pc",
+  [ATTR_HIGHPC] = "$high_pc", [ATTR_LOWARG] = "$low_arg", [ATTR_HIGHARG] = "$high_arg",
 
   [RETURN] = "return", [IF] = "if", [GOTO] = "goto", [COMMA] = ",", [ELSE] = "else",
 
@@ -28,11 +27,13 @@ char *token_pairs[] = {
 
   [LEFT_BRACKET] = "[", [RIGHT_BRACKET] = "]",
   [LEFT_PAREN] = "(", [RIGHT_PAREN] = ")",
+  [ADD_TO] = "+=", [SUB_TO] = "-=", [MULTI_TO] = "*=",
+  [DIVIDE_TO] = "/=", [LSH_TO] = "<<=", [RSH_TO] = ">>=",
+  [AND_TO] = "&=", [OR_TO] = "|=", [XOR_TO] = "^=",
   [EQUAL_EQUAL] = "==", [EQUAL] = "=",
   [BANG_EQUAL] = "!=", [BANG] = "!",
   [GREATER_EQUAL] = ">=", [GREATER_THAN] = ">",
   [LESS_EQUAL] = "<=", [LESS_THAN] = "<",
-  [ADD_TO] = "+=", [SUB_TO] = "-=", [MULTI_TO] = "*=", [DIVIDE_TO] = "/=", [AND_TO] = "&=",
   [AND] = "&", [NEGATIVE] = "-",
 
   [UNKNOWN] = "unknown", [COMMENT] = "#", [TOKEN_EOF] = "EOF",
@@ -49,10 +50,10 @@ init_token (scanner_t *scanner, token_type type)
   token.token_len = scanner->current_char - scanner->token_start;
   token.line_nr = scanner->line_nr;
 
-  if (type == NEWLINE)
-    debug ("At %04d: NEWLINE", token.line_nr);
-  else
-    debug ("At %04d: %s", token.line_nr, token_pairs[type]);
+  // if (type == NEWLINE)
+  //   debug ("At %04d: NEWLINE", token.line_nr);
+  // else
+  //   debug ("At %04d: %s", token.line_nr, token_pairs[type]);
 
   return token;
 }
