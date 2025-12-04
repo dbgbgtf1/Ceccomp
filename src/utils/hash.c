@@ -8,6 +8,8 @@
 #include <stdint.h>
 #include <string.h>
 
+table_t table;
+
 static uint32_t
 hashString (key_t key_tmp)
 {
@@ -21,11 +23,11 @@ hashString (key_t key_tmp)
 }
 
 static bucket_t *
-hash_bucket (table_t *table, key_t key_tmp)
+hash_bucket (key_t key_tmp)
 {
   uint32_t hash = hashString (key_tmp);
-  uint32_t idx = hash % table->capacity;
-  return &table->bucket[idx];
+  uint32_t idx = hash % table.capacity;
+  return &table.bucket[idx];
 }
 
 static bucket_t *
@@ -35,84 +37,87 @@ creat_bucket (key_t key_tmp, uint16_t line_nr)
   bucket = reallocate (bucket, sizeof (bucket_t) + key_tmp.len + 1);
 
   bucket->key_tmp = key_tmp;
-
   bucket->line_nr = line_nr;
   bucket->next = NULL;
   return bucket;
 }
 
 void
-insert_key (table_t *table, key_t key_tmp, uint16_t line_nr)
+insert_key (key_t key_tmp, uint16_t line_nr)
 {
-  bucket_t *bucket = hash_bucket (table, key_tmp);
+  bucket_t *bucket = hash_bucket (key_tmp);
 
   bucket_t *bucket_new = creat_bucket (key_tmp, line_nr);
   bucket_new->next = bucket->next;
   bucket->next = bucket_new;
 
-  table->count++;
+  table.count++;
 }
 
 static void
-free_next_bucket (table_t *table, bucket_t *bucket)
+free_next_bucket (bucket_t *bucket)
 {
   bucket_t *bucket_next = bucket->next->next;
   reallocate (bucket->next, 0);
   bucket->next = bucket_next;
-  table->count--;
+  table.count--;
 }
 
 void
-free_key (table_t *table, key_t key_tmp)
+free_key (key_t key_tmp)
 {
-  bucket_t *bucket = hash_bucket (table, key_tmp);
+  bucket_t *bucket = hash_bucket (key_tmp);
 
   while (bucket->next)
     {
       if (strncmp (bucket->next->key_tmp.string, key_tmp.string, key_tmp.len))
         bucket = bucket->next;
-      free_next_bucket (table, bucket);
-      return;
+      else
+        {
+          free_next_bucket (bucket);
+          return;
+        }
     }
 
   error (CANNOT_FIND_VALUE, key_tmp.len, key_tmp.string);
 }
 
 uint16_t
-find_key (table_t *table, key_t key_tmp)
+find_key (key_t key_tmp)
 {
-  bucket_t *bucket = hash_bucket (table, key_tmp);
+  bucket_t *bucket = hash_bucket (key_tmp);
 
   while (bucket->next)
     {
       if (strncmp (bucket->next->key_tmp.string, key_tmp.string, key_tmp.len))
         bucket = bucket->next;
-      return bucket->next->line_nr;
+      else
+        return bucket->next->line_nr;
     }
 
   error (CANNOT_FIND_VALUE, key_tmp.len, key_tmp.string);
 }
 
 void
-init_table (table_t *table)
+init_table ()
 {
-  table->count = 0;
-  table->capacity = 0x100;
-  table->bucket = reallocate (table, sizeof (bucket_t) * table->capacity);
-  memset (table->bucket, '\0', sizeof (bucket_t) * table->capacity);
+  table.count = 0;
+  table.capacity = 0x100;
+  table.bucket = reallocate (&table, sizeof (bucket_t) * table.capacity);
+  memset (table.bucket, '\0', sizeof (bucket_t) * table.capacity);
 }
 
 void
-free_table (table_t *table)
+free_table ()
 {
-  while (table->capacity--)
+  while (table.capacity--)
     {
-      bucket_t *bucket = &table->bucket[table->capacity];
+      bucket_t *bucket = &table.bucket[table.capacity];
       while (bucket->next)
-        free_next_bucket (table, bucket);
+        free_next_bucket (bucket);
     }
 
-  assert (table->count == 0 && table->capacity == 0);
+  assert (table.count == 0 && table.capacity == 0);
 
-  table->bucket = reallocate (table, sizeof (bucket_t) * table->capacity);
+  table.bucket = reallocate (&table, sizeof (bucket_t) * table.capacity);
 }

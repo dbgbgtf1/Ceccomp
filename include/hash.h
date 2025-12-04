@@ -26,14 +26,14 @@ typedef struct
   bucket_t *bucket;
 } table_t;
 
-extern void insert_key (table_t *table, key_t key_tmp, uint16_t line_nr);
+extern void insert_key (key_t key_tmp, uint16_t line_nr);
 
-extern void free_key (table_t *table, key_t key_tmp);
+extern void free_key (key_t key_tmp);
 
-extern uint16_t find_key (table_t *table, key_t key_tmp);
+extern uint16_t find_key (key_t key_tmp);
 
-extern void init_table (table_t *table);
+extern void init_table ();
 
-extern void free_table (table_t *table);
+extern void free_table ();
 
 #endif
