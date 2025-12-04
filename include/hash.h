@@ -6,12 +6,17 @@
 
 typedef struct bucket_t bucket_t;
 
+typedef struct
+{
+  uint16_t len;
+  char *string;
+} key_t;
+
 struct bucket_t
 {
   bucket_t *next;
   uint16_t line_nr;
-  uint16_t len;
-  char *string;
+  key_t key_tmp;
 };
 
 typedef struct
@@ -21,13 +26,11 @@ typedef struct
   bucket_t *bucket;
 } table_t;
 
-// clang-format off
-extern void insert_key (table_t *table, char *key, uint16_t len, uint16_t line_nr);
-// clang-format on
+extern void insert_key (table_t *table, key_t key_tmp, uint16_t line_nr);
 
-extern void free_key (table_t *table, char *key, uint16_t len);
+extern void free_key (table_t *table, key_t key_tmp);
 
-extern uint16_t find_key (table_t *table, char *key, uint16_t len);
+extern uint16_t find_key (table_t *table, key_t key_tmp);
 
 extern void init_table (table_t *table);
 
