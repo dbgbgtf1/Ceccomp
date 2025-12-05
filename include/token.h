@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 // clang-format off
+// many thing rely on the enum order, careful when modify this
 typedef enum
 {
   ARCH_X86, ARCH_I686, ARCH_X86_64,
@@ -16,7 +17,7 @@ typedef enum
   ARCH_RISCV64,
 
   KILL_PROC, KILL, ALLOW, NOTIFY,
-  LOG, TRAP, ERRNO, TRACE,
+  LOG, TRACE, TRAP, ERRNO,
 
   A, X, MEM, ATTR_LEN,
   ATTR_SYSCALL, ATTR_ARCH, ATTR_LOWPC, ATTR_HIGHPC,
@@ -34,10 +35,10 @@ typedef enum
   AND_TO, OR_TO, XOR_TO,
 
   EQUAL_EQUAL, EQUAL,
-  BANG_EQUAL, BANG,
+  BANG_EQUAL, AND,
   GREATER_EQUAL, GREATER_THAN,
   LESS_EQUAL, LESS_THAN,
-  AND, NEGATIVE,
+  NEGATIVE, BANG,
 
   UNKNOWN, COMMENT, TOKEN_EOF,
   IDENTIFIER, LABEL_DECL, NUMBER,
@@ -54,6 +55,7 @@ struct token_t
   uint16_t line_nr;
 
   uint32_t data;
+  // data is for NUMBER
 };
 
 extern char *token_pairs[];

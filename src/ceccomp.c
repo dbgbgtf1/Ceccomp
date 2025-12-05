@@ -1,6 +1,8 @@
+#include "debug_method.h"
+#include "hash.h"
+#include "parser.h"
 #include "readsource.h"
 #include "scanner.h"
-#include "token.h"
 #include <stdio.h>
 
 int
@@ -10,8 +12,16 @@ main (int argc, char *argv[])
 
   char *source = read_source (fp);
   init_scanner (source);
-  token_t token;
+  init_table ();
+
+  state_ment_t state_ment;
+  init_parser ();
   do
-    token = scan_token ();
-  while (token.type != TOKEN_EOF && token.type != UNKNOWN);
+    {
+      parse_line (&state_ment);
+      print_statement (&state_ment);
+    }
+  while (state_ment.type != EOF_LINE);
+
+  free_table ();
 }

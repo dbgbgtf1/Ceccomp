@@ -1,5 +1,4 @@
 #include "vector.h"
-#include "log/error.h"
 #include "log/logger.h"
 #include <errno.h>
 #include <stddef.h>

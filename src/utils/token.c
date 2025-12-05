@@ -14,7 +14,7 @@ char *token_pairs[] = {
   [ARCH_RISCV64] = "riscv64",
 
   [KILL_PROC] = "KILL_PROCESS", [KILL] = "KILL", [ALLOW] = "ALLOW", [NOTIFY] = "NOTIFY",
-  [LOG] = "LOG", [TRAP] = "TRAP", [ERRNO] = "ERRNO", [TRACE] = "TRACE",
+  [LOG] = "LOG", [TRACE] = "TRACE", [TRAP] = "TRAP", [ERRNO] = "ERRNO",
 
   [A] = "$A", [X] = "$X", [MEM] = "$mem", [ATTR_LEN] = "$scmp_data_len",
   [ATTR_SYSCALL] = "$syscall_nr", [ATTR_ARCH] = "$arch", [ATTR_LOWPC] = "$low_pc",
@@ -32,10 +32,10 @@ char *token_pairs[] = {
   [AND_TO] = "&=", [OR_TO] = "|=", [XOR_TO] = "^=",
 
   [EQUAL_EQUAL] = "==", [EQUAL] = "=",
-  [BANG_EQUAL] = "!=", [BANG] = "!",
+  [BANG_EQUAL] = "!=", [AND] = "&",
   [GREATER_EQUAL] = ">=", [GREATER_THAN] = ">",
   [LESS_EQUAL] = "<=", [LESS_THAN] = "<",
-  [AND] = "&", [NEGATIVE] = "-",
+  [NEGATIVE] = "-", [BANG] = "!",
 
   [UNKNOWN] = "unknown", [COMMENT] = "#", [TOKEN_EOF] = "EOF",
   [IDENTIFIER] = "identifier", [LABEL_DECL] = "label_decl", [NUMBER] = "number",
@@ -51,11 +51,6 @@ init_token (scanner_t *scanner, token_type type)
   token.token_start = scanner->token_start;
   token.token_len = scanner->current_char - scanner->token_start;
   token.line_nr = scanner->line_nr;
-
-  // if (type == NEWLINE)
-  //   debug ("At %04d: NEWLINE", token.line_nr);
-  // else
-  //   debug ("At %04d: %s", token.line_nr, token_pairs[type]);
 
   return token;
 }
