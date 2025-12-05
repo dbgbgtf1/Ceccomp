@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 table_t table;
@@ -103,21 +104,21 @@ init_table ()
 {
   table.count = 0;
   table.capacity = 0x100;
-  table.bucket = reallocate (&table, sizeof (bucket_t) * table.capacity);
+  table.bucket = reallocate (NULL, sizeof (bucket_t) * table.capacity);
   memset (table.bucket, '\0', sizeof (bucket_t) * table.capacity);
 }
 
 void
 free_table ()
 {
-  while (table.capacity--)
+  while (table.capacity)
     {
-      bucket_t *bucket = &table.bucket[table.capacity];
+      bucket_t *bucket = &table.bucket[--table.capacity];
       while (bucket->next)
         free_next_bucket (bucket);
     }
 
   assert (table.count == 0 && table.capacity == 0);
 
-  table.bucket = reallocate (&table, sizeof (bucket_t) * table.capacity);
+  reallocate (table.bucket, sizeof (bucket_t) * table.capacity);
 }
