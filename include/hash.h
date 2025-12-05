@@ -1,16 +1,13 @@
 #ifndef HASH
 #define HASH
 
+#include "main.h"
 #include <stddef.h>
 #include <stdint.h>
 
 typedef struct bucket_t bucket_t;
 
-typedef struct
-{
-  uint16_t len;
-  char *string;
-} hkey_t;
+typedef string_t hkey_t;
 
 struct bucket_t
 {
