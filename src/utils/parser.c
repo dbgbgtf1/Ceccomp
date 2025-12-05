@@ -129,8 +129,8 @@ ret_obj ()
 
   if (match_from_to (TRACE, ERRNO))
     {
-      obj->data = paren_num ();
       obj->type = parser.current.type;
+      obj->data = paren_num ();
     }
   else if (match_from_to (KILL_PROC, LOG) || match (A))
     obj->type = parser.current.type;
@@ -245,11 +245,11 @@ jump_line ()
 static void
 left (assign_line_t *assign_line)
 {
-  if (match (MEM))
-    assign_line->left_var.data = bracket_num ();
-
   assign_line->left_var.type = parser.current.type;
   // expression checked for us, it must be A X MEM here
+
+  if (parser.current.type == MEM)
+    assign_line->left_var.data = bracket_num ();
 }
 
 static void
@@ -309,9 +309,9 @@ expression ()
 
   if (match (RETURN))
     return_line ();
-  else if (match (IF) || match (GOTO))
+  else if (match (IF) || peek (GOTO))
     jump_line ();
-  else if (peek_from_to (A, MEM))
+  else if (match_from_to (A, MEM))
     assign_line ();
   else
     error_at (parser.next, UNEXPECT_TOKEN);

@@ -59,7 +59,7 @@ print_statement (state_ment_t *state_ment)
 
       SPRINTF (print, "return %s", token_pairs[return_line.ret_obj.type]);
       if (return_line.ret_obj.data)
-        SPRINTF (print, "(% d)", return_line.ret_obj.data);
+        SPRINTF (print, "(%d)", return_line.ret_obj.data);
       break;
     case EMPTY_LINE:
       SPRINTF (print, "empty_line: ");
