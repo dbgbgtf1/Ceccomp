@@ -6,13 +6,12 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <string.h>
 
 table_t table;
 
 static uint32_t
-hashString (key_t key_tmp)
+hashString (hkey_t key_tmp)
 {
   uint32_t hash = 2166136261u;
   for (int i = 0; i < key_tmp.len; i++)
@@ -24,7 +23,7 @@ hashString (key_t key_tmp)
 }
 
 static bucket_t *
-hash_bucket (key_t key_tmp)
+hash_bucket (hkey_t key_tmp)
 {
   uint32_t hash = hashString (key_tmp);
   uint32_t idx = hash % table.capacity;
@@ -32,7 +31,7 @@ hash_bucket (key_t key_tmp)
 }
 
 static bucket_t *
-creat_bucket (key_t key_tmp, uint16_t line_nr)
+creat_bucket (hkey_t key_tmp, uint16_t line_nr)
 {
   bucket_t *bucket = NULL;
   bucket = reallocate (bucket, sizeof (bucket_t) + key_tmp.len + 1);
@@ -44,7 +43,7 @@ creat_bucket (key_t key_tmp, uint16_t line_nr)
 }
 
 void
-insert_key (key_t key_tmp, uint16_t line_nr)
+insert_key (hkey_t key_tmp, uint16_t line_nr)
 {
   bucket_t *bucket = hash_bucket (key_tmp);
 
@@ -65,7 +64,7 @@ free_next_bucket (bucket_t *bucket)
 }
 
 void
-free_key (key_t key_tmp)
+free_key (hkey_t key_tmp)
 {
   bucket_t *bucket = hash_bucket (key_tmp);
 
@@ -84,7 +83,7 @@ free_key (key_t key_tmp)
 }
 
 uint16_t
-find_key (key_t key_tmp)
+find_key (hkey_t key_tmp)
 {
   bucket_t *bucket = hash_bucket (key_tmp);
 

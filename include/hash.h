@@ -10,13 +10,13 @@ typedef struct
 {
   uint16_t len;
   char *string;
-} key_t;
+} hkey_t;
 
 struct bucket_t
 {
   bucket_t *next;
   uint16_t line_nr;
-  key_t key_tmp;
+  hkey_t key_tmp;
 };
 
 typedef struct
@@ -26,11 +26,11 @@ typedef struct
   bucket_t *bucket;
 } table_t;
 
-extern void insert_key (key_t key_tmp, uint16_t line_nr);
+extern void insert_key (hkey_t key_tmp, uint16_t line_nr);
 
-extern void free_key (key_t key_tmp);
+extern void free_key (hkey_t key_tmp);
 
-extern uint16_t find_key (key_t key_tmp);
+extern uint16_t find_key (hkey_t key_tmp);
 
 extern void init_table ();
 
