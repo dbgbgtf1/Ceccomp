@@ -2,6 +2,7 @@
 #include "log/logger.h"
 #include "parser.h"
 #include "token.h"
+#include <stdint.h>
 #include <stdio.h>
 
 void
@@ -69,12 +70,15 @@ print_statement (state_ment_t *state_ment)
       break;
     case ERROR_LINE:
       SPRINTF (print, "%s\n", error_line.error_msg);
-      SPRINTF (print, "%*.s", error_line.offset, "^");
+      uint16_t line_len = error_line.line_end - error_line.line_start;
+      uint16_t err_len = error_line.error_start - error_line.line_start;
+      SPRINTF (print, "%.*s\n", line_len, error_line.line_start);
+      SPRINTF (print, "%*s", err_len + 1, "^");
       break;
     default:
       SPRINTF (print, "impossible?");
       break;
     }
 
-  debug ("%s", buf);
+  printf ("%s\n", buf);
 }

@@ -72,9 +72,10 @@ typedef void *eof_line_t;
 
 typedef struct
 {
-  uint16_t offset;
+  char *line_start;
+  char *line_end;
+  char *error_start;
   char *error_msg;
-  token_t error_token;
 } error_line_t;
 
 typedef enum
@@ -100,7 +101,7 @@ typedef struct
     empty_line_t empty_line;
     eof_line_t eof_line;
     error_line_t error_line;
-  } ;
+  };
 } state_ment_t;
 
 extern void init_parser ();

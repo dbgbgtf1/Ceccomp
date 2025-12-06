@@ -71,13 +71,14 @@ match_from_to (token_type expected_start, token_type expected_end)
 static void
 error_at (token_t token, char *err_msg)
 {
-  local->type = ERROR_LINE;
-  local->error_line.error_token = token;
-  local->error_line.offset = token.token_start - parser.line_start;
-  local->error_line.error_msg = err_msg;
-
   while (!(match (NEWLINE) || peek (TOKEN_EOF)))
     advance ();
+
+  local->type = ERROR_LINE;
+  local->error_line.line_start = parser.line_start;
+  local->error_line.line_end = parser.current.token_start;
+  local->error_line.error_start = token.token_start;
+  local->error_line.error_msg = err_msg;
   longjmp (g_env, 1);
 }
 
