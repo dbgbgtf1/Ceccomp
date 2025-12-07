@@ -26,4 +26,20 @@
 #define EXPECT_COMMA _ ("Expect ','")
 #define EXPECT_NEWLINE _ ("Expect '\n'")
 
+// resolver
+#define RIGHT_SHOULD_BE_A _ ("Right operand should be '$A'")
+#define RIGHT_CAN_NOT_BE_A _ ("Right operand can not be '$A'")
+#define RIGHT_CAN_NOT_BE_X _ ("Right operand can not be '$X'")
+
+#define RIGHT_SHOULD_BE_A_OR_X _ ("Right operand should be '$A' or '$X'")
+#define RIGHT_SHOULD_BE_X_OR_NUM _ ("Right operand should be '$X' or num")
+
+#define OPERATOR_SHOULD_BE_EQUAL _ ("Operator should be '='")
+
+#define LEFT_SHOULD_BE_A _ ("Left operand should be A")
+
+#define ARGS_IDX_OUT_OF_RANGE _ ("Args index out of range")
+#define MEM_IDX_OUT_OF_RANGE _ ("Mem index out of range")
+#define UNINITIALIZED_MEM _ ("Uninitialized mem")
+
 #endif
