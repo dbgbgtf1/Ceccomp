@@ -3,14 +3,9 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include "parse_args.h"
 
 #define FORMAT "L%04d"
-typedef enum
-{
-  ALWAYS = 0,
-  AUTO = 1,
-  NEVER = 2
-} color_mode;
 
 extern bool color_enable;
 extern bool log_color_enable;
