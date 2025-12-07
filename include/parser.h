@@ -9,8 +9,6 @@
 
 typedef hkey_t label_t;
 
-#define LEN_VAL 0x40
-// $scmp_data_len will be transfer to 0x40 as NUMBER
 typedef struct
 {
   token_type type;

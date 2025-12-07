@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-scanner_t scanner;
+static scanner_t scanner;
 
 #define INIT_TOKEN(type) init_token (&scanner, type)
 #define INIT_TOKEN_DATA(type, data) init_token_data (&scanner, type, data)

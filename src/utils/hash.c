@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <string.h>
 
-table_t table;
+static table_t table;
 
 static uint32_t
 hashString (hkey_t key_tmp)

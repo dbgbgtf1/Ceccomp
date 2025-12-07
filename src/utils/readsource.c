@@ -10,9 +10,9 @@
 
 #define GROW_LEN 0x4000
 
-char *source = NULL;
-uint32_t current = 0;
-uint32_t map_len = 0;
+static char *source = NULL;
+static uint32_t current = 0;
+static uint32_t map_len = 0;
 
 static void
 clear_color (char *text)

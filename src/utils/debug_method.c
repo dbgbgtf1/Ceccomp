@@ -16,8 +16,8 @@ print_token (token_t *token)
 
 #define SPRINTF_CAT(...) print += sprintf (__VA_ARGS__)
 
-char buf[0x400];
-char *print;
+static char buf[0x400];
+static char *print;
 
 void
 print_statement (state_ment_t *state_ment)

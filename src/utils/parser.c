@@ -17,9 +17,9 @@ typedef struct
   token_t next;
 } parser_t;
 
-parser_t parser = { .line_nr = 0 };
-state_ment_t *local;
-jmp_buf g_env;
+static parser_t parser = { .line_nr = 0 };
+static state_ment_t *local;
+static jmp_buf g_env;
 
 static void
 advance ()
@@ -39,9 +39,9 @@ peek (token_type expected)
 }
 
 static bool
-peek_from_to (token_type expected_start, token_type expected_end)
+peek_from_to (token_type from, token_type to)
 {
-  if (parser.next.type < expected_start || parser.next.type > expected_end)
+  if (parser.next.type < from || parser.next.type > to)
     return false;
 
   return true;
@@ -255,17 +255,12 @@ left (assign_line_t *assign_line)
 static void
 right (assign_line_t *assign_line)
 {
-  if (match (A) || match (X) || match_from_to (ATTR_SYSCALL, ATTR_HIGHPC))
+  if (match (A) || match (X) || match_from_to (ATTR_LEN, ATTR_HIGHPC))
     assign_line->right_var.type = parser.current.type;
   else if (match (MEM) || match (ATTR_LOWARG) || match (ATTR_HIGHARG))
     {
       assign_line->right_var.type = parser.current.type;
       assign_line->right_var.data = bracket_num ();
-    }
-  else if (match (ATTR_LEN))
-    {
-      assign_line->right_var.type = NUMBER;
-      assign_line->right_var.data = LEN_VAL;
     }
   else if (match (NUMBER))
     {
