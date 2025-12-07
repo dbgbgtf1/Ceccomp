@@ -18,7 +18,7 @@ char *token_pairs[] = {
 
   [A] = "$A", [X] = "$X", [MEM] = "$mem", [ATTR_LEN] = "$scmp_data_len",
   [ATTR_SYSCALL] = "$syscall_nr", [ATTR_ARCH] = "$arch", [ATTR_LOWPC] = "$low_pc",
-  [ATTR_HIGHPC] = "$high_pc", [ATTR_LOWARG] = "$low_arg", [ATTR_HIGHARG] = "$high_arg",
+  [ATTR_HIGHPC] = "$high_pc", [ATTR_LOWARG] = "$low_args", [ATTR_HIGHARG] = "$high_args",
 
   [RETURN] = "return", [IF] = "if", [GOTO] = "goto", [COMMA] = ",", [ELSE] = "else",
 
