@@ -44,9 +44,9 @@ is_alnum (char c)
 }
 
 static char
-peek (uint8_t len)
+peek ()
 {
-  return scanner.current_char[len];
+  return scanner.current_char[0];
 }
 
 static void
@@ -56,12 +56,22 @@ advance (uint16_t advance_len)
 }
 
 static bool
-match_string (char *expected)
+match (char expected)
 {
-  uint16_t compare_len = strlen (expected);
-  if (strncmp (expected, scanner.current_char, compare_len))
+  if (peek () != expected)
     return false;
-  advance (compare_len);
+
+  advance (1);
+  return true;
+}
+
+static bool
+match_string (char *expected, uint16_t cmp_len)
+{
+  if (strncmp (expected, scanner.current_char, cmp_len))
+    return false;
+
+  advance (cmp_len);
   return true;
 }
 
@@ -77,53 +87,50 @@ token_t
 scan_token ()
 {
   // spaces
-  while (peek (0) == ' ')
-    advance (1);
+  if (match (' '))
+    while (match (' '))
+      ;
+
+  // COMMENT
+  if (match (*token_pairs[COMMENT]))
+    while (peek () != '\n' && peek () != '\0')
+      advance (1);
 
   // sync
   scanner.token_start = scanner.current_char;
 
   // EOF
-  if (peek (0) == '\0')
+  if (peek () == '\0')
     return INIT_TOKEN (TOKEN_EOF);
 
-  // COMMENT
-  if (match_string (token_pairs[COMMENT]))
-    {
-      while (peek (0) != '\n' && peek (0) != '\0')
-        advance (1);
-      return INIT_TOKEN (COMMENT);
-    }
-
   // NEWLINE
-  if (match_string (token_pairs[NEWLINE]))
+  if (match (*token_pairs[NEWLINE]))
     {
       scanner.line_nr++;
       return INIT_TOKEN (NEWLINE);
     }
 
   // ARCH_X86 : TOKEN_EOF
-  for (uint32_t enum_idx = (int)ARCH_X86; enum_idx < (int)UNKNOWN;
-       enum_idx++)
+  for (uint32_t enum_idx = (int)ARCH_X86; enum_idx < (int)UNKNOWN; enum_idx++)
     {
-      if (match_string (token_pairs[enum_idx]))
+      if (match_string (token_pairs[enum_idx], strlen (token_pairs[enum_idx])))
         return INIT_TOKEN (enum_idx);
     }
 
   // LABEL_DECL : IDENTIFIER
   // IDENTIFIER include SYSCALL and label
   // We don't want hash the SYSCALL, so leave it later
-  if (is_alpha (peek (0)))
+  if (is_alpha (peek ()))
     {
       do
         advance (1);
-      while (is_alnum (peek (0)));
+      while (is_alnum (peek ()));
 
-      return INIT_TOKEN (match_string (":") ? LABEL_DECL : IDENTIFIER);
+      return INIT_TOKEN (match (':') ? LABEL_DECL : IDENTIFIER);
     }
 
   // NUMBER
-  if (isdigit (peek (0)))
+  if (isdigit (peek ()))
     {
       char *end;
       errno = 0;
