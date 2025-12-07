@@ -72,8 +72,6 @@ typedef void *eof_line_t;
 
 typedef struct
 {
-  char *line_start;
-  char *line_end;
   char *error_start;
   char *error_msg;
 } error_line_t;
@@ -92,6 +90,8 @@ typedef struct
 {
   uint16_t line_nr;
   expr_type type;
+  char *line_start;
+  char *line_end;
 
   union
   {

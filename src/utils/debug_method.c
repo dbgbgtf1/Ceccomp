@@ -14,7 +14,7 @@ print_token (token_t *token)
     debug ("At %04d: %s", token->line_nr, token_pairs[token->type]);
 }
 
-#define SPRINTF(...) print += sprintf (__VA_ARGS__)
+#define SPRINTF_CAT(...) print += sprintf (__VA_ARGS__)
 
 char buf[0x400];
 char *print;
@@ -29,56 +29,58 @@ print_statement (state_ment_t *state_ment)
   return_line_t return_line = state_ment->return_line;
   error_line_t error_line = state_ment->error_line;
 
-  SPRINTF (print, "At %04d: ", state_ment->line_nr);
+  SPRINTF_CAT (print, "At %04d: ", state_ment->line_nr);
   switch (state_ment->type)
     {
     case ASSIGN_LINE:
-      SPRINTF (print, "assign_line: ");
-      SPRINTF (print, "%s %s %s;", token_pairs[assign_line.left_var.type],
+      SPRINTF_CAT (print, "assign_line: ");
+      SPRINTF_CAT (print, "%s %s %s;", token_pairs[assign_line.left_var.type],
                token_pairs[assign_line.operator],
                token_pairs[assign_line.right_var.type]);
       break;
     case JUMP_LINE:
-      SPRINTF (print, "jump_line: ");
+      SPRINTF_CAT (print, "jump_line: ");
 
       if (jump_line.if_condition)
         {
-          SPRINTF (print, "if ");
+          SPRINTF_CAT (print, "if ");
           if (jump_line.if_bang)
-            SPRINTF (print, "!");
-          SPRINTF (print, "(A %s %s) ", token_pairs[jump_line.cond.comparator],
+            SPRINTF_CAT (print, "!");
+          SPRINTF_CAT (print, "(A %s %s) ", token_pairs[jump_line.cond.comparator],
                    token_pairs[jump_line.cond.cmpobj.type]);
         }
-      SPRINTF (print, "goto %.*s", jump_line.jt.len, jump_line.jt.string);
+      SPRINTF_CAT (print, "goto %.*s", jump_line.jt.len, jump_line.jt.string);
       if (jump_line.jf.string)
-        SPRINTF (print, ", else goto %.*s", jump_line.jf.len,
+        SPRINTF_CAT (print, ", else goto %.*s", jump_line.jf.len,
                  jump_line.jf.string);
 
       break;
     case RETURN_LINE:
-      SPRINTF (print, "return_line: ");
+      SPRINTF_CAT (print, "return_line: ");
 
-      SPRINTF (print, "return %s", token_pairs[return_line.ret_obj.type]);
+      SPRINTF_CAT (print, "return %s", token_pairs[return_line.ret_obj.type]);
       if (return_line.ret_obj.data)
-        SPRINTF (print, "(%d)", return_line.ret_obj.data);
+        SPRINTF_CAT (print, "(%d)", return_line.ret_obj.data);
       break;
     case EMPTY_LINE:
-      SPRINTF (print, "empty_line: ");
+      SPRINTF_CAT (print, "empty_line: ");
       break;
     case EOF_LINE:
-      SPRINTF (print, "eof_line: ");
+      SPRINTF_CAT (print, "eof_line: ");
       break;
     case ERROR_LINE:
-      SPRINTF (print, "%s\n", error_line.error_msg);
-      uint16_t line_len = error_line.line_end - error_line.line_start;
-      uint16_t err_len = error_line.error_start - error_line.line_start;
-      SPRINTF (print, "%.*s\n", line_len, error_line.line_start);
-      SPRINTF (print, "%*s", err_len + 1, "^");
+      SPRINTF_CAT (print, "%s\n", error_line.error_msg);
+      uint16_t line_len = state_ment->line_end - state_ment->line_start;
+      uint16_t err_len = error_line.error_start - state_ment->line_start;
+      SPRINTF_CAT (print, "%.*s\n", line_len, state_ment->line_start);
+      SPRINTF_CAT (print, "%*s", err_len + 1, "^");
       break;
     default:
-      SPRINTF (print, "impossible?");
+      SPRINTF_CAT (print, "impossible?");
       break;
     }
 
   printf ("%s\n", buf);
 }
+
+#undef SPRINTF_CAT

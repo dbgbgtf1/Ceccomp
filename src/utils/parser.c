@@ -11,7 +11,6 @@
 typedef struct
 {
   uint16_t line_nr;
-  char *line_start;
 
   token_t previous;
   token_t current;
@@ -71,12 +70,12 @@ match_from_to (token_type expected_start, token_type expected_end)
 static void
 error_at (token_t token, char *err_msg)
 {
+  // sync to the nextline
   while (!(match (NEWLINE) || peek (TOKEN_EOF)))
     advance ();
 
   local->type = ERROR_LINE;
-  local->error_line.line_start = parser.line_start;
-  local->error_line.line_end = parser.current.token_start;
+  local->line_end = parser.current.token_start;
   local->error_line.error_start = token.token_start;
   local->error_line.error_msg = err_msg;
   longjmp (g_env, 1);
@@ -317,9 +316,10 @@ expression ()
   else
     error_at (parser.next, UNEXPECT_TOKEN);
 
-  if (match (NEWLINE) || peek (TOKEN_EOF))
-    return;
-  error_at (parser.next, UNEXPECT_TOKEN);
+  if (!match (NEWLINE) && !peek (TOKEN_EOF))
+    error_at (parser.next, UNEXPECT_TOKEN);
+
+  local->line_end = parser.current.token_start;
 }
 
 static void
@@ -355,8 +355,8 @@ parse_line (state_ment_t *state_ment)
   memset (local, '\0', sizeof (state_ment_t));
 
   parser.line_nr++;
-  parser.line_start = parser.next.token_start;
-  state_ment->line_nr = parser.line_nr;
+  local->line_start = parser.next.token_start;
+  local->line_nr = parser.line_nr;
 
   if (setjmp (g_env) == 1)
     return;
