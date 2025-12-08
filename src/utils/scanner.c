@@ -15,28 +15,10 @@ static scanner_t scanner;
 #define INIT_TOKEN(type) init_token (&scanner, type)
 #define INIT_TOKEN_DATA(type, data) init_token_data (&scanner, type, data)
 
-static bool
-is_alpha (char c)
-{
-  if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
-    return true;
-  return false;
-}
-
 static inline bool
-is_digit (char c)
+isidentifier (char c)
 {
-  if (c >= '0' && c <= '9')
-    return true;
-  return false;
-}
-
-static inline bool
-is_alnum (char c)
-{
-  if (is_alpha (c))
-    return true;
-  if (is_digit (c))
+  if (isalnum (c))
     return true;
   if (c == '_')
     return true;
@@ -87,9 +69,8 @@ token_t
 scan_token ()
 {
   // spaces
-  if (match (' '))
-    while (match (' '))
-      ;
+  while (isspace (peek ()))
+    advance (1);
 
   // COMMENT
   if (match (*token_pairs[COMMENT]))
@@ -120,17 +101,17 @@ scan_token ()
   // LABEL_DECL : IDENTIFIER
   // IDENTIFIER include SYSCALL and label
   // We don't want hash the SYSCALL, so leave it later
-  if (is_alpha (peek ()))
+  if (isalpha (peek ()))
     {
       do
         advance (1);
-      while (is_alnum (peek ()));
+      while (isidentifier (peek ()));
 
       return INIT_TOKEN (match (':') ? LABEL_DECL : IDENTIFIER);
     }
 
   // NUMBER
-  if (isdigit (peek ()))
+  if (isxdigit (peek ()))
     {
       char *end;
       errno = 0;
