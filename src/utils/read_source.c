@@ -173,6 +173,8 @@ char *
 next_line (void)
 {
   static uint32_t cursor = 0;
+  if (cursor >= current)
+    return NULL;
   char *read_ptr = source + cursor;
   char *brk;
   switch (file_type)
