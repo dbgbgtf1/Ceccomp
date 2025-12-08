@@ -180,19 +180,20 @@ next_line (void)
   switch (file_type)
     {
     case UNIX:
-      brk = memchr (read_ptr, '\n', MIN (MAX_LINE_LEN, current - cursor));
+      brk = memchr (read_ptr, '\n', current - cursor);
       *brk = '\0';
       cursor = brk + 1 - source;
       break;
     case MACOS:
-      brk = memchr (read_ptr, '\r', MIN (MAX_LINE_LEN, current - cursor));
+      brk = memchr (read_ptr, '\r', current - cursor);
       *brk = '\0';
       cursor = brk + 1 - source;
       break;
     case WINDOWS:
-      brk = memchr (read_ptr, '\r', MIN (MAX_LINE_LEN, current - cursor));
-      memcpy (brk, "\0", 2);
-      cursor = brk + 2 - source;
+      // even if file is malformed, this could be safe (\n\n)
+      brk = memchr (read_ptr, '\n', current - cursor);
+      memcpy (brk - 1, "\0", 2);
+      cursor = brk + 1 - source;
       break;
     default:
       assert (!"file_type is neither UNIX, MACOS nor WINDOWS");
