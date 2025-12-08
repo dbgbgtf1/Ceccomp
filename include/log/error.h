@@ -12,6 +12,9 @@
   _ ("Line %u has more than %u bytes, perhaps the input is not a text file?")
 #define FILE_TOO_LARGE _ ("The input file is greater than 1 MiB!")
 
+// parse_args
+#define INVALID_COLOR_MODE _ ("Invalid color mode")
+
 // hash
 #define CANNOT_FIND_VALUE _ ("Can not find value: %.*s")
 
