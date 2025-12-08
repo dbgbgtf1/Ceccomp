@@ -9,7 +9,7 @@
 #include <stdio.h>
 
 bool has_error;
-static state_ment_t *local;
+static statement_t *local;
 static bool mem_valid[0x10] = { false };
 
 #define REPORT_ERROR(error_msg)                                               \
@@ -185,9 +185,9 @@ jump_line ()
 }
 
 static void
-resolve_state_ment (state_ment_t *state_ment)
+resolve_statement (statement_t *statement)
 {
-  local = state_ment;
+  local = statement;
 
   switch (local->type)
     {
@@ -214,5 +214,5 @@ resolver (vector_t *v)
   has_error = false;
 
   for (uint32_t idx = 0; idx < v->count; idx++)
-    resolve_state_ment (get_vector (v, idx));
+    resolve_statement (get_vector (v, idx));
 }

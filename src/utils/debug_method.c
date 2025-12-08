@@ -20,17 +20,17 @@ static char buf[0x400];
 static char *print;
 
 void
-print_statement (state_ment_t *state_ment)
+print_statement (statement_t *statement)
 {
   print = buf;
 
-  assign_line_t assign_line = state_ment->assign_line;
-  jump_line_t jump_line = state_ment->jump_line;
-  return_line_t return_line = state_ment->return_line;
-  error_line_t error_line = state_ment->error_line;
+  assign_line_t assign_line = statement->assign_line;
+  jump_line_t jump_line = statement->jump_line;
+  return_line_t return_line = statement->return_line;
+  error_line_t error_line = statement->error_line;
 
-  SPRINTF_CAT (print, "At %04d: ", state_ment->line_nr);
-  switch (state_ment->type)
+  SPRINTF_CAT (print, "At %04d: ", statement->line_nr);
+  switch (statement->type)
     {
     case ASSIGN_LINE:
       SPRINTF_CAT (print, "assign_line: ");
@@ -70,9 +70,9 @@ print_statement (state_ment_t *state_ment)
       break;
     case ERROR_LINE:
       SPRINTF_CAT (print, "%s\n", error_line.error_msg);
-      uint16_t line_len = state_ment->line_end - state_ment->line_start;
-      uint16_t err_len = error_line.error_start - state_ment->line_start;
-      SPRINTF_CAT (print, "%.*s\n", line_len, state_ment->line_start);
+      uint16_t line_len = statement->line_end - statement->line_start;
+      uint16_t err_len = error_line.error_start - statement->line_start;
+      SPRINTF_CAT (print, "%.*s\n", line_len, statement->line_start);
       SPRINTF_CAT (print, "%*s", err_len + 1, "^");
       break;
     default:

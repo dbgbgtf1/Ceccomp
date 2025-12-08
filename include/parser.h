@@ -100,10 +100,10 @@ typedef struct
     eof_line_t eof_line;
     error_line_t error_line;
   };
-} state_ment_t;
+} statement_t;
 
 extern void init_parser ();
 
-extern void parse_line (state_ment_t *state_ment);
+extern void parse_line (statement_t *statement);
 
 #endif

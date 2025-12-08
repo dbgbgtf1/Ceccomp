@@ -8,7 +8,7 @@
 
 extern bool has_error;
 
-// pass the state_ment_t vector !!!
+// pass the statement_t vector !!!
 extern void resolver (vector_t *v);
 
 #endif

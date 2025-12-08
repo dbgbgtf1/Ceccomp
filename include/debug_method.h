@@ -6,6 +6,6 @@
 
 extern void print_token (token_t *token);
 
-extern void print_statement (state_ment_t *state_ment);
+extern void print_statement (statement_t *statement);
 
 #endif

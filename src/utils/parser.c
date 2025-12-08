@@ -18,7 +18,7 @@ typedef struct
 } parser_t;
 
 static parser_t parser = { .line_nr = 0 };
-static state_ment_t *local;
+static statement_t *local;
 static jmp_buf g_env;
 
 static void
@@ -340,10 +340,10 @@ init_parser ()
 }
 
 void
-parse_line (state_ment_t *state_ment)
+parse_line (statement_t *statement)
 {
-  local = state_ment;
-  memset (local, '\0', sizeof (state_ment_t));
+  local = statement;
+  memset (local, '\0', sizeof (statement_t));
 
   parser.line_nr++;
   local->line_start = parser.next.token_start;
