@@ -19,6 +19,7 @@ main (int argc, char *argv[])
 
   fp = fopen (argv[1], "r");
   assert (init_source (fp));
+  fclose (fp);
   init_scanner (next_line ());
   init_table ();
   init_vector (&vector, sizeof (state_ment_t));
