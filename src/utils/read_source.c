@@ -58,8 +58,7 @@ fail_fast_invalid_source (void)
 {
   const char *zero_byte = memchr (source, '\0', current);
   if (zero_byte)
-    error (_ ("Found '\\0' file offset %lu, perhaps it's not a text file?"),
-           zero_byte - source);
+    error (FOUND_SUS_ZERO, zero_byte - source);
   register char lf = '\n';
   const char *line_start = source;
   uint32_t line_nr = 1;
@@ -71,7 +70,7 @@ fail_fast_invalid_source (void)
       line_break = memchr (source, lf, current);
       file_type = MACOS;
       if (!line_break)
-        error ("%s", FOUND_SUS_ZERO);
+        error ("%s", FOUND_SUS_NO_LF);
     }
   else
     {

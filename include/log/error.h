@@ -5,6 +5,8 @@
 
 // read_source
 #define FOUND_SUS_ZERO                                                        \
+  _ ("Found '\\0' file offset %lu, perhaps it's not a text file?")
+#define FOUND_SUS_NO_LF                                                       \
   _ ("No line break in source file, perhaps it's not a text file?")
 #define FOUND_SUS_LINE                                                        \
   _ ("Line %u has more than %u bytes, perhaps the input is not a text file?")
