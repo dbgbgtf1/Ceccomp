@@ -1,4 +1,10 @@
 #include "parse_args.h"
+#include "parser.h"
+#include "read_source.h"
+#include "scanner.h"
+#include "resolver.h"
+#include "vector.h"
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
