@@ -10,6 +10,7 @@
   _ ("No line break in source file, perhaps it's not a text file?")
 #define FOUND_SUS_LINE                                                        \
   _ ("Line %u has more than %u bytes, perhaps the input is not a text file?")
+#define FILE_TOO_LARGE _ ("The input file is greater than 1 MiB!")
 
 // hash
 #define CANNOT_FIND_VALUE _ ("Can not find value: %.*s")

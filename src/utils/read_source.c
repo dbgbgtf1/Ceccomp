@@ -1,5 +1,5 @@
 #define _GNU_SOURCE
-#include "readsource.h"
+#include "read_source.h"
 #include "i18n.h"
 #include "log/error.h"
 #include "log/logger.h"
@@ -12,7 +12,8 @@
 #include <unistd.h>
 
 #define GROW_LEN 0x4000
-#define MAX_LINE_LEN 0x300
+#define MAX_LINE_LEN 0x180
+#define MAX_FILE_LEN 0x10000 // 1MiB
 
 typedef enum
 {
@@ -28,12 +29,18 @@ static uint32_t current = 0;
 static uint32_t map_len = 0;
 
 static void
-clear_color (char *text)
-{
-  char *colorstart = NULL;
-  char *clear = text;
+increase_map (void); // forward declaration for fail_fast_invalid_source
 
-  for (char *cursor = text; *cursor != '\0'; cursor++)
+static void
+clear_color (char *text, uint32_t line_len)
+{
+  char *cursor = memchr (text, '\x1b', line_len);
+  if (!cursor)
+    return;
+  char *colorstart = NULL;
+  char *clear = cursor;
+
+  for (; *cursor != '\0'; cursor++)
     {
       if (!colorstart && *cursor != '\x1b')
         *clear++ = *cursor;
@@ -89,6 +96,20 @@ fail_fast_invalid_source (void)
       line_nr++;
     }
   // the rest line is safe
+  // but it may not end with lf, we add one to simplify following process
+  if (*(source + current - 1) != lf)
+    {
+      if (current % GROW_LEN == 0 || current % GROW_LEN == GROW_LEN - 1)
+        // we are at page boundry!
+        // allocate some more page shouldn't hurt too much performance
+        increase_map ();
+      if (file_type == UNIX || file_type == MACOS)
+        source[current] = lf;
+      else // file_type == WINDOWS
+        memcpy (source + current, "\r\n", 2);
+      current++; // memchr only check \r or \n,
+                 // so adding 1 byte could include windows case
+    }
 }
 
 static void
@@ -122,14 +143,17 @@ char *
 init_source (FILE *read_fp)
 {
   uint32_t read_len = 0;
+  int fd = fileno (read_fp); // give compiler some hint
 
   do
     {
       increase_map ();
-      read_len = read (fileno (read_fp), source + current, GROW_LEN);
+      read_len = read (fd, source + current, GROW_LEN);
       if (read_len == (uint32_t)-1)
         error ("read :%s", strerror (errno));
       current += read_len;
+      if (current > MAX_FILE_LEN)
+        error ("%s", FILE_TOO_LARGE);
     }
   while (read_len > 0); // reading via char device may get less than GROW_LEN
 
@@ -142,4 +166,35 @@ void
 free_source ()
 {
   munmap (source, map_len);
+}
+
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+char *
+next_line (void)
+{
+  static uint32_t cursor = 0;
+  char *read_ptr = source + cursor;
+  char *brk;
+  switch (file_type)
+    {
+    case UNIX:
+      brk = memchr (read_ptr, '\n', MIN (MAX_LINE_LEN, current - cursor));
+      *brk = '\0';
+      cursor = brk + 1 - source;
+      break;
+    case MACOS:
+      brk = memchr (read_ptr, '\r', MIN (MAX_LINE_LEN, current - cursor));
+      *brk = '\0';
+      cursor = brk + 1 - source;
+      break;
+    case WINDOWS:
+      brk = memchr (read_ptr, '\r', MIN (MAX_LINE_LEN, current - cursor));
+      memcpy (brk, "\0", 2);
+      cursor = brk + 2 - source;
+      break;
+    default:
+      assert (!"file_type is neither UNIX, MACOS nor WINDOWS");
+    }
+  clear_color (read_ptr, brk - read_ptr);
+  return read_ptr;
 }
