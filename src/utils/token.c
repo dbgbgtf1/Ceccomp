@@ -23,7 +23,6 @@ char *token_pairs[] = {
   [RETURN] = "return", [IF] = "if", [GOTO] = "goto", [COMMA] = ",", [ELSE] = "else",
 
   [DOT] = ".", [NEWLINE] = "\n",
-  [USELESS0] = "Label  CODE  JT   JF      K", [USELESS1] = "----------------------------------",
 
   [LEFT_BRACKET] = "[", [RIGHT_BRACKET] = "]",
   [LEFT_PAREN] = "(", [RIGHT_PAREN] = ")",

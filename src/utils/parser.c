@@ -342,10 +342,6 @@ init_parser ()
 void
 parse_line (state_ment_t *state_ment)
 {
-  // ignore our disasm useless output
-  while (match_from_to (USELESS0, USELESS1))
-    match (NEWLINE);
-
   local = state_ment;
   memset (local, '\0', sizeof (state_ment_t));
 
