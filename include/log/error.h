@@ -3,6 +3,9 @@
 
 #include "i18n.h"
 
+// parse_args
+#define INVALID_COLOR_MODE _ ("Invalid color mode")
+
 // hash
 #define CANNOT_FIND_VALUE _ ("Can not find value: %.*s")
 

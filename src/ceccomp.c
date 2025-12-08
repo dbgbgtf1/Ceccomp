@@ -1,38 +1,43 @@
-#include "debug_method.h"
-#include "hash.h"
 #include "parse_args.h"
-#include "parser.h"
-#include "readsource.h"
-#include "scanner.h"
-#include "resolver.h"
-#include "vector.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+static ceccomp_args args;
+
+static struct argp_option options[] = {
+  { "quiet", 'q', NULL, 0, NULL, 0 },
+  { "color", 'c', "COLOR", 0, NULL, 0 },
+  { "output", 'o', "OUTPUT", 0, NULL, 0 },
+  { "arch", 'a', "ARCH", 0, NULL, 0 },
+  { "pid", 'p', "PID", 0, NULL, 0 },
+  { "fmt", 'f', "FMT", 0, NULL, 0 },
+  { "help", 'h', NULL, 0, NULL, 0 },
+  { "usage", 'u', NULL, 0, NULL, 0 },
+  { 0 },
+};
+
+static void
+init_args (ceccomp_args *args)
+{
+  memset (args, '\0', sizeof (ceccomp_args));
+  args->cmd = HELP_ABNORMAL;
+  char *no_color = getenv ("NO_COLOR");
+  if (no_color != NULL && no_color[0] != '\0')
+    args->when = NEVER;
+  else
+    args->when = AUTO;
+}
 
 int
 main (int argc, char *argv[])
 {
-  FILE *fp;
-  char *source;
-  state_ment_t state_ment;
-  vector_t vector;
+  init_args (&args);
 
-  fp = fopen (argv[1], "r");
-  source = read_source (fp);
-  init_scanner (source);
-  init_table ();
-  init_vector (&vector, sizeof (state_ment_t));
-  init_parser ();
+  static struct argp argp
+      = { options, parse_opt, NULL, NULL, NULL, NULL, NULL };
+  argp_parse (&argp, argc, argv, ARGP_IN_ORDER, 0, &args);
 
-  do
-    {
-      parse_line (&state_ment);
-      print_statement (&state_ment);
-      push_vector (&vector, &state_ment);
-    }
-  while (state_ment.type != EOF_LINE);
-
-  resolver (&vector);
-
-  free_vector (&vector);
-  free_table ();
+  printf ("cmd: %d\n", args.cmd);
+  printf ("color: %d\n", args.when);
 }
