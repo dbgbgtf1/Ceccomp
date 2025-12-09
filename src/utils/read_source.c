@@ -13,7 +13,7 @@
 
 #define GROW_LEN 0x4000
 #define MAX_LINE_LEN 0x180
-#define MAX_FILE_LEN 0x10000 // 1MiB
+#define MAX_FILE_LEN 0x100000 // 1MiB
 
 typedef enum
 {

@@ -18,11 +18,7 @@ static scanner_t scanner;
 static inline bool
 isidentifier (char c)
 {
-  if (isalnum (c))
-    return true;
-  if (c == '_')
-    return true;
-  return false;
+  return isalnum (c) || c == '_';
 }
 
 static char
