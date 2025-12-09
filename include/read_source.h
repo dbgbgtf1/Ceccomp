@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 // read file at once, the pointer is all fixed
-extern char *init_source (FILE *read_fp);
+extern void init_source (FILE *read_fp);
 
 // return NULL to indicate EOF
 extern char *next_line (void);

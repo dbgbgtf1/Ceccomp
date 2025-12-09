@@ -141,7 +141,7 @@ increase_map ()
   map_len += GROW_LEN;
 }
 
-char *
+void
 init_source (FILE *read_fp)
 {
   uint32_t read_len = 0;
@@ -163,8 +163,6 @@ init_source (FILE *read_fp)
     error ("%s", FOUND_SUS_ZERO);
 
   process_source ();
-
-  return source;
 }
 
 void

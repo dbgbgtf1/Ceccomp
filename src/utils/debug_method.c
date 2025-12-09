@@ -8,8 +8,8 @@
 void
 print_token (token_t *token)
 {
-  if (token->type == NEWLINE)
-    debug ("At %04d: NEWLINE", token->line_nr);
+  if (token->type == LINE_END)
+    debug ("At %04d: LINE_END", token->line_nr);
   else
     debug ("At %04d: %s", token->line_nr, token_pairs[token->type]);
 }

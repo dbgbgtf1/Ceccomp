@@ -1,5 +1,6 @@
 #include "scanner.h"
 #include "log/logger.h"
+#include "read_source.h"
 #include "token.h"
 #include <ctype.h>
 #include <errno.h>
@@ -9,6 +10,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 static scanner_t scanner;
 
@@ -53,6 +55,38 @@ match_string (char *expected, uint16_t cmp_len)
   return true;
 }
 
+static token_t
+reset_to_nextline ()
+{
+  scanner.token_start = next_line ();
+  if (scanner.token_start == NULL)
+    return INIT_TOKEN (TOKEN_EOF);
+
+  scanner.current_char = scanner.token_start;
+  scanner.line_nr++;
+  return INIT_TOKEN (LINE_END);
+}
+
+static void
+skip_spaces ()
+{
+  while (true)
+    {
+      // spaces
+      if (match (' '))
+        while (isspace (peek ()))
+          advance (1);
+
+      // COMMENT
+      else if (match (*token_pairs[COMMENT]))
+        while (!match ('\0'))
+          advance (1);
+
+      else
+        break;
+    }
+}
+
 void
 init_scanner (char *start)
 {
@@ -64,28 +98,15 @@ init_scanner (char *start)
 token_t
 scan_token ()
 {
-  // spaces
-  while (isspace (peek ()))
-    advance (1);
-
-  // COMMENT
-  if (match (*token_pairs[COMMENT]))
-    while (peek () != '\n' && peek () != '\0')
-      advance (1);
+  // skip spaces and comment
+  skip_spaces ();
 
   // sync
   scanner.token_start = scanner.current_char;
 
-  // EOF
+  // LINE_END
   if (peek () == '\0')
-    return INIT_TOKEN (TOKEN_EOF);
-
-  // NEWLINE
-  if (match (*token_pairs[NEWLINE]))
-    {
-      scanner.line_nr++;
-      return INIT_TOKEN (NEWLINE);
-    }
+    return reset_to_nextline ();
 
   // ARCH_X86 : TOKEN_EOF
   for (uint32_t enum_idx = (int)ARCH_X86; enum_idx < (int)UNKNOWN; enum_idx++)

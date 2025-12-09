@@ -22,7 +22,7 @@ char *token_pairs[] = {
 
   [RETURN] = "return", [IF] = "if", [GOTO] = "goto", [COMMA] = ",", [ELSE] = "else",
 
-  [DOT] = ".", [NEWLINE] = "\n",
+  [DOT] = ".",
 
   [LEFT_BRACKET] = "[", [RIGHT_BRACKET] = "]",
   [LEFT_PAREN] = "(", [RIGHT_PAREN] = ")",
@@ -36,7 +36,7 @@ char *token_pairs[] = {
   [LESS_EQUAL] = "<=", [LESS_THAN] = "<",
   [NEGATIVE] = "-", [BANG] = "!",
 
-  [UNKNOWN] = "unknown", [COMMENT] = "#", [TOKEN_EOF] = "EOF",
+  [UNKNOWN] = "unknown", [COMMENT] = "#", [LINE_END] = "line_end",
   [IDENTIFIER] = "identifier", [LABEL_DECL] = "label_decl", [NUMBER] = "number",
   // label_decl ::= IDENTIFIER + ":"
 };

@@ -203,7 +203,6 @@ resolve_statement (statement_t *statement)
     // nothing need to be done for these line
     case RETURN_LINE:
     case EMPTY_LINE:
-    case EOF_LINE:
       return;
     }
 }
