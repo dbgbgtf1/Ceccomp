@@ -79,7 +79,7 @@ skip_spaces ()
 
       // COMMENT
       else if (match (*token_pairs[COMMENT]))
-        while (!match ('\0'))
+        while (peek () != '\0')
           advance (1);
 
       else
