@@ -1,10 +1,10 @@
 #define _GNU_SOURCE
 #include "read_source.h"
-#include "i18n.h"
 #include "log/error.h"
 #include "log/logger.h"
 #include <assert.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -29,18 +29,16 @@ static uint32_t current = 0;
 static uint32_t map_len = 0;
 
 static void
-increase_map (void); // forward declaration for fail_fast_invalid_source
-
-static void
 clear_color (char *text, uint32_t line_len)
 {
   char *cursor = memchr (text, '\x1b', line_len);
   if (!cursor)
     return;
+  char *top = text + line_len; // excluding
   char *colorstart = NULL;
   char *clear = cursor;
 
-  for (; *cursor != '\0'; cursor++)
+  for (; cursor < top; cursor++)
     {
       if (!colorstart && *cursor != '\x1b')
         *clear++ = *cursor;
@@ -50,65 +48,71 @@ clear_color (char *text, uint32_t line_len)
         colorstart = NULL;
       // else skip
     }
-  *clear = '\0';
+  *clear = '\0'; // since some characters are definitly dropped here,
+                 // no edge problem.
 }
 
-static void
-fail_fast_invalid_source (void)
+static char
+detect_file_type ()
 {
-  const char *zero_byte = memchr (source, '\0', current);
-  if (zero_byte)
-    error (FOUND_SUS_ZERO, zero_byte - source);
-  register char lf = '\n';
-  const char *line_start = source;
-  uint32_t line_nr = 1;
-  const char *line_break = memchr (source, lf, current);
-
+  char lf = '\n';
+  char *line_break = memchr (source, lf, current);
   if (!line_break)
     {
-      lf = '\r'; // no \n found? perhaps source file is from mac
-      line_break = memchr (source, lf, current);
-      file_type = MACOS;
-      if (!line_break)
+      if (memchr (source, '\r', current)) // perhaps the file is from macos?
+        {
+          file_type = MACOS;
+          return '\r';
+        }
+      else
         error ("%s", FOUND_SUS_NO_LF);
     }
   else
     {
-      if (line_break == source || line_break[-1] != '\r')
-        file_type = UNIX;
-      else
+      if (line_break != source && *(line_break - 1) == '\r')
         file_type = WINDOWS;
+      else
+        file_type = UNIX;
     }
-  assert (file_type != UNKNOWN);
+  return '\n';
+}
 
-  if (line_break - line_start > MAX_LINE_LEN)
-    error (FOUND_SUS_LINE, line_nr, MAX_LINE_LEN);
+static void
+process_source (void)
+{
+  register char lf = detect_file_type ();
 
-  line_start = line_break + 1;
-  line_nr++;
-  while (line_start + MAX_LINE_LEN <= source + current)
+  char *line_break;
+  char *line_start = source;
+  char *top = source + current;
+  uint32_t line_nr = 1;
+  while (true)
     {
-      line_break = memchr (line_start, lf, MAX_LINE_LEN);
-      if (!line_break)
-        error (FOUND_SUS_LINE, line_nr, MAX_LINE_LEN);
-      line_start = line_break + 1;
+      if (line_start + MAX_LINE_LEN <= top)
+        {
+          line_break = memchr (line_start, lf, MAX_LINE_LEN);
+          if (!line_break)
+            error (FOUND_SUS_LINE, line_nr, MAX_LINE_LEN);
+        }
+      else
+        {
+          // the rest space is less than MAX_LINE_LEN
+          line_break = memchr (line_start, lf, top - line_start);
+          if (!line_break)
+            break;
+        }
+
+      if (file_type == WINDOWS)
+        *(line_break - 1) = '\0';
+      *line_break = '\0';
+
+      clear_color (line_start, line_break - line_start);
+
       line_nr++;
+      line_start = line_break + 1;
     }
-  // the rest line is safe
-  // but it may not end with lf, we add one to simplify following process
-  if (*(source + current - 1) != lf)
-    {
-      if (current % GROW_LEN == 0 || current % GROW_LEN == GROW_LEN - 1)
-        // we are at page boundry!
-        // allocate some more page shouldn't hurt too much performance
-        increase_map ();
-      if (file_type == UNIX || file_type == MACOS)
-        source[current] = lf;
-      else // file_type == WINDOWS
-        memcpy (source + current, "\r\n", 2);
-      current++; // memchr only check \r or \n,
-                 // so adding 1 byte could include windows case
-    }
+
+  clear_color (line_start, top - line_start);
 }
 
 static void
@@ -156,7 +160,10 @@ init_source (FILE *read_fp)
     }
   while (read_len > 0); // reading via char device may get less than GROW_LEN
 
-  fail_fast_invalid_source ();
+  if (memchr (source, '\0', current))
+    error ("%s", FOUND_SUS_ZERO);
+
+  process_source ();
 
   return source;
 }
@@ -167,36 +174,28 @@ free_source ()
   munmap (source, map_len);
 }
 
-#define MIN(a, b) ((a) < (b) ? (a) : (b))
 char *
 next_line (void)
 {
   static uint32_t cursor = 0;
   if (cursor >= current)
     return NULL;
+
   char *read_ptr = source + cursor;
-  char *brk;
-  switch (file_type)
+
+  char *line_break = memchr (read_ptr, '\0', current - cursor);
+  if (!line_break)
     {
-    case UNIX:
-      brk = memchr (read_ptr, '\n', current - cursor);
-      *brk = '\0';
-      cursor = brk + 1 - source;
-      break;
-    case MACOS:
-      brk = memchr (read_ptr, '\r', current - cursor);
-      *brk = '\0';
-      cursor = brk + 1 - source;
-      break;
-    case WINDOWS:
-      // even if file is malformed, this could be safe (\n\n)
-      brk = memchr (read_ptr, '\n', current - cursor);
-      memcpy (brk - 1, "\0", 2);
-      cursor = brk + 1 - source;
-      break;
-    default:
-      assert (!"file_type is neither UNIX, MACOS nor WINDOWS");
+      // meet eof
+      cursor = current;
+      return read_ptr;
     }
-  clear_color (read_ptr, brk - read_ptr);
+
+  char *top = source + current; // give compiler some hint
+  do
+    line_break++;
+  while (line_break < top && *line_break == '\0');
+  cursor = line_break - source;
+
   return read_ptr;
 }

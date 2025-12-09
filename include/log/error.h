@@ -7,7 +7,6 @@
 #define INVALID_COLOR_MODE _ ("Invalid color mode")
 
 // read_source
-#define UNKNOWN_FILE_TYPE _ ("Unknown file type")
 #define FOUND_SUS_ZERO                                                        \
   _ ("Found '\\0' file offset %lu, perhaps it's not a text file?")
 #define FOUND_SUS_NO_LF                                                       \
