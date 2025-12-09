@@ -6,6 +6,7 @@ if [ "$1" == "--tolerant" ]; then
     TOLERANT=1
 fi
 errors=0
+debug_file=./build/debug_msg
 
 # skip chromium if libseccomp lower than 2.5.6
 EXPECT_VER=2.5.6
@@ -25,6 +26,7 @@ check_pass ()
     if [ $1 -eq 0 ]; then
         echo "[+] $filename passed"
     else
+        [ -f $debug_file ] && cat $debug_file
         echo "[x] $filename failed"
         if [ -n "$TOLERANT" ]; then
             ((errors += 1))
@@ -111,12 +113,12 @@ echo ""
 make test
 
 filename="trace test"
-timeout 0.2 ./build/ceccomp trace -o ./build/dyn_result -c always ./build/test &>/dev/null
+timeout 0.2 ./build/ceccomp trace -o ./build/dyn_result -c always ./build/test &>$debug_file
 diff -u ./build/dyn_result ./test/trace.log
 check_pass $?
 
 filename="probe test"
-./build/ceccomp probe -o ./build/dyn_result -c always ./build/test &>/dev/null
+./build/ceccomp probe -o ./build/dyn_result -c always ./build/test &>$debug_file
 diff -u ./build/dyn_result ./test/probe.log
 check_pass $?
 
