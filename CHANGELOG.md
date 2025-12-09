@@ -5,10 +5,12 @@ Items marked with :star: is the major change why we release a new version.
 <!-- and !num at the end of line for PRs. If the issue or PR is external, -->
 <!-- write user/repo#num or user/repo!num to reference. Then run scripts/complete-url.py -->
 <!-- to format raw ref to URL. -->
-## 4.0(Incoming)
-* **BREAKING** *
+## 4.0 (INCOMING)
+* **BREAKING**
 Replace ` Line  CODE  JT   JF      K` with ` Label  CODE  JT   JF      K`.
 Replace disasm output ` 0001: 0x20 0x00 0x00 0x00000004 $A = $arch` with ` L0001: 0x20 0x00 0x00 0x00000004 $A = $arch`. The good news we add support for label, we can use `goto Label_Allow`, also something like `Label_Allow:` in the start of a line as Label Decalarion.
+* :star: Remove `-mno-omit-leaf-frame-pointer` flag if not supported by cc
+* Print messages in dynamic tests
 ## 3.5
 * **BREAKING** :star: Now `trace` and `probe` no more accepts `-a`; arch is automatically retrieved via ptrace
 * :star: Add `i686` arch support

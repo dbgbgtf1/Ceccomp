@@ -609,8 +609,8 @@ def check_builder_name(makefile: Makefile):
 def check_omit_leaf_frame_pointer_flag(makefile: Makefile):
     pcheck('if compiler support -mno-omit-leaf-frame-pointer')
     code, _, _ = run_command([buildopts.cc, '-x', 'c', '-Werror', '-',
-                                   '-mno-omit-leaf-frame-pointer', '-o', '/dev/null']
-                                  , standard_c, push_sys_dir=True)
+                                   '-mno-omit-leaf-frame-pointer', '-o', '/dev/null'],
+                                   standard_c, push_sys_dir=True)
     if code:
         print(TXT_CYAN('no'))
         makefile.inject('ARCH_PRESERVE_FP', '')
