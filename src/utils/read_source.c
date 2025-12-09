@@ -48,8 +48,7 @@ clear_color (char *text, uint32_t line_len)
         colorstart = NULL;
       // else skip
     }
-  *clear = '\0'; // since some characters are definitly dropped here,
-                 // no edge problem.
+  memset (clear, '\0', top - clear);
 }
 
 static char
