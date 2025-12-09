@@ -393,8 +393,10 @@ def check_doc(makefile: Makefile):
 
 standard_c = '''
 #include <stdio.h>
+void leaf(void) {}
 int main() {
     puts("");
+    leaf();
     return 0;
 }
 '''
@@ -602,6 +604,19 @@ def check_builder_name(makefile: Makefile):
         error(f'Found \'/\' in builder name {buildopts.builder}, which is not allowed.')
     makefile.inject('BUILDER', buildopts.builder)
     print(TXT_GREEN('yes'))
+
+@new_task
+def check_omit_leaf_frame_pointer_flag(makefile: Makefile):
+    pcheck('if compiler support -mno-omit-leaf-frame-pointer')
+    code, _, _ = run_command([buildopts.cc, '-x', 'c', '-Werror', '-',
+                                   '-mno-omit-leaf-frame-pointer', '-o', '/dev/null']
+                                  , standard_c, push_sys_dir=True)
+    if code:
+        print(TXT_CYAN('no'))
+        makefile.inject('ARCH_PRESERVE_FP', '')
+    else:
+        print(TXT_GREEN('yes'))
+        makefile.inject('ARCH_PRESERVE_FP', '-mno-omit-leaf-frame-pointer')
 
 taskmgr.run_tasks()
 # vars not injected: EXTRA_CFLAGS EXTRA_LDFLAGS DEBUG_LEVEL PREFIX BINDIR ZSH_FPATH MANDIR DOCDIR DESTDIR SYS_INC_DIR SYS_LIB_DIR IS_STATIC
