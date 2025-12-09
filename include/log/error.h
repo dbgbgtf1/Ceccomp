@@ -5,15 +5,14 @@
 
 // parse_args
 #define INVALID_COLOR_MODE _ ("Invalid color mode")
+
 // read_source
+#define UNKNOWN_FILE_TYPE _ ("Unknown file type")
 #define FOUND_SUS_ZERO                                                        \
   _ ("No line break in source file, perhaps it's not a text file?")
 #define FOUND_SUS_LINE                                                        \
   _ ("Line %u has more than %u bytes, perhaps the input is not a text file?")
 #define FILE_TOO_LARGE _ ("The input file is greater than 1 MiB!")
-
-// parse_args
-#define INVALID_COLOR_MODE _ ("Invalid color mode")
 
 // hash
 #define CANNOT_FIND_VALUE _ ("Can not find value: %.*s")
