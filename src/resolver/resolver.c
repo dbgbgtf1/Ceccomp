@@ -1,14 +1,19 @@
 #include "resolver.h"
+#include "hash.h"
 #include "log/error.h"
 #include "log/logger.h"
 #include "parser.h"
 #include "token.h"
 #include <assert.h>
+#include <seccomp.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 bool has_error;
+uint32_t arch;
 static statement_t *local;
 static bool mem_valid[0x10] = { false };
 
@@ -28,7 +33,7 @@ report_error (char *error_msg)
   char buf[0x400];
   char *print = buf;
 
-  SPRINTF_CAT (print, "At %04d: ", local->line_nr);
+  SPRINTF_CAT (print, "At %04d: ", local->text_nr);
   SPRINTF_CAT (print, "%s\n", error_msg);
   uint16_t line_len = local->line_end - local->line_start;
   SPRINTF_CAT (print, "%.*s\n", line_len, local->line_start);
@@ -54,7 +59,7 @@ error_line ()
 
   error_line_t *error_line = &local->error_line;
 
-  SPRINTF_CAT (print, "At %04d: ", local->line_nr);
+  SPRINTF_CAT (print, "At %04d: ", local->text_nr);
   SPRINTF_CAT (print, "%s\n", error_line->error_msg);
   uint16_t line_len = local->line_end - local->line_start;
   uint16_t err_len = error_line->error_start - local->line_start;
@@ -182,6 +187,44 @@ assign_line ()
 static void
 jump_line ()
 {
+  jump_line_t *jump_line = &local->jump_line;
+  uint32_t jt = find_key (&jump_line->jt.key);
+  uint32_t jf;
+
+  jump_line->jt.type = NUMBER;
+  jump_line->jt.code_nr = jt - local->code_nr - 1;
+  if ((int32_t)jump_line->jt.code_nr < 0)
+    REPORT_ERROR (JT_MUST_BE_POSITIVE);
+
+  if (!jump_line->if_condition)
+    return;
+
+  if (jt > UINT16_MAX)
+    REPORT_ERROR (JT_TOO_FAR);
+
+  token_type type = jump_line->cond.cmpobj.type;
+  if (type == ATTR_SYSCALL)
+    {
+      obj_t *obj = &jump_line->cond.cmpobj;
+      obj->type = NUMBER;
+      char *sys_name = strndup (obj->string.string, obj->string.len);
+      obj->data = seccomp_syscall_resolve_name_arch (arch, sys_name);
+      free (sys_name);
+      if (obj->data == (uint32_t)-1)
+        REPORT_ERROR (EXPECT_SYSCALL);
+    }
+
+  if (jump_line->jf.key.string == NULL)
+    return;
+
+  jf = find_key (&jump_line->jf.key);
+  jump_line->jf.type = NUMBER;
+  jump_line->jf.code_nr = jf - local->code_nr - 1;
+  if ((int32_t)jump_line->jt.code_nr < 0)
+    REPORT_ERROR (JF_MUST_BE_POSITIVE);
+
+  if (jf > UINT16_MAX)
+    REPORT_ERROR (JF_TOO_FAR);
 }
 
 static void
@@ -203,14 +246,16 @@ resolve_statement (statement_t *statement)
     // nothing need to be done for these line
     case RETURN_LINE:
     case EMPTY_LINE:
+    case EOF_LINE:
       return;
     }
 }
 
 void
-resolver (vector_t *v)
+resolver (vector_t *v, uint32_t default_arch)
 {
   has_error = false;
+  arch = default_arch;
 
   for (uint32_t idx = 0; idx < v->count; idx++)
     resolve_statement (get_vector (v, idx));
