@@ -29,14 +29,15 @@ print_statement (statement_t *statement)
   return_line_t return_line = statement->return_line;
   error_line_t error_line = statement->error_line;
 
-  SPRINTF_CAT (print, "At %04d: ", statement->line_nr);
+  SPRINTF_CAT (print, "At %04d(%04d): ", statement->code_nr,
+               statement->text_nr);
   switch (statement->type)
     {
     case ASSIGN_LINE:
       SPRINTF_CAT (print, "assign_line: ");
-      SPRINTF_CAT (print, "%s %s %s;", token_pairs[assign_line.left_var.type],
-               token_pairs[assign_line.operator],
-               token_pairs[assign_line.right_var.type]);
+      SPRINTF_CAT (print, "%s %s %s", token_pairs[assign_line.left_var.type],
+                   token_pairs[assign_line.operator],
+                   token_pairs[assign_line.right_var.type]);
       break;
     case JUMP_LINE:
       SPRINTF_CAT (print, "jump_line: ");
@@ -46,14 +47,15 @@ print_statement (statement_t *statement)
           SPRINTF_CAT (print, "if ");
           if (jump_line.if_bang)
             SPRINTF_CAT (print, "!");
-          SPRINTF_CAT (print, "(A %s %s) ", token_pairs[jump_line.cond.comparator],
-                   token_pairs[jump_line.cond.cmpobj.type]);
+          SPRINTF_CAT (print, "(A %s 0x%08x) ",
+                       token_pairs[jump_line.cond.comparator],
+                       jump_line.cond.cmpobj.data);
         }
-      SPRINTF_CAT (print, "goto %.*s", jump_line.jt.len, jump_line.jt.string);
-      if (jump_line.jf.string)
-        SPRINTF_CAT (print, ", else goto %.*s", jump_line.jf.len,
-                 jump_line.jf.string);
-
+      SPRINTF_CAT (print, "goto %04u",
+                   jump_line.jt.code_nr + statement->code_nr + 1);
+      if (jump_line.jf.key.string)
+        SPRINTF_CAT (print, ", else goto %04u",
+                     jump_line.jf.code_nr + statement->code_nr + 1);
       break;
     case RETURN_LINE:
       SPRINTF_CAT (print, "return_line: ");
