@@ -79,7 +79,7 @@ free_key (hkey_t *key_tmp)
         }
     }
 
-  error (CANNOT_FIND_VALUE, key_tmp->len, key_tmp->string);
+  error (CANNOT_FIND_LABEL, key_tmp->len, key_tmp->string);
 }
 
 uint16_t
@@ -95,7 +95,7 @@ find_key (hkey_t *key_tmp)
         return bucket->next->line_nr;
     }
 
-  error (CANNOT_FIND_VALUE, key_tmp->len, key_tmp->string);
+  error (CANNOT_FIND_LABEL, key_tmp->len, key_tmp->string);
 }
 
 void
