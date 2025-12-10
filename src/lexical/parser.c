@@ -1,23 +1,27 @@
 #include "parser.h"
+#include "arch_trans.h"
 #include "hash.h"
 #include "log/error.h"
 #include "scanner.h"
 #include "token.h"
+#include <seccomp.h>
 #include <setjmp.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 typedef struct
 {
-  uint16_t line_nr;
+  uint16_t text_nr;
+  uint16_t code_nr;
 
   token_t previous;
   token_t current;
   token_t next;
 } parser_t;
 
-static parser_t parser = { .line_nr = 0 };
+static parser_t parser = { .text_nr = 0, .code_nr = 0 };
 static statement_t *local;
 static jmp_buf g_env;
 
@@ -111,6 +115,8 @@ static void
 empty_line ()
 {
   local->type = EMPTY_LINE;
+  parser.code_nr--;
+  // empty_line doesn't count
   return;
 }
 
@@ -151,44 +157,65 @@ label (label_t *label)
 {
   if (!match (IDENTIFIER))
     error_at (parser.next, EXPECT_LABEL);
-  label->string = parser.current.token_start;
-  label->len = parser.current.token_len;
+
+  label->type = IDENTIFIER;
+  label->key.string = parser.current.token_start;
+  label->key.len = parser.current.token_len;
 }
 
 static void
 compare_obj (obj_t *obj)
 {
   if (match (X))
-    obj->type = parser.current.type;
-  else if (match (NUMBER))
+    {
+      obj->type = parser.current.type;
+      return;
+    }
+
+  if (match (NUMBER))
     {
       obj->type = parser.current.type;
       obj->data = parser.current.data;
+      return;
     }
-  else if (match_from_to (ARCH_X86, ARCH_RISCV64))
-    {
-      // i386
-      if (!match (DOT))
-        obj->type = parser.current.type;
-      // i386.read
-      else
-        {
-          if (!peek (IDENTIFIER))
-            error_at (parser.next, EXPECT_SYSCALL);
-          obj->type = ATTR_SYSCALL;
-          obj->string.string = parser.previous.token_start;
-          obj->string.len = parser.previous.token_len
-                            + parser.current.token_len + parser.next.token_len;
-          advance ();
-        }
-    }
-  else if (match (IDENTIFIER))
+
+  if (match (IDENTIFIER))
     {
       obj->type = ATTR_SYSCALL;
       obj->string.string = parser.current.token_start;
       obj->string.len = parser.current.token_len;
+      return;
     }
-  // read
+  // read, we can't resolve syscall_name without arch
+
+  if (!match_from_to (ARCH_X86, ARCH_RISCV64))
+    error_at (parser.next, UNEXPECT_TOKEN);
+
+  if (!match (DOT))
+    {
+      obj->type = NUMBER;
+      obj->data = internal_arch_to_scmp_arch (parser.current.type);
+      return;
+    }
+  // i386
+  else
+    {
+      if (!peek (IDENTIFIER))
+        error_at (parser.next, EXPECT_SYSCALL);
+
+      uint32_t scmp_arch = internal_arch_to_scmp_arch (parser.previous.type);
+      obj->type = NUMBER;
+      char *sys_name
+          = strndup (parser.next.token_start, parser.next.token_len);
+      obj->data = seccomp_syscall_resolve_name_arch (scmp_arch, sys_name);
+      free (sys_name);
+      if (obj->data == (uint32_t)-1)
+        error_at(parser.next, EXPECT_SYSCALL);
+
+      advance ();
+      return;
+    }
+  // i386.read
 }
 
 static void
@@ -226,11 +253,15 @@ jump_line ()
     error_at (parser.next, EXPECT_GOTO);
 
   label (&jump_line->jt);
-  jump_line->jf.string = NULL;
+  jump_line->jf.key.string = NULL;
   // jf default as zero
 
   if (peek (LINE_END) || peek (TOKEN_EOF))
     return;
+
+  if (!jump_line->if_condition)
+    error_at (parser.next, UNEXPECT_TOKEN);
+  // without condition, there is no jf;
 
   if (!match (COMMA))
     error_at (parser.next, EXPECT_COMMA);
@@ -243,29 +274,29 @@ jump_line ()
 }
 
 static void
-left (assign_line_t *assign_line)
+left (obj_t *obj)
 {
-  assign_line->left_var.type = parser.current.type;
+  obj->type = parser.current.type;
   // expression checked for us, it must be A X MEM here
 
   if (parser.current.type == MEM)
-    assign_line->left_var.data = bracket_num ();
+    obj->data = bracket_num ();
 }
 
 static void
-right (assign_line_t *assign_line)
+right (obj_t *obj)
 {
   if (match (A) || match (X) || match_from_to (ATTR_LEN, ATTR_HIGHPC))
-    assign_line->right_var.type = parser.current.type;
+    obj->type = parser.current.type;
   else if (match (MEM) || match (ATTR_LOWARG) || match (ATTR_HIGHARG))
     {
-      assign_line->right_var.type = parser.current.type;
-      assign_line->right_var.data = bracket_num ();
+      obj->type = parser.current.type;
+      obj->data = bracket_num ();
     }
   else if (match (NUMBER))
     {
-      assign_line->right_var.type = parser.current.type;
-      assign_line->right_var.data = parser.current.data;
+      obj->type = parser.current.type;
+      obj->data = parser.current.data;
     }
   else
     error_at (parser.next, EXPECT_RIGHT_VAR);
@@ -277,7 +308,7 @@ assign_line ()
   local->type = ASSIGN_LINE;
   assign_line_t *assign_line = &local->assign_line;
 
-  left (assign_line);
+  left (&assign_line->left_var);
 
   if (match_from_to (ADD_TO, XOR_TO))
     assign_line->operator = parser.current.type;
@@ -291,7 +322,7 @@ assign_line ()
   else
     error_at (parser.next, EXPECT_OPERATOR);
 
-  right (assign_line);
+  right (&assign_line->right_var);
 }
 
 static void
@@ -323,9 +354,12 @@ label_decl ()
   if (!match (LABEL_DECL))
     return;
 
-  label_t label = { .string = parser.current.token_start,
-                    .len = parser.current.token_len };
-  insert_key (label, parser.line_nr);
+  label_t label;
+  label.type = IDENTIFIER;
+  label.key.string = parser.current.token_start;
+  label.key.len = parser.current.token_len - 1;
+  // ignore the ':' character
+  insert_key (&label.key, parser.code_nr);
 
   // ignore our disasm useless output
   uint32_t count = 0;
@@ -345,9 +379,13 @@ parse_line (statement_t *statement)
   local = statement;
   memset (local, '\0', sizeof (statement_t));
 
-  parser.line_nr++;
+  parser.text_nr++;
+  parser.code_nr++;
+  // if statement turns out to be empty_line, code_line--;
+  local->code_nr = parser.code_nr;
+  local->text_nr = parser.text_nr;
+
   local->line_start = parser.next.token_start;
-  local->line_nr = parser.line_nr;
 
   if (setjmp (g_env) == 1)
     return;

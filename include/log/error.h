@@ -16,7 +16,7 @@
 #define FILE_TOO_LARGE _ ("The input file is greater than 1 MiB!")
 
 // hash
-#define CANNOT_FIND_VALUE _ ("Can not find value: %.*s")
+#define CANNOT_FIND_LABEL _ ("Can not find label: %.*s")
 
 // parser
 #define UNEXPECT_TOKEN _ ("Unexpect token")
@@ -31,6 +31,7 @@
 #define EXPECT_COMPARTOR _ ("Expect comparator")
 #define EXPECT_LABEL _ ("Expect label")
 #define EXPECT_SYSCALL _ ("Expect syscall")
+// EXPECT_SYSCALL also use in resolver
 
 #define EXPECT_GOTO _ ("Expect 'goto'")
 #define EXPECT_A _ ("Expect '$A'")
@@ -53,5 +54,10 @@
 #define ARGS_IDX_OUT_OF_RANGE _ ("Args index out of range")
 #define MEM_IDX_OUT_OF_RANGE _ ("Mem index out of range")
 #define UNINITIALIZED_MEM _ ("Uninitialized mem")
+
+#define JT_TOO_FAR _ ("Jt is too far")
+#define JF_TOO_FAR _ ("Jf is too far")
+#define JT_MUST_BE_POSITIVE _ ("Jt must be positive")
+#define JF_MUST_BE_POSITIVE _ ("Jf must be positive")
 
 #endif

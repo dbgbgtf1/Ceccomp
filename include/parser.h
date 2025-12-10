@@ -7,7 +7,15 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-typedef hkey_t label_t;
+typedef struct {
+  token_type type;
+  union {
+    hkey_t key;
+    uint32_t code_nr;
+  };
+  // store code_nr when type is NUMBER
+  // store identifier when type is IDENTIFIER
+}label_t;
 
 typedef struct
 {
@@ -19,7 +27,8 @@ typedef struct
   };
   // store idx for MEM | ATTR_LOWARG | ATTR_HIGHARG
   // store value for NUMBER | TRAP | TRACE | ERRNO
-  // I don't want to deal with `i386 | i386.read | read` in parser
+  // use ATTR_SYSCALL to cover read
+  // I can't deal with `read` in parser without arch
   // so save it in string
 } obj_t;
 
@@ -86,7 +95,8 @@ typedef enum
 
 typedef struct
 {
-  uint16_t line_nr;
+  uint16_t text_nr;
+  uint16_t code_nr;
   expr_type type;
   char *line_start;
   char *line_end;
