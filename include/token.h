@@ -62,8 +62,9 @@ extern char *token_pairs[];
 typedef struct scanner_t scanner_t;
 typedef struct token_t token_t;
 
-token_t init_token (scanner_t *scanner, token_type type);
+void init_token (token_t *token, scanner_t *scanner, token_type type);
 
-token_t init_token_data (scanner_t *scanner, token_type type, size_t data);
+void init_token_data (token_t *token, scanner_t *scanner, token_type type,
+                      size_t data);
 
 #endif

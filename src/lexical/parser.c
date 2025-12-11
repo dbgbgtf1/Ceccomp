@@ -30,7 +30,7 @@ advance ()
 {
   parser.previous = parser.current;
   parser.current = parser.next;
-  parser.next = scan_token ();
+  scan_token (&parser.next);
 }
 
 static bool

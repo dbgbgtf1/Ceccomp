@@ -16,6 +16,6 @@ typedef struct token_t token_t;
 
 extern void init_scanner (char *start);
 
-extern token_t scan_token ();
+extern void scan_token (token_t *token);
 
 #endif

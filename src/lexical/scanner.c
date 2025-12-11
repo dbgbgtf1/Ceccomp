@@ -14,8 +14,20 @@
 
 static scanner_t scanner;
 
-#define INIT_TOKEN(type) init_token (&scanner, type)
-#define INIT_TOKEN_DATA(type, data) init_token_data (&scanner, type, data)
+#define INIT_TOKEN(type)                                                      \
+  do                                                                          \
+    {                                                                         \
+      init_token (token, &scanner, type);                                   \
+      return;                                                                 \
+    }                                                                         \
+  while (0);
+#define INIT_TOKEN_DATA(type, data)                                           \
+  do                                                                          \
+    {                                                                         \
+      init_token_data (token, &scanner, type, data);                        \
+      return;                                                                 \
+    }                                                                         \
+  while (0);
 
 static inline bool
 isidentifier (char c)
@@ -55,16 +67,16 @@ match_string (char *expected, uint16_t cmp_len)
   return true;
 }
 
-static token_t
-reset_to_nextline ()
+static void
+reset_to_nextline (token_t *token)
 {
   scanner.token_start = next_line ();
   if (scanner.token_start == NULL)
-    return INIT_TOKEN (TOKEN_EOF);
+    INIT_TOKEN (TOKEN_EOF);
 
   scanner.current_char = scanner.token_start;
   scanner.line_nr++;
-  return INIT_TOKEN (LINE_END);
+  INIT_TOKEN (LINE_END);
 }
 
 static void
@@ -95,8 +107,8 @@ init_scanner (char *start)
   scanner.line_nr = 1;
 }
 
-token_t
-scan_token ()
+void
+scan_token (token_t *token)
 {
   // skip spaces and comment
   skip_spaces ();
@@ -106,13 +118,13 @@ scan_token ()
 
   // LINE_END
   if (peek () == '\0')
-    return reset_to_nextline ();
+    reset_to_nextline (token);
 
   // ARCH_X86 : TOKEN_EOF
   for (uint32_t enum_idx = (int)ARCH_X86; enum_idx < (int)UNKNOWN; enum_idx++)
     {
       if (match_string (token_pairs[enum_idx], strlen (token_pairs[enum_idx])))
-        return INIT_TOKEN (enum_idx);
+        INIT_TOKEN (enum_idx);
     }
 
   // LABEL_DECL : IDENTIFIER
@@ -124,7 +136,7 @@ scan_token ()
         advance (1);
       while (isidentifier (peek ()));
 
-      return INIT_TOKEN (match (':') ? LABEL_DECL : IDENTIFIER);
+      INIT_TOKEN (match (':') ? LABEL_DECL : IDENTIFIER);
     }
 
   // NUMBER
@@ -136,8 +148,8 @@ scan_token ()
       if (errno)
         error ("strtol: %s", strerror (errno));
       scanner.current_char = end;
-      return INIT_TOKEN_DATA (NUMBER, num);
+      INIT_TOKEN_DATA (NUMBER, num);
     }
 
-  return INIT_TOKEN (UNKNOWN);
+  INIT_TOKEN (UNKNOWN);
 }

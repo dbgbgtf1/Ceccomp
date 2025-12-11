@@ -42,22 +42,18 @@ char *token_pairs[] = {
 };
 // clang-format on
 
-token_t
-init_token (scanner_t *scanner, token_type type)
+void
+init_token (token_t *token,scanner_t *scanner, token_type type)
 {
-  token_t token;
-  token.type = type;
-  token.token_start = scanner->token_start;
-  token.token_len = scanner->current_char - scanner->token_start;
-  token.line_nr = scanner->line_nr;
-
-  return token;
+  token->type = type;
+  token->token_start = scanner->token_start;
+  token->token_len = scanner->current_char - scanner->token_start;
+  token->line_nr = scanner->line_nr;
 }
 
-token_t
-init_token_data (scanner_t *scanner, token_type type, size_t data)
+void
+init_token_data (token_t *token, scanner_t *scanner, token_type type, size_t data)
 {
-  token_t token = init_token (scanner, type);
-  token.data = data;
-  return token;
+  init_token (token, scanner, type);
+  token->data = data;
 }
