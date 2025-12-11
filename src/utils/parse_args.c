@@ -10,6 +10,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+static bool stop_parse = false;
+
 static uint64_t
 fail_fast_strtoull (char *num, char *error_msg)
 {
@@ -152,6 +154,7 @@ parse_trace (trace_arg_t *args, int key, char *arg, struct argp_state *state)
         return 0;
       args->mode = TRACE_PROG;
       args->prog_idx = state->next - 1;
+      stop_parse = true;
       return 0;
     case 'p':
       if (args->mode != UNDECIDED)
@@ -175,8 +178,10 @@ parse_probe (probe_arg_t *args, int key, char *arg, struct argp_state *state)
   switch (key)
     {
     case ARGP_KEY_ARG:
-      if (state->arg_num == 1)
-        args->prog_idx = state->next - 1;
+      if (state->arg_num != 1)
+        return 0;
+      args->prog_idx = state->next - 1;
+      stop_parse = true;
       return 0;
     case 'o':
       args->output_file = fail_fast_fopen (arg, "w+");
@@ -191,7 +196,7 @@ parse_opt (int key, char *arg, struct argp_state *state)
 {
   ceccomp_arg_t *args = state->input;
 
-  if (args->trace_arg->prog_idx != 0 || args->probe_arg->prog_idx != 0)
+  if (stop_parse)
     return 0;
 
   switch (key)
