@@ -7,7 +7,7 @@ bool color_enable = true;
 bool log_color_enable = true;
 
 void
-set_color (color_mode color, FILE *output)
+set_color (color_mode_t color, FILE *output)
 {
   if (color == ALWAYS)
     {

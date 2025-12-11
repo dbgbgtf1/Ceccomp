@@ -16,92 +16,77 @@ typedef enum
   HELP_MODE,
   VERSION_MODE,
   HELP_ABNORMAL,
-} subcommand;
+} subcommand_t;
 
 typedef enum
 {
   HEXLINE,
   HEXFMT,
-  RA,
-} print_mode;
+  RAW,
+} print_mode_t;
 
 typedef enum
 {
   ALWAYS,
   AUTO,
   NEVER,
-} color_mode;
+} color_mode_t;
 
 typedef struct
 {
   uint32_t arch_enum;
-  print_mode mode;
-  char *text_name;
-} asm_args;
+  print_mode_t mode;
+  FILE *text_file;
+} asm_arg_t;
 
 typedef struct
 {
   uint32_t arch_enum;
-  char *raw_name;
-} disasm_args;
+  FILE *raw_file;
+} disasm_arg_t;
 
 typedef struct
 {
   uint32_t arch_enum;
   bool quiet;
-  char *text_name;
+  FILE *text_file;
   char *sys_name;
   uint64_t args[6];
   uint64_t ip;
-} emu_args;
+} emu_arg_t;
 
 typedef struct
 {
-  char *output_file;
-  char *program;
-} probe_args;
-
-typedef struct
-{
-  char *output_file;
-  char *program;
-} trace_prog_args;
-
-typedef struct
-{
-  char *output_file;
-  pid_t pid;
-} trace_pid_args;
+  FILE *output_file;
+  uint32_t prog_idx;
+} probe_arg_t;
 
 typedef enum
 {
+  UNDECIDED,
   TRACE_PROG,
   TRACE_PID,
-} trace_mode;
+} trace_mode_t;
 
 typedef struct
 {
-  trace_mode mode;
-  union
-  {
-    trace_prog_args trace_prog_arg;
-    trace_pid_args trace_pid_args;
-  };
-} trace_args;
+  trace_mode_t mode;
+  FILE *output_file;
+  uint32_t prog_idx;
+  pid_t pid;
+} trace_arg_t;
 
 typedef struct
 {
-  subcommand cmd;
-  color_mode when;
-  union
-  {
-    asm_args asm_arg;
-    disasm_args disasm_arg;
-    emu_args emu_arg;
-    probe_args probe_arg;
-    trace_args trace_arg;
-  };
-} ceccomp_args;
+  subcommand_t cmd;
+  color_mode_t when;
+
+  asm_arg_t *asm_arg;
+  disasm_arg_t *disasm_arg;
+  emu_arg_t *emu_arg;
+  probe_arg_t *probe_arg;
+  trace_arg_t *trace_arg;
+} ceccomp_arg_t;
 
 extern error_t parse_opt (int key, char *arg, struct argp_state *state);
 

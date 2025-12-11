@@ -10,7 +10,7 @@
 extern bool color_enable;
 extern bool log_color_enable;
 
-extern void set_color (color_mode color, FILE *output);
+extern void set_color (color_mode_t color, FILE *output);
 
 #define CLR "\x1b[0m"
 

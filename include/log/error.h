@@ -5,6 +5,9 @@
 
 // parse_args
 #define INVALID_COLOR_MODE _ ("Invalid color mode")
+#define INVALID_FMT_MODE _ ("Invalid format mode")
+#define INVALID_NUMBER _ ("Invalid number")
+#define UNABLE_OPEN_FILE _ ("Unable open file")
 
 // read_source
 #define FOUND_SUS_ZERO                                                        \

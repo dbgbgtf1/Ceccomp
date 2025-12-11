@@ -1,10 +1,37 @@
 #include "parse_args.h"
+#include "arch_trans.h"
 #include "log/error.h"
 #include "log/logger.h"
 #include <argp.h>
+#include <errno.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
-static subcommand
+static uint64_t
+fail_fast_strtoull (char *num, char *error_msg)
+{
+  char *end;
+  errno = 0;
+  uint64_t result = strtoull (num, &end, 0);
+  if (result == 0 && errno)
+    error ("%s", error_msg);
+  return result;
+}
+
+static FILE *
+fail_fast_fopen (char *file, char *mode)
+{
+  debug ("opening %s", file);
+  FILE *fp = fopen (file, mode);
+  if (fp == NULL)
+    error ("%s", UNABLE_OPEN_FILE);
+  return fp;
+}
+
+static subcommand_t
 parse_subcommand (char *arg)
 {
   if (!strcmp (arg, "asm"))
@@ -25,7 +52,7 @@ parse_subcommand (char *arg)
     return HELP_ABNORMAL;
 }
 
-static color_mode
+static color_mode_t
 parse_color_mode (char *arg)
 {
   if (!strcmp (arg, "always"))
@@ -38,15 +65,33 @@ parse_color_mode (char *arg)
     error ("%s: %s", INVALID_COLOR_MODE, arg);
 }
 
+static print_mode_t
+parse_print_mode (char *arg)
+{
+  if (!strcmp (arg, "hexfmt"))
+    return HEXFMT;
+  else if (!strcmp (arg, "hexline"))
+    return HEXLINE;
+  else if (!strcmp (arg, "raw"))
+    return RAW;
+  else
+    error ("%s: %s", INVALID_FMT_MODE, arg);
+}
+
 static int
-parse_asm (asm_args *args, int key, char *arg)
+parse_asm (asm_arg_t *args, int key, char *arg, struct argp_state *state)
 {
   switch (key)
     {
     case ARGP_KEY_ARG:
-      args->text_name = arg;
+      if (state->arg_num == 1)
+        args->text_file = fail_fast_fopen (arg, "r");
       return 0;
     case 'a':
+      args->arch_enum = str_to_scmp_arch (arg);
+      return 0;
+    case 'f':
+      args->mode = parse_print_mode (arg);
       return 0;
     }
 
@@ -54,43 +99,114 @@ parse_asm (asm_args *args, int key, char *arg)
 }
 
 static int
-parse_disasm (disasm_args *args, int key, char *arg)
+parse_disasm (disasm_arg_t *args, int key, char *arg, struct argp_state *state)
 {
+  switch (key)
+    {
+    case ARGP_KEY_ARG:
+      if (state->arg_num == 1)
+        args->raw_file = fail_fast_fopen (arg, "r");
+      return 0;
+    case 'a':
+      args->arch_enum = str_to_scmp_arch (arg);
+      return 0;
+    }
+
   return 0;
 }
 
 static int
-parse_emu (emu_args *args, int key, char *arg)
+parse_emu (emu_arg_t *args, int key, char *arg, struct argp_state *state)
 {
+  switch (key)
+    {
+    case ARGP_KEY_ARG:
+      if (state->arg_num == 1)
+        args->text_file = fail_fast_fopen (arg, "r");
+      else if (state->arg_num == 2)
+        args->sys_name = arg;
+      else if (state->arg_num >= 3 && state->arg_num <= 8)
+        args->args[state->arg_num - 3]
+            = fail_fast_strtoull (arg, INVALID_NUMBER);
+      else if (state->arg_num == 9)
+        args->ip = fail_fast_strtoull (arg, INVALID_NUMBER);
+      return 0;
+    case 'a':
+      args->arch_enum = str_to_scmp_arch (arg);
+      return 0;
+    case 'q':
+      args->quiet = true;
+      return 0;
+    }
+
   return 0;
 }
 
 static int
-parse_trace (trace_args *args, int key, char *arg)
+parse_trace (trace_arg_t *args, int key, char *arg, struct argp_state *state)
 {
+  switch (key)
+    {
+    case ARGP_KEY_ARG:
+      if (state->arg_num != 1 || args->mode != UNDECIDED)
+        return 0;
+      args->mode = TRACE_PROG;
+      args->prog_idx = state->next - 1;
+      return 0;
+    case 'p':
+      if (args->mode != UNDECIDED)
+        return 0;
+      args->mode = TRACE_PID;
+      args->pid = fail_fast_strtoull (arg, INVALID_NUMBER);
+      return 0;
+    case 'o':
+      if (args->mode != UNDECIDED)
+        return 0;
+      args->output_file = fail_fast_fopen (arg, "w+");
+      return 0;
+    }
+
   return 0;
 }
 
 static int
-parse_probe (probe_args *args, int key, char *arg)
+parse_probe (probe_arg_t *args, int key, char *arg, struct argp_state *state)
 {
+  switch (key)
+    {
+    case ARGP_KEY_ARG:
+      if (state->arg_num == 1)
+        args->prog_idx = state->next - 1;
+      return 0;
+    case 'o':
+      args->output_file = fail_fast_fopen (arg, "w+");
+      return 0;
+    }
+
   return 0;
 }
 
 error_t
 parse_opt (int key, char *arg, struct argp_state *state)
 {
-  ceccomp_args *args = state->input;
+  ceccomp_arg_t *args = state->input;
+
+  if (args->trace_arg->prog_idx != 0 || args->probe_arg->prog_idx != 0)
+    return 0;
 
   switch (key)
     {
     case ARGP_KEY_ARG:
       if (state->arg_num == 0)
         args->cmd = parse_subcommand (arg);
-      return 0;
+      break;
     case 'c':
       args->when = parse_color_mode (arg);
+      return 0;
     case 'h':
+      if (args->cmd == HELP_ABNORMAL)
+        args->cmd = HELP_MODE;
+      return 0;
     case 'u':
       if (args->cmd == HELP_ABNORMAL)
         args->cmd = HELP_MODE;
@@ -98,15 +214,15 @@ parse_opt (int key, char *arg, struct argp_state *state)
     }
 
   if (args->cmd == ASM_MODE)
-    return parse_asm (&args->asm_arg, key, arg);
+    return parse_asm (args->asm_arg, key, arg, state);
   else if (args->cmd == DISASM_MODE)
-    return parse_disasm (&args->disasm_arg, key, arg);
+    return parse_disasm (args->disasm_arg, key, arg, state);
   else if (args->cmd == EMU_MODE)
-    return parse_emu (&args->emu_arg, key, arg);
+    return parse_emu (args->emu_arg, key, arg, state);
   else if (args->cmd == TRACE_MODE)
-    return parse_trace (&args->trace_arg, key, arg);
+    return parse_trace (args->trace_arg, key, arg, state);
   else if (args->cmd == PROBE_MODE)
-    return parse_probe (&args->probe_arg, key, arg);
+    return parse_probe (args->probe_arg, key, arg, state);
 
   return 0;
 }
