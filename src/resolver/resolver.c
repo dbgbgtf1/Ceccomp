@@ -2,7 +2,6 @@
 #include "hash.h"
 #include "log/error.h"
 #include "log/logger.h"
-#include "main.h"
 #include "parser.h"
 #include "token.h"
 #include "vector.h"
@@ -15,7 +14,7 @@
 
 bool has_error;
 static statement_t *local;
-static bool mem_valid[0x10] = { false };
+static uint16_t *masks, mem_valid = 0;
 
 #define REPORT_ERROR(error_msg)                                               \
   do                                                                          \
@@ -71,7 +70,6 @@ error_line ()
 #undef SPRINTF_CAT
 
 #define IS_ARG_OUT_RANGE(obj) is_out_range (obj, 0x5)
-
 #define IS_MEM_OUT_RANGE(obj) is_out_range (obj, 0x15)
 
 static bool
@@ -117,7 +115,7 @@ assign_A (assign_line_t *assign_line)
     {
       if (IS_MEM_OUT_RANGE (right))
         REPORT_ERROR (MEM_IDX_OUT_OF_RANGE);
-      if (!mem_valid[right->data])
+      if (!(mem_valid & (1 << right->data)))
         REPORT_ERROR (UNINITIALIZED_MEM);
     }
 }
@@ -148,7 +146,7 @@ assign_X (assign_line_t *assign_line)
     {
       if (IS_MEM_OUT_RANGE (right))
         REPORT_ERROR (MEM_IDX_OUT_OF_RANGE);
-      if (!mem_valid[right->data])
+      if (!(mem_valid & (1 << right->data)))
         REPORT_ERROR (UNINITIALIZED_MEM);
     }
 }
@@ -158,7 +156,7 @@ assign_MEM (assign_line_t *assign_line)
 {
   obj_t *left = &assign_line->left_var;
   token_type operator = assign_line->operator;
-  obj_t *right = &assign_line->left_var;
+  obj_t *right = &assign_line->right_var;
 
   if (operator != EQUAL)
     REPORT_ERROR (OPERATOR_SHOULD_BE_EQUAL);
@@ -169,7 +167,7 @@ assign_MEM (assign_line_t *assign_line)
   if (right->type != A && right->type != X)
     REPORT_ERROR (RIGHT_SHOULD_BE_A_OR_X);
 
-  mem_valid[left->data] = true;
+  mem_valid |= (1 << left->data);
 }
 
 static void
@@ -185,38 +183,45 @@ assign_line ()
 }
 
 static void
+set_jt_jf (label_t *label, uint32_t code_nr)
+{
+  label->type = NUMBER;
+  label->code_nr = code_nr - local->code_nr - 1;
+}
+
+static void
 jump_line ()
 {
   jump_line_t *jump_line = &local->jump_line;
-  uint32_t jt = find_key (&jump_line->jt.key);
-  uint32_t jf;
 
-  jump_line->jt.type = NUMBER;
-  jump_line->jt.code_nr = jt - local->code_nr - 1;
+  set_jt_jf (&jump_line->jt, find_key (&jump_line->jt.key));
   if ((int32_t)jump_line->jt.code_nr < 0)
     REPORT_ERROR (JT_MUST_BE_POSITIVE);
 
   if (!jump_line->if_condition)
-    return;
-
-  if (jt > UINT8_MAX)
-    REPORT_ERROR (JT_TOO_FAR);
-
-  if (jump_line->jf.key.string == NULL)
     {
-      jump_line->jf.type = NUMBER;
-      jump_line->jf.code_nr = 0;
+      masks[local->code_nr + jump_line->jt.code_nr + 1] &= mem_valid;
+      mem_valid = ~0;
       return;
     }
 
-  jf = find_key (&jump_line->jf.key);
-  jump_line->jf.type = NUMBER;
-  jump_line->jf.code_nr = jf - local->code_nr - 1;
-  if ((int32_t)jump_line->jt.code_nr < 0)
+  if (jump_line->jt.code_nr > UINT8_MAX)
+    REPORT_ERROR (JT_TOO_FAR);
+
+  if (jump_line->jf.key.string == NULL)
+    set_jt_jf (&jump_line->jf, local->code_nr + 1);
+  else
+    set_jt_jf (&jump_line->jf, find_key (&jump_line->jf.key));
+
+  if ((int32_t)jump_line->jf.code_nr < 0)
     REPORT_ERROR (JF_MUST_BE_POSITIVE);
 
-  if (jf > UINT8_MAX)
+  if (jump_line->jf.code_nr > UINT8_MAX)
     REPORT_ERROR (JF_TOO_FAR);
+
+  masks[local->code_nr + jump_line->jt.code_nr + 1] &= mem_valid;
+  masks[local->code_nr + jump_line->jf.code_nr + 1] &= mem_valid;
+  mem_valid = ~0;
 }
 
 #define _SCMP_ACT_TRAP(x) (SCMP_ACT_TRAP | ((x) & 0x0000ffffU))
@@ -237,10 +242,10 @@ return_line ()
 {
   return_line_t *return_line = &local->return_line;
   token_type ret_type = return_line->ret_obj.type;
-  return_line->ret_obj.type = NUMBER;
   if (ret_type == A)
     return;
 
+  return_line->ret_obj.type = NUMBER;
   if (ret_type == TRACE || ret_type == TRAP || ret_type == ERRNO)
     return_line->ret_obj.data |= retvals[ret_type];
   else
@@ -279,12 +284,21 @@ resolver (vector_t *v)
 {
   has_error = false;
 
+  masks = reallocate (NULL, sizeof (uint16_t) * (v->count - 1));
+  memset (masks, 0xff, sizeof (uint16_t) * (v->count - 1));
+  mem_valid = 0;
+
   for (uint32_t i = 0; i < v->count - 1; i++)
-    resolve_statement (get_vector (v, i));
+    {
+      mem_valid &= masks[i];
+      resolve_statement (get_vector (v, i));
+    }
 
   statement_t *last = get_vector (v, v->count - 2);
   if (last->type != RETURN_LINE)
     report_error (EXPECT_RETURN_IN_THE_END);
+
+  reallocate (masks, 0x0);
 
   if (has_error)
     return true;

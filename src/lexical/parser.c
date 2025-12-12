@@ -21,7 +21,7 @@ typedef struct
   token_t next;
 } parser_t;
 
-static parser_t parser = { .text_nr = 0, .code_nr = 0 };
+static parser_t parser = { .text_nr = -1, .code_nr = -1 };
 static statement_t *local;
 static uint32_t local_arch;
 static jmp_buf g_env;
@@ -132,7 +132,6 @@ static void
 ret_obj ()
 {
   obj_t *obj = &local->return_line.ret_obj;
-  obj->type = parser.current.type;
 
   if (match_from_to (TRACE, ERRNO))
     {
