@@ -296,6 +296,8 @@ alu_mode (uint8_t alu_enum)
       return BPF_LSH;
     case ALU_RS:
       return BPF_RSH;
+    case ALU_XO:
+      return BPF_XOR;
     default:
       error ("%s", INPOSSIBLE_ALU_ENUM);
     }

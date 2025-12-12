@@ -198,7 +198,7 @@ parse_alu_sym (char *cmp_str)
   else if (!strncmp (cmp_str, "|=", 2))
     return ALU_OR;
   else if (!strncmp (cmp_str, "^=", 2))
-    return ALU_ML;
+    return ALU_XO;
   else if (!strncmp (cmp_str, "<<=", 3))
     return ALU_LS;
   else if (!strncmp (cmp_str, ">>=", 3))
