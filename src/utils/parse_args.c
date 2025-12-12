@@ -26,7 +26,6 @@ fail_fast_strtoull (char *num, char *error_msg)
 static FILE *
 fail_fast_fopen (char *file, char *mode)
 {
-  debug ("opening %s", file);
   FILE *fp = fopen (file, mode);
   if (fp == NULL)
     error ("%s", UNABLE_OPEN_FILE);

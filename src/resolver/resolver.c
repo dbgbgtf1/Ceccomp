@@ -2,6 +2,7 @@
 #include "hash.h"
 #include "log/error.h"
 #include "log/logger.h"
+#include "main.h"
 #include "parser.h"
 #include "token.h"
 #include "vector.h"
@@ -218,6 +219,35 @@ jump_line ()
     REPORT_ERROR (JF_TOO_FAR);
 }
 
+#define _SCMP_ACT_TRAP(x) (SCMP_ACT_TRAP | ((x) & 0x0000ffffU))
+
+static uint32_t retvals[] = {
+  [KILL_PROC] = SCMP_ACT_KILL_PROCESS,
+  [KILL] = SCMP_ACT_KILL,
+  [ALLOW] = SCMP_ACT_ALLOW,
+  [NOTIFY] = SCMP_ACT_NOTIFY,
+  [LOG] = SCMP_ACT_LOG,
+  [TRACE] = SCMP_ACT_TRACE (0),
+  [TRAP] = _SCMP_ACT_TRAP (0),
+  [ERRNO] = SCMP_ACT_ERRNO (0),
+};
+
+static void
+return_line ()
+{
+  return_line_t *return_line = &local->return_line;
+  token_type ret_type = return_line->ret_obj.type;
+  return_line->ret_obj.type = NUMBER;
+  if (ret_type == A)
+    return;
+
+  if (ret_type == TRACE || ret_type == TRAP || ret_type == ERRNO)
+    return_line->ret_obj.data |= retvals[ret_type];
+  else
+    return_line->ret_obj.data = retvals[ret_type];
+  // Don't assume the ret_obj.data == zero when not used
+}
+
 static void
 resolve_statement (statement_t *statement)
 {
@@ -234,8 +264,10 @@ resolve_statement (statement_t *statement)
     case JUMP_LINE:
       jump_line ();
       return;
-    // nothing need to be done for these line
     case RETURN_LINE:
+      return_line ();
+      return;
+    // nothing need to be done for these line
     case EMPTY_LINE:
     case EOF_LINE:
       return;
@@ -247,10 +279,10 @@ resolver (vector_t *v)
 {
   has_error = false;
 
-  for (uint32_t idx = 0; idx < v->count; idx++)
-    resolve_statement (get_vector (v, idx));
+  for (uint32_t i = 0; i < v->count - 1; i++)
+    resolve_statement (get_vector (v, i));
 
-  statement_t *last = get_vector(v, v->count - 1);
+  statement_t *last = get_vector (v, v->count - 2);
   if (last->type != RETURN_LINE)
     report_error (EXPECT_RETURN_IN_THE_END);
 
