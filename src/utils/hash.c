@@ -11,43 +11,43 @@
 static table_t table;
 
 static uint32_t
-hashString (hkey_t *key_tmp)
+hashString (hkey_t *key)
 {
   uint32_t hash = 2166136261u;
-  for (int i = 0; i < key_tmp->len; i++)
+  for (int i = 0; i < key->len; i++)
     {
-      hash ^= (uint8_t)key_tmp->string[i];
+      hash ^= (uint8_t)key->string[i];
       hash *= 16777619;
     }
   return hash;
 }
 
 static bucket_t *
-hash_bucket (hkey_t *key_tmp)
+hash_bucket (hkey_t *key)
 {
-  uint32_t hash = hashString (key_tmp);
+  uint32_t hash = hashString (key);
   uint32_t idx = hash % table.capacity;
   return &table.bucket[idx];
 }
 
 static bucket_t *
-creat_bucket (hkey_t *key_tmp, uint16_t line_nr)
+creat_bucket (hkey_t *key, uint16_t line_nr)
 {
   bucket_t *bucket = NULL;
-  bucket = reallocate (bucket, sizeof (bucket_t) + key_tmp->len + 1);
+  bucket = reallocate (bucket, sizeof (bucket_t) + key->len + 1);
 
-  bucket->key_tmp = *key_tmp;
+  bucket->key = *key;
   bucket->line_nr = line_nr;
   bucket->next = NULL;
   return bucket;
 }
 
 void
-insert_key (hkey_t *key_tmp, uint16_t line_nr)
+insert_key (hkey_t *key, uint16_t line_nr)
 {
-  bucket_t *bucket = hash_bucket (key_tmp);
+  bucket_t *bucket = hash_bucket (key);
 
-  bucket_t *bucket_new = creat_bucket (key_tmp, line_nr);
+  bucket_t *bucket_new = creat_bucket (key, line_nr);
   bucket_new->next = bucket->next;
   bucket->next = bucket_new;
 
@@ -64,13 +64,13 @@ free_next_bucket (bucket_t *bucket)
 }
 
 void
-free_key (hkey_t *key_tmp)
+free_key (hkey_t *key)
 {
-  bucket_t *bucket = hash_bucket (key_tmp);
+  bucket_t *bucket = hash_bucket (key);
 
   while (bucket->next)
     {
-      if (strncmp (bucket->next->key_tmp.string, key_tmp->string, key_tmp->len))
+      if (strncmp (bucket->next->key.string, key->string, key->len))
         bucket = bucket->next;
       else
         {
@@ -79,23 +79,23 @@ free_key (hkey_t *key_tmp)
         }
     }
 
-  error (CANNOT_FIND_LABEL, key_tmp->len, key_tmp->string);
+  error (CANNOT_FIND_LABEL, key->len, key->string);
 }
 
 uint16_t
-find_key (hkey_t *key_tmp)
+find_key (hkey_t *key)
 {
-  bucket_t *bucket = hash_bucket (key_tmp);
+  bucket_t *bucket = hash_bucket (key);
 
   while (bucket->next)
     {
-      if (strncmp (bucket->next->key_tmp.string, key_tmp->string, key_tmp->len))
+      if (strncmp (bucket->next->key.string, key->string, key->len))
         bucket = bucket->next;
       else
         return bucket->next->line_nr;
     }
 
-  error (CANNOT_FIND_LABEL, key_tmp->len, key_tmp->string);
+  error (CANNOT_FIND_LABEL, key->len, key->string);
 }
 
 void
