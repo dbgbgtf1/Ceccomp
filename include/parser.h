@@ -2,34 +2,28 @@
 #define PARSER
 
 #include "hash.h"
-#include "main.h"
 #include "token.h"
 #include <stdbool.h>
 #include <stdint.h>
-
-typedef struct {
-  token_type type;
-  union {
-    hkey_t key;
-    uint32_t code_nr;
-  };
-  // store code_nr when type is NUMBER
-  // store identifier when type is IDENTIFIER
-}label_t;
 
 typedef struct
 {
   token_type type;
   union
   {
-    uint32_t data;
-    string_t string;
+    hkey_t key;
+    uint32_t code_nr;
   };
+  // store code_nr when type is NUMBER
+  // store identifier when type is IDENTIFIER
+} label_t;
+
+typedef struct
+{
+  token_type type;
+  uint32_t data;
   // store idx for MEM | ATTR_LOWARG | ATTR_HIGHARG
   // store value for NUMBER | TRAP | TRACE | ERRNO
-  // use ATTR_SYSCALL to cover read
-  // I can't deal with `read` in parser without arch
-  // so save it in string
 } obj_t;
 
 typedef struct
@@ -112,7 +106,7 @@ typedef struct
   };
 } statement_t;
 
-extern void init_parser ();
+extern void init_parser (uint32_t scmp_arch);
 
 extern void parse_line (statement_t *statement);
 

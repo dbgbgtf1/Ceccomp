@@ -10,6 +10,7 @@
 extern bool has_error;
 
 // pass the statement_t vector !!!
-extern void resolver (vector_t *v, uint32_t default_arch);
+// return false if ok, return true if error occurs
+extern bool resolver (vector_t *v);
 
 #endif

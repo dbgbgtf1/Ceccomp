@@ -4,16 +4,15 @@
 #include "log/logger.h"
 #include "parser.h"
 #include "token.h"
+#include "vector.h"
 #include <assert.h>
 #include <seccomp.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 
 bool has_error;
-uint32_t arch;
 static statement_t *local;
 static bool mem_valid[0x10] = { false };
 
@@ -85,23 +84,23 @@ is_out_range (obj_t *obj, uint32_t max_idx)
 static void
 assign_A (assign_line_t *assign_line)
 {
-  token_type *operator = &assign_line->operator;
+  token_type operator = assign_line->operator;
   obj_t *right = &assign_line->right_var;
 
-  if (*operator == NEGATIVE)
+  if (operator == NEGATIVE)
     {
       if (right->type != A)
         REPORT_ERROR (RIGHT_SHOULD_BE_A);
       return;
     }
-  else if (match_from_to (*operator, ADD_TO, XOR_TO))
+  else if (match_from_to (operator, ADD_TO, XOR_TO))
     {
       if (right->type != X && right->type != NUMBER)
         REPORT_ERROR (RIGHT_SHOULD_BE_X_OR_NUM);
       return;
     }
 
-  assert (*operator == EQUAL);
+  assert (operator == EQUAL);
 
   if (right->type == ATTR_LEN)
     {
@@ -129,7 +128,7 @@ assign_X (assign_line_t *assign_line)
   obj_t *right = &assign_line->right_var;
 
   if (*operator != EQUAL)
-    REPORT_ERROR (LEFT_SHOULD_BE_A);
+    REPORT_ERROR (OPERATOR_SHOULD_BE_EQUAL);
 
   if (right->type == ATTR_LEN)
     {
@@ -157,10 +156,10 @@ static void
 assign_MEM (assign_line_t *assign_line)
 {
   obj_t *left = &assign_line->left_var;
-  token_type *operator = &assign_line->operator;
+  token_type operator = assign_line->operator;
   obj_t *right = &assign_line->left_var;
 
-  if (*operator != EQUAL)
+  if (operator != EQUAL)
     REPORT_ERROR (OPERATOR_SHOULD_BE_EQUAL);
 
   if (IS_MEM_OUT_RANGE (left))
@@ -199,23 +198,15 @@ jump_line ()
   if (!jump_line->if_condition)
     return;
 
-  if (jt > UINT16_MAX)
+  if (jt > UINT8_MAX)
     REPORT_ERROR (JT_TOO_FAR);
 
-  token_type type = jump_line->cond.cmpobj.type;
-  if (type == ATTR_SYSCALL)
-    {
-      obj_t *obj = &jump_line->cond.cmpobj;
-      obj->type = NUMBER;
-      char *sys_name = strndup (obj->string.string, obj->string.len);
-      obj->data = seccomp_syscall_resolve_name_arch (arch, sys_name);
-      free (sys_name);
-      if (obj->data == (uint32_t)-1)
-        REPORT_ERROR (EXPECT_SYSCALL);
-    }
-
   if (jump_line->jf.key.string == NULL)
-    return;
+    {
+      jump_line->jf.type = NUMBER;
+      jump_line->jf.code_nr = 0;
+      return;
+    }
 
   jf = find_key (&jump_line->jf.key);
   jump_line->jf.type = NUMBER;
@@ -223,7 +214,7 @@ jump_line ()
   if ((int32_t)jump_line->jt.code_nr < 0)
     REPORT_ERROR (JF_MUST_BE_POSITIVE);
 
-  if (jf > UINT16_MAX)
+  if (jf > UINT8_MAX)
     REPORT_ERROR (JF_TOO_FAR);
 }
 
@@ -251,12 +242,19 @@ resolve_statement (statement_t *statement)
     }
 }
 
-void
-resolver (vector_t *v, uint32_t default_arch)
+bool
+resolver (vector_t *v)
 {
   has_error = false;
-  arch = default_arch;
 
   for (uint32_t idx = 0; idx < v->count; idx++)
     resolve_statement (get_vector (v, idx));
+
+  statement_t *last = get_vector(v, v->count - 1);
+  if (last->type != RETURN_LINE)
+    report_error (EXPECT_RETURN_IN_THE_END);
+
+  if (has_error)
+    return true;
+  return false;
 }

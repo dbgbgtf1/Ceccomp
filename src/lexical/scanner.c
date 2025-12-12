@@ -20,14 +20,14 @@ static scanner_t scanner;
       init_token (token, &scanner, type);                                     \
       return;                                                                 \
     }                                                                         \
-  while (0);
+  while (0)
 #define INIT_TOKEN_DATA(type, data)                                           \
   do                                                                          \
     {                                                                         \
       init_token_data (token, &scanner, type, data);                          \
       return;                                                                 \
     }                                                                         \
-  while (0);
+  while (0)
 
 static inline bool
 isidentifier (char c)

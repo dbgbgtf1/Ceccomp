@@ -23,6 +23,7 @@ typedef struct
 
 static parser_t parser = { .text_nr = 0, .code_nr = 0 };
 static statement_t *local;
+static uint32_t local_arch;
 static jmp_buf g_env;
 
 static void
@@ -163,6 +164,15 @@ label (label_t *label)
   label->key.len = parser.current.token_len;
 }
 
+static uint32_t
+resolve_name_arch (uint32_t arch_token, token_t *sys_tokne)
+{
+  char *sys_name = strndup (sys_tokne->token_start, sys_tokne->token_len);
+  uint32_t sys_nr = seccomp_syscall_resolve_name_arch (arch_token, sys_name);
+  free (sys_name);
+  return sys_nr;
+}
+
 static void
 compare_obj (obj_t *obj)
 {
@@ -172,49 +182,42 @@ compare_obj (obj_t *obj)
       return;
     }
 
+  obj->type = NUMBER;
+
   if (match (NUMBER))
     {
-      obj->type = parser.current.type;
       obj->data = parser.current.data;
       return;
     }
 
   if (match (IDENTIFIER))
     {
-      obj->type = ATTR_SYSCALL;
-      obj->string.string = parser.current.token_start;
-      obj->string.len = parser.current.token_len;
+      obj->data = resolve_name_arch (local_arch, &parser.current);
+      if (obj->data == (uint32_t)-1)
+        error_at (parser.current, EXPECT_SYSCALL);
       return;
     }
-  // read, we can't resolve syscall_name without arch
+  // read
 
   if (!match_from_to (ARCH_X86, ARCH_RISCV64))
     error_at (parser.next, UNEXPECT_TOKEN);
 
   if (!match (DOT))
     {
-      obj->type = NUMBER;
       obj->data = internal_arch_to_scmp_arch (parser.current.type);
       return;
     }
   // i386
-  else
-    {
-      if (!peek (IDENTIFIER))
-        error_at (parser.next, EXPECT_SYSCALL);
 
-      uint32_t scmp_arch = internal_arch_to_scmp_arch (parser.previous.type);
-      obj->type = NUMBER;
-      char *sys_name
-          = strndup (parser.next.token_start, parser.next.token_len);
-      obj->data = seccomp_syscall_resolve_name_arch (scmp_arch, sys_name);
-      free (sys_name);
-      if (obj->data == (uint32_t)-1)
-        error_at(parser.next, EXPECT_SYSCALL);
+  if (!peek (IDENTIFIER))
+    error_at (parser.next, EXPECT_SYSCALL);
 
-      advance ();
-      return;
-    }
+  uint32_t scmp_arch = internal_arch_to_scmp_arch (parser.previous.type);
+  obj->data = resolve_name_arch (scmp_arch, &parser.next);
+  if (obj->data == (uint32_t)-1)
+    error_at (parser.next, EXPECT_SYSCALL);
+
+  advance ();
   // i386.read
 }
 
@@ -368,9 +371,10 @@ label_decl ()
 }
 
 void
-init_parser ()
+init_parser (uint32_t scmp_arch)
 {
   advance ();
+  local_arch = scmp_arch;
 }
 
 void
