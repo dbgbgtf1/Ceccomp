@@ -17,14 +17,14 @@ static scanner_t scanner;
 #define INIT_TOKEN(type)                                                      \
   do                                                                          \
     {                                                                         \
-      init_token (token, &scanner, type);                                   \
+      init_token (token, &scanner, type);                                     \
       return;                                                                 \
     }                                                                         \
   while (0);
 #define INIT_TOKEN_DATA(type, data)                                           \
   do                                                                          \
     {                                                                         \
-      init_token_data (token, &scanner, type, data);                        \
+      init_token_data (token, &scanner, type, data);                          \
       return;                                                                 \
     }                                                                         \
   while (0);
@@ -118,7 +118,7 @@ scan_token (token_t *token)
 
   // LINE_END
   if (peek () == '\0')
-    reset_to_nextline (token);
+    return reset_to_nextline (token);
 
   // ARCH_X86 : TOKEN_EOF
   for (uint32_t enum_idx = (int)ARCH_X86; enum_idx < (int)UNKNOWN; enum_idx++)
