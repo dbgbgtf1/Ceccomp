@@ -17,10 +17,15 @@ static struct utsname uts;
 int
 main (int argc, char *argv[])
 {
+  uname (&uts);
+  uint32_t arch = str_to_scmp_arch (uts.machine);
+  if (arch == (uint32_t)-1)
+    error ("arch is invalid: %s", uts.machine);
+
   FILE *fp = fopen (argv[1], "r");
   init_source (fp);
   init_scanner (next_line ());
-  init_parser ();
+  init_parser (arch);
   init_table ();
 
   vector_t v;
@@ -29,23 +34,18 @@ main (int argc, char *argv[])
   do
     {
       parse_line (&statement);
-      push_vector (&v, &statement);
+      if (statement.type != EMPTY_LINE)
+        push_vector (&v, &statement);
     }
   while (statement.type != EOF_LINE);
+  // EOF_LINE is in get_vector (&v, v.count -1)
 
-  uname (&uts);
-  uint32_t arch = str_to_scmp_arch (uts.machine);
-  if (arch == (uint32_t)-1)
-    error ("arch is invalid: %s", uts.machine);
-  resolver (&v, arch);
+  resolver (&v);
 
-  statement_t *copy = get_vector (&v, 0);
-  for (uint32_t i = 0; copy->type != EOF_LINE; i++)
-    {
-      print_statement (copy);
-      copy = get_vector (&v, i);
-    }
+  for (uint32_t i = 0; i < v.count - 1; i++)
+    print_statement (get_vector (&v, i));
 
   free_table ();
   free_source ();
+  free_vector (&v);
 }

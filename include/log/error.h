@@ -3,6 +3,9 @@
 
 #include "i18n.h"
 
+// asm
+#define ASM_TERMINATED _ ("Asm terminated")
+
 // parse_args
 #define INVALID_COLOR_MODE _ ("Invalid color mode")
 #define INVALID_FMT_MODE _ ("Invalid format mode")
@@ -62,5 +65,7 @@
 #define JF_TOO_FAR _ ("Jf is too far")
 #define JT_MUST_BE_POSITIVE _ ("Jt must be positive")
 #define JF_MUST_BE_POSITIVE _ ("Jf must be positive")
+
+#define EXPECT_RETURN_IN_THE_END _ ("Expect return in the end")
 
 #endif

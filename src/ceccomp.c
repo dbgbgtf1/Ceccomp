@@ -1,4 +1,5 @@
 #include "arch_trans.h"
+#include "asm.h"
 #include "parse_args.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -81,10 +82,7 @@ main (int argc, char *argv[])
   switch (args.cmd)
     {
     case ASM_MODE:
-      printf ("ASM_MODE\n");
-      printf ("arch: 0x%x", args.asm_arg->arch_enum);
-      printf (", fmt: %d", args.asm_arg->mode);
-      printf (", text: %p\n", args.asm_arg->text_file);
+      assemble (asm_arg.text_file, asm_arg.arch_enum, asm_arg.mode);
       break;
     case DISASM_MODE:
       printf ("DISASM_MODE\n");
@@ -128,5 +126,4 @@ main (int argc, char *argv[])
       printf ("HELP_ABNORMAL\n");
       break;
     }
-  printf ("color: %d\n", args.when);
 }
