@@ -80,7 +80,7 @@ error_at (token_t token, char *err_msg)
     advance ();
 
   local->type = ERROR_LINE;
-  local->line_end = parser.current.token_start;
+  local->line_end = parser.current.token_start + parser.current.token_len;
   local->error_line.error_start = token.token_start;
   local->error_line.error_msg = err_msg;
   longjmp (g_env, 1);

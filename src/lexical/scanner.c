@@ -72,7 +72,10 @@ reset_to_nextline (token_t *token)
 {
   scanner.token_start = next_line ();
   if (scanner.token_start == NULL)
+  {
+    scanner.token_start = scanner.current_char;
     INIT_TOKEN (TOKEN_EOF);
+  }
 
   scanner.current_char = scanner.token_start;
   scanner.line_nr++;
