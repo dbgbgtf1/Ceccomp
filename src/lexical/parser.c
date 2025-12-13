@@ -232,7 +232,7 @@ condition (jump_line_t *jump_line)
     error_at (parser.next, EXPECT_PAREN);
   if (!match (A))
     error_at (parser.next, EXPECT_A);
-  if (!match_from_to (EQUAL_EQUAL, LESS_THAN))
+  if (!match_from_to (EQUAL_EQUAL, AND))
     error_at (parser.next, EXPECT_COMPARTOR);
   jump_line->cond.comparator = parser.current.type;
 
