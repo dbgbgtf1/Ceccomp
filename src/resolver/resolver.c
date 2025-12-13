@@ -96,6 +96,13 @@ assign_A (assign_line_t *assign_line)
     {
       if (right->type != X && right->type != NUMBER)
         REPORT_ERROR (RIGHT_SHOULD_BE_X_OR_NUM);
+
+      if (operator == DIVIDE_TO && right->type == NUMBER && right->data == 0)
+        REPORT_ERROR (ALU_DIV_BY_ZERO);
+
+      if (match_from_to (operator, LSH_TO, RSH_TO))
+        if (right->type == NUMBER && right->data >= 32)
+          REPORT_ERROR (ALU_SH_OUT_OF_RANGE);
       return;
     }
 
@@ -284,8 +291,8 @@ resolver (vector_t *v)
 {
   has_error = false;
 
-  masks = reallocate (NULL, sizeof (uint16_t) * (v->count - 1));
-  memset (masks, 0xff, sizeof (uint16_t) * (v->count - 1));
+  masks = reallocate (NULL, sizeof (*masks) * (v->count - 1));
+  memset (masks, 0xff, sizeof (*masks) * (v->count - 1));
   mem_valid = 0;
 
   for (uint32_t i = 0; i < v->count - 1; i++)
@@ -296,7 +303,7 @@ resolver (vector_t *v)
 
   statement_t *last = get_vector (v, v->count - 2);
   if (last->type != RETURN_LINE)
-    report_error (EXPECT_RETURN_IN_THE_END);
+    report_error (MUST_END_WITH_RET);
 
   reallocate (masks, 0x0);
 
