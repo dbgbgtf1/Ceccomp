@@ -54,13 +54,13 @@ jmp_mode (uint8_t cmp_enum, bool *reverse)
     case CMP_EQ:
       return BPF_JEQ;
 
-    case CMP_LT:
+    case CMP_LE:
       *reverse = !*reverse;
     // fall through
     case CMP_GT:
       return BPF_JGT;
 
-    case CMP_LE:
+    case CMP_LT:
       *reverse = !*reverse;
     // fall through
     case CMP_GE:

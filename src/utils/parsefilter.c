@@ -59,7 +59,7 @@ typedef enum
 } cmp_sym;
 
 const char *true_cmp_sym_tbl[4] = { " == ", " > ", " >= ", " & " };
-const char *false_cmp_sym_tbl[4] = { " != ", " < ", " <= ", " & " };
+const char *false_cmp_sym_tbl[4] = { " != ", " <= ", " < ", " & " };
 
 static void
 set_stat (reg_stat *dest, reg_stat src, bool force)
