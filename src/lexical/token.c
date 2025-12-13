@@ -30,10 +30,10 @@ char *token_pairs[] = {
   [DIVIDE_TO] = "/=", [LSH_TO] = "<<=", [RSH_TO] = ">>=",
   [AND_TO] = "&=", [OR_TO] = "|=", [XOR_TO] = "^=",
 
-  [EQUAL_EQUAL] = "==", [EQUAL] = "=",
-  [BANG_EQUAL] = "!=", [AND] = "&",
+  [EQUAL_EQUAL] = "==", [BANG_EQUAL] = "!=",
   [GREATER_EQUAL] = ">=", [GREATER_THAN] = ">",
   [LESS_EQUAL] = "<=", [LESS_THAN] = "<",
+  [AND] = "&", [EQUAL] = "=",
   [NEGATIVE] = "-", [BANG] = "!",
 
   [UNKNOWN] = "unknown", [COMMENT] = "#", [LINE_END] = "line_end",
@@ -43,7 +43,7 @@ char *token_pairs[] = {
 // clang-format on
 
 void
-init_token (token_t *token,scanner_t *scanner, token_type type)
+init_token (token_t *token, scanner_t *scanner, token_type type)
 {
   token->type = type;
   token->token_start = scanner->token_start;
@@ -52,7 +52,8 @@ init_token (token_t *token,scanner_t *scanner, token_type type)
 }
 
 void
-init_token_data (token_t *token, scanner_t *scanner, token_type type, size_t data)
+init_token_data (token_t *token, scanner_t *scanner, token_type type,
+                 size_t data)
 {
   init_token (token, scanner, type);
   token->data = data;
