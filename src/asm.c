@@ -69,6 +69,7 @@ static filter
 st_stx_line (assign_line_t *assign_line)
 {
   filter f = { .code = 0, .jf = 0, .jt = 0, .k = 0 };
+  f.k = assign_line->left_var.data;
   if (assign_line->right_var.type == A)
     f.code |= BPF_ST;
   else if (assign_line->right_var.type == A)
@@ -166,6 +167,7 @@ reverse_jt_jt (jump_line_t *jump_line)
 static uint32_t comparator_table[] = {
   [EQUAL_EQUAL] = BPF_JEQ, [BANG_EQUAL] = BPF_JEQ,   [GREATER_EQUAL] = BPF_JGE,
   [LESS_THAN] = BPF_JGE,   [GREATER_THAN] = BPF_JGT, [LESS_EQUAL] = BPF_JGT,
+  [AND] = BPF_JSET,
 };
 
 static filter
