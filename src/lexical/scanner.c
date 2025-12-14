@@ -74,7 +74,7 @@ reset_to_nextline (token_t *token)
   if (nextline == NULL)
     INIT_TOKEN (TOKEN_EOF);
 
-  init_token (token, &scanner, LINE_END);
+  init_token (token, &scanner, EOL);
   scanner.token_start = nextline;
   scanner.current_char = scanner.token_start;
   scanner.line_nr++;
@@ -110,7 +110,7 @@ scan_token (token_t *token)
   // sync
   scanner.token_start = scanner.current_char;
 
-  // LINE_END
+  // EOL
   if (peek () == '\0')
     return reset_to_nextline (token);
 

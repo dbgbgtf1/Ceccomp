@@ -76,7 +76,7 @@ static void
 error_at (token_t token, char *err_msg)
 {
   // sync to the nextline
-  while (!(match (LINE_END) || peek (TOKEN_EOF)))
+  while (!(match (EOL) || peek (TOKEN_EOF)))
     advance ();
 
   local->type = ERROR_LINE;
@@ -258,7 +258,7 @@ jump_line ()
   jump_line->jf.key.string = NULL;
   // jf default as zero
 
-  if (peek (LINE_END) || peek (TOKEN_EOF))
+  if (peek (EOL) || peek (TOKEN_EOF))
     return;
 
   if (!jump_line->if_condition)
@@ -330,7 +330,7 @@ assign_line ()
 static void
 expression ()
 {
-  if (peek (LINE_END))
+  if (peek (EOL))
     empty_line ();
   else if (peek (TOKEN_EOF))
     eof_line ();
@@ -343,7 +343,7 @@ expression ()
   else
     error_at (parser.next, UNEXPECT_TOKEN);
 
-  if (match (LINE_END))
+  if (match (EOL))
     local->line_end = parser.current.token_start;
   else if (peek (TOKEN_EOF))
     local->line_end = parser.next.token_start;

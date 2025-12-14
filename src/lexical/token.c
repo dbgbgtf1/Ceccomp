@@ -37,7 +37,7 @@ char *token_pairs[] = {
   [AND] = "&", [EQUAL] = "=",
   [NEGATIVE] = "-", [BANG] = "!",
 
-  [UNKNOWN] = "unknown", [COMMENT] = "#", [LINE_END] = "line_end",
+  [UNKNOWN] = "unknown", [COMMENT] = "#", [EOL] = "line_end",
   [IDENTIFIER] = "identifier", [LABEL_DECL] = "label_decl", [NUMBER] = "number",
   // label_decl ::= IDENTIFIER + ":"
 };
