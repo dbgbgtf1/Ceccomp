@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #define LEN_VAL 0x40
+#define _SCMP_ACT_TRAP(x) (SCMP_ACT_TRAP | ((x) & 0x0000ffffU))
 
 extern bool has_error;
 

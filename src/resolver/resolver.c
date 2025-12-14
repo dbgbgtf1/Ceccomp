@@ -231,8 +231,6 @@ jump_line ()
   mem_valid = ~0;
 }
 
-#define _SCMP_ACT_TRAP(x) (SCMP_ACT_TRAP | ((x) & 0x0000ffffU))
-
 static uint32_t retvals[] = {
   [KILL_PROC] = SCMP_ACT_KILL_PROCESS,
   [KILL] = SCMP_ACT_KILL,

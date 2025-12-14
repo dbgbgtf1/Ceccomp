@@ -101,6 +101,7 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
     case BPF_ALU | BPF_DIV | BPF_K:
       if (f.k == 0)
         return report_error (ALU_DIV_BY_ZERO);
+      return false;
 
     case BPF_ALU | BPF_LSH | BPF_K:
     case BPF_ALU | BPF_RSH | BPF_K:
@@ -159,7 +160,7 @@ check_prog (fprog *prog)
   memset (masks, 0xff, sizeof (*masks) * prog->len);
   mem_valid = 0;
 
-  for (uint32_t i = 0; i < prog->len - 1; i++)
+  for (uint16_t i = 0; i < prog->len - 1; i++)
     {
 
       if (check_filter (prog->filter, i, prog->len))
