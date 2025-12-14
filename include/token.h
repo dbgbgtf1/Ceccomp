@@ -65,6 +65,6 @@ typedef struct token_t token_t;
 void init_token (token_t *token, scanner_t *scanner, token_type type);
 
 void init_token_data (token_t *token, scanner_t *scanner, token_type type,
-                      size_t data);
+                      uint32_t data);
 
 #endif

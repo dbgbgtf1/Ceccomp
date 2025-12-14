@@ -1,6 +1,7 @@
 #include "token.h"
 #include "scanner.h"
 #include <stddef.h>
+#include <stdint.h>
 
 // clang-format off
 char *token_pairs[] = {
@@ -53,7 +54,7 @@ init_token (token_t *token, scanner_t *scanner, token_type type)
 
 void
 init_token_data (token_t *token, scanner_t *scanner, token_type type,
-                 size_t data)
+                 uint32_t data)
 {
   init_token (token, scanner, type);
   token->data = data;

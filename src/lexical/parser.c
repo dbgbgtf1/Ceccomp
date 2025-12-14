@@ -330,12 +330,11 @@ assign_line ()
 static void
 expression ()
 {
-  if (match (LINE_END))
-    return empty_line ();
-  if (match (TOKEN_EOF))
-    return eof_line ();
-
-  if (match (RETURN))
+  if (peek (LINE_END))
+    empty_line ();
+  else if (peek (TOKEN_EOF))
+    eof_line ();
+  else if (match (RETURN))
     return_line ();
   else if (match (IF) || peek (GOTO))
     jump_line ();
@@ -344,10 +343,12 @@ expression ()
   else
     error_at (parser.next, UNEXPECT_TOKEN);
 
-  if (!match (LINE_END) && !peek (TOKEN_EOF))
+  if (match (LINE_END))
+    local->line_end = parser.current.token_start;
+  else if (peek (TOKEN_EOF))
+    local->line_end = parser.next.token_start;
+  else
     error_at (parser.next, UNEXPECT_TOKEN);
-
-  local->line_end = parser.current.token_start;
 }
 
 static void

@@ -70,36 +70,28 @@ match_string (char *expected, uint16_t cmp_len)
 static void
 reset_to_nextline (token_t *token)
 {
-  scanner.token_start = next_line ();
-  if (scanner.token_start == NULL)
-  {
-    scanner.token_start = scanner.current_char;
+  char *nextline = next_line ();
+  if (nextline == NULL)
     INIT_TOKEN (TOKEN_EOF);
-  }
 
+  init_token (token, &scanner, LINE_END);
+  scanner.token_start = nextline;
   scanner.current_char = scanner.token_start;
   scanner.line_nr++;
-  INIT_TOKEN (LINE_END);
 }
 
 static void
 skip_spaces ()
 {
-  while (true)
-    {
-      // spaces
-      if (match (' '))
-        while (isspace (peek ()))
-          advance (1);
+  // spaces
+  if (match (' '))
+    while (isspace (peek ()))
+      advance (1);
 
-      // COMMENT
-      else if (match (*token_pairs[COMMENT]))
-        while (peek () != '\0')
-          advance (1);
-
-      else
-        break;
-    }
+  // COMMENT
+  else if (match (*token_pairs[COMMENT]))
+    while (peek () != '\0')
+      advance (1);
 }
 
 void
