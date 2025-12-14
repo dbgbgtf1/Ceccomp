@@ -87,7 +87,7 @@ assign_line (assign_line_t *assign_line)
       DO_OPERATE (=);
       break;
     case NEGATIVE:
-      DO_OPERATE(=-);
+      DO_OPERATE (= -);
       break;
     default:
       assert (0);
@@ -105,11 +105,9 @@ jump_line (jump_line_t *jump_line)
   if (!jump_line->if_condition)
     return jt;
 
+  bool cond_true = false;
   if (jump_line->if_bang)
-    {
-      jt = jump_line->jf.code_nr;
-      jf = jump_line->jt.code_nr;
-    }
+    cond_true = true;
 
   uint32_t right = 0;
   if (jump_line->cond.cmpobj.type == X)
@@ -117,39 +115,34 @@ jump_line (jump_line_t *jump_line)
   else
     right = jump_line->cond.cmpobj.data;
 
-  bool cond_true = false;
-
   switch (jump_line->cond.comparator)
     {
     case EQUAL_EQUAL:
-      cond_true = DO_COMPARE (==);
+      cond_true ^= DO_COMPARE (==);
       break;
     case BANG_EQUAL:
-      cond_true = DO_COMPARE (!=);
+      cond_true ^= DO_COMPARE (!=);
       break;
     case GREATER_EQUAL:
-      cond_true = DO_COMPARE (>=);
+      cond_true ^= DO_COMPARE (>=);
       break;
     case GREATER_THAN:
-      cond_true = DO_COMPARE (>);
+      cond_true ^= DO_COMPARE (>);
       break;
     case LESS_EQUAL:
-      cond_true = DO_COMPARE (<=);
+      cond_true ^= DO_COMPARE (<=);
       break;
     case LESS_THAN:
-      cond_true = DO_COMPARE (<);
+      cond_true ^= DO_COMPARE (<);
       break;
     case AND:
-      cond_true = DO_COMPARE (&);
+      cond_true ^= DO_COMPARE (&);
       break;
     default:
       assert (0);
     }
 
-  if (cond_true)
-    return jt;
-  else
-    return jf;
+  return (cond_true ? jt : jf);
 }
 
 static char ret_char[0x100] = "";
@@ -183,7 +176,7 @@ return_line (return_line_t *return_line)
     case SCMP_ACT_TRACE (0):
       return paren_num (TRACE, ret_data & 0xffff);
     case _SCMP_ACT_TRAP (0):
-      return paren_num (TRACE, ret_data & 0xffff);
+      return paren_num (TRAP, ret_data & 0xffff);
     case SCMP_ACT_ERRNO (0):
       return paren_num (ERRNO, ret_data & 0xffff);
     default:

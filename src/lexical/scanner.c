@@ -84,12 +84,11 @@ static void
 skip_spaces ()
 {
   // spaces
-  if (match (' '))
-    while (isspace (peek ()))
-      advance (1);
+  while (isspace (peek ()))
+    advance (1);
 
   // COMMENT
-  else if (match (*token_pairs[COMMENT]))
+  if (match (*token_pairs[COMMENT]))
     while (peek () != '\0')
       advance (1);
 }

@@ -164,9 +164,9 @@ label (label_t *label)
 }
 
 static uint32_t
-resolve_name_arch (uint32_t arch_token, token_t *sys_tokne)
+resolve_name_arch (uint32_t arch_token, token_t *sys_token)
 {
-  char *sys_name = strndup (sys_tokne->token_start, sys_tokne->token_len);
+  char *sys_name = strndup (sys_token->token_start, sys_token->token_len);
   uint32_t sys_nr = seccomp_syscall_resolve_name_arch (arch_token, sys_name);
   free (sys_name);
   return sys_nr;
