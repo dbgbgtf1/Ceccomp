@@ -1,5 +1,6 @@
 #include "arch_trans.h"
 #include "asm.h"
+#include "emu.h"
 #include "parse_args.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -90,14 +91,7 @@ main (int argc, char *argv[])
       printf (", raw: %p\n", args.disasm_arg->raw_file);
       break;
     case EMU_MODE:
-      printf ("EMU_MODE\n");
-      printf ("arch: 0x%x,", args.emu_arg->arch_enum);
-      printf (", quiet: %s", args.emu_arg->quiet ? "true" : "false");
-      printf (", text: %p,", args.emu_arg->text_file);
-      printf (", sys_name: %s", args.emu_arg->sys_name);
-      for (int i = 0; i <= 5; i++)
-        printf (", args[%d]: %lu", i, args.emu_arg->args[i]);
-      printf (", ip: %lu\n", args.emu_arg->ip);
+      emulate (&emu_arg);
       break;
     case TRACE_MODE:
       printf ("TRACE_MODE\n");

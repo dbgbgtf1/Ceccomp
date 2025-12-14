@@ -3,6 +3,11 @@
 
 #include "i18n.h"
 
+// emu
+#define EMU_TERMINATED _ ("Emu terminated")
+#define INPUT_SYS_NR _ ("Please input syscall_nr to emu")
+#define INVALID_SYSNR _ ("Invalid syscall_nr")
+
 // asm
 #define ASM_TERMINATED _ ("Asm terminated")
 
