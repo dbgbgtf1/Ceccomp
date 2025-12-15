@@ -352,16 +352,10 @@ set_print_format (print_mode p_mode)
 static void
 format_print (filter filter, char *format)
 {
-  uint8_t low_code = filter.code & 0xff;
-  uint8_t high_code = (filter.code & ~0xff) / 0x100;
-  uint8_t jt = filter.jt;
-  uint8_t jf = filter.jf;
-  uint8_t k_0 = filter.k & 0xff;
-  uint8_t k_1 = (filter.k & ~0xff) / 0x100;
-  uint8_t k_2 = (filter.k & ~0xffff) / 0x10000;
-  uint8_t k_3 = (filter.k & ~0xffffff) / 0x1000000;
+  uint8_t *ptr = (uint8_t *)&filter;
 
-  printf (format, low_code, high_code, jt, jf, k_0, k_1, k_2, k_3);
+  printf (format, ptr[0], ptr[1], ptr[2], ptr[3], ptr[4], ptr[5], ptr[6],
+          ptr[7]);
 }
 
 void
