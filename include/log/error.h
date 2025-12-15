@@ -74,6 +74,6 @@
 
 #define MUST_END_WITH_RET _ ("Bpf filter must end with return")
 
-#define INVALID_OPERTION _ ("Invalid opertion")
+#define INVALID_OPERATION _ ("Invalid operation")
 
 #endif
