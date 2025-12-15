@@ -247,7 +247,7 @@ return_line ()
 {
   return_line_t *return_line = &local->return_line;
   token_type ret_type = return_line->ret_obj.type;
-  if (ret_type == A)
+  if (ret_type == A || ret_type == NUMBER)
     return;
 
   return_line->ret_obj.type = NUMBER;

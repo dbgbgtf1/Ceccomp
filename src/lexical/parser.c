@@ -138,6 +138,11 @@ ret_obj ()
       obj->type = parser.current.type;
       obj->data = paren_num ();
     }
+  else if (match (NUMBER))
+    {
+      obj->type = NUMBER;
+      obj->data = parser.current.data;
+    }
   else if (match_from_to (KILL_PROC, LOG) || match (A))
     obj->type = parser.current.type;
   else
