@@ -78,7 +78,7 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
   uint32_t k = f.k;
 
   if (!codes[code])
-    report_error (INVALID_OPERTION);
+    error ("%s", INVALID_OPERATION);
 
   switch (code)
     {
