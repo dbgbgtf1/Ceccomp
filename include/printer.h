@@ -1,5 +1,5 @@
-#ifndef PRINT_STATEMENT
-#define PRINT_STATEMENT
+#ifndef PRINTR
+#define PRINTR
 
 #include "parser.h"
 

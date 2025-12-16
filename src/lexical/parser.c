@@ -2,6 +2,7 @@
 #include "arch_trans.h"
 #include "hash.h"
 #include "log/error.h"
+#include "main.h"
 #include "scanner.h"
 #include "token.h"
 #include <seccomp.h>
@@ -357,17 +358,15 @@ expression ()
 }
 
 static void
-label_decl ()
+label_decl (string_t *label_decl)
 {
   if (!match (LABEL_DECL))
     return;
 
-  label_t label;
-  label.type = IDENTIFIER;
-  label.key.string = parser.current.token_start;
-  label.key.len = parser.current.token_len - 1;
+  label_decl->string = parser.current.token_start;
+  label_decl->len = parser.current.token_len - 1;
   // ignore the ':' character
-  insert_key (&label.key, parser.code_nr);
+  insert_key (label_decl, parser.code_nr);
 
   // ignore our disasm useless output
   uint32_t count = 0;
@@ -393,13 +392,15 @@ parse_line (statement_t *statement)
   // if statement turns out to be empty_line, code_line--;
   local->code_nr = parser.code_nr;
   local->text_nr = parser.text_nr;
+  local->label_decl.string = NULL;
+  // label_decl.string default as NULL
 
   local->line_start = parser.next.token_start;
 
   if (setjmp (g_env) == 1)
     return;
 
-  label_decl ();
+  label_decl (&statement->label_decl);
   expression ();
 
   return;

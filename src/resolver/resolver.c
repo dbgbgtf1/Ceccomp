@@ -202,7 +202,7 @@ jump_line ()
   jump_line_t *jump_line = &local->jump_line;
 
   set_jt_jf (&jump_line->jt, find_key (&jump_line->jt.key));
-  if ((int32_t)jump_line->jt.code_nr < 0)
+  if ((int16_t)jump_line->jt.code_nr < 0)
     REPORT_ERROR (JT_MUST_BE_POSITIVE);
 
   if (!jump_line->if_condition)
@@ -220,7 +220,7 @@ jump_line ()
   else
     set_jt_jf (&jump_line->jf, find_key (&jump_line->jf.key));
 
-  if ((int32_t)jump_line->jf.code_nr < 0)
+  if ((int16_t)jump_line->jf.code_nr < 0)
     REPORT_ERROR (JF_MUST_BE_POSITIVE);
 
   if (jump_line->jf.code_nr > UINT8_MAX)

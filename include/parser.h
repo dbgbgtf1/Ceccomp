@@ -2,6 +2,7 @@
 #define PARSER
 
 #include "hash.h"
+#include "main.h"
 #include "token.h"
 #include <stdbool.h>
 #include <stdint.h>
@@ -9,13 +10,11 @@
 typedef struct
 {
   token_type type;
-  union
-  {
-    hkey_t key;
-    uint32_t code_nr;
-  };
+  hkey_t key;
+  uint16_t code_nr;
   // store code_nr when type is NUMBER
   // store identifier when type is IDENTIFIER
+  // when key.string != NULL, key stores the label string
 } label_t;
 
 typedef struct
@@ -91,6 +90,7 @@ typedef struct
 {
   uint16_t text_nr;
   uint16_t code_nr;
+  string_t label_decl;
   expr_type type;
   char *line_start;
   char *line_end;

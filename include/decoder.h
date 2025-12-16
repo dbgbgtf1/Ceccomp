@@ -1,5 +1,5 @@
-#ifndef DECODE_FILTERS
-#define DECODE_FILTERS
+#ifndef DECODER
+#define DECODER
 
 #include "main.h"
 #include "vector.h"

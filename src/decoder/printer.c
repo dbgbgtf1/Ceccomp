@@ -1,10 +1,11 @@
-#include "print_statement.h"
+#include "printer.h"
 #include "color.h"
 #include "parser.h"
 #include "token.h"
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 typedef void (*print_fn) (token_type type, uint32_t data);
 
@@ -111,23 +112,23 @@ assign_line (statement_t *statement)
     }
 
   print_obj (right);
-  putchar ('\n');
 }
 
 static inline void
-print_label (uint32_t jump_to)
+print_label (label_t *label, uint16_t pc)
 {
-  printf (DEFAULT_LABEL, jump_to);
+  if (label->key.string == NULL)
+    printf (DEFAULT_LABEL, pc + label->code_nr + 1);
+  else
+    printf ("%*s", label->key.len, label->key.string);
 }
 
 static void
 print_ja (statement_t *statement)
 {
-  uint32_t jt = statement->code_nr + statement->jump_line.jt.code_nr + 1;
-
   print_token_pair (GOTO);
   putchar (' ');
-  print_label (jt);
+  print_label (&statement->jump_line.jt, statement->code_nr);
   putchar ('\n');
 }
 
@@ -137,9 +138,6 @@ jump_line (statement_t *statement)
   jump_line_t *jump_line = &statement->jump_line;
   if (!jump_line->if_condition)
     return print_ja (statement);
-
-  uint16_t jt = statement->code_nr + jump_line->jt.code_nr + 1;
-  uint16_t jf = statement->code_nr + jump_line->jf.code_nr + 1;
 
   print_token_pair (IF);
   putchar (' ');
@@ -156,7 +154,7 @@ jump_line (statement_t *statement)
   putchar (' ');
   print_token_pair (GOTO);
   putchar (' ');
-  print_label (jt);
+  print_label (&jump_line->jt, statement->code_nr);
 
   if (jump_line->jf.code_nr == 0)
     {
@@ -170,8 +168,7 @@ jump_line (statement_t *statement)
   putchar (' ');
   print_token_pair (GOTO);
   putchar (' ');
-  print_label (jf);
-  putchar ('\n');
+  print_label (&jump_line->jf, statement->code_nr);
 }
 
 static void
@@ -180,12 +177,15 @@ return_line (statement_t *statement)
   print_token_pair (RETURN);
   putchar (' ');
   print_obj (&statement->return_line.ret_obj);
-  putchar ('\n');
 }
 
 void
 print_statement (statement_t *statement)
 {
+  if (statement->label_decl.string != NULL)
+    printf ("%*s", statement->label_decl.len, statement->label_decl.string);
+  // maybe emulate will save the user label_decl string for us.
+
   switch (statement->type)
     {
     case ASSIGN_LINE:
@@ -197,7 +197,10 @@ print_statement (statement_t *statement)
     case RETURN_LINE:
       return_line (statement);
       break;
+    case EMPTY_LINE:
+      break;
     default:
       assert (0);
     }
+  putchar ('\n');
 }

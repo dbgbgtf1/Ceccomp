@@ -1,8 +1,8 @@
 #include "disasm.h"
-#include "decode_filters.h"
+#include "decoder.h"
 #include "main.h"
 #include "parser.h"
-#include "print_statement.h"
+#include "printer.h"
 #include "vector.h"
 #include <stdint.h>
 #include <stdio.h>
