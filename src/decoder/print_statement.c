@@ -101,13 +101,17 @@ assign_line (statement_t *statement)
   obj_t *right = &assign_line->right_var;
 
   print_obj (left);
-  printf (" ");
+  putchar (' ');
   if (assign_line->operator == NEGATIVE)
     printf ("= -");
   else
-    print_token_pair (assign_line->operator);
+    {
+      print_token_pair (assign_line->operator);
+      putchar (' ');
+    }
 
   print_obj (right);
+  putchar ('\n');
 }
 
 static inline void
@@ -122,8 +126,9 @@ print_ja (statement_t *statement)
   uint32_t jt = statement->code_nr + statement->jump_line.jt.code_nr + 1;
 
   print_token_pair (GOTO);
-  printf (" ");
+  putchar (' ');
   print_label (jt);
+  putchar ('\n');
 }
 
 static void
@@ -131,44 +136,51 @@ jump_line (statement_t *statement)
 {
   jump_line_t *jump_line = &statement->jump_line;
   if (!jump_line->if_condition)
-    print_ja (statement);
+    return print_ja (statement);
 
   uint16_t jt = statement->code_nr + jump_line->jt.code_nr + 1;
   uint16_t jf = statement->code_nr + jump_line->jf.code_nr + 1;
 
   print_token_pair (IF);
-  printf (" ");
+  putchar (' ');
   if (jump_line->if_bang)
     print_token_pair (BANG);
   print_token_pair (LEFT_PAREN);
-  print_token_pair (A);
-  printf (" ");
+  obj_t obj_A = { .type = A, .data = 0 };
+  print_obj (&obj_A);
+  putchar (' ');
   print_token_pair (jump_line->cond.comparator);
+  putchar (' ');
   print_obj (&jump_line->cond.cmpobj);
   print_token_pair (RIGHT_PAREN);
-  printf (" ");
+  putchar (' ');
   print_token_pair (GOTO);
-  printf (" ");
+  putchar (' ');
   print_label (jt);
 
   if (jump_line->jf.code_nr == 0)
-    return;
+    {
+      putchar ('\n');
+      return;
+    }
 
   print_token_pair (COMMA);
-  printf (" ");
+  putchar (' ');
   print_token_pair (ELSE);
-  printf (" ");
+  putchar (' ');
   print_token_pair (GOTO);
-  printf (" ");
+  putchar (' ');
   print_label (jf);
+  putchar ('\n');
 }
 
 static void
 return_line (statement_t *statement)
 {
   print_token_pair (RETURN);
-  printf (" ");
+  putchar (' ');
   print_obj (&statement->return_line.ret_obj);
+  putchar ('\n');
 }
 
 void

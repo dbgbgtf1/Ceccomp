@@ -55,7 +55,7 @@ ld_ldx_line (filter f, statement_t *statement)
     case BPF_ABS:
       right->type = abs_table[f.k];
       if (right->type == ATTR_LOWARG || right->type == ATTR_HIGHARG)
-        right->data = f.k - offsetof (seccomp_data, args[0]);
+        right->data = (f.k - offsetof (seccomp_data, args[0])) / 0x8;
       return;
     }
 }
@@ -115,10 +115,24 @@ static token_type comparator_table[] = {
   [BPF_JSET] = AND,
 };
 
+static token_type reverse_table[] = {
+  [BPF_JEQ] = BANG_EQUAL,
+  [BPF_JGT] = LESS_EQUAL,
+  [BPF_JGE] = LESS_THAN,
+};
+
 static void
-condition (filter f, jump_condition_t *cond)
+condition (filter f, jump_condition_t *cond, bool *if_bang)
 {
-  cond->comparator = comparator_table[BPF_OP (f.code)];
+  uint32_t op = BPF_OP (f.code);
+  if ((!*if_bang) || op == BPF_JSET)
+    cond->comparator = comparator_table[op];
+  else
+    {
+      cond->comparator = reverse_table[op];
+      *if_bang = false;
+    }
+
   if (BPF_SRC (f.code) == BPF_X)
     cond->cmpobj.type = X;
   else
@@ -153,7 +167,7 @@ jump_line (filter f, statement_t *statement)
       jump_line->jf.code_nr = f.jf;
     }
 
-  condition (f, &jump_line->cond);
+  condition (f, &jump_line->cond, &jump_line->if_bang);
 }
 
 static void
@@ -193,8 +207,6 @@ misc_line (filter f, statement_t *statement)
 static void
 decode_filter (filter f, statement_t *statement)
 {
-  memset (statement, '\0', sizeof (statement_t));
-
   switch (BPF_CLASS (f.code))
     {
     case BPF_LD:
@@ -230,8 +242,10 @@ decode_filters (fprog *prog, vector_t *v)
 
   for (uint32_t i = 0; i < prog->len; i++)
     {
-      statement.text_nr = i;
-      statement.code_nr = i;
+      memset (&statement, '\0', sizeof (statement_t));
+
+      statement.text_nr = i + 1;
+      statement.code_nr = i + 1;
 
       decode_filter (prog->filter[i], &statement);
       push_vector (v, &statement);

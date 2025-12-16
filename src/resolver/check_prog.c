@@ -147,10 +147,8 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
       masks[pc + 1 + fptr[pc].jf] &= mem_valid;
       mem_valid = ~0;
       return false;
-
-    default:
-      assert (0);
     }
+  return false;
 }
 
 bool
@@ -160,7 +158,7 @@ check_prog (fprog *prog)
   memset (masks, 0xff, sizeof (*masks) * prog->len);
   mem_valid = 0;
 
-  for (uint16_t i = 0; i < prog->len - 1; i++)
+  for (uint16_t i = 0; i < prog->len; i++)
     {
 
       if (check_filter (prog->filter, i, prog->len))
@@ -168,8 +166,8 @@ check_prog (fprog *prog)
     }
 
   uint16_t last = prog->filter[prog->len - 1].code;
-  if ((last != (BPF_RET | BPF_A)) || (last != (BPF_RET | BPF_K)))
-    report_error (MUST_END_WITH_RET);
+  if ((last != (BPF_RET | BPF_A)) && (last != (BPF_RET | BPF_K)))
+    return report_error (MUST_END_WITH_RET);
 
   return false;
 
