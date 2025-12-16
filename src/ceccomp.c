@@ -1,5 +1,6 @@
 #include "arch_trans.h"
 #include "asm.h"
+#include "disasm.h"
 #include "emu.h"
 #include "parse_args.h"
 #include <stdbool.h>
@@ -86,9 +87,7 @@ main (int argc, char *argv[])
       assemble (asm_arg.text_file, asm_arg.arch_enum, asm_arg.mode);
       break;
     case DISASM_MODE:
-      printf ("DISASM_MODE\n");
-      printf ("arch: 0x%x", args.disasm_arg->arch_enum);
-      printf (", raw: %p\n", args.disasm_arg->raw_file);
+      disasm (disasm_arg.raw_file, disasm_arg.arch_enum);
       break;
     case EMU_MODE:
       emulate (&emu_arg);

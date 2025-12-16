@@ -11,6 +11,9 @@
 // asm
 #define ASM_TERMINATED _ ("Asm terminated")
 
+// disasm
+#define DISASM_TERMINATED _ ("Disasm terminated")
+
 // parse_args
 #define INVALID_COLOR_MODE _ ("Invalid color mode")
 #define INVALID_FMT_MODE _ ("Invalid format mode")
