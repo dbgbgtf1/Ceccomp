@@ -159,8 +159,7 @@ print_emu_statement (statement_t *statement, char *override_color, bool quiet)
   if (override_color)
     {
       printf ("%s", override_color);
-      color_save = color_enable;
-      color_enable = false;
+      push_color (false);
     }
 
   if (statement->label_decl.start == NULL)
@@ -171,7 +170,7 @@ print_emu_statement (statement_t *statement, char *override_color, bool quiet)
 
   if (override_color)
     {
-      color_enable = color_save;
+      pop_color ();
       printf ("%s", CLR);
     }
 }

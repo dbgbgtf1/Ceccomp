@@ -1,5 +1,6 @@
 #include "color.h"
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -32,4 +33,21 @@ set_color (color_mode_t color, FILE *output)
       else
         log_color_enable = false;
     }
+}
+
+bool enable_stack[0x10];
+// 0x10 is definitely enough;
+static uint8_t enable_sp = 0x0;
+
+void
+push_color (bool enable)
+{
+  enable_stack[enable_sp++] = color_enable;
+  color_enable = enable;
+}
+
+void
+pop_color ()
+{
+  color_enable = enable_stack[--enable_sp];
 }
