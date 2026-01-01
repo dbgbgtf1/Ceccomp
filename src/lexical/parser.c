@@ -133,6 +133,7 @@ static void
 ret_obj ()
 {
   obj_t *obj = &local->return_line.ret_obj;
+  obj->literal.start = parser.next.token_start;
 
   if (match_from_to (TRACE, ERRNO))
     {
@@ -148,6 +149,10 @@ ret_obj ()
     obj->type = parser.current.type;
   else
     error_at (parser.next, EXPECT_RETURN_VAL);
+
+  obj->literal.len = parser.current.token_start + parser.current.token_len
+                     - obj->literal.start;
+  // some obj consume more than one token like TRACE(0xf)
 }
 
 static void
@@ -181,6 +186,9 @@ resolve_name_arch (uint32_t arch_token, token_t *sys_token)
 static void
 compare_obj (obj_t *obj)
 {
+  obj->literal.start = parser.next.token_start;
+  obj->literal.len = parser.next.token_len;
+
   if (match (X))
     {
       obj->type = parser.current.type;
@@ -222,6 +230,7 @@ compare_obj (obj_t *obj)
   if (obj->data == (uint32_t)-1)
     error_at (parser.next, EXPECT_SYSCALL);
 
+  obj->literal.len += parser.next.token_len;
   advance ();
   // i386.read
 }
@@ -286,14 +295,21 @@ left (obj_t *obj)
 {
   obj->type = parser.current.type;
   // expression checked for us, it must be A X MEM here
+  obj->literal.start = parser.current.token_start;
 
   if (parser.current.type == MEM)
     obj->data = bracket_num ();
+
+  obj->literal.len = parser.current.token_start + parser.current.token_len
+                     - obj->literal.start;
+  // some obj consume more than one token like mem[0xf]
 }
 
 static void
 right (obj_t *obj)
 {
+  obj->literal.start = parser.current.token_start;
+
   if (match (A) || match (X) || match_from_to (ATTR_LEN, ATTR_HIGHPC))
     obj->type = parser.current.type;
   else if (match (MEM) || match (ATTR_LOWARG) || match (ATTR_HIGHARG))
@@ -308,6 +324,10 @@ right (obj_t *obj)
     }
   else
     error_at (parser.next, EXPECT_RIGHT_VAR);
+
+  obj->literal.len = parser.current.token_start + parser.current.token_len
+                     - obj->literal.start;
+  // some obj consume more than one token like mem[0xf]
 }
 
 static void

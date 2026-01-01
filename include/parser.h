@@ -9,9 +9,9 @@
 
 typedef struct
 {
-  hkey_t key;
-  uint16_t code_nr;
   token_type type;
+  uint16_t code_nr;
+  hkey_t key;
   // store code_nr when type is NUMBER
   // store identifier when type is IDENTIFIER
   // when key.string != NULL, key stores the label string
@@ -21,6 +21,7 @@ typedef struct
 {
   token_type type;
   uint32_t data;
+  string_t literal;
   // store idx for MEM | ATTR_LOWARG | ATTR_HIGHARG
   // store value for NUMBER | TRAP | TRACE | ERRNO
 } obj_t;

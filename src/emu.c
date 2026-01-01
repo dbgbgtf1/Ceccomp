@@ -1,5 +1,6 @@
 #include "emu.h"
 #include "color.h"
+#include "render.h"
 #include "log/error.h"
 #include "log/logger.h"
 #include "parse_args.h"
@@ -146,47 +147,37 @@ jump_line (jump_line_t *jump_line)
   return (cond_true ? jt : jf);
 }
 
-static char ret_char[0x100] = "";
-
-static char *
-paren_num (token_type ret, uint32_t paren_num)
+static void
+print_emu_statement (statement_t *statement, char *override_color, bool quiet)
 {
-  snprintf (ret_char, 0x100, "%s(%d)", token_pairs[ret], paren_num);
-  return ret_char;
-}
+  deresolve_statement (statement);
 
-static char *
-return_line (return_line_t *return_line)
-{
-  uint32_t ret_data;
-  if (return_line->ret_obj.type == A)
-    ret_data = A_reg;
-  else
-    ret_data = return_line->ret_obj.data;
+  if (quiet)
+    return;
 
-  switch (ret_data & 0xffff0000)
+  bool color_save;
+  if (override_color)
     {
-    case SCMP_ACT_KILL_PROCESS:
-      return token_pairs[KILL_PROC];
-    case SCMP_ACT_KILL:
-      return token_pairs[KILL];
-    case SCMP_ACT_ALLOW:
-      return token_pairs[ALLOW];
-    case SCMP_ACT_LOG:
-      return token_pairs[LOG];
-    case SCMP_ACT_TRACE (0):
-      return paren_num (TRACE, ret_data & 0xffff);
-    case _SCMP_ACT_TRAP (0):
-      return paren_num (TRAP, ret_data & 0xffff);
-    case SCMP_ACT_ERRNO (0):
-      return paren_num (ERRNO, ret_data & 0xffff);
-    default:
-      assert (0);
+      printf ("%s", override_color);
+      color_save = color_enable;
+      color_enable = false;
+    }
+
+  if (statement->label_decl.start == NULL)
+    printf (" " DEFAULT_LABEL ": ", statement->text_nr);
+  else
+    printf (" %.*s: ", statement->label_decl.len, statement->label_decl.start);
+  print_statement (statement);
+
+  if (override_color)
+    {
+      color_enable = color_save;
+      printf ("%s", CLR);
     }
 }
 
-static char *
-emu_statements (vector_t *v)
+static obj_t *
+emulator (vector_t *v, bool quiet)
 {
   uint32_t read_idx = 0;
   uint32_t exec_idx = 0;
@@ -194,15 +185,14 @@ emu_statements (vector_t *v)
   for (; read_idx < v->count - 1; read_idx++)
     {
       statement_t *statement = get_vector (v, read_idx);
-      uint32_t len = statement->line_end - statement->line_start;
 
       if (read_idx < exec_idx)
         {
-          printf (LIGHT ("%*s\n"), len, statement->line_start);
+          print_emu_statement (statement, LIGHTCLR, quiet);
           continue;
         }
 
-      printf ("%*s\n", len, statement->line_start);
+      print_emu_statement (statement, NULL, quiet);
       exec_idx++;
 
       switch (statement->type)
@@ -214,10 +204,11 @@ emu_statements (vector_t *v)
           exec_idx += jump_line (&statement->jump_line);
           break;
         case RETURN_LINE:
-          return return_line (&statement->return_line);
+          return &statement->return_line.ret_obj;
         case EMPTY_LINE:
           break;
-        default:
+        case EOF_LINE:
+        case ERROR_LINE:
           assert (0);
         }
     }
@@ -261,7 +252,8 @@ emulate (emu_arg_t *emu_arg)
   do
     {
       parse_line (&statement);
-      push_vector (&v, &statement);
+      if (statement.type != EMPTY_LINE)
+        push_vector (&v, &statement);
     }
   while (statement.type != EOF_LINE);
 
@@ -269,8 +261,10 @@ emulate (emu_arg_t *emu_arg)
     error ("%s", EMU_TERMINATED);
   // if ERROR_LINE exists, then exits
 
-  char *ret = emu_statements (&v);
-  printf ("%s", ret);
+  obj_t *ret = emulator (&v, emu_arg->quiet);
+  putchar (' ');
+  print_obj (ret);
+  putchar ('\n');
 
   free_table ();
   free_source ();
