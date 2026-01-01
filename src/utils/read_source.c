@@ -191,7 +191,7 @@ next_line (void)
   char *top = source + current; // give compiler some hint
   do
     line_break++;
-  while (line_break < top && (*line_break == '\0' || *line_break == '\n'));
+  while (line_break < top && (*line_break == '\0'));
   cursor = line_break - source;
 
   return read_ptr;
