@@ -1,4 +1,5 @@
 #include "disasm.h"
+#include "color.h"
 #include "decoder.h"
 #include "main.h"
 #include "parser.h"
@@ -19,17 +20,17 @@ disasm (FILE *fp, uint32_t scmp_arch)
   vector_t v;
   init_vector (&v, sizeof (statement_t));
   decode_filters (&prog, &v);
-  printf ("#Label  CODE  JT   JF      K\n");
-  printf ("#---------------------------------\n");
+  puts (LIGHT ("#Label  CODE  JT   JF      K"));
+  puts (LIGHT ("#---------------------------------"));
 
   for (uint32_t i = 0; i < v.count; i++)
     {
       filter f = filters[i];
-      printf (" L%04d: 0x%02x 0x%02x 0x%02x 0x%08x ", i, f.code, f.jt, f.jf,
-              f.k);
+      printf (" " DEFAULT_LABEL ": 0x%02x 0x%02x 0x%02x 0x%08x ", i, f.code,
+              f.jt, f.jf, f.k);
       print_statement (get_vector (&v, i));
     }
 
-  printf ("#---------------------------------\n");
+  puts (LIGHT ("#---------------------------------"));
   free_vector (&v);
 }
