@@ -72,10 +72,21 @@ init_args (ceccomp_arg_t *args)
     args->when = AUTO;
 }
 
+static void
+init_output ()
+{
+#ifdef DEBUG
+  setbuf (stdin, NULL);
+  setbuf (stdout, NULL);
+  setbuf (stderr, NULL);
+#endif
+}
+
 int
 main (int argc, char *argv[])
 {
   init_args (&args);
+  init_output ();
 
   static struct argp argp
       = { options, parse_opt, NULL, NULL, NULL, NULL, NULL };
