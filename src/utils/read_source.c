@@ -102,16 +102,16 @@ process_source (void)
         }
 
       if (file_type == WINDOWS)
-        *(line_break - 1) = '\0';
-      *line_break = '\0';
+        *(line_break - 1) = ' ';
+      *line_break = '\n';
 
-      clear_color (line_start, line_break - line_start);
+      clear_color (line_start, line_break - line_start + 1);
 
       line_nr++;
       line_start = line_break + 1;
     }
 
-  clear_color (line_start, top - line_start);
+  clear_color (line_start, top - line_start + 1);
 }
 
 static void
@@ -180,7 +180,7 @@ next_line (void)
 
   char *read_ptr = source + cursor;
 
-  char *line_break = memchr (read_ptr, '\0', current - cursor);
+  char *line_break = memchr (read_ptr, '\n', current - cursor);
   if (!line_break)
     {
       // meet eof
@@ -191,7 +191,7 @@ next_line (void)
   char *top = source + current; // give compiler some hint
   do
     line_break++;
-  while (line_break < top && *line_break == '\0');
+  while (line_break < top && (*line_break == '\0' || *line_break == '\n'));
   cursor = line_break - source;
 
   return read_ptr;

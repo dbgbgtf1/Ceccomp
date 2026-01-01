@@ -84,13 +84,15 @@ static void
 skip_spaces ()
 {
   // spaces
-  while (isspace (peek ()))
+  while ((peek ()) == ' ')
     advance (1);
 
   // COMMENT
-  if (match (*token_pairs[COMMENT]))
-    while (peek () != '\0')
-      advance (1);
+  if (!match (*token_pairs[COMMENT]))
+    return;
+
+  while (peek () != '\n')
+    advance (1);
 }
 
 void
@@ -111,7 +113,7 @@ scan_token (token_t *token)
   scanner.token_start = scanner.current_char;
 
   // EOL
-  if (peek () == '\0')
+  if (peek () == '\n')
     return reset_to_nextline (token);
 
   // ARCH_X86 : TOKEN_EOF
