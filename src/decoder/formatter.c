@@ -11,93 +11,66 @@ static void
 print_num (token_type type, uint32_t data)
 {
   (void)type;
-  printf (BRIGHT_CYAN ("0x%x"), data);
+  printf ("0x%x", data);
 }
 
 static void
-print_var (token_type type, uint32_t data)
+print_str (token_type type, uint32_t data)
 {
   (void)data;
-  printf (BRIGHT_YELLOW ("%s"), token_pairs[type]);
+  printf ("%s", token_pairs[type]);
 }
 
 static void
-print_mem (token_type type, uint32_t data)
+print_bracket (token_type type, uint32_t data)
 {
-  printf (BRIGHT_YELLOW ("%s[0x%01x]"), token_pairs[type], data);
+  printf ("%s[0x%01x]", token_pairs[type], data);
 }
 
 static void
-print_attr_bracket (token_type type, uint32_t data)
+print_paren (token_type type, uint32_t data)
 {
-  printf (BRIGHT_BLUE ("%s[0x%01x]"), token_pairs[type], data);
-}
-
-static void
-print_attr (token_type type, uint32_t data)
-{
-  (void)data;
-  printf (BRIGHT_BLUE ("%s"), token_pairs[type]);
-}
-
-static void
-print_red (token_type type, uint32_t data)
-{
-  (void)data;
-  printf (RED ("%s"), token_pairs[type]);
-}
-
-static void
-print_yellow (token_type type, uint32_t data)
-{
-  (void)data;
-  printf (YELLOW ("%s"), token_pairs[type]);
-}
-
-static void
-print_yellow_paren (token_type type, uint32_t data)
-{
-  printf (YELLOW ("%s"), token_pairs[type]);
+  printf ("%s", token_pairs[type]);
   if (data)
     printf ("(0x%x)", data);
 }
 
-static void
-print_green (token_type type, uint32_t data)
-{
-  (void)data;
-  printf (GREEN ("%s"), token_pairs[type]);
-}
+obj_print_t obj_print[] = {
+  [A] = { print_str, BRIGHT_YELLOWCLR },
+  [X] = { print_str, BRIGHT_YELLOWCLR },
 
-print_fn obj_printer[] = {
-  [A] = print_var,
-  [X] = print_var,
+  [MEM] = { print_bracket, BRIGHT_YELLOWCLR },
+  [ATTR_LOWARG] = { print_bracket, BRIGHT_BLUECLR },
+  [ATTR_HIGHARG] = { print_bracket, BRIGHT_BLUECLR },
 
-  [MEM] = print_mem,
-  [ATTR_LOWARG] = print_attr_bracket,
-  [ATTR_HIGHARG] = print_attr_bracket,
+  [ATTR_SYSCALL] = { print_str, BRIGHT_BLUECLR },
+  [ATTR_ARCH] = { print_str, BRIGHT_BLUECLR },
+  [ATTR_LOWPC] = { print_str, BRIGHT_BLUECLR },
+  [ATTR_HIGHPC] = { print_str, BRIGHT_BLUECLR },
 
-  [ATTR_SYSCALL] = print_attr,
-  [ATTR_ARCH] = print_attr,
-  [ATTR_LOWPC] = print_attr,
-  [ATTR_HIGHPC] = print_attr,
+  [NUMBER] = { print_num, BRIGHT_CYANCLR },
 
-  [NUMBER] = print_num,
-
-  [KILL_PROC] = print_red,
-  [KILL] = print_red,
-  [ALLOW] = print_green,
-  [NOTIFY] = print_yellow,
-  [LOG] = print_yellow,
-  [TRACE] = print_yellow_paren,
-  [TRAP] = print_yellow_paren,
-  [ERRNO] = print_yellow_paren,
+  [KILL_PROC] = { print_str, REDCLR },
+  [KILL] = { print_str, REDCLR },
+  [ALLOW] = { print_str, GREENCLR },
+  [NOTIFY] = { print_str, YELLOWCLR },
+  [LOG] = { print_str, YELLOWCLR },
+  [TRACE] = { print_paren, YELLOWCLR },
+  [TRAP] = { print_paren, YELLOWCLR },
+  [ERRNO] = { print_paren, REDCLR },
 };
 
 void
-print_obj (obj_t *obj)
+obj_printer (obj_t *obj)
 {
-  obj_printer[obj->type](obj->type, obj->data);
+  if (color_enable)
+    printf ("%s", obj_print[obj->type].color);
+  if (obj->literal.start != NULL)
+    printf ("%.*s", obj->literal.len, obj->literal.start);
+  else
+    obj_print[obj->type].handler (obj->type, obj->data);
+  if (color_enable)
+    printf ("%s", CLR);
 }
 
 static inline void
@@ -113,7 +86,7 @@ assign_line (statement_t *statement)
   obj_t *left = &assign_line->left_var;
   obj_t *right = &assign_line->right_var;
 
-  print_obj (left);
+  obj_printer (left);
   putchar (' ');
   if (assign_line->operator == NEGATIVE)
     printf ("= -");
@@ -123,7 +96,7 @@ assign_line (statement_t *statement)
       putchar (' ');
     }
 
-  print_obj (right);
+  obj_printer (right);
 }
 
 static inline void
@@ -156,11 +129,11 @@ jump_line (statement_t *statement)
     print_token_pair (BANG);
   print_token_pair (LEFT_PAREN);
   obj_t obj_A = { .type = A, .data = 0 };
-  print_obj (&obj_A);
+  obj_printer (&obj_A);
   putchar (' ');
   print_token_pair (jump_line->cond.comparator);
   putchar (' ');
-  print_obj (&jump_line->cond.cmpobj);
+  obj_printer (&jump_line->cond.cmpobj);
   print_token_pair (RIGHT_PAREN);
   putchar (' ');
   print_token_pair (GOTO);
@@ -184,7 +157,7 @@ return_line (statement_t *statement)
 {
   print_token_pair (RETURN);
   putchar (' ');
-  print_obj (&statement->return_line.ret_obj);
+  obj_printer (&statement->return_line.ret_obj);
 }
 
 void
@@ -202,6 +175,7 @@ print_statement (statement_t *statement)
       return_line (statement);
       break;
     case EMPTY_LINE:
+      break;
     case ERROR_LINE:
     case EOF_LINE:
       assert (0);

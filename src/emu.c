@@ -262,7 +262,7 @@ emulate (emu_arg_t *emu_arg)
 
   obj_t *ret = emulator (&v, emu_arg->quiet);
   putchar (' ');
-  print_obj (ret);
+  obj_printer (ret);
   putchar ('\n');
 
   free_table ();

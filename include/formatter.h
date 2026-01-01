@@ -7,7 +7,12 @@
 
 typedef void (*print_fn) (token_type type, uint32_t data);
 
-extern void print_obj (obj_t *obj);
+typedef struct {
+  print_fn handler;
+  char *color;
+} obj_print_t;
+
+extern void obj_printer (obj_t *obj);
 
 // this should be called in order
 // call deresolve_statement before print_statement
