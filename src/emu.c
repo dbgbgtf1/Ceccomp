@@ -147,6 +147,19 @@ jump_line (jump_line_t *jump_line)
 }
 
 static void
+print_label_decl (statement_t *statement)
+{
+  if (statement->type != EMPTY_LINE)
+    {
+      if (statement->label_decl.start == NULL)
+        printf (" " DEFAULT_LABEL ": ", statement->code_nr);
+      else
+        printf (" %.*s: ", statement->label_decl.len,
+                statement->label_decl.start);
+    }
+}
+
+static void
 print_emu_statement (statement_t *statement, char *override_color, bool quiet)
 {
   if (quiet)
@@ -158,14 +171,7 @@ print_emu_statement (statement_t *statement, char *override_color, bool quiet)
       push_color (false);
     }
 
-  if (statement->type != EMPTY_LINE)
-    {
-      if (statement->label_decl.start == NULL)
-        printf (" " DEFAULT_LABEL ": ", statement->text_nr);
-      else
-        printf (" %.*s: ", statement->label_decl.len,
-                statement->label_decl.start);
-    }
+  print_label_decl (statement);
   print_statement (statement);
 
   if (override_color)
@@ -207,6 +213,9 @@ emulator (vector_t *v_text, vector_t *v_code, bool quiet)
           exec_idx = ((statement_t *)get_vector (v_code, code_nr))->text_nr;
           break;
         case RETURN_LINE:
+          if (!quiet)
+            printf (" ...... %d lines skipped\n",
+                    v_text->count - 1 - read_idx);
           return &statement->return_line.ret_obj;
         case EMPTY_LINE:
           break;
