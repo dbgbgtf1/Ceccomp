@@ -34,8 +34,7 @@ report_error (char *error_msg)
 
   SPRINTF_CAT (print, "At %04d: ", local->text_nr);
   SPRINTF_CAT (print, "%s\n", error_msg);
-  uint16_t line_len = local->line_end - local->line_start;
-  SPRINTF_CAT (print, "%.*s\n", line_len, local->line_start);
+  SPRINTF_CAT (print, "%.*s\n", local->line_len, local->line_start);
 
   warn ("%s\n", buf);
 }
@@ -60,9 +59,8 @@ error_line ()
 
   SPRINTF_CAT (print, "At %04d: ", local->text_nr);
   SPRINTF_CAT (print, "%s\n", error_line->error_msg);
-  uint16_t line_len = local->line_end - local->line_start;
   uint16_t err_len = error_line->error_start - local->line_start;
-  SPRINTF_CAT (print, "%.*s\n", line_len, local->line_start);
+  SPRINTF_CAT (print, "%.*s\n", local->line_len, local->line_start);
   SPRINTF_CAT (print, "%*s", err_len + 1, "^");
 
   warn ("%s\n", buf);

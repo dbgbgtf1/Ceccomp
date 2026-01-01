@@ -81,7 +81,8 @@ error_at (token_t token, char *err_msg)
     advance ();
 
   local->type = ERROR_LINE;
-  local->line_end = parser.current.token_start + parser.current.token_len;
+  local->line_len = parser.current.token_start + parser.current.token_len
+                    - local->line_start;
   local->error_line.error_start = token.token_start;
   local->error_line.error_msg = err_msg;
   longjmp (g_env, 1);
@@ -370,9 +371,9 @@ expression ()
     error_at (parser.next, UNEXPECT_TOKEN);
 
   if (match (EOL))
-    local->line_end = parser.current.token_start;
+    local->line_len = parser.current.token_start - local->line_start;
   else if (peek (TOKEN_EOF))
-    local->line_end = parser.next.token_start;
+    local->line_len = parser.next.token_start - local->line_start;
   else
     error_at (parser.next, UNEXPECT_TOKEN);
 }

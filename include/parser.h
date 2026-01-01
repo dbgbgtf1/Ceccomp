@@ -94,7 +94,7 @@ typedef struct
   expr_type type;
   string_t label_decl;
   char *line_start;
-  char *line_end;
+  uint32_t line_len;
 
   union
   {
