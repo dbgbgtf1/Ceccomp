@@ -308,7 +308,7 @@ left (obj_t *obj)
 static void
 right (obj_t *obj)
 {
-  obj->literal.start = parser.current.token_start;
+  obj->literal.start = parser.next.token_start;
 
   if (match (A) || match (X) || match_from_to (ATTR_LEN, ATTR_HIGHPC))
     obj->type = parser.current.type;
