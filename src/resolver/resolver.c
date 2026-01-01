@@ -279,8 +279,9 @@ resolve_statement (statement_t *statement)
       return;
     // nothing need to be done for these line
     case EMPTY_LINE:
-    case EOF_LINE:
       return;
+    case EOF_LINE:
+      assert (0);
     }
 }
 

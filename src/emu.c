@@ -1,11 +1,10 @@
 #include "emu.h"
 #include "color.h"
-#include "render.h"
+#include "formatter.h"
 #include "log/error.h"
 #include "log/logger.h"
 #include "parse_args.h"
 #include "parser.h"
-#include "formatter.h"
 #include "read_source.h"
 #include "resolver.h"
 #include "scanner.h"
@@ -150,22 +149,23 @@ jump_line (jump_line_t *jump_line)
 static void
 print_emu_statement (statement_t *statement, char *override_color, bool quiet)
 {
-  deresolve_statement (statement);
-
   if (quiet)
     return;
 
-  bool color_save;
   if (override_color)
     {
       printf ("%s", override_color);
       push_color (false);
     }
 
-  if (statement->label_decl.start == NULL)
-    printf (" " DEFAULT_LABEL ": ", statement->text_nr);
-  else
-    printf (" %.*s: ", statement->label_decl.len, statement->label_decl.start);
+  if (statement->type != EMPTY_LINE)
+    {
+      if (statement->label_decl.start == NULL)
+        printf (" " DEFAULT_LABEL ": ", statement->text_nr);
+      else
+        printf (" %.*s: ", statement->label_decl.len,
+                statement->label_decl.start);
+    }
   print_statement (statement);
 
   if (override_color)
@@ -251,8 +251,7 @@ emulate (emu_arg_t *emu_arg)
   do
     {
       parse_line (&statement);
-      if (statement.type != EMPTY_LINE)
-        push_vector (&v, &statement);
+      push_vector (&v, &statement);
     }
   while (statement.type != EOF_LINE);
 
