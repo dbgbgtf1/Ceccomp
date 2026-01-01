@@ -2,7 +2,7 @@
 #include "decoder.h"
 #include "main.h"
 #include "parser.h"
-#include "printer.h"
+#include "formatter.h"
 #include "vector.h"
 #include <stdint.h>
 #include <stdio.h>

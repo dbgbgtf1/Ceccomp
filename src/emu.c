@@ -4,6 +4,7 @@
 #include "log/logger.h"
 #include "parse_args.h"
 #include "parser.h"
+#include "formatter.h"
 #include "read_source.h"
 #include "resolver.h"
 #include "scanner.h"

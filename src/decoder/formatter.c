@@ -1,4 +1,4 @@
-#include "printer.h"
+#include "formatter.h"
 #include "color.h"
 #include "parser.h"
 #include "token.h"
@@ -7,17 +7,17 @@
 #include <stdio.h>
 #include <string.h>
 
-typedef void (*print_fn) (token_type type, uint32_t data);
-
 static void
 print_num (token_type type, uint32_t data)
 {
+  (void)type;
   printf (BRIGHT_CYAN ("0x%x"), data);
 }
 
 static void
 print_var (token_type type, uint32_t data)
 {
+  (void)data;
   printf (BRIGHT_YELLOW ("%s"), token_pairs[type]);
 }
 
@@ -36,24 +36,36 @@ print_attr_bracket (token_type type, uint32_t data)
 static void
 print_attr (token_type type, uint32_t data)
 {
+  (void)data;
   printf (BRIGHT_BLUE ("%s"), token_pairs[type]);
 }
 
 static void
 print_red (token_type type, uint32_t data)
 {
+  (void)data;
   printf (RED ("%s"), token_pairs[type]);
 }
 
 static void
 print_yellow (token_type type, uint32_t data)
 {
+  (void)data;
   printf (YELLOW ("%s"), token_pairs[type]);
+}
+
+static void
+print_yellow_paren (token_type type, uint32_t data)
+{
+  printf (YELLOW ("%s"), token_pairs[type]);
+  if (data)
+    printf ("(0x%x)", data);
 }
 
 static void
 print_green (token_type type, uint32_t data)
 {
+  (void)data;
   printf (GREEN ("%s"), token_pairs[type]);
 }
 
@@ -77,12 +89,12 @@ print_fn obj_printer[] = {
   [ALLOW] = print_green,
   [NOTIFY] = print_yellow,
   [LOG] = print_yellow,
-  [TRACE] = print_yellow,
-  [TRAP] = print_yellow,
-  [ERRNO] = print_yellow,
+  [TRACE] = print_yellow_paren,
+  [TRAP] = print_yellow_paren,
+  [ERRNO] = print_yellow_paren,
 };
 
-static inline void
+void
 print_obj (obj_t *obj)
 {
   obj_printer[obj->type](obj->type, obj->data);
@@ -117,10 +129,10 @@ assign_line (statement_t *statement)
 static inline void
 print_label (label_t *label, uint16_t pc)
 {
-  if (label->key.string == NULL)
+  if (label->key.start == NULL)
     printf (DEFAULT_LABEL, pc + label->code_nr + 1);
   else
-    printf ("%*s", label->key.len, label->key.string);
+    printf ("%.*s", label->key.len, label->key.start);
 }
 
 static void
@@ -129,7 +141,6 @@ print_ja (statement_t *statement)
   print_token_pair (GOTO);
   putchar (' ');
   print_label (&statement->jump_line.jt, statement->code_nr);
-  putchar ('\n');
 }
 
 static void
@@ -157,10 +168,7 @@ jump_line (statement_t *statement)
   print_label (&jump_line->jt, statement->code_nr);
 
   if (jump_line->jf.code_nr == 0)
-    {
-      putchar ('\n');
-      return;
-    }
+    return;
 
   print_token_pair (COMMA);
   putchar (' ');
@@ -182,10 +190,6 @@ return_line (statement_t *statement)
 void
 print_statement (statement_t *statement)
 {
-  if (statement->label_decl.string != NULL)
-    printf ("%*s", statement->label_decl.len, statement->label_decl.string);
-  // maybe emulate will save the user label_decl string for us.
-
   switch (statement->type)
     {
     case ASSIGN_LINE:
@@ -198,8 +202,8 @@ print_statement (statement_t *statement)
       return_line (statement);
       break;
     case EMPTY_LINE:
-      break;
-    default:
+    case ERROR_LINE:
+    case EOF_LINE:
       assert (0);
     }
   putchar ('\n');
