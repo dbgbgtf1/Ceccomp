@@ -215,7 +215,7 @@ jump_line ()
   if (jump_line->jt.code_nr > UINT8_MAX)
     REPORT_ERROR (JT_TOO_FAR);
 
-  if (jump_line->jf.key.string == NULL)
+  if (jump_line->jf.key.start == NULL)
     set_jt_jf (&jump_line->jf, local->code_nr + 1);
   else
     set_jt_jf (&jump_line->jf, find_key (&jump_line->jf.key));

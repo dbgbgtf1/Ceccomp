@@ -16,7 +16,7 @@ hashString (hkey_t *key)
   uint32_t hash = 2166136261u;
   for (int i = 0; i < key->len; i++)
     {
-      hash ^= (uint8_t)key->string[i];
+      hash ^= (uint8_t)key->start[i];
       hash *= 16777619;
     }
   return hash;
@@ -70,7 +70,7 @@ free_key (hkey_t *key)
 
   while (bucket->next)
     {
-      if (strncmp (bucket->next->key.string, key->string, key->len))
+      if (strncmp (bucket->next->key.start, key->start, key->len))
         bucket = bucket->next;
       else
         {
@@ -79,7 +79,7 @@ free_key (hkey_t *key)
         }
     }
 
-  error (CANNOT_FIND_LABEL, key->len, key->string);
+  error (CANNOT_FIND_LABEL, key->len, key->start);
 }
 
 uint16_t
@@ -89,13 +89,13 @@ find_key (hkey_t *key)
 
   while (bucket->next)
     {
-      if (strncmp (bucket->next->key.string, key->string, key->len))
+      if (strncmp (bucket->next->key.start, key->start, key->len))
         bucket = bucket->next;
       else
         return bucket->next->line_nr;
     }
 
-  error (CANNOT_FIND_LABEL, key->len, key->string);
+  error (CANNOT_FIND_LABEL, key->len, key->start);
 }
 
 void

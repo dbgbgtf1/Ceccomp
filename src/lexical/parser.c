@@ -165,7 +165,7 @@ label (label_t *label)
     error_at (parser.next, EXPECT_LABEL);
 
   label->type = IDENTIFIER;
-  label->key.string = parser.current.token_start;
+  label->key.start = parser.current.token_start;
   label->key.len = parser.current.token_len;
 }
 
@@ -261,7 +261,7 @@ jump_line ()
     error_at (parser.next, EXPECT_GOTO);
 
   label (&jump_line->jt);
-  jump_line->jf.key.string = NULL;
+  jump_line->jf.key.start = NULL;
   // jf default as zero
 
   if (peek (EOL) || peek (TOKEN_EOF))
@@ -363,7 +363,7 @@ label_decl (string_t *label_decl)
   if (!match (LABEL_DECL))
     return;
 
-  label_decl->string = parser.current.token_start;
+  label_decl->start = parser.current.token_start;
   label_decl->len = parser.current.token_len - 1;
   // ignore the ':' character
   insert_key (label_decl, parser.code_nr);
@@ -392,7 +392,7 @@ parse_line (statement_t *statement)
   // if statement turns out to be empty_line, code_line--;
   local->code_nr = parser.code_nr;
   local->text_nr = parser.text_nr;
-  local->label_decl.string = NULL;
+  local->label_decl.start = NULL;
   // label_decl.string default as NULL
 
   local->line_start = parser.next.token_start;

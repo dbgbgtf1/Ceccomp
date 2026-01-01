@@ -17,7 +17,7 @@ typedef struct sock_filter filter;
 typedef struct seccomp_data seccomp_data;
 
 typedef struct {
-  char *string;
+  char *start;
   uint16_t len;
 } string_t;
 
