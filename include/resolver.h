@@ -10,7 +10,8 @@
 
 extern bool has_error;
 
-// pass the statement_t vector !!!
+// pass the statement_t vector ordered by code_nr
+// don't pass the statement_t vector_t ordered bt text_nr
 // return false if ok, return true if error occurs
 extern bool resolver (vector_t *v);
 
