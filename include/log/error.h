@@ -45,6 +45,7 @@
 #define EXPECT_COMPARTOR _ ("Expect comparator")
 #define EXPECT_LABEL _ ("Expect label")
 #define EXPECT_SYSCALL _ ("Expect syscall")
+#define EXPECT_ARCH _ ("Expect architecture")
 // EXPECT_SYSCALL also use in resolver
 
 #define EXPECT_GOTO _ ("Expect 'goto'")
@@ -72,8 +73,6 @@
 
 #define JT_TOO_FAR _ ("Jt is too far")
 #define JF_TOO_FAR _ ("Jf is too far")
-#define JT_MUST_BE_POSITIVE _ ("Jt must be positive")
-#define JF_MUST_BE_POSITIVE _ ("Jf must be positive")
 
 #define MUST_END_WITH_RET _ ("Bpf filter must end with return")
 
