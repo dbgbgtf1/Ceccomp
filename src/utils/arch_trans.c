@@ -30,11 +30,44 @@ uint32_t arch_pairs[] = {
 };
 
 uint32_t
-internal_arch_to_scmp_arch (uint32_t arch)
+internal_arch_to_scmp_arch (uint32_t internal_arch)
 {
   // ARCH_X86 = 0, so (arch >= ARCH_X86) is always true;
-  if (arch <= ARCH_RISCV64)
-    return arch_pairs[arch];
+  if (internal_arch <= ARCH_RISCV64)
+    return arch_pairs[internal_arch];
+
+  return -1;
+}
+
+uint32_t
+scmp_arch_to_internal_arch (uint32_t scmp_arch)
+{
+  switch (scmp_arch)
+    {
+      // clang-format off
+    case SCMP_ARCH_X86: return ARCH_X86;
+    case SCMP_ARCH_X86_64: return ARCH_X86_64;
+    case SCMP_ARCH_X32: return ARCH_X32;
+    case SCMP_ARCH_ARM: return ARCH_ARM;
+    case SCMP_ARCH_AARCH64: return ARCH_AARCH64;
+    case SCMP_ARCH_LOONGARCH64: return ARCH_LONNGARCH64;
+    case SCMP_ARCH_M68K: return ARCH_M68K;
+    case SCMP_ARCH_MIPSEL64N32: return ARCH_MIPSEL64N32;
+    case SCMP_ARCH_MIPSEL64: return ARCH_MIPSEL64;
+    case SCMP_ARCH_MIPSEL: return ARCH_MIPSEL;
+    case SCMP_ARCH_MIPS64N32: return ARCH_MIPS64N32;
+    case SCMP_ARCH_MIPS64: return ARCH_MIPS64;
+    case SCMP_ARCH_MIPS: return ARCH_MIPS;
+    case SCMP_ARCH_PARISC64: return ARCH_PARISC64;
+    case SCMP_ARCH_PARISC: return ARCH_PARISC;
+    case SCMP_ARCH_PPC64LE: return ARCH_PPC64LE;
+    case SCMP_ARCH_PPC64: return ARCH_PPC64;
+    case SCMP_ARCH_PPC: return ARCH_PPC;
+    case SCMP_ARCH_S390X: return ARCH_S390X;
+    case SCMP_ARCH_S390: return ARCH_S390;
+    case SCMP_ARCH_RISCV64: return ARCH_RISCV64;
+      // clang-format on
+    }
 
   return -1;
 }
@@ -48,4 +81,13 @@ str_to_scmp_arch (char *str)
         return internal_arch_to_scmp_arch (i);
     }
   return -1;
+}
+
+char *
+scmp_arch_to_str (uint32_t scmp_arch)
+{
+  int32_t idx = scmp_arch_to_internal_arch (scmp_arch);
+  if (idx == -1)
+    return NULL;
+  return token_pairs[idx];
 }
