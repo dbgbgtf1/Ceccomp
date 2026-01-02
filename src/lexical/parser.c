@@ -219,6 +219,8 @@ compare_obj (obj_t *obj)
   if (!match (DOT))
     {
       obj->data = internal_arch_to_scmp_arch (parser.current.type);
+      if (obj->data == (uint32_t)-1)
+        error_at (parser.current, EXPECT_ARCH);
       return;
     }
   // i386
@@ -227,6 +229,8 @@ compare_obj (obj_t *obj)
     error_at (parser.next, EXPECT_SYSCALL);
 
   uint32_t scmp_arch = internal_arch_to_scmp_arch (parser.previous.type);
+  if (obj->data == (uint32_t)-1)
+    error_at (parser.previous, EXPECT_ARCH);
   obj->data = resolve_name_arch (scmp_arch, &parser.next);
   if (obj->data == (uint32_t)-1)
     error_at (parser.next, EXPECT_SYSCALL);
