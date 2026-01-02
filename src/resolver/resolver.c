@@ -25,6 +25,7 @@ static uint16_t *masks, mem_valid = 0;
   while (0)
 
 #define SPRINTF_CAT(...) print += sprintf (__VA_ARGS__)
+
 static void
 report_error (char *error_msg)
 {
@@ -195,20 +196,25 @@ set_jt_jf (label_t *label, uint32_t code_nr)
 }
 
 static void
+ja_line (jump_line_t *jump_line)
+{
+  uint32_t jt = find_key (&jump_line->jt.key);
+  set_jt_jf (&jump_line->jt, jt);
+
+  masks[jt] &= mem_valid;
+  mem_valid = ~0;
+}
+
+static void
 jump_line ()
 {
   jump_line_t *jump_line = &local->jump_line;
 
-  set_jt_jf (&jump_line->jt, find_key (&jump_line->jt.key));
-  if ((int16_t)jump_line->jt.code_nr < 0)
-    REPORT_ERROR (JT_MUST_BE_POSITIVE);
-
   if (!jump_line->if_condition)
-    {
-      masks[local->code_nr + jump_line->jt.code_nr + 1] &= mem_valid;
-      mem_valid = ~0;
-      return;
-    }
+    return ja_line (jump_line);
+
+  uint32_t jt = find_key (&jump_line->jt.key);
+  set_jt_jf (&jump_line->jt, jt);
 
   if (jump_line->jt.code_nr > UINT8_MAX)
     REPORT_ERROR (JT_TOO_FAR);
@@ -218,14 +224,12 @@ jump_line ()
   else
     set_jt_jf (&jump_line->jf, find_key (&jump_line->jf.key));
 
-  if ((int16_t)jump_line->jf.code_nr < 0)
-    REPORT_ERROR (JF_MUST_BE_POSITIVE);
-
+  uint32_t jf = local->code_nr + jump_line->jf.code_nr + 1;
   if (jump_line->jf.code_nr > UINT8_MAX)
     REPORT_ERROR (JF_TOO_FAR);
 
-  masks[local->code_nr + jump_line->jt.code_nr + 1] &= mem_valid;
-  masks[local->code_nr + jump_line->jf.code_nr + 1] &= mem_valid;
+  masks[jt] &= mem_valid;
+  masks[jf] &= mem_valid;
   mem_valid = ~0;
 }
 
