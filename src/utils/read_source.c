@@ -102,8 +102,9 @@ process_source (void)
         }
 
       if (file_type == WINDOWS)
-        *(line_break - 1) = ' ';
-      *line_break = '\n';
+        memcpy (line_break - 1, "\n", 2);
+      else
+        *line_break = '\n';
 
       clear_color (line_start, line_break - line_start + 1);
 
@@ -162,6 +163,9 @@ init_source (FILE *read_fp)
   if (memchr (source, '\0', current))
     error ("%s", FOUND_SUS_ZERO);
 
+  if (current % GROW_LEN == 0)
+    increase_map (); // scanner expect a trailing \n, which may increase map
+
   process_source ();
 }
 
@@ -184,6 +188,7 @@ next_line (void)
   if (!line_break)
     {
       // meet eof
+      source[current] = '\n';
       cursor = current;
       return read_ptr;
     }
