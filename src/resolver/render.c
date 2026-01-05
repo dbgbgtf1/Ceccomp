@@ -34,6 +34,8 @@ typedef struct
   uint32_t arch;
 } stat_ctx_t;
 
+static stat_ctx_t *list;
+
 #define FORCE true
 
 static void
@@ -48,21 +50,21 @@ set_stat (uint8_t *dest, uint8_t src, bool force)
 
 // same as set_stat
 static void
-set_arch (uint32_t *dest, uint32_t src)
+set_arch (uint32_t dest_idx, uint32_t src)
 {
-  if (*dest == NONE)
-    *dest = src;
-  else if (*dest != src)
-    *dest = MIXED;
+  if (list[dest_idx].arch == NONE)
+    list[dest_idx].arch = src;
+  else if (list[dest_idx].arch != src)
+    list[dest_idx].arch = MIXED;
 }
 
 static void
-set_ctx (stat_ctx_t *dest, stat_ctx_t *src, bool force)
+set_ctx (uint32_t dest_idx, uint32_t src_idx, bool force)
 {
-  set_stat (&dest->A_stat, src->A_stat, force);
-  set_stat (&dest->X_stat, src->X_stat, force);
+  set_stat (&list[dest_idx].A_stat, list[src_idx].A_stat, force);
+  set_stat (&list[dest_idx].X_stat, list[src_idx].X_stat, force);
   for (uint32_t i = 0; i < BPF_MEMWORDS; i++)
-    set_stat (&dest->mem_stat[i], src->mem_stat[i], force);
+    set_stat (&list[dest_idx].mem_stat[i], list[src_idx].mem_stat[i], force);
 }
 
 static void
@@ -106,11 +108,12 @@ assign_line (assign_line_t *assign_line, stat_ctx_t *ctx)
 }
 
 static void
-ja_line (jump_line_t *jump_line, stat_ctx_t *stat_list)
+ja_line (jump_line_t *jump_line)
 {
-  uint32_t jt = jump_line->jt.code_nr;
-  set_ctx (&stat_list[jt], &stat_list[local->code_nr], !FORCE);
-  set_arch (&stat_list[jt].arch, stat_list[local->code_nr].arch);
+  uint32_t pc = local->code_nr;
+  uint32_t jt = pc + jump_line->jt.code_nr + 1;
+  set_ctx (jt, pc, !FORCE);
+  set_arch (jt, list[pc].arch);
 }
 
 static void
@@ -119,20 +122,22 @@ try_resolve_arch (obj_t *cmpobj)
   char *arch_str = scmp_arch_to_str (cmpobj->data);
   if (arch_str == NULL)
     return;
+  cmpobj->type = IDENTIFIER;
   cmpobj->literal.start = arch_str;
   cmpobj->literal.len = strlen (arch_str);
-  cmpobj->type = ATTR_ARCH;
 }
 
 static void
-try_resolve_sysnr (stat_ctx_t *stat_list, obj_t *cmpobj)
+try_resolve_sysnr (obj_t *cmpobj)
 {
-  uint32_t cur_arch = stat_list[local->code_nr].arch;
+  uint32_t cur_arch = list[local->code_nr].arch;
+  if (cur_arch == NONE)
+    return;
   char *sys_name = seccomp_syscall_resolve_num_arch (cur_arch, cmpobj->data);
   if (sys_name == NULL)
     return;
 
-  cmpobj->type = ATTR_SYSCALL;
+  cmpobj->type = IDENTIFIER;
   if (cur_arch == default_arch)
     {
       cmpobj->literal.start = sys_name;
@@ -142,42 +147,47 @@ try_resolve_sysnr (stat_ctx_t *stat_list, obj_t *cmpobj)
   else
     {
       char *buf = malloc (0x30);
-      cmpobj->literal.len = snprintf (buf, 0x30, "%s.%s",
-                                      scmp_arch_to_str (cur_arch), sys_name);
+      char *arch = scmp_arch_to_str (cur_arch);
+      cmpobj->literal.start = buf;
+      cmpobj->literal.len = snprintf (buf, 0x30, "%s.%s", arch, sys_name);
       push_vector (ptr_list, &buf);
+      free (sys_name);
     }
 }
 
 static void
-jump_line (jump_line_t *jump_line, stat_ctx_t *stat_list)
+jump_line (jump_line_t *jump_line)
 {
   if (!jump_line->if_condition)
-    return ja_line (jump_line, stat_list);
+    return ja_line (jump_line);
 
-  uint8_t jt = jump_line->jt.code_nr;
-  uint8_t jf = jump_line->jf.code_nr;
-  set_ctx (&stat_list[jt], &stat_list[local->code_nr], !FORCE);
-  set_ctx (&stat_list[jf], &stat_list[local->code_nr], !FORCE);
+  uint32_t pc = local->code_nr;
+  uint8_t jt = pc + jump_line->jt.code_nr + 1;
+  uint8_t jf = pc + jump_line->jf.code_nr + 1;
+  token_type cmp_op = jump_line->cond.comparator;
+  uint32_t cmp_data = jump_line->cond.cmpobj.data;
+  set_ctx (jt, pc, !FORCE);
+  set_ctx (jf, pc, !FORCE);
 
   // It's hard and unnessary to handle other comparators
-  // So just set_arch when comparator is EQUAL
-  if (stat_list[local->code_nr].A_stat != ARCH)
+  // So just set_arch when comparator is EQUAL_EQUAL
+  if (list[pc].A_stat != ARCH)
     {
-      set_arch (&stat_list[jt].arch, stat_list[local->code_nr].arch);
-      set_arch (&stat_list[jf].arch, stat_list[local->code_nr].arch);
+      set_arch (jt, list[pc].arch);
+      set_arch (jf, list[pc].arch);
     }
-  else if (jump_line->cond.comparator == EQUAL)
+  else if (cmp_op == EQUAL_EQUAL || cmp_op == BANG_EQUAL)
     {
-      set_arch (&stat_list[jt].arch, jump_line->cond.cmpobj.data);
-      set_arch (&stat_list[jf].arch, MIXED);
+      set_arch ((cmp_op == EQUAL_EQUAL) ? jt : jf, cmp_data);
+      set_arch ((cmp_op == EQUAL_EQUAL) ? jf : jt, MIXED);
     }
 
   obj_t *cmpobj = &jump_line->cond.cmpobj;
-  if (stat_list[local->code_nr].A_stat == ARCH)
+  if (list[pc].A_stat == ARCH)
     try_resolve_arch (cmpobj);
 
-  else if (stat_list[local->code_nr].A_stat == SYSNR)
-    try_resolve_sysnr (stat_list, cmpobj);
+  else if (list[pc].A_stat == SYSNR)
+    try_resolve_sysnr (cmpobj);
 }
 
 static token_type
@@ -217,17 +227,19 @@ return_line (return_line_t *return_line)
 }
 
 static void
-render_statement (statement_t *statement, stat_ctx_t *stat_list)
+render_statement (statement_t *statement)
 {
   local = statement;
 
   switch (local->type)
     {
     case ASSIGN_LINE:
-      assign_line (&local->assign_line, &stat_list[local->code_nr]);
+      assign_line (&local->assign_line, &list[local->code_nr]);
+      set_ctx (local->code_nr + 1, local->code_nr, !FORCE);
+      set_arch (local->code_nr + 1, list[local->code_nr].arch);
       break;
     case JUMP_LINE:
-      jump_line (&local->jump_line, stat_list);
+      jump_line (&local->jump_line);
       break;
     case RETURN_LINE:
       return_line (&local->return_line);
@@ -245,12 +257,13 @@ render (vector_t *v, vector_t *v_ptr, uint32_t scmp_arch)
   default_arch = scmp_arch;
   ptr_list = v_ptr;
 
-  uint32_t stat_list_len = sizeof (stat_ctx_t) * (v->count - 1);
-  stat_ctx_t *stat_list = reallocate (NULL, stat_list_len);
-  memset (stat_list, NONE, stat_list_len);
+  uint32_t list_len = sizeof (stat_ctx_t) * (v->count + 1);
+  // statement code_nr starts from 1
+  list = reallocate (NULL, list_len);
+  memset (list, NONE, list_len);
 
-  for (uint32_t i = 0; i < v->count - 1; i++)
-    render_statement (get_vector (v, i), stat_list);
+  for (uint32_t i = 0; i < v->count; i++)
+    render_statement (get_vector (v, i));
 
-  reallocate (stat_list, 0);
+  reallocate (list, 0);
 }
