@@ -1,10 +1,10 @@
 = ceccomp(1)
 dbgbgtf <dudududumaxver@outlook.com>; RocketDev <ma2014119@outlook.com>
-{VERSION}, {TAG_TIME}
 :doctype: manpage
 :docdatetime: {TAG_TIME}
 :manmanual: Ceccomp Manual
 :mansource: ceccomp {VERSION}
+:manversion: {VERSION}
 :imagesdir: images/
 :stylesheet: boot-slate.css
 

@@ -7,7 +7,7 @@ result*
 *.cache/
 CeccompBuild/
 diff_result
-Makefile
+/Makefile
 po/*.po~
 SOURCES.txt
 include/config.h

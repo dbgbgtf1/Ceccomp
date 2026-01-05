@@ -1,0 +1,1198 @@
+# Chinese translations for PACKAGE package
+# Copyright (C) 2026 Free Software Foundation, Inc.
+# This file is distributed under the same license as the PACKAGE package.
+# Automatically generated, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ceccomp docs\n"
+"POT-Creation-Date: 2026-01-05 15:20+0800\n"
+"PO-Revision-Date: 2026-01-05 15:21+0800\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: RocketDev\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.8\n"
+
+#. type: Title =
+#: ceccomp.adoc:1
+#, no-wrap
+msgid "ceccomp(1)"
+msgstr "ceccomp(1)"
+
+#. type: Plain text
+#: ceccomp.adoc:3
+msgid "dbgbgtf <dudududumaxver@outlook.com>; RocketDev <ma2014119@outlook.com>"
+msgstr ""
+"dbgbgtf <dudududumaxver@outlook.com>; RocketDev <ma2014119@outlook.com>"
+
+#. type: Title ==
+#: ceccomp.adoc:11
+#, no-wrap
+msgid "NAME"
+msgstr "名称"
+
+#. type: Plain text
+#: ceccomp.adoc:14
+msgid "ceccomp - A tool to analyze seccomp filters"
+msgstr "ceccomp - 一个分析安全计算 (seccomp) 过滤器的工具"
+
+#. type: Title ==
+#: ceccomp.adoc:15
+#, no-wrap
+msgid "SYNOPSIS"
+msgstr "大纲"
+
+#. type: Plain text
+#: ceccomp.adoc:20
+#, no-wrap
+msgid ""
+"    usage: ceccomp <asm|disasm|emu|trace|probe|version|help> [FILE] [-q|--quiet]\n"
+"                   [-f|--format FMT] [-a|--arch ARCH] [-p|--pid PID]\n"
+"                   [-o|--output FILE] [-c|--color WHEN] ...\n"
+msgstr ""
+"    usage: ceccomp <asm|disasm|emu|trace|probe|version|help> [FILE] [-q|--quiet]\n"
+"                   [-f|--format FMT] [-a|--arch ARCH] [-p|--pid PID]\n"
+"                   [-o|--output FILE] [-c|--color WHEN] ...\n"
+
+#. type: Title ==
+#: ceccomp.adoc:21
+#, no-wrap
+msgid "CONCEPT"
+msgstr "概念"
+
+#. type: Plain text
+#: ceccomp.adoc:26
+msgid ""
+"Kernel use BPF filters to limit syscall rules, applied via `seccomp` or "
+"`prctl` syscall. For example, down below is a simple filter to block "
+"`execve` syscall in hex format:"
+msgstr ""
+"内核使用BPF过滤器来限制系统调用规则，并使用 `seccomp` 和 `prctl` 两个系统调用"
+"来安装过滤器。以下是一个以十六进制表示的限制 `execve` 系统调用的简单过滤器："
+
+#. type: Plain text
+#: ceccomp.adoc:31
+#, no-wrap
+msgid ""
+"    1: 20 00 00 00 00 00 00 00     $A = $syscall_nr\n"
+"    2: 15 00 00 01 3b 00 00 00     if ($A != execve) goto 4\n"
+"    3: 06 00 00 00 00 00 00 00     return KILL\n"
+"    4: 06 00 00 00 00 00 ff 7f     return ALLOW\n"
+msgstr ""
+"    1: 20 00 00 00 00 00 00 00     $A = $syscall_nr\n"
+"    2: 15 00 00 01 3b 00 00 00     if ($A != execve) goto 4\n"
+"    3: 06 00 00 00 00 00 00 00     return KILL\n"
+"    4: 06 00 00 00 00 00 ff 7f     return ALLOW\n"
+
+#. type: Plain text
+#: ceccomp.adoc:35
+msgid ""
+"The part presented in hex is what kernel received, and `ceccomp` take it to "
+"disassemble back to human readable text. For instance the *lineno* in the "
+"left and *statement* in the right."
+msgstr ""
+"以上十六进制的部分就是内核收到的过滤器，而 `ceccomp` 负责把它拿来反汇编为人类"
+"可读的文本。\n"
+"例如左侧的 *行号* 和右侧的 *伪代码* 。"
+
+#. type: Plain text
+#: ceccomp.adoc:38
+msgid ""
+"Later I'll use _TEXT_ in short for BPF human readable text, and use _RAW_ in "
+"short for BPF raw format, please keep that in mind."
+msgstr ""
+"之后我会使用 _TEXT_ 作为BPF过滤器人类可读文本（伪代码）的缩写，\n"
+"使用 _RAW_ 作为BPF过滤器原始格式的缩写，请记住这个约定。"
+
+#. type: Title ==
+#: ceccomp.adoc:39
+#, no-wrap
+msgid "DESCRIPTION"
+msgstr "描述"
+
+#. type: Plain text
+#: ceccomp.adoc:44
+msgid ""
+"`ceccomp` have 5 main functions, basically it's a C version of `seccomp-"
+"tools`, however, there are some breaking changes you need to know, which "
+"will be highlighted in each subcommand section."
+msgstr ""
+"`ceccomp` 有5个主要的功能，它基本上是C版本的 `seccomp-tools` ，然而，\n"
+"有一些不同的地方你需要知道，它们会在在每个子命令的章节中被注明。"
+
+#. type: Title ===
+#: ceccomp.adoc:45
+#, no-wrap
+msgid "asm - ASSEMBLE"
+msgstr "asm - 汇编"
+
+#. type: Plain text
+#: ceccomp.adoc:48
+#, no-wrap
+msgid "    ceccomp asm [-c WHEN] [-a ARCH] [-f FMT] [TEXT]\n"
+msgstr "    ceccomp asm [-c WHEN] [-a ARCH] [-f FMT] [TEXT]\n"
+
+#. type: Plain text
+#: ceccomp.adoc:51
+msgid ""
+"Assemble _TEXT_ to _RAW_. Use it to embed hand written filter rules into C "
+"code or to see the original code of some _TEXT_."
+msgstr ""
+"将 _TEXT_ 汇编为 _RAW_ 。适用于将手写的过滤器规则嵌入到C代码中，\n"
+"或希望观察一些 _TEXT_ 对应的原始字节码。"
+
+#. type: Labeled list
+#: ceccomp.adoc:52 ceccomp.adoc:93 ceccomp.adoc:128 ceccomp.adoc:172
+#, no-wrap
+msgid "WHEN"
+msgstr "WHEN"
+
+#. type: Plain text
+#: ceccomp.adoc:56
+msgid ""
+"Determines when to display warnings and errors in color. If the value is "
+"_auto_, ceccomp will display color when the output target is a \"tty\". Can "
+"be _auto_, _never_ or _always_. The default value is _auto_."
+msgstr ""
+"决定了 `ceccomp` 何时输出有颜色的文本。当设置为 _auto_ 时， `ceccomp`\n"
+"会在输出目标是一个“tty”时打印颜色。可以是 _auto_ 、 _never_ 或者 "
+"_always_ 。\n"
+"默认值是 _auto_ 。"
+
+#. type: Labeled list
+#: ceccomp.adoc:57 ceccomp.adoc:97 ceccomp.adoc:143
+#, no-wrap
+msgid "ARCH"
+msgstr "ARCH"
+
+#. type: Plain text
+#: ceccomp.adoc:62
+msgid ""
+"Set to any architecture libseccomp supports. Will be used to determine the "
+"actual syscall number behind the name (for example, on x86_64, you could "
+"write `\"execve\"` instead of `59` like the basic example above). Your "
+"system arch will be taken if not set via `uname`. The default value on your "
+"system is {ARCH}."
+msgstr ""
+"可以设置为任何 libseccomp 支持的架构。它将被用于决定系统调用名称对应的系统调"
+"用号。\n"
+"例如，在 x86_64 上，就像上面的基本示例，你可以写 `\"execve\"` 而不是数字 "
+"`59`\n"
+"指代系统调用号。如果不设置这个参数，则通过 `uname` 提取当前系统的架构。\n"
+"你的系统上的默认值是 {ARCH} 。"
+
+#. type: Labeled list
+#: ceccomp.adoc:63
+#, no-wrap
+msgid "FMT"
+msgstr "FMT"
+
+#. type: Plain text
+#: ceccomp.adoc:67
+msgid ""
+"Determines how `ceccomp` produces binary-format bpf code. Can be _hexfmt_, "
+"_hexline_ or _raw_. You could find sample output in <<EXAMPLES>> section.  "
+"The default value is _hexline_."
+msgstr ""
+"决定了 `ceccomp` 如何输出二进制格式的BPF字节码。可以是 _hexfmt_ 、 "
+"_hexline_\n"
+"或者 _raw_ 。你可以在 <<ceccomp 示例>> 节中找到示例输出。默认值是 "
+"_hexline_ 。"
+
+#. type: Labeled list
+#: ceccomp.adoc:68 ceccomp.adoc:146
+#, no-wrap
+msgid "TEXT"
+msgstr "TEXT"
+
+#. type: Plain text
+#: ceccomp.adoc:71
+msgid ""
+"Take a optional filename to determine which file containing _TEXT_ will be "
+"assembled. Will read from _stdin_ if not set."
+msgstr ""
+"一个可选的文件名，其中存放了需要被汇编的 _TEXT_ 。不设置则从 _标准输入_ 中读"
+"取。"
+
+#. type: Plain text
+#: ceccomp.adoc:74
+msgid ""
+"Please check out <<TEXT GRAMMAR REFERENCE>> section to see how to write a "
+"rule by hand. Some examples will be displayed in <<EXAMPLES>> section."
+msgstr ""
+"查看 <<TEXT 语法参考>> 一节可以找到如何手写规则。一些示例会在 <<ceccomp 示例"
+">> 一节中展示。"
+
+#. type: Table
+#: ceccomp.adoc:84
+#, no-wrap
+msgid ""
+"|Command|Difference\n"
+"\n"
+"|`seccomp-tools asm`\n"
+"|Use its own grammar to assemble, a bit script like\n"
+"\n"
+"|`ceccomp asm`\n"
+"|You can just take `disasm` output to `asm`, no new grammar is needed to learn;\n"
+"take `stdin` as input by default\n"
+msgstr ""
+"|命令|差别\n"
+"\n"
+"|`seccomp-tools asm`\n"
+"|使用它自己的语法汇编，有点像脚本\n"
+"\n"
+"|`ceccomp asm`\n"
+"|你可以直接拿着 `disasm` 的输出来汇编，不需要学习新语法；默认使用 _标准输入_ 作为输入\n"
+
+#. type: Title ===
+#: ceccomp.adoc:86
+#, no-wrap
+msgid "disasm - DISASSEMBLE"
+msgstr "disasm - 反汇编"
+
+#. type: Plain text
+#: ceccomp.adoc:89
+#, no-wrap
+msgid "    ceccomp disasm [-c WHEN] [-a ARCH] [RAW]\n"
+msgstr "    ceccomp disasm [-c WHEN] [-a ARCH] [RAW]\n"
+
+#. type: Plain text
+#: ceccomp.adoc:92
+msgid ""
+"Disassemble _RAW_ to _TEXT_. Use it to see what does a filter do if you "
+"could not access filter via `trace` and have to manually extract the filter "
+"out."
+msgstr ""
+"反汇编 _RAW_ 为 _TEXT_ 。适用于当你无法使用 `trace` 看到过滤器时，必须手动提"
+"取过滤器，\n"
+"然后检查其含义。"
+
+#. type: Plain text
+#: ceccomp.adoc:96
+msgid ""
+"Argument description can be found in <<asm - ASSEMBLE>> section. `disasm` "
+"may print more text in color including syntax highlighting for _TEXT_."
+msgstr ""
+"参数描述可以在 <<asm - 汇编>> 一节中找到。 `disasm` 可能会打印更多有颜色的文"
+"本，包括针对\n"
+"_TEXT_ 的语法高亮。"
+
+#. type: Plain text
+#: ceccomp.adoc:102
+msgid ""
+"Set to any architecture libseccomp supports. Will be used to determine how "
+"filtered syscall number in _RAW_ filter is translated to syscall name (for "
+"example, on x86_64, the number `0x3b` is translated to `execve` if is "
+"comparing syscall_nr, see the basic example above). The default value on "
+"your system is {ARCH}."
+msgstr ""
+"可以设置为任何 libseccomp 支持的架构。它将被用于决定 _RAW_ 中的系统调用号如何"
+"被翻译为系统调用名。\n"
+"例如，在 x86_64 上，在比较系统调用号时，数字 `0x3b` 将被翻译为 `execve` ，可"
+"以看上面的基本示例。\n"
+"你的系统上的默认值是 {ARCH} 。"
+
+#. type: Plain text
+#: ceccomp.adoc:107
+msgid ""
+"ceccomp will try to resolve syscall number under an arch ONLY IF that at "
+"that line, arch can be determined. On foreign arch (not equal to the arch "
+"you set), the foreign arch will be prepended to syscall name. You may notice "
+"that in some cases, seccomp-tools is able to resolve the name while ceccomp "
+"is not, that may be intended as the arch is not determined."
+msgstr ""
+"当且仅当在某一行的架构可以被确定时，ceccomp 才会尝试用那个架构解析那个系统调"
+"用号。\n"
+"如果是外部架构（不等于你设置的架构），它会被附加到系统调用名前。你可能会注意"
+"到在一些情况下，\n"
+"seccomp-tools 能解析一些系统调用名，而 ceccomp 不能，这可能是因为此时架构不能"
+"被确定。"
+
+#. type: Table
+#: ceccomp.adoc:117
+#, no-wrap
+msgid ""
+"|Command|Difference\n"
+"\n"
+"|`seccomp-tools disasm`\n"
+"|Disassembles in its format; never check if the filter is valid\n"
+"\n"
+"|`ceccomp disasm`\n"
+"|Disassembles in ceccomp format, and takes `stdin` as input by default; check arch strictly\n"
+"and always display foreign arch name\n"
+msgstr ""
+"|命令|差别\n"
+"\n"
+"|`seccomp-tools disasm`\n"
+"|用它自己的语法反汇编；永远不会检查 _RAW_ 是否合法\n"
+"\n"
+"|`ceccomp disasm`\n"
+"|用 ceccomp 语法反汇编，并且默认将 _标准输入_ 作为输入；严格检查架构，\n"
+"并且永远打印外部架构名\n"
+
+#. type: Title ===
+#: ceccomp.adoc:119
+#, no-wrap
+msgid "emu - EMULATE"
+msgstr "emu - 模拟"
+
+#. type: Plain text
+#: ceccomp.adoc:122
+#, no-wrap
+msgid "    ceccomp emu [-c WHEN] [-a ARCH] [-q] [TEXT] SYSCALL_NAME/SYSCALL_NR [ARGS[0] ARGS[1] ... ARGS[5] PC]\n"
+msgstr "    ceccomp emu [-c WHEN] [-a ARCH] [-q] [TEXT] SYSCALL_NAME/SYSCALL_NR [ARGS[0] ARGS[1] ... ARGS[5] PC]\n"
+
+#. type: Plain text
+#: ceccomp.adoc:127
+msgid ""
+"Emulate what will happen if `syscall(SYSCALL_NR, ARGS[0], ARGS[1], ..., "
+"ARGS[5])` from `PC` is called following rules described in _TEXT_. Use it to "
+"see the result without actually running it in program or you don't want to "
+"examine the filter rule manually. This subcommand can be used to "
+"automatically examining a filter."
+msgstr ""
+"按照 _TEXT_ 中描述的规则，模拟从 `PC` 调用 `syscall(SYSCALL_NR, ARGS[0], "
+"ARGS[1], ..., ARGS[5])`\n"
+"的结果。适用于在不实际运行程序或不想手动检查规则时，查看触发系统调用的结"
+"果。\n"
+"这个子命令适合用来自动检测一个过滤器。"
+
+#. type: Plain text
+#: ceccomp.adoc:131
+msgid ""
+"Argument description can be found in <<asm - ASSEMBLE>> section. `emu` may "
+"print more text in color including syntax highlighting for _TEXT_ and "
+"skipped statements."
+msgstr ""
+"参数描述可以在 <<asm - 汇编>> 一节中找到。 `emu` 可能会打印更多有颜色的文本，"
+"包括针对\n"
+"_TEXT_ 的语法高亮以及跳过的伪代码。"
+
+#. type: Labeled list
+#: ceccomp.adoc:132
+#, no-wrap
+msgid "SYSCALL_NAME/SYSCALL_NR"
+msgstr "SYSCALL_NAME/SYSCALL_NR"
+
+#. type: Plain text
+#: ceccomp.adoc:137
+msgid ""
+"If you set *SYSCALL_NAME* (like `execve`), it will be translated to "
+"*SYSCALL_NR* under *ARCH* first. Or else set *SYSCALL_NR* directly (like "
+"`59`). Then the nr will be tested against the bpf filter to see the result "
+"of that syscall. This argument is NOT optional."
+msgstr ""
+"如果你设置了 *SYSCALL_NAME* （比如 `execve` ），那么它会基于 *ARCH* 先被翻译"
+"为对应的\n"
+"*SYSCALL_NR* 。或者你可以直接设置 *SYSCALL_NR* （例如 `59` ）。然后会测试这个"
+"系统调用号经过\n"
+"BPF 过滤器处理后的输出并打印出来。这个参数是必填的。"
+
+#. type: Labeled list
+#: ceccomp.adoc:138
+#, no-wrap
+msgid "ARGS[0-5] and PC"
+msgstr "ARGS[0-5] 和 PC"
+
+#. type: Plain text
+#: ceccomp.adoc:142
+msgid ""
+"Register values when calling syscall. For example, on x86_64, these are "
+"equivalent to `rdi`, `rsi`, `rdx`, `r10`, `r8`, `r9` and `rip`. Their "
+"default value is 0."
+msgstr ""
+"当调用系统调用时对应寄存器的值。例如，在 x86_64 上，它们分别对应了\n"
+"`rdi` 、 `rsi` 、 `rdx` 、 `r10` 、 `r8` 、 `r9` 和 `rip` 。它们的默认值都是"
+"0。"
+
+#. type: Plain text
+#: ceccomp.adoc:145
+msgid "Argument description can be found in <<asm - ASSEMBLE>> section."
+msgstr "参数描述可以在 <<asm - 汇编>> 一节中找到。"
+
+#. type: Plain text
+#: ceccomp.adoc:149
+msgid ""
+"Take a optional filename to determine which file containing _TEXT_ rule will "
+"be tested. Will read from _stdin_ if not set."
+msgstr ""
+"一个可选的文件名，其中存放了需要被测试的 _TEXT_ 规则。不设置则从 _标准输入_ "
+"中读取。"
+
+#. type: Table
+#: ceccomp.adoc:159
+#, no-wrap
+msgid ""
+"|Command|Difference\n"
+"\n"
+"|`seccomp-tools emu`\n"
+"|Take a _RAW_ as input\n"
+"\n"
+"|`ceccomp emu`\n"
+"|Take a _TEXT_ as input and take `stdin` as input by default; set *PC* is\n"
+"possible\n"
+msgstr ""
+"|命令|差别\n"
+"\n"
+"|`seccomp-tools emu`\n"
+"|用 _RAW_ 作为输入\n"
+"\n"
+"|`ceccomp emu`\n"
+"|用 _TEXT_ 作为输入，并默认将 _标准输入_ 作为输入；可以设置 *PC*\n"
+
+#. type: Title ===
+#: ceccomp.adoc:161
+#, no-wrap
+msgid "trace - TRACE FILTER IN RUNTIME"
+msgstr "trace - 运行时捕获过滤器"
+
+#. type: Plain text
+#: ceccomp.adoc:165
+#, no-wrap
+msgid ""
+"    ceccomp trace [-c WHEN] [-o FILE] PROGRAM [program-args]\n"
+"                  [-c WHEN] -p PID\n"
+msgstr ""
+"    ceccomp trace [-c WHEN] [-o FILE] PROGRAM [program-args]\n"
+"                  [-c WHEN] -p PID\n"
+
+#. type: Plain text
+#: ceccomp.adoc:171
+msgid ""
+"The first line captures filters *PROGRAM* loads in runtime by tracing it; "
+"the second line extract seccomp filters from *PID*; once fetched filters, "
+"print them in _TEXT_. You can only choose one of the two formats above.  Use "
+"this if running the program is the simplest way to fetch bpf filters or a "
+"program with seccomp filters installed is waiting for input."
+msgstr ""
+"使用第一行的命令可以利用调试在 *PROGRAM* 运行中加载过滤器时动态捕获过滤器；\n"
+"第二行的命令可以从 *PID* 对应的进程中提取出 seccomp 过滤器；一旦捕获到了过滤"
+"器，\n"
+"将会以 _TEXT_ 的格式将它打印出来。你可以从两个格式中选择一个使用。\n"
+"适用于运行一个程序是捕获BPF过滤器最简单的方式或者一个安装了 seccomp\n"
+"过滤器的程序正在等待输入。"
+
+#. type: Plain text
+#: ceccomp.adoc:175
+msgid ""
+"Argument description can be found in <<asm - ASSEMBLE>> section. `trace` may "
+"print more text in color including syntax highlighting for _TEXT_."
+msgstr ""
+"参数描述可以在 <<asm - 汇编>> 一节中找到。 `trace` 可能会打印更多有颜色的文"
+"本，包括针对\n"
+"_TEXT_ 的语法高亮。"
+
+#. type: Labeled list
+#: ceccomp.adoc:176
+#, no-wrap
+msgid "FILE"
+msgstr "FILE"
+
+#. type: Plain text
+#: ceccomp.adoc:181
+msgid ""
+"May be useful when *PROGRAM* produces quite a lot output in _stderr_.  "
+"`ceccomp` allow user to close _stdin_ and _stdout_ to limit *PROGRAM* input "
+"and output, so `ceccomp` use _stderr_ to print messages when running "
+"*PROGRAM*, set *FILE* if you want to see _TEXT_ in some other file."
+msgstr ""
+"当 *PROGRAM* 会产生很多输出到 _标准错误_ 时可能很有用。 `ceccomp` 允许用户关"
+"闭\n"
+"_标准输入_ 和 _标准输出_ 来限制 *PROGRAM* 的输入和输出，所以 当运行\n"
+"*PROGRAM* 时 `ceccomp` 使用 _标准错误_ 来打印消息。如果你想在别的文件中看见\n"
+"_TEXT_ 的话请设置 *FILE* 。"
+
+#. type: Labeled list
+#: ceccomp.adoc:182
+#, no-wrap
+msgid "PROGRAM"
+msgstr "PROGRAM"
+
+#. type: Plain text
+#: ceccomp.adoc:185
+msgid ""
+"Set to the program you want to run, and *program-args* are its arguments "
+"just like running shell command `exec PROGRAM program-args`."
+msgstr ""
+"设置为你想运行的程序，并且 *program-args* 将作为它的参数，\n"
+"就像运行 shell 命令 `exec PROGRAM program-args` 。"
+
+#. type: Labeled list
+#: ceccomp.adoc:186
+#, no-wrap
+msgid "PID"
+msgstr "PID"
+
+#. type: Plain text
+#: ceccomp.adoc:189
+msgid ""
+"Set to the pid you want to inspect. *PID* is conflict with *PROGRAM*; you "
+"could either run a program dynamically or examine a pid in one command."
+msgstr ""
+"设置为你想检查的 pid。 *PID* 和 *PROGRAM* 相冲突；你只能在一条命令中动态运行"
+"一个程序，\n"
+"或者检查一个 pid。"
+
+#. type: Plain text
+#: ceccomp.adoc:193
+msgid ""
+"To extract filters from *PID*, `CAP_SYS_ADMIN` is needed and "
+"`CAP_SYS_PTRACE` may also be needed, the easiest way to acquire them is "
+"calling `ceccomp` with `sudo`."
+msgstr ""
+"要想从 *PID* 中提取过滤器，你需要 `CAP_SYS_ADMIN` ，同时还可能需要\n"
+"`CAP_SYS_PTRACE` ，最简单的获取它们的方法是用 `sudo` 运行 `ceccomp` 。"
+
+#. type: Plain text
+#: ceccomp.adoc:197
+msgid ""
+"Since _version 3.1_, multiple process tracing is introduced, and when tracee "
+"forking/resolving/exiting, an extra INFO message is printed. You can discard "
+"it by running command like `ceccomp trace -o $(tty) PROG 2>/dev/null`."
+msgstr ""
+"从 _version 3.1_ 开始引入了多进程支持，并且当被调试进程 fork/resolve/exit\n"
+"时，将会打印一条额外的 INFO 信息。你可以使用像 `ceccomp trace -o $(tty) PROG "
+"2>/dev/null`\n"
+"这样的命令丢弃它。"
+
+#. type: Table
+#: ceccomp.adoc:209
+#, no-wrap
+msgid ""
+"|Command|Difference\n"
+"\n"
+"|`seccomp-tools dump`\n"
+"|Setting output format is possible; each filter can be output to a different\n"
+"file; killing *PROGRAM* once *LIMIT* times of filters loaded; wrapping *PROGRAM*\n"
+"in `sh -c`\n"
+"\n"
+"|`ceccomp trace`\n"
+"|All filters are output to a single file; never kill *PROGRAM*; *PROGRAM* is\n"
+"launched directly, so `./` is not needed; explicitly print when forking\n"
+msgstr ""
+"|命令|差别\n"
+"\n"
+"|`seccomp-tools dump`\n"
+"|可以设置输出格式；每一个过滤器可以输出到不同的文件；当 *PROGRAM*\n"
+"加载了 *LIMIT* 个过滤器后就杀死程序；将 *PROGRAM* 包装在 `sh -c` 中运行\n"
+"\n"
+"|`ceccomp trace`\n"
+"|所有过滤器被输出到同一个文件；永远不会杀死 *PROGRAM* ； *PROGRAM* 是直接被执行的，\n"
+"所以不需要 `./` ；当 fork 时，显式打印事件\n"
+
+#. type: Title ===
+#: ceccomp.adoc:211
+#, no-wrap
+msgid "probe - TEST COMMON SYSCALLS INSTANTLY"
+msgstr "probe - 快速测试常见的系统调用"
+
+#. type: Plain text
+#: ceccomp.adoc:214
+#, no-wrap
+msgid "    ceccomp probe [-c WHEN] [-o FILE] PROGRAM [program-args]\n"
+msgstr "    ceccomp probe [-c WHEN] [-o FILE] PROGRAM [program-args]\n"
+
+#. type: Plain text
+#: ceccomp.adoc:218
+msgid ""
+"Run *PROGRAM* with *program-args* to captures *FIRST* seccomp filter, and "
+"then kill all children. Use it when a quick check against a program is "
+"needed, and detect potential seccomp rule issues."
+msgstr ""
+"以 *program-args* 为参数运行 *PROGRAM* 来捕获 *第一个* seccomp 过滤器，\n"
+"然后杀死所有子进程。适用于快速测试一个程序的规则并检测潜在的 seccomp\n"
+"规则问题。"
+
+#. type: Plain text
+#: ceccomp.adoc:220
+msgid ""
+"All argument descriptions can be found in <<trace - TRACE FILTER IN "
+"RUNTIME>> section."
+msgstr "所有参数描述都可以在 <<trace - 运行时捕获过滤器>> 一节中找到。"
+
+#. type: Plain text
+#: ceccomp.adoc:224
+msgid ""
+"The output for this subcommand is the emulating result of common syscalls "
+"like `execve`, `open` and so on. If the filter itself is not capable of "
+"blocking syscalls, you could know that with a glance."
+msgstr ""
+"这个子命令的输出是一系列常见的系统调用的模拟结果，例如 `execve` 、 `open` "
+"等。\n"
+"如果过滤器本身并不能阻拦系统调用，那你一眼就能看出来。"
+
+#. type: Plain text
+#: ceccomp.adoc:227
+msgid ""
+"Typical output for this subcommand is described below, more detailed example "
+"could be found in <<EXAMPLES>> section."
+msgstr ""
+"这个子命令的典型输出如下所示，更多完整的实例可以在 <<ceccomp 示例>> 一节中找"
+"到。"
+
+#. type: Plain text
+#: ceccomp.adoc:239
+#, no-wrap
+msgid ""
+"    open      -> ALLOW\n"
+"    read      -> ALLOW\n"
+"    write     -> ALLOW\n"
+"    execve    -> KILL\n"
+"    execveat  -> KILL\n"
+"    mmap      -> ALLOW\n"
+"    mprotect  -> ALLOW\n"
+"    openat    -> ALLOW\n"
+"    sendfile  -> ALLOW\n"
+"    ptrace    -> ERRNO(1)\n"
+"    fork      -> ALLOW\n"
+msgstr ""
+"    open      -> ALLOW\n"
+"    read      -> ALLOW\n"
+"    write     -> ALLOW\n"
+"    execve    -> KILL\n"
+"    execveat  -> KILL\n"
+"    mmap      -> ALLOW\n"
+"    mprotect  -> ALLOW\n"
+"    openat    -> ALLOW\n"
+"    sendfile  -> ALLOW\n"
+"    ptrace    -> ERRNO(1)\n"
+"    fork      -> ALLOW\n"
+
+#. type: Plain text
+#: ceccomp.adoc:241
+msgid "`seccomp-tools` don't have this subcommand."
+msgstr "`seccomp-tools` 没有等价的子命令。"
+
+#. type: Title ==
+#: ceccomp.adoc:242
+#, no-wrap
+msgid "TEXT GRAMMAR REFERENCE"
+msgstr "TEXT 语法参考"
+
+#. type: Plain text
+#: ceccomp.adoc:247
+msgid ""
+"A valid _TEXT_ could only contain *statement* like `$A = $arch`, but adding "
+"an extra *lineno* may help you much. *lineno* starts from 1, and always "
+"bases 10."
+msgstr ""
+"一个有效的 _TEXT_ 可以只包含 *伪代码* 如 `$A = $arch` ，但是添加一些多余的\n"
+"*行号* 可能可以辅助你手写 _TEXT_ 。 *行号* 从1开始，并且永远是十进制的。"
+
+#. type: Plain text
+#: ceccomp.adoc:249
+msgid "BPF ops which are not described below are banned by kernel."
+msgstr "其余未描述到的BPF操作都被内核禁止了。"
+
+#. type: Title ===
+#: ceccomp.adoc:250
+#, no-wrap
+msgid "Optional Wrapper"
+msgstr "可选的其他字段"
+
+#. type: Plain text
+#: ceccomp.adoc:254
+msgid ""
+"`ceccomp disasm` displays a lot of things, but most of them are optional for "
+"asm."
+msgstr "`ceccomp disasm` 展示了很多东西，但对于 asm 来说大部分是可选的。"
+
+#. type: Plain text
+#: ceccomp.adoc:259
+#, no-wrap
+msgid ""
+"    Line  CODE  JT   JF      K\n"
+"    ---------------------------------\n"
+"    0001: 0x06 0x00 0x00 0x7fff0000 return ALLOW\n"
+"    ---------------------------------\n"
+msgstr ""
+"    Line  CODE  JT   JF      K\n"
+"    ---------------------------------\n"
+"    0001: 0x06 0x00 0x00 0x7fff0000 return ALLOW\n"
+"    ---------------------------------\n"
+
+#. type: Plain text
+#: ceccomp.adoc:261
+msgid "Only `return ALLOW`, the *statement* is needed."
+msgstr "以上例子中，只用 `return ALLOW` 这条 *伪代码* 是需要的。"
+
+#. type: Plain text
+#: ceccomp.adoc:266
+msgid ""
+"There are some slight difference between `ceccomp disasm` and `seccomp-tools "
+"disasm`, down below is a general example. And some statements are different, "
+"so don't pipe seccomp-tools output to ceccomp blindly."
+msgstr ""
+"`ceccomp disasm` 和 `seccomp-tools disasm` 的输出之间有很多细微的差别，\n"
+"以下是一个典型的输出示例。同时有些伪代码是不同的，所以不要盲目将 seccomp-"
+"tools\n"
+"的输出管道给 ceccomp。"
+
+#. type: Plain text
+#: ceccomp.adoc:270
+#, no-wrap
+msgid ""
+"    line  CODE  JT   JF      K\n"
+"    =================================\n"
+"    0000: 0x06 0x00 0x00 0x7fff0000  return ALLOW\n"
+msgstr ""
+"    line  CODE  JT   JF      K\n"
+"    =================================\n"
+"    0000: 0x06 0x00 0x00 0x7fff0000  return ALLOW\n"
+
+#. type: Title ===
+#: ceccomp.adoc:271
+#, no-wrap
+msgid "Assignment"
+msgstr "赋值"
+
+#. type: Plain text
+#: ceccomp.adoc:275
+msgid ""
+"`A` can be set to seccomp attributes directly. But `X` can not be assigned "
+"with seccomp attributes directly due to kernel limit."
+msgstr ""
+"`A` 可以直接赋值为 seccomp 属性。由于内核限制， `X` 不能直接赋值为 seccomp 属"
+"性。"
+
+#. type: Plain text
+#: ceccomp.adoc:278
+#, no-wrap
+msgid ""
+"    $A = $arch\n"
+"    $A = $syscall_nr\n"
+msgstr ""
+"    $A = $arch\n"
+"    $A = $syscall_nr\n"
+
+#. type: Plain text
+#: ceccomp.adoc:280
+msgid ""
+"To assign `A` with those 64-bit long fields, `low_` or `high_` prefix is "
+"needed."
+msgstr "要给 `A` 赋值为这些64位长的字段，必须使用 `low_` 或者 `high_` 的前缀。"
+
+#. type: Plain text
+#: ceccomp.adoc:288
+#, no-wrap
+msgid ""
+"    $A = $low_pc\n"
+"    $A = $high_pc\n"
+"    $A = $low_args[0]\n"
+"    $A = $high_args[0]\n"
+"    ...\n"
+"    $A = $low_args[5]\n"
+"    $A = $high_args[5]\n"
+msgstr ""
+"    $A = $low_pc\n"
+"    $A = $high_pc\n"
+"    $A = $low_args[0]\n"
+"    $A = $high_args[0]\n"
+"    ...\n"
+"    $A = $low_args[5]\n"
+"    $A = $high_args[5]\n"
+
+#. type: Plain text
+#: ceccomp.adoc:291
+msgid ""
+"A special attribute is `sizeof(struct seccomp_data)`, that can be assigned "
+"to `A` or `X` directly."
+msgstr ""
+"一个特殊的属性是 `sizeof(struct seccomp_data)` ，它可以直接赋值给 `A` 或 "
+"`X` 。"
+
+#. type: Plain text
+#: ceccomp.adoc:294
+#, no-wrap
+msgid ""
+"    $A = $scmp_data_len\n"
+"    $X = $scmp_data_len\n"
+msgstr ""
+"    $A = $scmp_data_len\n"
+"    $X = $scmp_data_len\n"
+
+#. type: Plain text
+#: ceccomp.adoc:298
+msgid ""
+"Temporary memory is 32-bit, to access them, you could use hex or dec as "
+"index.  Both `A` and `X` is assignable. Assigning immediate values to `A` or "
+"`X` accepts any format of number if you imply the correct base by \"0x\" or "
+"\"0b\"."
+msgstr ""
+"临时内存是32位的，要想访问它们，你可以使用十六进制或者十进制的索引。\n"
+"`A` 和 `X` 都是可赋值的。给 `A` 或 `X` 赋值为立即数接受任意格式的数字，\n"
+"只要你使用 \"0x\" 或者 \"0b\" 等前缀正确表达数字是几进制的。"
+
+#. type: Plain text
+#: ceccomp.adoc:306
+#, no-wrap
+msgid ""
+"    $X = $mem[0]\n"
+"    $A = $mem[0xf]\n"
+"    $A = $mem[15] # both hex and dec index are OK\n"
+"    $A = 0\n"
+"    $X = 0x3b\n"
+"    $A = 0b111\n"
+"    $X = 0777\n"
+msgstr ""
+"    $X = $mem[0]\n"
+"    $A = $mem[0xf]\n"
+"    $A = $mem[15] # both hex and dec index are OK\n"
+"    $A = 0\n"
+"    $X = 0x3b\n"
+"    $A = 0b111\n"
+"    $X = 0777\n"
+
+#. type: Plain text
+#: ceccomp.adoc:309
+msgid ""
+"You could also assign `X` to `A` or in the reverse order. Assign `X` or `A` "
+"to temporary memory is definitely okay."
+msgstr ""
+"你还可以将 `X` 赋值给 `A` 或者反过来。将 `X` 或 `A` 赋值给临时内存当然可以。"
+
+#. type: Plain text
+#: ceccomp.adoc:314
+#, no-wrap
+msgid ""
+"    $A = $X\n"
+"    $X = $A\n"
+"    $mem[3] = $X\n"
+"    $mem[0x4] = $A\n"
+msgstr ""
+"    $A = $X\n"
+"    $X = $A\n"
+"    $mem[3] = $X\n"
+"    $mem[0x4] = $A\n"
+
+#. type: Title ===
+#: ceccomp.adoc:315
+#, no-wrap
+msgid "Arithmetic Operations"
+msgstr "数学运算"
+
+#. type: Plain text
+#: ceccomp.adoc:318
+msgid "Various operations can be applied to `A`."
+msgstr "你可以以多种方式操作 `A` 。"
+
+#. type: Plain text
+#: ceccomp.adoc:325
+#, no-wrap
+msgid ""
+"    $A += 30\n"
+"    $A -= 4\n"
+"    $A *= 9\n"
+"    $A /= 1\n"
+"    $A &= 7\n"
+"    $A >>= 6\n"
+msgstr ""
+"    $A += 30\n"
+"    $A -= 4\n"
+"    $A *= 9\n"
+"    $A /= 1\n"
+"    $A &= 7\n"
+"    $A >>= 6\n"
+
+#. type: Plain text
+#: ceccomp.adoc:327
+msgid "The right value can be `X`."
+msgstr "右值也可以是 `X` 。"
+
+#. type: Plain text
+#: ceccomp.adoc:332
+#, no-wrap
+msgid ""
+"    $A &= $X\n"
+"    $A |= $X\n"
+"    $A ^= $X\n"
+"    $A <<= $X\n"
+msgstr ""
+"    $A &= $X\n"
+"    $A |= $X\n"
+"    $A ^= $X\n"
+"    $A <<= $X\n"
+
+#. type: Plain text
+#: ceccomp.adoc:334
+msgid "And there is a way to negativate `A`."
+msgstr "想要对 `A` 取反可以这么做。"
+
+#. type: Plain text
+#: ceccomp.adoc:336
+#, no-wrap
+msgid "    $A = -$A\n"
+msgstr "    $A = -$A\n"
+
+#. type: Title ===
+#: ceccomp.adoc:337
+#, no-wrap
+msgid "Jump Downwards If ..."
+msgstr "当...时向下跳转"
+
+#. type: Plain text
+#: ceccomp.adoc:340
+msgid "Unconditional jump:"
+msgstr "无条件跳转："
+
+#. type: Plain text
+#: ceccomp.adoc:342
+#, no-wrap
+msgid "    goto 3\n"
+msgstr "    goto 3\n"
+
+#. type: Plain text
+#: ceccomp.adoc:344
+msgid "Jump if:"
+msgstr "当...跳转："
+
+#. type: Plain text
+#: ceccomp.adoc:350
+#, no-wrap
+msgid ""
+"    if ($A == execve) goto 3\n"
+"    if ($A != 1234) goto 4\n"
+"    if ($A & $X) goto 5\n"
+"    if !($A & 7) goto 6\n"
+"    if ($A <= $X) goto 7\n"
+msgstr ""
+"    if ($A == execve) goto 3\n"
+"    if ($A != 1234) goto 4\n"
+"    if ($A & $X) goto 5\n"
+"    if !($A & 7) goto 6\n"
+"    if ($A <= $X) goto 7\n"
+
+#. type: Plain text
+#: ceccomp.adoc:352
+msgid "If true jump to ... if false jump to...:"
+msgstr "当条件为真时跳转到...，条件为假时跳转到...："
+
+#. type: Plain text
+#: ceccomp.adoc:355
+#, no-wrap
+msgid ""
+"    if ($A > $X) goto 3, else goto 4\n"
+"    if ($A >= 4567) goto 5, else goto 6\n"
+msgstr ""
+"    if ($A > $X) goto 3, else goto 4\n"
+"    if ($A >= 4567) goto 5, else goto 6\n"
+
+#. type: Plain text
+#: ceccomp.adoc:362
+msgid ""
+"ONLY in conditions, you CAN replace number with syscall name. In example "
+"above, `0x3b` is replaced by `execve`. All the syscall name will be resolved "
+"to syscall number under your selected arch. If you want to resolve a syscall "
+"name in foreign arch (not equal to your selected arch), please prepend a "
+"arch and dot. For example, your arch is x86_64, and you are writing "
+"_aarch64_ rules, then please write like:"
+msgstr ""
+"只有在做条件判断时，你才能将数字替换为系统调用号。在以上的例子中， `0x3b`\n"
+"被 `execve` 替换。所有系统调用名将会以你设置的架构解析为系统调用号。\n"
+"如果你希望解析外部架构（不等于你设置的架构）的系统调用名，\n"
+"请在前面附加架构名和一个点。例如，你设置的架构是 x86_64，并且你正在写\n"
+"_aarch64_ 架构的规则，请这样写："
+
+#. type: Plain text
+#: ceccomp.adoc:364
+#, no-wrap
+msgid "    if ($A == aarch64.read) goto 5\n"
+msgstr "    if ($A == aarch64.read) goto 5\n"
+
+#. type: Plain text
+#: ceccomp.adoc:367
+msgid ""
+"Note that if you manually set arch to _aarch64_ with `-a aarch64`, you can "
+"omit `aarch64.` in statement."
+msgstr ""
+"注意当你手动使用 `-a aarch64` 将架构设置为 _aarch64_ 时，\n"
+"你可以在伪代码中忽略 `aarch64.` 。"
+
+#. type: Title ===
+#: ceccomp.adoc:368
+#, no-wrap
+msgid "Return Code"
+msgstr "返回码"
+
+#. type: Plain text
+#: ceccomp.adoc:371
+msgid "Return value of register `A`:"
+msgstr "返回寄存器 `A` 的值："
+
+#. type: Plain text
+#: ceccomp.adoc:373
+#, no-wrap
+msgid "    return $A\n"
+msgstr "    return $A\n"
+
+#. type: Plain text
+#: ceccomp.adoc:377
+msgid ""
+"Or return a immediate value, with extra field in `()`. Actions including "
+"`TRACE`, `TRAP` and `ERRNO` accept an extra field, without `()`, they are "
+"treated as `action(0)`:"
+msgstr ""
+"或者返回一个立即数，多余的字段放在 `()` 里。 `TRACE` 、 `TRAP` 和 `ERRNO`\n"
+"接受一个额外的字段，如果没有 `()` ，它们将被视为 `行为(0)` 。"
+
+#. type: Plain text
+#: ceccomp.adoc:386
+#, no-wrap
+msgid ""
+"    return KILL\n"
+"    return KILL_PROCESS\n"
+"    return TRAP(123)\n"
+"    return ERRNO(0)\n"
+"    return TRACE\n"
+"    return TRACE(3)\n"
+"    return LOG\n"
+"    return NOTIFY\n"
+msgstr ""
+"    return KILL\n"
+"    return KILL_PROCESS\n"
+"    return TRAP(123)\n"
+"    return ERRNO(0)\n"
+"    return TRACE\n"
+"    return TRACE(3)\n"
+"    return LOG\n"
+"    return NOTIFY\n"
+
+#. type: Title ==
+#: ceccomp.adoc:387
+#, no-wrap
+msgid "EXAMPLES"
+msgstr "ceccomp 示例"
+
+#. type: Plain text
+#: ceccomp.adoc:392
+msgid ""
+"Manpage can not display images, so please check out html version of this "
+"page to see examples."
+msgstr "手册不能显示图片，因此如果想看示例请参阅html版本。"
+
+#. type: Title ===
+#: ceccomp.adoc:395
+#, no-wrap
+msgid "asm example"
+msgstr "asm 示例"
+
+#. type: Target for macro image
+#: ceccomp.adoc:396
+#, no-wrap
+msgid "asm.png"
+msgstr "asm.png"
+
+#. type: Title ===
+#: ceccomp.adoc:397
+#, no-wrap
+msgid "disasm example"
+msgstr "disasm 示例"
+
+#. type: Target for macro image
+#: ceccomp.adoc:398
+#, no-wrap
+msgid "disasm.png"
+msgstr "disasm.png"
+
+#. type: Title ===
+#: ceccomp.adoc:399
+#, no-wrap
+msgid "emu example"
+msgstr "emu 示例"
+
+#. type: Target for macro image
+#: ceccomp.adoc:400
+#, no-wrap
+msgid "emu.png"
+msgstr "emu.png"
+
+#. type: Target for macro image
+#: ceccomp.adoc:401
+#, no-wrap
+msgid "emu_quiet.png"
+msgstr "emu_quiet.png"
+
+#. type: Title ===
+#: ceccomp.adoc:402
+#, no-wrap
+msgid "trace example"
+msgstr "trace 示例"
+
+#. type: Plain text
+#: ceccomp.adoc:404
+msgid "Running program:"
+msgstr "运行程序："
+
+#. type: Target for macro image
+#: ceccomp.adoc:405
+#, no-wrap
+msgid "trace.png"
+msgstr "trace.png"
+
+#. type: Plain text
+#: ceccomp.adoc:408
+msgid "If set `-o FILE`:"
+msgstr "如果设置了 `-o FILE` ："
+
+#. type: Target for macro image
+#: ceccomp.adoc:409
+#, no-wrap
+msgid "output_trick.png"
+msgstr "output_trick.png"
+
+#. type: Plain text
+#: ceccomp.adoc:412
+msgid "Pid mode:"
+msgstr "PID模式："
+
+#. type: Target for macro image
+#: ceccomp.adoc:413
+#, no-wrap
+msgid "trace_pid.png"
+msgstr "trace_pid.png"
+
+#. type: Plain text
+#: ceccomp.adoc:416
+msgid "Completion for pid mode is available under zsh:"
+msgstr "zsh下PID模式可以使用补全："
+
+#. type: Target for macro image
+#: ceccomp.adoc:417
+#, no-wrap
+msgid "trace_completion.png"
+msgstr "trace_completion.png"
+
+#. type: Title ===
+#: ceccomp.adoc:419
+#, no-wrap
+msgid "probe example"
+msgstr "probe 示例"
+
+#. type: Target for macro image
+#: ceccomp.adoc:420
+#, no-wrap
+msgid "probe.png"
+msgstr "probe.png"
+
+#. type: Title ==
+#: ceccomp.adoc:423
+#, no-wrap
+msgid "REPO"
+msgstr "仓库"
+
+#. type: Plain text
+#: ceccomp.adoc:427
+msgid ""
+"Visit https://github.com/dbgbgtf1/Ceccomp to find the code.  Pull Requests "
+"and Issues are welcome!"
+msgstr ""
+"在 https://github.com/dbgbgtf1/Ceccomp 可以找到源代码。\n"
+"欢迎提交 Pull Requests 和 Issues ！"
+
+#. type: Plain text
+#: ceccomp.adoc:428
+msgid "Copyright (C) 2025-present, distributed under GPLv3 or later."
+msgstr "Copyright (C) 2025-现在，基于 GPLv3 或更新版本分发。"
