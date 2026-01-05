@@ -192,7 +192,7 @@ empty_printer (uint32_t times, bool quiet)
     print_statement (&empty);
 }
 
-static obj_t *
+static statement_t *
 emulator (vector_t *v_code, bool quiet)
 {
   uint32_t read_idx = 0;
@@ -222,9 +222,10 @@ emulator (vector_t *v_code, bool quiet)
         {
         case ASSIGN_LINE:
           assign_line (&statement->assign_line);
-          break;
+          continue;
         case JUMP_LINE:
           exec_idx += jump_line (&statement->jump_line);
+          continue;
         case RETURN_LINE:
           break;
         case EMPTY_LINE:
@@ -232,10 +233,12 @@ emulator (vector_t *v_code, bool quiet)
         case ERROR_LINE:
           assert (0);
         }
+
+      break;
     }
 
   assert (statement->type == RETURN_LINE);
-  return &statement->return_line.ret_obj;
+  return statement;
 }
 
 static void
@@ -283,9 +286,12 @@ emulate (emu_arg_t *emu_arg)
     error ("%s", EMU_TERMINATED);
   // if ERROR_LINE exists, then exits
 
-  obj_t *ret = emulator (&v_code, emu_arg->quiet);
+  statement_t *ret = emulator (&v_code, emu_arg->quiet);
+  uint32_t line_left = statement.text_nr - ret->text_nr;
+  if (!emu_arg->quiet && line_left)
+    printf (" ...... %d lines skipped\n", line_left);
   putchar (' ');
-  obj_printer (ret);
+  obj_printer (&ret->return_line.ret_obj);
   putchar ('\n');
 
   free_table ();
