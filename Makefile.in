@@ -132,7 +132,7 @@ $(MAN_OBJ): $(DOC_DIR)/ceccomp.adoc | $(BUILD_DIR) $(MARK)
 	$Q$(call ECHO,ADOC,$@)
 	$Q$(ASCIIDOC) -b manpage $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
 
-$(MAN_CHN): $(DOC_DIR)/ceccomp-cn.adoc | $(BUILD_DIR) $(MARK)
+$(MAN_CHN): $(DOC_DIR)/ceccomp.zh_CN.adoc | $(BUILD_DIR) $(MARK)
 	$Q$(call ECHO,ADOC,$@)
 	$Q$(ASCIIDOC) -b manpage $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
 
@@ -140,7 +140,7 @@ $(HTML_OBJ): $(DOC_DIR)/ceccomp.adoc | $(BUILD_DIR) $(MARK)
 	$Q$(call ECHO,ADOC,$@)
 	$Q$(ASCIIDOC) -b html5 $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
 
-$(HTML_CHN): $(DOC_DIR)/ceccomp-cn.adoc | $(BUILD_DIR) $(MARK)
+$(HTML_CHN): $(DOC_DIR)/ceccomp.zh_CN.adoc | $(BUILD_DIR) $(MARK)
 	$Q$(call ECHO,ADOC,$@)
 	$Q$(ASCIIDOC) -b html5 $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
 
