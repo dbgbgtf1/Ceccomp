@@ -4,6 +4,13 @@
 #include <stddef.h>
 #include <stdint.h>
 
+// when a vector store statement_t
+// the statement must be ordered by code_nr
+// code_nr and text_nr both starts from 1
+// statement at index 0 should be ignored
+// empty lines are skipped and dealed with text_nr
+// eof_lines are skipped, too.
+
 typedef struct
 {
   uint32_t count;

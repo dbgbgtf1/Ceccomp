@@ -4,6 +4,7 @@
 #include "hash.h"
 #include "main.h"
 #include "token.h"
+#include "vector.h"
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -109,6 +110,7 @@ typedef struct
 
 extern void init_parser (uint32_t scmp_arch);
 
-extern void parse_line (statement_t *statement);
+// see vector.h for vector details
+extern void parser (vector_t *v);
 
 #endif

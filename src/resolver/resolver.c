@@ -291,17 +291,17 @@ resolver (vector_t *v)
 {
   has_error = false;
 
-  masks = reallocate (NULL, sizeof (*masks) * (v->count - 1));
-  memset (masks, 0xff, sizeof (*masks) * (v->count - 1));
+  masks = reallocate (NULL, sizeof (*masks) * (v->count + 1));
+  memset (masks, 0xff, sizeof (*masks) * (v->count + 1));
   mem_valid = 0;
 
-  for (uint32_t i = 0; i < v->count - 1; i++)
+  for (uint32_t i = 1; i < v->count; i++)
     {
       mem_valid &= masks[i];
       resolve_statement (get_vector (v, i));
     }
 
-  statement_t *last = get_vector (v, v->count - 2);
+  statement_t *last = get_vector (v, v->count - 1);
   if (last->type != RETURN_LINE)
     report_error (MUST_END_WITH_RET);
 

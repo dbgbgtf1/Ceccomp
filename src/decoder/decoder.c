@@ -239,6 +239,7 @@ decode_filters (fprog *prog, vector_t *v)
     error ("%s", DISASM_TERMINATED);
 
   statement_t statement;
+  push_vector (v, &statement);
 
   for (uint32_t i = 0; i < prog->len; i++)
     {

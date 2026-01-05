@@ -247,22 +247,13 @@ assemble (FILE *fp, uint32_t scmp_arch, print_mode_t print_mode)
 
   vector_t v;
   init_vector (&v, sizeof (statement_t));
-  statement_t statement;
-  do
-    {
-      parse_line (&statement);
-      if (statement.type != EMPTY_LINE)
-        push_vector (&v, &statement);
-      // skip EMPTY_LINE
-    }
-  while (statement.type != EOF_LINE);
-
+  parser (&v);
   if (resolver (&v))
     error ("%s", ASM_TERMINATED);
   // if ERROR_LINE exists, then exits
 
   char *fmt = set_print_fmt (print_mode);
-  for (uint32_t i = 0; i < v.count - 1; i++)
+  for (uint32_t i = 1; i < v.count; i++)
     print_asm (fmt, asm_statement (get_vector (&v, i)));
 
   free_table ();

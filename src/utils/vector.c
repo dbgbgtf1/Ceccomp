@@ -29,7 +29,7 @@ void
 init_vector (vector_t *v, size_t elem_size)
 {
   v->count = 0;
-  v->capacity = 8;
+  v->capacity = 0x10;
   v->elem_size = elem_size;
   v->data = NULL;
   UPDATE_VECTOR;

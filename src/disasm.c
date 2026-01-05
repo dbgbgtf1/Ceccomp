@@ -19,26 +19,28 @@ disasm (FILE *fp, uint32_t scmp_arch)
   prog.filter = filters;
   prog.len = fread (filters, sizeof (filter), 1024, fp);
 
-  vector_t v_code;
+  vector_t v;
   vector_t v_ptr;
-  init_vector (&v_code, sizeof (statement_t));
-  init_vector (&v_code, sizeof (char *));
-  render (&v_code, &v_ptr, scmp_arch);
-  decode_filters (&prog, &v_code);
+
+  init_vector (&v, sizeof (statement_t));
+  init_vector (&v_ptr, sizeof (char *));
+  decode_filters (&prog, &v);
+  render (&v, &v_ptr, scmp_arch);
   puts (LIGHT ("#Label  CODE  JT   JF      K"));
   puts (LIGHT ("#---------------------------------"));
 
-  for (uint32_t i = 0; i < v_code.count; i++)
+  for (uint32_t i = 1; i < v.count; i++)
     {
       filter f = filters[i];
-      printf (" " DEFAULT_LABEL ": 0x%02x 0x%02x 0x%02x 0x%08x ", i, f.code,
-              f.jt, f.jf, f.k);
-      print_statement (get_vector (&v_code, i));
+      printf (" " DEFAULT_LABEL ": 0x%02x 0x%02x 0x%02x 0x%08x ", i,
+              f.code, f.jt, f.jf, f.k);
+      print_statement (get_vector (&v, i));
     }
 
   puts (LIGHT ("#---------------------------------"));
+
   for (uint32_t i = 0; i < v_ptr.count; i++)
     free (*((char **)get_vector (&v_ptr, i)));
-
-  free_vector (&v_code);
+  free_vector (&v);
+  free_vector (&v_ptr);
 }
