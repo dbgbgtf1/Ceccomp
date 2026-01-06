@@ -230,13 +230,14 @@ compare_obj (obj_t *obj)
     error_at (parse.next, EXPECT_SYSCALL);
 
   uint32_t scmp_arch = internal_arch_to_scmp_arch (parse.previous.type);
-  if (obj->data == (uint32_t)-1)
+  if (scmp_arch == (uint32_t)-1)
     error_at (parse.previous, EXPECT_ARCH);
   obj->data = resolve_name_arch (scmp_arch, &parse.next);
   if (obj->data == (uint32_t)-1)
     error_at (parse.next, EXPECT_SYSCALL);
 
-  obj->literal.len += parse.next.token_len;
+  obj->literal.len += parse.next.token_len + 1;
+  // +1 is for dot
   advance ();
   // i386.read
 }
