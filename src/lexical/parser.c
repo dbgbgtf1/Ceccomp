@@ -5,6 +5,7 @@
 #include "main.h"
 #include "scanner.h"
 #include "token.h"
+#include "vector.h"
 #include <seccomp.h>
 #include <setjmp.h>
 #include <stdbool.h>
@@ -432,16 +433,28 @@ init_parser (uint32_t scmp_arch)
 }
 
 void
-parser (vector_t *v)
+parser (vector_t *text_v, vector_t *code_ptr_v)
 {
-  statement_t statement;
-  push_vector (v, &statement);
+  statement_t statement = { 0 };
+  statement_t *ptr = &statement;
+  push_vector (text_v, &statement);
+  push_vector (code_ptr_v, &ptr);
   while (true)
     {
       parse_line (&statement);
+
       if (statement.type == EOF_LINE)
         break;
-      if (statement.type != EMPTY_LINE)
-        push_vector (v, &statement);
+      push_vector (text_v, &statement);
+    }
+
+  // we have to do it after text vector finish
+  // because text vector might reallocate
+  for (uint32_t i = 1; i < text_v->count; i++)
+    {
+      ptr = get_vector (text_v, i);
+      if (ptr->type == EMPTY_LINE)
+        continue;
+      push_vector (code_ptr_v, &ptr);
     }
 }

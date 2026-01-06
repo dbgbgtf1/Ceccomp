@@ -12,6 +12,6 @@ extern bool has_error;
 
 // see vector.h for vector details
 // return false if ok, return true if error occurs
-extern bool resolver (vector_t *v);
+extern bool resolver (vector_t *code_ptr_v);
 
 #endif

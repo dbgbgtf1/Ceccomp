@@ -245,18 +245,24 @@ assemble (FILE *fp, uint32_t scmp_arch, print_mode_t print_mode)
   init_parser (scmp_arch);
   init_table ();
 
-  vector_t v;
-  init_vector (&v, sizeof (statement_t));
-  parser (&v);
-  if (resolver (&v))
+  vector_t text_v;
+  vector_t code_ptr_v;
+  init_vector (&text_v, sizeof (statement_t));
+  init_vector (&code_ptr_v, sizeof (statement_t *));
+  parser (&text_v, &code_ptr_v);
+  if (resolver (&code_ptr_v))
     error ("%s", ASM_TERMINATED);
   // if ERROR_LINE exists, then exits
 
   char *fmt = set_print_fmt (print_mode);
-  for (uint32_t i = 1; i < v.count; i++)
-    print_asm (fmt, asm_statement (get_vector (&v, i)));
+  for (uint32_t i = 1; i < code_ptr_v.count; i++)
+    {
+      statement_t **ptr = get_vector (&code_ptr_v, i);
+      print_asm (fmt, asm_statement (*ptr));
+    }
 
   free_table ();
   free_source ();
-  free_vector (&v);
+  free_vector (&text_v);
+  free_vector (&code_ptr_v);
 }

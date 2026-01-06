@@ -181,33 +181,17 @@ emulate_printer (statement_t *statement, char *override_color, bool quiet)
     }
 }
 
-static void
-empty_printer (uint32_t times, bool quiet)
-{
-  if (quiet)
-    return;
-
-  statement_t empty = { .type = EMPTY_LINE };
-  for (uint32_t i = 0; i < times; i++)
-    print_statement (&empty);
-}
-
 static statement_t *
-emulator (vector_t *v, bool quiet)
+emulator (vector_t *text_v, vector_t *code_ptr_v, bool quiet)
 {
   uint32_t read_idx = 1;
   uint32_t exec_idx = 1;
-
-  uint32_t offset = 0;
+  uint32_t jmp;
 
   statement_t *statement;
-  for (; read_idx < v->count; read_idx++)
+  for (; read_idx < text_v->count; read_idx++)
     {
-      statement = get_vector (v, read_idx);
-
-      empty_printer (statement->text_nr - statement->code_nr - offset, quiet);
-      offset = statement->text_nr - statement->code_nr;
-      // handle skipped empty lines
+      statement = get_vector (text_v, read_idx);
 
       if (read_idx < exec_idx)
         {
@@ -224,11 +208,16 @@ emulator (vector_t *v, bool quiet)
           assign_line (&statement->assign_line);
           continue;
         case JUMP_LINE:
-          exec_idx += jump_line (&statement->jump_line);
+          jmp = jump_line (&statement->jump_line);
+          // debug ("%d + %d + 1", statement->code_nr, jmp);
+          statement_t **ptr
+              = get_vector (code_ptr_v, statement->code_nr + jmp + 1);
+          exec_idx = (*ptr)->text_nr;
           continue;
         case RETURN_LINE:
           break;
         case EMPTY_LINE:
+          continue;
         case EOF_LINE:
         case ERROR_LINE:
           assert (0);
@@ -270,15 +259,18 @@ emulate (emu_arg_t *emu_arg)
   init_parser (emu_arg->arch_enum);
   init_table ();
 
-  vector_t v;
-  init_vector (&v, sizeof (statement_t));
-  parser (&v);
-  if (resolver (&v))
+  vector_t text_v;
+  vector_t code_ptr_v;
+  init_vector (&text_v, sizeof (statement_t));
+  init_vector (&code_ptr_v, sizeof (statement_t *));
+  parser (&text_v, &code_ptr_v);
+  if (resolver (&code_ptr_v))
     error ("%s", EMU_TERMINATED);
   // if ERROR_LINE exists, then exits
 
-  statement_t *ret = emulator (&v, emu_arg->quiet);
-  uint32_t last_line = ((statement_t *)get_vector (&v, v.count - 1))->text_nr;
+  statement_t *ret = emulator (&text_v, &code_ptr_v, emu_arg->quiet);
+  uint32_t last_line
+      = ((statement_t *)get_vector (&text_v, text_v.count - 1))->text_nr;
   uint32_t line_left = last_line - ret->text_nr;
   if (!emu_arg->quiet && line_left)
     printf (" ...... %d lines skipped\n", line_left);
@@ -288,5 +280,6 @@ emulate (emu_arg_t *emu_arg)
 
   free_table ();
   free_source ();
-  free_vector (&v);
+  free_vector (&text_v);
+  free_vector (&code_ptr_v);
 }

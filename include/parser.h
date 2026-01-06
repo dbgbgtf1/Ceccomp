@@ -111,6 +111,6 @@ typedef struct
 extern void init_parser (uint32_t scmp_arch);
 
 // see vector.h for vector details
-extern void parser (vector_t *v);
+extern void parser (vector_t *text_v, vector_t *code_ptr_v);
 
 #endif

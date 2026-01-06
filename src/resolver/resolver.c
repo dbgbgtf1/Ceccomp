@@ -287,22 +287,23 @@ resolve_statement (statement_t *statement)
 }
 
 bool
-resolver (vector_t *v)
+resolver (vector_t *code_ptr_v)
 {
   has_error = false;
 
-  masks = reallocate (NULL, sizeof (*masks) * (v->count + 1));
-  memset (masks, 0xff, sizeof (*masks) * (v->count + 1));
+  masks = reallocate (NULL, sizeof (*masks) * (code_ptr_v->count + 1));
+  memset (masks, 0xff, sizeof (*masks) * (code_ptr_v->count + 1));
   mem_valid = 0;
 
-  for (uint32_t i = 1; i < v->count; i++)
+  for (uint32_t i = 1; i < code_ptr_v->count; i++)
     {
       mem_valid &= masks[i];
-      resolve_statement (get_vector (v, i));
+      statement_t **ptr = get_vector (code_ptr_v, i);
+      resolve_statement (*ptr);
     }
 
-  statement_t *last = get_vector (v, v->count - 1);
-  if (last->type != RETURN_LINE)
+  statement_t **last = get_vector (code_ptr_v, code_ptr_v->count - 1);
+  if ((*last)->type != RETURN_LINE)
     report_error (MUST_END_WITH_RET);
 
   reallocate (masks, 0x0);

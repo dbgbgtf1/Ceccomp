@@ -4,12 +4,13 @@
 #include <stddef.h>
 #include <stdint.h>
 
-// when a vector store statement_t
-// the statement must be ordered by code_nr
+// A vector store statement ordered by code_nr
+// A vector stores statement_t ptr ordered by text_nr
+
 // code_nr and text_nr both starts from 1
 // statement at index 0 should be ignored
-// empty lines are skipped and dealed with text_nr
-// eof_lines are skipped, too.
+
+// eof_lines won't be in the vector
 
 typedef struct
 {
