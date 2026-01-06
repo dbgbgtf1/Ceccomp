@@ -86,12 +86,13 @@ typedef enum
 
 typedef struct
 {
-  uint16_t text_nr;
-  uint16_t code_nr;
   expr_type type;
   string_t label_decl;
   char *line_start;
-  uint32_t line_len;
+  uint16_t text_nr;
+  uint16_t code_nr;
+  uint16_t comment;
+  uint16_t line_len;
 
   union
   {

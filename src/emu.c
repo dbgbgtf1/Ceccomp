@@ -3,6 +3,7 @@
 #include "formatter.h"
 #include "log/error.h"
 #include "log/logger.h"
+#include "main.h"
 #include "parse_args.h"
 #include "parser.h"
 #include "read_source.h"
@@ -97,11 +98,11 @@ assign_line (assign_line_t *assign_line)
 
 #define DO_COMPARE(comparator) (bool)(A_reg comparator right)
 
-static uint32_t
+static label_t *
 jump_line (jump_line_t *jump_line)
 {
-  uint32_t jt = jump_line->jt.code_nr;
-  uint32_t jf = jump_line->jf.code_nr;
+  label_t *jt = &jump_line->jt;
+  label_t *jf = &jump_line->jf;
 
   if (!jump_line->if_condition)
     return jt;
@@ -146,17 +147,38 @@ jump_line (jump_line_t *jump_line)
   return (cond_true ? jt : jf);
 }
 
+static uint32_t
+code_nr_to_text_nr (vector_t *text_v, vector_t *code_ptr_v, statement_t *cur,
+                    label_t *jmp)
+{
+  statement_t **ptr = get_vector (code_ptr_v, cur->code_nr + jmp->code_nr + 1);
+  uint32_t text_nr = (*ptr)->text_nr;
+
+  statement_t *statement;
+  string_t *label_decl;
+  while (true)
+    {
+      statement = get_vector (text_v, text_nr);
+      if (statement->type != EMPTY_LINE)
+        break;
+
+      label_decl = &statement->label_decl;
+      if ((label_decl->start)
+          && (!strncmp (label_decl->start, jmp->key.start, jmp->key.len)))
+        break;
+      text_nr--;
+    }
+  return text_nr;
+}
+
 static void
 print_label_decl (statement_t *statement)
 {
-  if (statement->type != EMPTY_LINE)
-    {
-      if (statement->label_decl.start == NULL)
-        printf (" " DEFAULT_LABEL ": ", statement->code_nr);
-      else
-        printf (" %.*s: ", statement->label_decl.len,
-                statement->label_decl.start);
-    }
+  string_t *label_decl = &statement->label_decl;
+  if (label_decl->start != NULL)
+    printf (" %.*s: ", label_decl->len, label_decl->start);
+  else if (statement->type != EMPTY_LINE)
+    printf (" " DEFAULT_LABEL ": ", statement->code_nr);
 }
 
 static void
@@ -186,7 +208,7 @@ emulator (vector_t *text_v, vector_t *code_ptr_v, bool quiet)
 {
   uint32_t read_idx = 1;
   uint32_t exec_idx = 1;
-  uint32_t jmp;
+  label_t *jmp;
 
   statement_t *statement;
   for (; read_idx < text_v->count; read_idx++)
@@ -209,10 +231,7 @@ emulator (vector_t *text_v, vector_t *code_ptr_v, bool quiet)
           continue;
         case JUMP_LINE:
           jmp = jump_line (&statement->jump_line);
-          // debug ("%d + %d + 1", statement->code_nr, jmp);
-          statement_t **ptr
-              = get_vector (code_ptr_v, statement->code_nr + jmp + 1);
-          exec_idx = (*ptr)->text_nr;
+          exec_idx = code_nr_to_text_nr (text_v, code_ptr_v, statement, jmp);
           continue;
         case RETURN_LINE:
           break;
