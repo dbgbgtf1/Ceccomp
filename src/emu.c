@@ -163,7 +163,7 @@ code_nr_to_text_nr (vector_t *text_v, vector_t *code_ptr_v, statement_t *cur,
         break;
 
       label_decl = &statement->label_decl;
-      if ((label_decl->start)
+      if ((label_decl->start) && (label_decl->len == jmp->key.len)
           && (!strncmp (label_decl->start, jmp->key.start, jmp->key.len)))
         break;
       text_nr--;
@@ -283,7 +283,7 @@ emulate (emu_arg_t *emu_arg)
   init_vector (&text_v, sizeof (statement_t));
   init_vector (&code_ptr_v, sizeof (statement_t *));
   parser (&text_v, &code_ptr_v);
-  if (resolver (&code_ptr_v))
+  if (resolver (&text_v, &code_ptr_v))
     error ("%s", EMU_TERMINATED);
   // if ERROR_LINE exists, then exits
 
