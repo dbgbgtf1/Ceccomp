@@ -38,14 +38,6 @@ typedef struct
 
 typedef struct
 {
-  // var A;
-  // jump always compare A with something else, so skip it
-  token_type comparator;
-  obj_t cmpobj;
-} jump_condition_t;
-
-typedef struct
-{
   // token_t if;
   // jump_line_t must starts with if, so skip it
   bool if_bang;
@@ -54,7 +46,11 @@ typedef struct
   // does condition exists
   // if true, jt and jf both uint16_t
   // else jt is uint32_t, jf is ignored
-  jump_condition_t cond;
+
+  // var A;
+  // jump always compare A with something else, so skip it
+  token_type comparator;
+  obj_t cmpobj;
 
   label_t jt;
   label_t jf;

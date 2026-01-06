@@ -164,8 +164,8 @@ jump_line (jump_line_t *jump_line)
   uint32_t pc = local->code_nr;
   uint8_t jt = pc + jump_line->jt.code_nr + 1;
   uint8_t jf = pc + jump_line->jf.code_nr + 1;
-  token_type cmp_op = jump_line->cond.comparator;
-  uint32_t cmp_data = jump_line->cond.cmpobj.data;
+  token_type cmp_op = jump_line->comparator;
+  uint32_t cmp_data = jump_line->cmpobj.data;
   set_ctx (jt, pc, !FORCE);
   set_ctx (jf, pc, !FORCE);
 
@@ -182,7 +182,7 @@ jump_line (jump_line_t *jump_line)
       set_arch ((cmp_op == EQUAL_EQUAL) ? jf : jt, MIXED);
     }
 
-  obj_t *cmpobj = &jump_line->cond.cmpobj;
+  obj_t *cmpobj = &jump_line->cmpobj;
   if (list[pc].A_stat == ARCH)
     try_resolve_arch (cmpobj);
 

@@ -132,9 +132,9 @@ jump_line (statement_t *statement)
   obj_t obj_A = { .type = A, .data = 0 };
   obj_printer (&obj_A);
   putchar (' ');
-  print_token_pair (jump_line->cond.comparator);
+  print_token_pair (jump_line->comparator);
   putchar (' ');
-  obj_printer (&jump_line->cond.cmpobj);
+  obj_printer (&jump_line->cmpobj);
   print_token_pair (RIGHT_PAREN);
   putchar (' ');
   print_token_pair (GOTO);

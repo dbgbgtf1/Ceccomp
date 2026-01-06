@@ -255,9 +255,9 @@ condition (jump_line_t *jump_line)
     error_at (parse.next, EXPECT_A);
   if (!match_from_to (EQUAL_EQUAL, AND))
     error_at (parse.next, EXPECT_COMPARTOR);
-  jump_line->cond.comparator = parse.current.type;
+  jump_line->comparator = parse.current.type;
 
-  compare_obj (&jump_line->cond.cmpobj);
+  compare_obj (&jump_line->cmpobj);
 
   if (!match (RIGHT_PAREN))
     error_at (parse.next, EXPECT_PAREN);

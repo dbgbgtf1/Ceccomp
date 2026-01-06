@@ -122,23 +122,23 @@ static token_type reverse_table[] = {
 };
 
 static void
-condition (filter f, jump_condition_t *cond, bool *if_bang)
+condition (filter f, token_type *comparator, obj_t *cmpobj, bool *if_bang)
 {
   uint32_t op = BPF_OP (f.code);
   if ((!*if_bang) || op == BPF_JSET)
-    cond->comparator = comparator_table[op];
+    *comparator = comparator_table[op];
   else
     {
-      cond->comparator = reverse_table[op];
+      *comparator = reverse_table[op];
       *if_bang = false;
     }
 
   if (BPF_SRC (f.code) == BPF_X)
-    cond->cmpobj.type = X;
+    cmpobj->type = X;
   else
     {
-      cond->cmpobj.type = NUMBER;
-      cond->cmpobj.data = f.k;
+      cmpobj->type = NUMBER;
+      cmpobj->data = f.k;
     }
 }
 
@@ -167,7 +167,8 @@ jump_line (filter f, statement_t *statement)
       jump_line->jf.code_nr = f.jf;
     }
 
-  condition (f, &jump_line->cond, &jump_line->if_bang);
+  condition (f, &jump_line->comparator, &jump_line->cmpobj,
+             &jump_line->if_bang);
 }
 
 static void

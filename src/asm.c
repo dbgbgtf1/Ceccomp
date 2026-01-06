@@ -182,23 +182,23 @@ jump_line (jump_line_t *jump_line)
     }
 
   bool sym_reverse = false;
-  token_type comparator = jump_line->cond.comparator;
+  token_type comparator = jump_line->comparator;
   if (comparator == BANG_EQUAL || comparator == LESS_EQUAL
       || comparator == LESS_THAN)
     sym_reverse = true;
 
-  f.code |= comparator_table[jump_line->cond.comparator];
+  f.code |= comparator_table[jump_line->comparator];
   if (sym_reverse ^ jump_line->if_bang)
     reverse_jt_jt (jump_line);
   f.jt = jump_line->jt.code_nr;
   f.jf = jump_line->jf.code_nr;
 
-  if (jump_line->cond.cmpobj.type == X)
+  if (jump_line->cmpobj.type == X)
     f.code |= BPF_X;
-  else if (jump_line->cond.cmpobj.type == NUMBER)
+  else if (jump_line->cmpobj.type == NUMBER)
     {
       f.code |= BPF_K;
-      f.k = jump_line->cond.cmpobj.data;
+      f.k = jump_line->cmpobj.data;
     }
 
   return f;

@@ -111,12 +111,12 @@ jump_line (jump_line_t *jump_line)
     cond_true = true;
 
   uint32_t right = 0;
-  if (jump_line->cond.cmpobj.type == X)
+  if (jump_line->cmpobj.type == X)
     right = X_reg;
   else
-    right = jump_line->cond.cmpobj.data;
+    right = jump_line->cmpobj.data;
 
-  switch (jump_line->cond.comparator)
+  switch (jump_line->comparator)
     {
     case EQUAL_EQUAL:
       cond_true ^= DO_COMPARE (==);
