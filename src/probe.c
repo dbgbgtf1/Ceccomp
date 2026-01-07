@@ -75,7 +75,7 @@ probe (char *argv[], FILE *output_fp)
     {
       fprintf (output_fp, "%-10s-> ", to_test_list[i]);
       emu_arg.sys_name = to_test_list[i];
-      emulate_v (&text_v, &code_ptr_v, &emu_arg);
+      emulate_v (&text_v, &code_ptr_v, &emu_arg, output_fp);
     }
 
   free_table ();

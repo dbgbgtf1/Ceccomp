@@ -268,21 +268,21 @@ init_attr (emu_arg_t *emu_arg)
 }
 
 void
-emulate_v (vector_t *text_v, vector_t *code_ptr_v, emu_arg_t *emu_arg)
+emulate_v (vector_t *text_v, vector_t *code_ptr_v, emu_arg_t *emu_arg,
+           FILE *output_fp)
 {
   init_attr (emu_arg);
 
   statement_t *ret = emulator (text_v, code_ptr_v, emu_arg->quiet);
   uint32_t line_left = text_v->count - 1 - ret->text_nr;
   if (!emu_arg->quiet && line_left)
-    print_as_comment (stdout, "... %d line(s) skipped", line_left);
+    print_as_comment (output_fp, "... %d line(s) skipped", line_left);
 
   if (!emu_arg->quiet)
     return;
 
-  putchar (' ');
-  extern_obj_printer (stdout, &ret->return_line.ret_obj);
-  putchar ('\n');
+  extern_obj_printer (output_fp, &ret->return_line.ret_obj);
+  fputc ('\n', output_fp);
 }
 
 void
@@ -302,7 +302,7 @@ emulate (emu_arg_t *emu_arg)
     error ("%s", EMU_TERMINATED);
   // if ERROR_LINE exists, then exits
 
-  emulate_v (&text_v, &code_ptr_v, emu_arg);
+  emulate_v (&text_v, &code_ptr_v, emu_arg, stdout);
 
   free_table ();
   free_source ();
