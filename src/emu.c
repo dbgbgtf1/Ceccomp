@@ -176,9 +176,7 @@ print_label_decl (statement_t *statement)
 {
   string_t *label_decl = &statement->label_decl;
   if (label_decl->start != NULL)
-    printf (" %.*s: ", label_decl->len, label_decl->start);
-  else if (statement->type != EMPTY_LINE)
-    printf (" " DEFAULT_LABEL ": ", statement->code_nr);
+    printf ("%.*s: ", label_decl->len, label_decl->start);
 }
 
 static void
@@ -277,7 +275,7 @@ emulate_v (vector_t *text_v, vector_t *code_ptr_v, emu_arg_t *emu_arg)
   statement_t *ret = emulator (text_v, code_ptr_v, emu_arg->quiet);
   uint32_t line_left = text_v->count - 1 - ret->text_nr;
   if (!emu_arg->quiet && line_left)
-    print_as_comment (stdout, "...... %x lines skipped", line_left);
+    print_as_comment (stdout, "... %d line(s) skipped", line_left);
 
   if (!emu_arg->quiet)
     return;
