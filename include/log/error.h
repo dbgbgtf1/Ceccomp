@@ -3,6 +3,9 @@
 
 #include "i18n.h"
 
+// probe
+#define PROBE_TERMINATED _ ("Probe terminated")
+
 // emu
 #define EMU_TERMINATED _ ("Emu terminated")
 #define INPUT_SYS_NR _ ("Please input syscall_nr to emu")
@@ -13,6 +16,42 @@
 
 // disasm
 #define DISASM_TERMINATED _ ("Disasm terminated")
+
+// trace
+#define PEEKDATA_FAILED_ADR _ ("Peekdata failed at %p")
+#define EXECV_ERR _ ("execv failed executing")
+#define PROCESS_FORK _ ("Process %d spawned a new pid %d")
+#define PROCESS_EXIT _ ("Process %d exited")
+#define PARSE_PID_BPF _ ("Parsing %d process seccomp filter")
+#define PROCFS_NOT_ACCESSIBLE _ ("Procfs not accessible, unable to perform")
+#define NOT_AN_CBPF _ ("Non-cbpf found, can't resolve, but continue")
+#define SEIZING_KERNEL_THREAD _ ("Kernel thread can not be seized")
+#define ACTION_PTRACE_SEIZE "ptrace seizing"
+#define NO_FILTER_FOUND _ ("No seccomp filters found in pid %d\n")
+#define TARGET_TRACED_BY _ ("Target process is being traced by %d pid process")
+// no translation due to terms
+#define ACTION_GET_FILTER "ptrace get seccomp filters"
+
+#define CAP_SYS_PTRACE_OR_KTHREAD                                             \
+  _ ("perhaps seizing kthread or lacking CAP_SYS_PTRACE")
+#define REQUIRE_CAP_SYS_ADMIN                                                 \
+  _ ("Run with CAP_SYS_ADMIN capability to fetch seccomp filters")
+#define REQUIRE_CAP_SYS_PTRACE                                                \
+  _ ("Run with CAP_SYS_PTRACE capability to seize a foreign process")
+#define CANNOT_WORK_FROM_32_TO_64                                             \
+  _ ("Ptrace from 32-bit tracer to 64-bit tracee is limited")
+#define TRACEE_ARCH_NOT_SUPPORTED                                             \
+  _ ("libseccomp does not support the tracee's arch (%#x)")
+#define CAP_SYS_ADMIN_OR_IN_SECCOMP                                           \
+  _ ("perhaps lacking CAP_SYS_ADMIN or ceccomp is in seccomp mode")
+#define GET_FILTER_UNSUPPORTED                                                \
+  _ ("PTRACE_GET_SECCOMP_FILTER is not supported on your system")
+#define CECCOMP_IN_SECCOMP                                                    \
+  _ ("Ceccomp is in seccomp mode, fetch seccomp filters of other process is " \
+     "not permitted")
+#define GET_FILTER_UNSUPPORTED_OR_NO_FILTER                                   \
+  _ ("perhaps PTRACE_GET_SECCOMP_FILTER is not supported or no seccomp "      \
+     "filter in target process")
 
 // parse_args
 #define INVALID_COLOR_MODE _ ("Invalid color mode")

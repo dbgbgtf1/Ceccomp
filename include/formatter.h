@@ -14,7 +14,7 @@ typedef struct
   char *color;
 } obj_print_t;
 
-extern void obj_printer (obj_t *obj);
+extern void extern_obj_printer (FILE *output_fp, obj_t *obj);
 
 extern void print_as_comment (FILE *output_fp, char *comment_fmt, ...)
     __attribute__ ((format (printf, 2, 3)));

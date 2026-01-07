@@ -1,0 +1,86 @@
+#include "probe.h"
+#include "emu.h"
+#include "log/error.h"
+#include "log/logger.h"
+#include "parse_args.h"
+#include "parser.h"
+#include "read_source.h"
+#include "resolver.h"
+#include "scanner.h"
+#include "trace.h"
+#include "vector.h"
+#include <fcntl.h>
+#include <seccomp.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
+char *to_test_list[]
+    = { "open", "openat",   "read",     "write",  "execve", "execveat",
+        "mmap", "mprotect", "sendfile", "ptrace", "fork" };
+
+static uint32_t
+init_text (FILE **text, char *argv[])
+{
+  *text = tmpfile ();
+  if (*text == NULL)
+    error ("open: %s", strerror (errno));
+  uint32_t scmp_arch = program_trace (argv, *text, true);
+  fflush (*text);
+  fseek (*text, 0, SEEK_SET);
+  return scmp_arch;
+}
+
+static void
+init_emu_arg (emu_arg_t *emu_arg, FILE *text, uint32_t scmp_arch)
+{
+  for (uint32_t i = 0; i < 6; i++)
+    emu_arg->args[i] = 0;
+  emu_arg->quiet = true;
+  emu_arg->text_file = text;
+  emu_arg->scmp_arch = scmp_arch;
+  emu_arg->ip = 0;
+}
+
+void
+probe (char *argv[], FILE *output_fp)
+{
+  FILE *text;
+  emu_arg_t emu_arg;
+  uint32_t scmp_arch;
+
+  scmp_arch = init_text (&text, argv);
+  init_emu_arg (&emu_arg, text, scmp_arch);
+
+  vector_t text_v;
+  vector_t code_ptr_v;
+
+  init_source (text);
+  init_scanner (next_line ());
+  init_parser (scmp_arch);
+  init_table ();
+
+  init_vector (&text_v, sizeof (statement_t));
+  init_vector (&code_ptr_v, sizeof (statement_t *));
+  parser (&text_v, &code_ptr_v);
+  if (resolver (&code_ptr_v))
+    error ("%s", PROBE_TERMINATED);
+  // if ERROR_LINE exists, then exits
+
+  for (size_t i = 0; i < ARRAY_SIZE (to_test_list); i++)
+    {
+      fprintf (output_fp, "%-10s-> ", to_test_list[i]);
+      emu_arg.sys_name = to_test_list[i];
+      emulate_v (&text_v, &code_ptr_v, &emu_arg);
+    }
+
+  free_table ();
+  free_source ();
+  free_vector (&text_v);
+  free_vector (&code_ptr_v);
+  fclose (text);
+}

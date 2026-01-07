@@ -1,9 +1,10 @@
 #include "arch_trans.h"
 #include "asm.h"
 #include "disasm.h"
-#include "trace.h"
 #include "emu.h"
 #include "parse_args.h"
+#include "probe.h"
+#include "trace.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -105,22 +106,14 @@ main (int argc, char *argv[])
       emulate (&emu_arg);
       break;
     case TRACE_MODE:
-      printf ("TRACE_MODE\n");
-      if (args.trace_arg->mode == TRACE_PID)
-        {
-          printf ("pid: %d\n", args.trace_arg->pid);
-          break;
-        }
-      program_trace (&argv[trace_arg.prog_idx], trace_arg.output_file, false);
-      for (int i = args.trace_arg->prog_idx; i < argc; i++)
-        printf (" %s", argv[i]);
-      printf (", output_file: %p\n", args.trace_arg->output_file);
+      if (trace_arg.mode == TRACE_PID)
+        pid_trace (trace_arg.pid);
+      else if (trace_arg.mode == TRACE_PROG)
+        program_trace (&argv[trace_arg.prog_idx], trace_arg.output_file,
+                       false);
       break;
     case PROBE_MODE:
-      printf ("PROBE_MODE\n");
-      for (int i = args.probe_arg->prog_idx; i < argc; i++)
-        printf ("%s ", argv[i]);
-      printf ("\noutput_file: %p\n", args.probe_arg->output_file);
+      probe (&argv[probe_arg.prog_idx], probe_arg.output_file);
       break;
     case HELP_MODE:
       printf ("HELP_MODE\n");

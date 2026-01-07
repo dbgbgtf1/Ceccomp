@@ -27,8 +27,8 @@ print_prog (uint32_t scmp_arch, fprog *prog, FILE *output_fp)
   for (uint32_t i = 1; i < v.count; i++)
     {
       filter f = filters[i];
-      printf (" " DEFAULT_LABEL ": 0x%02x 0x%02x 0x%02x 0x%08x ", i, f.code,
-              f.jt, f.jf, f.k);
+      fprintf (output_fp, " " DEFAULT_LABEL ": 0x%02x 0x%02x 0x%02x 0x%08x ",
+               i, f.code, f.jt, f.jf, f.k);
       print_statement (output_fp, get_vector (&v, i));
     }
 

@@ -65,7 +65,7 @@ obj_print_t obj_print[] = {
   [ERRNO] = { print_paren, REDCLR },
 };
 
-void
+static void
 obj_printer (obj_t *obj)
 {
   if (color_enable)
@@ -76,6 +76,13 @@ obj_printer (obj_t *obj)
     obj_print[obj->type].handler (obj->type, obj->data);
   if (color_enable)
     fprintf (fp, "%s", CLR);
+}
+
+void
+extern_obj_printer (FILE *output_fp, obj_t *obj)
+{
+  fp = output_fp;
+  obj_printer (obj);
 }
 
 static inline void

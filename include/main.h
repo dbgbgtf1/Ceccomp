@@ -15,6 +15,7 @@
 typedef struct sock_fprog fprog;
 typedef struct sock_filter filter;
 typedef struct seccomp_data seccomp_data;
+typedef struct ptrace_syscall_info syscall_info;
 
 typedef struct {
   char *start;
