@@ -84,7 +84,7 @@ assign_line (assign_line_t *assign_line, stat_ctx_t *ctx)
   else if (left->type == MEM)
     left_stat = &ctx->mem_stat[right->data];
   else
-    assert (0);
+    assert (!"Unknown left value type");
 
   if (op != EQUAL)
     right_stat = MIXED;
@@ -245,7 +245,9 @@ render_statement (statement_t *statement)
     case EMPTY_LINE:
     case EOF_LINE:
     case ERROR_LINE:
-      assert (0);
+      assert (!"type shouldn't be EMPTY, EOF or ERROR");
+    default:
+      assert (!"Unknown type");
     }
 }
 
@@ -260,7 +262,7 @@ render (vector_t *v, vector_t *v_ptr, uint32_t scmp_arch)
   list = reallocate (NULL, list_len);
   memset (list, NONE, list_len);
 
-  for (uint32_t i = 0; i < v->count; i++)
+  for (uint32_t i = 1; i < v->count; i++)
     render_statement (get_vector (v, i));
 
   reallocate (list, 0);
