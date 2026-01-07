@@ -194,7 +194,7 @@ print_as_comment (FILE *output_fp, char *comment_fmt, ...)
   static char buf[0x400];
   buf[0] = *token_pairs[COMMENT];
   statement_t statement = { .line_start = buf, .comment = 0 };
-  statement.line_len = vsnprintf (buf + 1, 0x3ff, comment_fmt, args);
+  statement.line_len = vsnprintf (buf + 1, 0x3ff, comment_fmt, args) + 1;
 
   print_comment (&statement);
   fputc ('\n', fp);
