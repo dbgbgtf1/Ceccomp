@@ -217,10 +217,10 @@ jump_line ()
   uint32_t jt = find_key (&jump_line->jt.key);
   set_jt_jf (&jump_line->jt, jt);
 
+  if ((int16_t)jump_line->jt.code_nr < 0)
+    REPORT_ERROR (JT_MUST_BE_POSITIVE);
   if (jump_line->jt.code_nr > UINT8_MAX)
     REPORT_ERROR (JT_TOO_FAR);
-  if ((int8_t)jump_line->jt.code_nr < 0)
-    REPORT_ERROR (JT_MUST_BE_POSITIVE);
   if (jt > bpf_len)
     REPORT_ERROR (JT_INVALID_TAG);
 
@@ -230,10 +230,10 @@ jump_line ()
     set_jt_jf (&jump_line->jf, find_key (&jump_line->jf.key));
 
   uint32_t jf = local->code_nr + jump_line->jf.code_nr + 1;
+  if ((int16_t)jump_line->jf.code_nr < 0)
+    REPORT_ERROR (JF_MUST_BE_POSITIVE);
   if (jump_line->jf.code_nr > UINT8_MAX)
     REPORT_ERROR (JF_TOO_FAR);
-  if ((int8_t)jump_line->jf.code_nr < 0)
-    REPORT_ERROR (JF_MUST_BE_POSITIVE);
   if (jf > bpf_len)
     REPORT_ERROR (JF_INVALID_TAG);
 
