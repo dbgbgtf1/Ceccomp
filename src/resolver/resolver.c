@@ -15,6 +15,7 @@
 bool has_error;
 static statement_t *local;
 static uint16_t *masks, mem_valid = 0;
+static uint16_t bpf_len = 0;
 
 #define REPORT_ERROR(error_msg)                                               \
   do                                                                          \
@@ -35,9 +36,9 @@ report_error (char *error_msg)
 
   SPRINTF_CAT (print, "At %04d: ", local->text_nr);
   SPRINTF_CAT (print, "%s\n", error_msg);
-  SPRINTF_CAT (print, "%.*s\n", local->line_len, local->line_start);
+  SPRINTF_CAT (print, "%.*s", local->line_len, local->line_start);
 
-  warn ("%s\n", buf);
+  warn ("%s", buf);
 }
 
 static bool
@@ -218,6 +219,10 @@ jump_line ()
 
   if (jump_line->jt.code_nr > UINT8_MAX)
     REPORT_ERROR (JT_TOO_FAR);
+  if ((int8_t)jump_line->jt.code_nr < 0)
+    REPORT_ERROR (JT_MUST_BE_POSITIVE);
+  if (jt > bpf_len)
+    REPORT_ERROR (JT_INVALID_TAG);
 
   if (jump_line->jf.key.start == NULL)
     set_jt_jf (&jump_line->jf, local->code_nr + 1);
@@ -227,6 +232,10 @@ jump_line ()
   uint32_t jf = local->code_nr + jump_line->jf.code_nr + 1;
   if (jump_line->jf.code_nr > UINT8_MAX)
     REPORT_ERROR (JF_TOO_FAR);
+  if ((int8_t)jump_line->jf.code_nr < 0)
+    REPORT_ERROR (JF_MUST_BE_POSITIVE);
+  if (jf > bpf_len)
+    REPORT_ERROR (JF_INVALID_TAG);
 
   masks[jt] &= mem_valid;
   masks[jf] &= mem_valid;
@@ -291,9 +300,11 @@ resolver (vector_t *code_ptr_v)
 {
   has_error = false;
 
-  masks = reallocate (NULL, sizeof (*masks) * (code_ptr_v->count + 1));
-  memset (masks, 0xff, sizeof (*masks) * (code_ptr_v->count + 1));
+  masks = reallocate (NULL, sizeof (*masks) * (code_ptr_v->count));
+  memset (masks, 0xff, sizeof (*masks) * (code_ptr_v->count));
   mem_valid = 0;
+
+  bpf_len = code_ptr_v->count - 1;
 
   for (uint32_t i = 1; i < code_ptr_v->count; i++)
     {

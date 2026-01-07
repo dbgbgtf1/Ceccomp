@@ -72,7 +72,11 @@
 #define ALU_SH_OUT_OF_RANGE _ ("Alu lsh or rsh out of range")
 
 #define JT_TOO_FAR _ ("Jt is too far")
+#define JT_MUST_BE_POSITIVE _ ("Jt must be positive")
 #define JF_TOO_FAR _ ("Jf is too far")
+#define JF_MUST_BE_POSITIVE _ ("Jf must be positive")
+#define JT_INVALID_TAG _ ("Jt to invalid tag")
+#define JF_INVALID_TAG _ ("Jf to invalid tag")
 
 #define MUST_END_WITH_RET _ ("Bpf filter must end with return")
 
