@@ -3,6 +3,8 @@
 #include "parser.h"
 #include "token.h"
 #include <assert.h>
+#include <iso646.h>
+#include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -161,6 +163,34 @@ return_line (statement_t *statement)
   obj_printer (&statement->return_line.ret_obj);
 }
 
+static void
+print_comment (statement_t *statement)
+{
+  if (statement->comment == (uint16_t)-1)
+    return;
+
+  char *comment_start = statement->line_start + statement->comment;
+  uint16_t comment_len = statement->line_len - statement->comment;
+  printf (LIGHT ("%.*s"), comment_len, comment_start);
+}
+
+void
+print_as_comment (char *comment_fmt, ...)
+{
+  va_list args;
+  va_start (args, comment_fmt);
+
+  static char buf[0x400];
+  buf[0] = *token_pairs[COMMENT];
+  statement_t statement = { .line_start = buf, .comment = 0 };
+  statement.line_len = vsnprintf (buf + 1, 0x3ff, comment_fmt, args);
+
+  print_comment (&statement);
+  putchar ('\n');
+
+  va_end (args);
+}
+
 void
 print_statement (statement_t *statement)
 {
@@ -181,5 +211,6 @@ print_statement (statement_t *statement)
     case EOF_LINE:
       assert (0);
     }
+  print_comment (statement);
   putchar ('\n');
 }

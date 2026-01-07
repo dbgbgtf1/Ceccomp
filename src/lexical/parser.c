@@ -265,13 +265,22 @@ condition (jump_line_t *jump_line)
 }
 
 static void
+ja_line ()
+{
+  local->type = JUMP_LINE;
+  jump_line_t *jump_line = &local->jump_line;
+  jump_line->if_condition = false;
+
+  label (&jump_line->jt);
+}
+
+static void
 jump_line ()
 {
   local->type = JUMP_LINE;
   jump_line_t *jump_line = &local->jump_line;
 
-  if (parse.current.type == IF)
-    condition (jump_line);
+  condition (jump_line);
 
   if (!match (GOTO))
     error_at (parse.next, EXPECT_GOTO);
@@ -280,15 +289,10 @@ jump_line ()
   jump_line->jf.key.start = NULL;
   // jf default as zero
 
-  if (peek (EOL) || peek (TOKEN_EOF))
-    return;
-
-  if (!jump_line->if_condition)
-    error_at (parse.next, UNEXPECT_TOKEN);
-  // without condition, there is no jf;
-
   if (!match (COMMA))
-    error_at (parse.next, EXPECT_COMMA);
+    return;
+  // probably this jump_line has no jf
+
   if (!match (ELSE))
     error_at (parse.next, EXPECT_ELSE);
   if (!match (GOTO))
@@ -363,18 +367,25 @@ assign_line ()
 static void
 expression ()
 {
-  if (peek (EOL))
+  if (peek (EOL) || peek (COMMENT))
     empty_line ();
   else if (peek (TOKEN_EOF))
     eof_line ();
   else if (match (RETURN))
     return_line ();
-  else if (match (IF) || peek (GOTO))
+  else if (match (IF))
     jump_line ();
+  else if (match (GOTO))
+    ja_line ();
   else if (match_from_to (A, MEM))
     assign_line ();
   else
     error_at (parse.next, UNEXPECT_TOKEN);
+
+  if (match (COMMENT))
+    local->comment = parse.current.token_start - local->line_start;
+  else
+    local->comment = -1;
 
   if (match (EOL))
     local->line_len = parse.current.token_start - local->line_start;

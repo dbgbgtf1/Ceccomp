@@ -84,14 +84,7 @@ static void
 skip_spaces ()
 {
   // spaces
-  while ((peek ()) == ' ')
-    advance (1);
-
-  // COMMENT
-  if (!match (*token_pairs[COMMENT]))
-    return;
-
-  while (peek () != '\n')
+  while (isspace (peek ()) && peek () != '\n')
     advance (1);
 }
 
@@ -106,11 +99,19 @@ init_scanner (char *start)
 void
 scan_token (token_t *token)
 {
-  // skip spaces and comment
+  // skip spaces
   skip_spaces ();
 
   // sync
   scanner.token_start = scanner.current_char;
+
+  // COMMENT
+  if (match (*token_pairs[COMMENT]))
+    {
+      while (peek () != '\n')
+        advance (1);
+      INIT_TOKEN (COMMENT);
+    }
 
   // EOL
   if (peek () == '\n')
