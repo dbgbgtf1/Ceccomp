@@ -65,7 +65,7 @@ error_line ()
   SPRINTF_CAT (print, "%.*s\n", local->line_len, local->line_start);
   SPRINTF_CAT (print, "%*s", err_len + 1, "^");
 
-  warn ("%s\n", buf);
+  warn ("%s", buf);
 }
 #undef SPRINTF_CAT
 
@@ -242,17 +242,6 @@ jump_line ()
   mem_valid = ~0;
 }
 
-static uint32_t retvals[] = {
-  [KILL_PROC] = SCMP_ACT_KILL_PROCESS,
-  [KILL] = SCMP_ACT_KILL,
-  [ALLOW] = SCMP_ACT_ALLOW,
-  [NOTIFY] = SCMP_ACT_NOTIFY,
-  [LOG] = SCMP_ACT_LOG,
-  [TRACE] = SCMP_ACT_TRACE (0),
-  [TRAP] = _SCMP_ACT_TRAP (0),
-  [ERRNO] = SCMP_ACT_ERRNO (0),
-};
-
 static void
 return_line ()
 {
@@ -261,11 +250,9 @@ return_line ()
   if (ret_type == A || ret_type == NUMBER)
     return;
 
-  return_line->ret_obj.type = NUMBER;
-  if (ret_type == TRACE || ret_type == TRAP || ret_type == ERRNO)
-    return_line->ret_obj.data |= retvals[ret_type];
-  else
-    return_line->ret_obj.data = retvals[ret_type];
+  if ((ret_type == TRACE || ret_type == TRAP || ret_type == ERRNO)
+      && return_line->ret_obj.data > 0xffff)
+    REPORT_ERROR (RET_DATA_OVERFLOW);
   // Don't assume the ret_obj.data == zero when not used
 }
 

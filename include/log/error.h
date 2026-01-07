@@ -110,6 +110,7 @@
 #define ALU_DIV_BY_ZERO _ ("Alu div by zero")
 #define ALU_SH_OUT_OF_RANGE _ ("Alu lsh or rsh out of range")
 
+#define RET_DATA_OVERFLOW _ ("Ret data too large")
 #define JT_TOO_FAR _ ("Jt is too far")
 #define JT_MUST_BE_POSITIVE _ ("Jt must be positive")
 #define JF_TOO_FAR _ ("Jf is too far")

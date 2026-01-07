@@ -18,6 +18,17 @@
 #include <stdint.h>
 #include <stdio.h>
 
+static uint32_t retvals[] = {
+  [KILL_PROC] = SCMP_ACT_KILL_PROCESS,
+  [KILL] = SCMP_ACT_KILL,
+  [ALLOW] = SCMP_ACT_ALLOW,
+  [NOTIFY] = SCMP_ACT_NOTIFY,
+  [LOG] = SCMP_ACT_LOG,
+  [TRACE] = SCMP_ACT_TRACE (0),
+  [TRAP] = _SCMP_ACT_TRAP (0),
+  [ERRNO] = SCMP_ACT_ERRNO (0),
+};
+
 static filter
 return_line (return_line_t *return_line)
 {
@@ -27,11 +38,12 @@ return_line (return_line_t *return_line)
       f.code |= BPF_A;
       return f;
     }
-
-  assert (return_line->ret_obj.type == NUMBER);
-
   f.code |= BPF_K;
-  f.k = return_line->ret_obj.data;
+  if (return_line->ret_obj.type == NUMBER)
+    f.k = return_line->ret_obj.data;
+  else
+    // KILL, KILL_PROC, ALLOW, NOTIFY, LOG has data = 0
+    f.k = retvals[return_line->ret_obj.type] | return_line->ret_obj.data;
   return f;
 }
 
