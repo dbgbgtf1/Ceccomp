@@ -290,7 +290,7 @@ emulate (emu_arg_t *emu_arg)
   statement_t *ret = emulator (&text_v, &code_ptr_v, emu_arg->quiet);
   uint32_t line_left = text_v.count - 1 - ret->text_nr;
   if (!emu_arg->quiet && line_left)
-    print_as_comment ("...... %x lines skipped", line_left);
+    print_as_comment (stdout, "...... %x lines skipped", line_left);
 
   if (emu_arg->quiet)
     {
