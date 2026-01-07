@@ -6,7 +6,7 @@
 
 #define DEFAULT_LABEL "L%04d"
 
-typedef void (*print_fn) (token_type type, uint32_t data);
+typedef void (*print_fn) (obj_t *obj, const char *color);
 
 typedef struct
 {

@@ -3,7 +3,6 @@
 #include "parser.h"
 #include "token.h"
 #include <assert.h>
-#include <iso646.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -12,46 +11,84 @@
 FILE *fp;
 
 static void
-print_num (token_type type, uint32_t data)
+print_num (obj_t *tk, const char *color)
 {
-  (void)type;
-  fprintf (fp, "0x%x", data);
+  if (color_enable)
+    fprintf (fp, "%s", color);
+  if (tk->literal.start != NULL)
+    fprintf (fp, "%.*s", tk->literal.len, tk->literal.start);
+  else
+    fprintf (fp, "0x%x", tk->data);
+  if (color_enable)
+    fprintf (fp, "%s", CLR);
 }
 
 static void
-print_str (token_type type, uint32_t data)
+print_str (obj_t *tk, const char *color)
 {
-  (void)data;
-  fprintf (fp, "%s", token_pairs[type]);
+  if (color_enable)
+    fprintf (fp, "%s", color);
+  fprintf (fp, "%s", token_pairs[tk->type]);
+  if (color_enable)
+    fprintf (fp, "%s", CLR);
 }
 
 static void
-print_bracket (token_type type, uint32_t data)
+print_identifier (obj_t *tk, const char *color)
 {
-  fprintf (fp, "%s[0x%01x]", token_pairs[type], data);
+  if (color_enable)
+    fprintf (fp, "%s", color);
+  fprintf (fp, "%.*s", tk->literal.len, tk->literal.start);
+  if (color_enable)
+    fprintf (fp, "%s", CLR);
 }
 
 static void
-print_paren (token_type type, uint32_t data)
+print_dec_bracket (obj_t *tk, const char *color)
 {
-  fprintf (fp, "%s", token_pairs[type]);
-  if (data)
-    fprintf (fp, "(0x%x)", data);
+  if (color_enable)
+    fprintf (fp, "%s", color);
+  fprintf (fp, "%s", token_pairs[tk->type]);
+  if (color_enable)
+    fprintf (fp, "%s", CLR);
+  fprintf (fp, "[%d]", tk->data);
+}
+
+static void
+print_hex_bracket (obj_t *tk, const char *color)
+{
+  if (color_enable)
+    fprintf (fp, "%s", color);
+  fprintf (fp, "%s", token_pairs[tk->type]);
+  if (color_enable)
+    fprintf (fp, "%s", CLR);
+  fprintf (fp, "[0x%x]", tk->data);
+}
+
+static void
+print_paren (obj_t *tk, const char *color)
+{
+  if (color_enable)
+    fprintf (fp, "%s", color);
+  fprintf (fp, "%s", token_pairs[tk->type]);
+  if (color_enable)
+    fprintf (fp, "%s", CLR);
+  fprintf (fp, "(%d)", tk->data);
 }
 
 obj_print_t obj_print[] = {
   [A] = { print_str, BRIGHT_YELLOWCLR },
   [X] = { print_str, BRIGHT_YELLOWCLR },
 
-  [MEM] = { print_bracket, BRIGHT_YELLOWCLR },
-  [ATTR_LOWARG] = { print_bracket, BRIGHT_BLUECLR },
-  [ATTR_HIGHARG] = { print_bracket, BRIGHT_BLUECLR },
+  [MEM] = { print_hex_bracket, BRIGHT_YELLOWCLR },
+  [ATTR_LOWARG] = { print_dec_bracket, BRIGHT_BLUECLR },
+  [ATTR_HIGHARG] = { print_dec_bracket, BRIGHT_BLUECLR },
 
   [ATTR_SYSCALL] = { print_str, BRIGHT_BLUECLR },
   [ATTR_ARCH] = { print_str, BRIGHT_BLUECLR },
   [ATTR_LOWPC] = { print_str, BRIGHT_BLUECLR },
   [ATTR_HIGHPC] = { print_str, BRIGHT_BLUECLR },
-  [IDENTIFIER] = { print_str, BRIGHT_CYANCLR },
+  [IDENTIFIER] = { print_identifier, BRIGHT_CYANCLR },
 
   [NUMBER] = { print_num, BRIGHT_CYANCLR },
 
@@ -68,14 +105,7 @@ obj_print_t obj_print[] = {
 static void
 obj_printer (obj_t *obj)
 {
-  if (color_enable)
-    fprintf (fp, "%s", obj_print[obj->type].color);
-  if (obj->literal.start != NULL)
-    fprintf (fp, "%.*s", obj->literal.len, obj->literal.start);
-  else
-    obj_print[obj->type].handler (obj->type, obj->data);
-  if (color_enable)
-    fprintf (fp, "%s", CLR);
+  obj_print[obj->type].handler (obj, obj_print[obj->type].color);
 }
 
 void
