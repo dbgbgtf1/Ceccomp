@@ -1,51 +1,57 @@
 // this is for separately function testing
-#include "arch_trans.h"
-#include "debug_method.h"
-#include "hash.h"
-#include "log/logger.h"
-#include "parser.h"
-#include "read_source.h"
-#include "resolver.h"
-#include "scanner.h"
-#include "vector.h"
+#include "main.h"
+#include <linux/audit.h>
+#include <linux/filter.h>
+#include <linux/seccomp.h>
+#include <signal.h>
+#include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
-#include <sys/utsname.h>
+#include <stdlib.h>
+#include <sys/prctl.h>
+#include <sys/syscall.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
-static struct utsname uts;
+#define ARRAY_SIZE(arr) (sizeof (arr) / sizeof (arr[0]))
+
+static void
+load_filter (void)
+{
+  prctl (PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
+  /* Assume that AUDIT_ARCH_X86_64 means the normal x86-64 ABI
+     (in the x32 ABI, all system calls have bit 30 set in the
+     'nr' field, meaning the numbers are >= X32_SYSCALL_BIT). */
+
+  char f[] = "\x20\x00\x00\x00\x00\x00\x00\x00"
+             "\x15\x00\x01\x00\xff\xff\xff\xff"
+             "\x06\x00\x00\x00\x00\x00\xff\x7f"
+             "\x06\x00\x00\x00\x01\x00\x05\x00";
+
+  struct sock_fprog prog
+      = { .len = ARRAY_SIZE (f) / sizeof (filter), .filter = (filter *)f };
+
+  syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, NULL, &prog);
+}
 
 int
-main (int argc, char *argv[])
+main (void)
 {
-  uname (&uts);
-  uint32_t arch = str_to_scmp_arch (uts.machine);
-  if (arch == (uint32_t)-1)
-    error ("arch is invalid: %s", uts.machine);
-
-  FILE *fp = fopen (argv[1], "r");
-  init_source (fp);
-  init_scanner (next_line ());
-  init_parser (arch);
-  init_table ();
-
-  vector_t v;
-  init_vector (&v, sizeof (statement_t));
-  statement_t statement;
-  do
+  pid_t pid = fork ();
+  if (pid != 0)
     {
-      parse_line (&statement);
-      if (statement.type != EMPTY_LINE)
-        push_vector (&v, &statement);
+      wait (NULL);
+      exit (0);
     }
-  while (statement.type != EOF_LINE);
-  // EOF_LINE is in get_vector (&v, v.count -1)
+  else
+    {
+      load_filter ();
 
-  resolver (&v);
-
-  for (uint32_t i = 0; i < v.count - 1; i++)
-    print_statement (get_vector (&v, i));
-
-  free_table ();
-  free_source ();
-  free_vector (&v);
+      pid = fork ();
+      if (pid != 0)
+        exit (0);
+      signal (SIGINT, SIG_IGN);
+      sleep (100);
+    }
 }
