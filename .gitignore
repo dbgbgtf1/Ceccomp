@@ -17,3 +17,5 @@ py-temp/ceccomp.egg-info/
 py-temp/wheelhouse
 py-temp/ceccomp/ceccomp
 test_prog
+text
+gdb_scripts

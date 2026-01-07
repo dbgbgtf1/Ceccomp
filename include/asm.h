@@ -1,12 +1,9 @@
 #ifndef ASM
 #define ASM
 
-#include "parseargs.h"
+#include "parse_args.h"
 #include <stdint.h>
-#include <stdio.h>
 
-extern void assemble (uint32_t arch_token, FILE *read_fp, print_mode mode);
-
-#define SCMP_DATA_LEN "$scmp_data_len"
+extern void assemble (FILE *fp, uint32_t scmp_arch, print_mode_t print_mode);
 
 #endif

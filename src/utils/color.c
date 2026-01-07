@@ -1,5 +1,6 @@
 #include "color.h"
 #include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -7,20 +8,20 @@ bool color_enable = true;
 bool log_color_enable = true;
 
 void
-set_color (ceccomp_args *args, FILE *output)
+set_color (color_mode_t color, FILE *output)
 {
-  if (args->color == ALWAYS)
+  if (color == ALWAYS)
     {
       color_enable = true;
       log_color_enable = true;
     }
-  else if (args->color == NEVER)
+  else if (color == NEVER)
     {
       color_enable = false;
       log_color_enable = false;
     }
 
-  else if (args->color == AUTO)
+  else if (color == AUTO)
     {
       if (isatty (fileno (output)))
         color_enable = true;
@@ -32,4 +33,21 @@ set_color (ceccomp_args *args, FILE *output)
       else
         log_color_enable = false;
     }
+}
+
+bool enable_stack[0x10];
+// 0x10 is definitely enough;
+static uint8_t enable_sp = 0x0;
+
+void
+push_color (bool enable)
+{
+  enable_stack[enable_sp++] = color_enable;
+  color_enable = enable;
+}
+
+void
+pop_color ()
+{
+  color_enable = enable_stack[--enable_sp];
 }

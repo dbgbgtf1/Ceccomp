@@ -1,15 +1,18 @@
 #ifndef COLOR
 #define COLOR
 
-#include "parseargs.h"
+#include "parse_args.h"
 #include <stdbool.h>
-
-#define FORMAT "L%04d"
+#include <stdio.h>
 
 extern bool color_enable;
 extern bool log_color_enable;
 
-extern void set_color (ceccomp_args *args, FILE *output);
+extern void set_color (color_mode_t color, FILE *output);
+
+extern void push_color (bool enable);
+
+extern void pop_color ();
 
 #define CLR "\x1b[0m"
 

@@ -1,362 +1,311 @@
 #include "emu.h"
 #include "color.h"
+#include "formatter.h"
 #include "log/error.h"
 #include "log/logger.h"
 #include "main.h"
-#include "parseargs.h"
-#include "parseobj.h"
-#include "preasm.h"
-#include "transfer.h"
-#include <fcntl.h>
-#include <libintl.h>
+#include "parse_args.h"
+#include "parser.h"
+#include "read_source.h"
+#include "resolver.h"
+#include "scanner.h"
+#include "token.h"
+#include "vector.h"
+#include <assert.h>
 #include <linux/filter.h>
 #include <seccomp.h>
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
-#include <unistd.h>
 
-static uint32_t read_idx;
-static uint32_t execute_idx;
-static char *clean_line;
-static char *origin_line;
-static FILE *s_output_fp;
+static uint32_t A_reg = 0;
+static uint32_t X_reg = 0;
+static uint32_t mem[BPF_MEMWORDS] = { 0 };
 
-#define LIGHTCOLORPRINTF(str, ...)                                            \
-  fprintf (s_output_fp, LIGHT (str "\n"), __VA_ARGS__)
-static bool
-is_state_true (uint32_t A, uint32_t cmp_enum, uint32_t rval)
+static uint32_t syscall_nr = 0;
+static uint32_t scmp_arch = 0;
+static uint32_t low_pc = 0;
+static uint32_t high_pc = 0;
+static uint32_t low_args[6] = { 0 };
+static uint32_t high_args[6] = { 0 };
+
+static uint32_t *vars[] = {
+  [ATTR_SYSCALL] = &syscall_nr,
+  [ATTR_ARCH] = &scmp_arch,
+  [ATTR_LOWPC] = &low_pc,
+  [ATTR_HIGHPC] = &high_pc,
+  [ATTR_LOWARG] = low_args,
+  [ATTR_HIGHARG] = high_args,
+  [A] = &A_reg,
+  [X] = &X_reg,
+  [MEM] = mem,
+};
+
+#define DO_OPERATE(operator) (*left operator (*right))
+
+static void
+assign_line (assign_line_t *assign_line)
 {
-  switch (cmp_enum)
+  uint32_t *left = vars[assign_line->left_var.type];
+
+  token_type right_type = assign_line->right_var.type;
+  uint32_t *right = vars[right_type];
+  if (right_type == ATTR_LOWARG || right_type == ATTR_HIGHARG)
+    right += assign_line->right_var.data;
+  if (right_type == NUMBER)
+    right = &assign_line->right_var.data;
+
+  switch (assign_line->operator)
     {
-    case CMP_EQ:
-      return (A == rval);
-    case CMP_GT:
-      return (A > rval);
-    case CMP_GE:
-      return (A >= rval);
-    case CMP_LE:
-      return (A <= rval);
-    case CMP_AD:
-      return (A & rval);
-    case CMP_LT:
-      return (A < rval);
-    case CMP_NE:
-      return (A != rval);
+    case ADD_TO:
+      DO_OPERATE (+=);
+      break;
+    case SUB_TO:
+      DO_OPERATE (-=);
+      break;
+    case MULTI_TO:
+      DO_OPERATE (*=);
+      break;
+    case DIVIDE_TO:
+      DO_OPERATE (/=);
+      break;
+    case LSH_TO:
+      DO_OPERATE (<<=);
+      break;
+    case RSH_TO:
+      DO_OPERATE (>>=);
+      break;
+    case AND_TO:
+      DO_OPERATE (&=);
+      break;
+    case OR_TO:
+      DO_OPERATE (|=);
+      break;
+    case XOR_TO:
+      DO_OPERATE (^=);
+      break;
+    case EQUAL:
+      DO_OPERATE (=);
+      break;
+    case NEGATIVE:
+      DO_OPERATE (= -);
+      break;
     default:
-      error ("%s", INPOSSIBLE_CMP_ENUM);
+      assert (0);
     }
 }
 
-static bool
-emu_condition (char *sym_str, reg_mem *reg, seccomp_data *data)
+#define DO_COMPARE(comparator) (bool)(A_reg comparator right)
+
+static label_t *
+jump_line (jump_line_t *jump_line)
 {
-  uint8_t sym_enum = parse_cmp_sym (sym_str);
-  uint8_t sym_len = GETSYMLEN (sym_enum);
+  label_t *jt = &jump_line->jt;
+  label_t *jf = &jump_line->jf;
 
-  char *rval_str = sym_str + sym_len;
-  uint32_t rval = right_val_ifline (rval_str, reg, data->arch);
+  if (!jump_line->if_condition)
+    return jt;
 
-  fprintf (s_output_fp, BRIGHT_YELLOW ("$A"));
-  fprintf (s_output_fp, " %.*s ", sym_len, sym_str);
-  if (STARTWITH (rval_str, "$X"))
-    fprintf (s_output_fp, BRIGHT_YELLOW ("%.*s"),
-             (uint32_t)(strchr (rval_str, ')') - rval_str), rval_str);
+  bool cond_true = false;
+  if (jump_line->if_bang)
+    cond_true = true;
+
+  uint32_t right = 0;
+  if (jump_line->cmpobj.type == X)
+    right = X_reg;
   else
-    fprintf (s_output_fp, BRIGHT_CYAN ("%.*s"),
-             (uint32_t)(strchr (rval_str, ')') - rval_str), rval_str);
+    right = jump_line->cmpobj.data;
 
-  return is_state_true (reg->A, sym_enum, rval);
+  switch (jump_line->comparator)
+    {
+    case EQUAL_EQUAL:
+      cond_true ^= DO_COMPARE (==);
+      break;
+    case BANG_EQUAL:
+      cond_true ^= DO_COMPARE (!=);
+      break;
+    case GREATER_EQUAL:
+      cond_true ^= DO_COMPARE (>=);
+      break;
+    case GREATER_THAN:
+      cond_true ^= DO_COMPARE (>);
+      break;
+    case LESS_EQUAL:
+      cond_true ^= DO_COMPARE (<=);
+      break;
+    case LESS_THAN:
+      cond_true ^= DO_COMPARE (<);
+      break;
+    case AND:
+      cond_true ^= DO_COMPARE (&);
+      break;
+    default:
+      assert (0);
+    }
+
+  return (cond_true ? jt : jf);
 }
 
 static uint32_t
-jmp_to (reg_mem *reg, seccomp_data *data)
+code_nr_to_text_nr (vector_t *text_v, vector_t *code_ptr_v, statement_t *cur,
+                    label_t *jmp)
 {
-  char *sym_str;
-  bool reverse = maybe_reverse (clean_line);
-  if (reverse)
+  statement_t **ptr = get_vector (code_ptr_v, cur->code_nr + jmp->code_nr + 1);
+  uint32_t text_nr = (*ptr)->text_nr;
+
+  statement_t *statement;
+  string_t *label_decl;
+  while (true)
     {
-      sym_str = clean_line + strlen ("if!($A");
-      fprintf (s_output_fp, "if !(");
-    }
-  else
-    {
-      sym_str = clean_line + strlen ("if($A");
-      fprintf (s_output_fp, "if (");
-    }
-
-  bool condition;
-  condition = emu_condition (sym_str, reg, data);
-
-  char *right_paren = strchr (sym_str, ')');
-  if (right_paren == NULL)
-    error (FORMAT " %s: %s", execute_idx, PAREN_WRAP_CONDITION, origin_line);
-
-  uint32_t jmp_set = parse_goto (right_paren + 1);
-  uint16_t jf = GETJF (jmp_set);
-  uint16_t jt = GETJT (jmp_set);
-
-  if (jf != 0)
-    fprintf (s_output_fp, ") goto " FORMAT ", else goto " FORMAT "\n", jt, jf);
-  else
-    fprintf (s_output_fp, ") goto " FORMAT "\n", jt);
-
-  if (condition && reverse)
-    return jf;
-  else if (!condition && !reverse)
-    return jf;
-  else
-    return jt;
-}
-
-static void
-emu_if_line (reg_mem *reg, seccomp_data *data, uint32_t *execute_idx)
-{
-  uint32_t tmp_idx = jmp_to (reg, data);
-  if (tmp_idx == 0)
-    return;
-  if (tmp_idx < *execute_idx)
-    error (FORMAT " %s: %s", *execute_idx, INVALID_JMP_NR, origin_line);
-  *execute_idx = tmp_idx;
-}
-
-static void
-emu_assign_line (reg_mem *reg, seccomp_data *data)
-{
-  reg_set lval;
-  left_val_assignline (clean_line, &lval, reg);
-  uint8_t lval_len = lval.reg_len;
-  uint32_t *lval_ptr = lval.reg_ptr;
-
-  if (*(clean_line + lval_len) != '=')
-    error (FORMAT " %s %s", execute_idx, INVALID_OPERATOR, origin_line);
-  fprintf (s_output_fp, BRIGHT_YELLOW ("%.*s"), lval_len, clean_line);
-
-  char *rval_str = clean_line + lval_len + 1;
-
-  if (STARTWITH (clean_line, "$A"))
-    {
-      uint32_t offset = STR2ABS (rval_str);
-      if (offset != (uint32_t)-1)
-        {
-          *lval_ptr = *(uint32_t *)((char *)data + offset);
-          fprintf (s_output_fp, " = ");
-          fprintf (s_output_fp, BRIGHT_BLUE ("%s"), rval_str);
-          fprintf (s_output_fp, "\n");
-          return;
-        }
-    }
-
-  fprintf (s_output_fp, " = ");
-  uint32_t rval = right_val_assignline (s_output_fp, rval_str, reg);
-  fprintf (s_output_fp, "\n");
-
-  *lval_ptr = rval;
-}
-
-static char *
-emu_ret_line (reg_mem *reg)
-{
-  char *retval_str = clean_line + strlen ("return");
-
-  if (STARTWITH (retval_str, "$A"))
-    return RETVAL2STR (reg->A);
-
-  int32_t retval = STR2RETVAL (retval_str);
-  if (retval == -1)
-    error (FORMAT " %s %s", execute_idx, INVALID_RET_VAL, origin_line);
-
-  retval_str = RETVAL2STR (retval);
-  return retval_str;
-}
-
-static void
-emu_goto_line (uint32_t *execute_idx)
-{
-  char *jmp_to_str = clean_line + strlen ("gotoL");
-  char *end;
-  uint32_t jmp_to = strtoul (jmp_to_str, &end, 10);
-
-  if (jmp_to_str == end)
-    error (FORMAT " %s %s", *execute_idx, INVALID_NR_AFTER_GOTO, origin_line);
-
-  fprintf (s_output_fp, "goto " FORMAT "\n", jmp_to);
-
-  if (jmp_to < *execute_idx)
-    error (FORMAT " %s: %s", *execute_idx, INVALID_JMP_NR, origin_line);
-
-  *execute_idx = jmp_to;
-}
-
-static void
-emu_do_alu (uint32_t *A_ptr, uint8_t alu_enum, uint32_t rval)
-{
-  switch (alu_enum)
-    {
-    case ALU_AN:
-      *A_ptr &= rval;
-      return;
-    case ALU_AD:
-      *A_ptr += rval;
-      return;
-    case ALU_SU:
-      *A_ptr -= rval;
-      return;
-    case ALU_ML:
-      *A_ptr *= rval;
-      return;
-    case ALU_DV:
-      *A_ptr /= rval;
-      return;
-    case ALU_OR:
-      *A_ptr |= rval;
-      return;
-    case ALU_LS:
-      *A_ptr <<= rval;
-      return;
-    case ALU_RS:
-      *A_ptr >>= rval;
-      return;
-    default:
-      error ("%s", INPOSSIBLE_ALU_ENUM);
-    }
-}
-
-static void
-emu_alu_neg (reg_mem *reg)
-{
-  reg->A = -reg->A;
-  fprintf (s_output_fp, "%s = -%s\n", BRIGHT_YELLOW ("$A"),
-           BRIGHT_YELLOW ("$A"));
-  return;
-}
-
-static void
-emu_alu_line (reg_mem *reg)
-{
-  char *sym_str = clean_line + strlen ("$A");
-  uint8_t sym_enum = parse_alu_sym (sym_str);
-  uint8_t sym_len = GETSYMLEN (sym_enum);
-
-  fprintf (s_output_fp, "%s %.*s ", BRIGHT_YELLOW ("$A"), sym_len, sym_str);
-
-  uint32_t *A_ptr = &reg->A;
-  char *rval_str = sym_str + sym_len;
-
-  uint32_t rval;
-  char *end;
-  if (!strcmp (rval_str, "$X"))
-    {
-      rval = reg->X;
-      fprintf (s_output_fp, BRIGHT_YELLOW ("%s"), rval_str);
-    }
-  else
-    {
-      rval = strtoul (rval_str, &end, 0);
-      if (rval_str == end)
-        error (FORMAT " %s: %s", execute_idx, INVALID_RIGHT_VAL, origin_line);
-      fprintf (s_output_fp, BRIGHT_CYAN ("%s"), rval_str);
-    }
-
-  emu_do_alu (A_ptr, sym_enum, rval);
-  fprintf (s_output_fp, "\n");
-}
-
-static void
-init_regs (reg_mem *reg)
-{
-  reg->A = 0;
-  reg->X = 0;
-  for (int i = 0; i < BPF_MEMWORDS; i++)
-    reg->mem[i] = (uint32_t)ARG_INIT_VAL;
-}
-
-char *
-emu_lines (bool quiet, FILE *read_fp, seccomp_data *data)
-{
-  if (quiet)
-    s_output_fp = fopen ("/dev/null", "r+");
-  else
-    s_output_fp = stdout;
-
-  reg_mem reg;
-  init_regs (&reg);
-
-  char *ret = NULL;
-  for (read_idx = 1, execute_idx = 1;; read_idx++)
-    {
-      pre_asm (read_fp, &origin_line, &clean_line);
-      if (origin_line == NULL)
+      statement = get_vector (text_v, text_nr);
+      if (statement->type != EMPTY_LINE)
         break;
 
-      if (read_idx < execute_idx)
+      label_decl = &statement->label_decl;
+      if ((label_decl->start) && (label_decl->len == jmp->key.len)
+          && (!strncmp (label_decl->start, jmp->key.start, jmp->key.len)))
+        break;
+      text_nr--;
+    }
+  return text_nr;
+}
+
+static void
+print_label_decl (statement_t *statement)
+{
+  string_t *label_decl = &statement->label_decl;
+  if (label_decl->start != NULL)
+    printf ("%.*s: ", label_decl->len, label_decl->start);
+}
+
+static void
+emulate_printer (statement_t *statement, char *override_color, bool quiet)
+{
+  if (quiet)
+    return;
+
+  if (override_color)
+    {
+      printf ("%s", override_color);
+      push_color (false);
+    }
+
+  print_label_decl (statement);
+  print_statement (stdout, statement);
+
+  if (override_color)
+    {
+      pop_color ();
+      printf ("%s", CLR);
+    }
+}
+
+static statement_t *
+emulator (vector_t *text_v, vector_t *code_ptr_v, bool quiet)
+{
+  uint32_t read_idx = 1;
+  uint32_t exec_idx = 1;
+  label_t *jmp;
+
+  statement_t *statement;
+  for (; read_idx < text_v->count; read_idx++)
+    {
+      statement = get_vector (text_v, read_idx);
+
+      if (read_idx < exec_idx)
         {
-          LIGHTCOLORPRINTF (FORMAT ": %s", read_idx, origin_line);
+          emulate_printer (statement, LIGHTCLR, quiet);
           continue;
         }
 
-      fprintf (s_output_fp, FORMAT ": ", read_idx);
+      emulate_printer (statement, NULL, quiet);
+      exec_idx++;
 
-      execute_idx++;
-      set_error_log (origin_line, execute_idx);
-      if (STARTWITH (clean_line, "if"))
-        emu_if_line (&reg, data, &execute_idx);
-      else if (STARTWITH (clean_line, "return"))
+      switch (statement->type)
         {
-          ret = emu_ret_line (&reg);
+        case ASSIGN_LINE:
+          assign_line (&statement->assign_line);
+          continue;
+        case JUMP_LINE:
+          jmp = jump_line (&statement->jump_line);
+          exec_idx = code_nr_to_text_nr (text_v, code_ptr_v, statement, jmp);
+          continue;
+        case RETURN_LINE:
           break;
+        case EMPTY_LINE:
+          continue;
+        case EOF_LINE:
+        case ERROR_LINE:
+          assert (0);
         }
-      else if (STARTWITH (clean_line, "goto"))
-        emu_goto_line (&execute_idx);
-      else if (STARTWITH (clean_line, "$A=-$A"))
-        emu_alu_neg (&reg);
-      else if ((STARTWITH (clean_line, "$") && *(clean_line + 2) == '='))
-        emu_assign_line (&reg, data);
-      else if (STARTWITH (clean_line, "$mem["))
-        emu_assign_line (&reg, data);
-      else if (STARTWITH (clean_line, "$A"))
-        emu_alu_line (&reg);
-      else
-        error (FORMAT " %s: %s", execute_idx, INVALID_ASM_CODE, origin_line);
+
+      break;
     }
 
-  if (quiet)
-    fclose (s_output_fp);
+  assert (statement->type == RETURN_LINE);
+  return statement;
+}
 
-  if (ret == NULL)
-    error ("%s", MUST_END_WITH_RET);
-  return ret;
+static void
+init_attr (emu_arg_t *emu_arg)
+{
+  if (emu_arg->sys_name == NULL)
+    error ("%s", INPUT_SYS_NR);
+  syscall_nr = seccomp_syscall_resolve_name_arch (emu_arg->scmp_arch,
+                                                  emu_arg->sys_name);
+  if ((int32_t)syscall_nr == __NR_SCMP_ERROR)
+    error ("%s", INVALID_SYSNR);
+
+  scmp_arch = emu_arg->scmp_arch;
+  low_pc = emu_arg->ip & UINT32_MAX;
+  high_pc = emu_arg->ip >> 32;
+  for (uint32_t i = 0; i < 6; i++)
+    {
+      low_args[i] = emu_arg->args[i] & UINT32_MAX;
+      high_args[i] = emu_arg->args[i] >> 32;
+    }
 }
 
 void
-emulate (ceccomp_args *args)
+emulate_v (vector_t *text_v, vector_t *code_ptr_v, emu_arg_t *emu_arg,
+           FILE *output_fp)
 {
-  seccomp_data data = { 0 };
-  data.arch = args->arch_token;
+  init_attr (emu_arg);
 
-  if (args->syscall_nr == (char *)ARG_INIT_VAL)
-    error ("%s", INPUT_SYS_NR);
+  statement_t *ret = emulator (text_v, code_ptr_v, emu_arg->quiet);
+  uint32_t line_left = text_v->count - 1 - ret->text_nr;
+  if (!emu_arg->quiet && line_left)
+    print_as_comment (output_fp, "... %d line(s) skipped", line_left);
 
-  data.nr
-      = seccomp_syscall_resolve_name_arch (args->arch_token, args->syscall_nr);
-  if (data.nr == __NR_SCMP_ERROR)
-    data.nr = strtoull_check (args->syscall_nr, 0, INVALID_SYSNR);
+  if (!emu_arg->quiet)
+    return;
 
-  for (int i = 0; i < 6; i++)
-    data.args[i] = args->sys_args[i];
-  data.instruction_pointer = args->ip;
+  extern_obj_printer (output_fp, &ret->return_line.ret_obj);
+  fputc ('\n', output_fp);
+}
 
-  char *retval_str = NULL;
-  if (args->quiet)
-    retval_str = emu_lines (true, args->read_fp, &data);
-  else
-    retval_str = emu_lines (false, args->read_fp, &data);
+void
+emulate (emu_arg_t *emu_arg)
+{
+  init_source (emu_arg->text_file);
+  init_scanner (next_line ());
+  init_parser (emu_arg->scmp_arch);
+  init_table ();
 
-  printf ("return ");
-  printf ("%s", retval_str);
-  printf ("\n");
+  vector_t text_v;
+  vector_t code_ptr_v;
+  init_vector (&text_v, sizeof (statement_t));
+  init_vector (&code_ptr_v, sizeof (statement_t *));
+  parser (&text_v, &code_ptr_v);
+  if (resolver (&code_ptr_v))
+    error ("%s", EMU_TERMINATED);
+  // if ERROR_LINE exists, then exits
+
+  emulate_v (&text_v, &code_ptr_v, emu_arg, stdout);
+
+  free_table ();
+  free_source ();
+  free_vector (&text_v);
+  free_vector (&code_ptr_v);
 }

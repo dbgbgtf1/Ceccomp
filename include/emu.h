@@ -1,19 +1,12 @@
 #ifndef EMU
 #define EMU
 
-#include "main.h"
-#include "parseargs.h"
+#include "parse_args.h"
+#include "vector.h"
 
-typedef struct
-{
-  uint32_t A;
-  uint32_t X;
+extern void emulate_v (vector_t *text_v, vector_t *code_ptr_v,
+                       emu_arg_t *emu_arg, FILE *output_fp);
 
-  uint32_t mem[BPF_MEMWORDS];
-} reg_mem;
-
-extern char *emu_lines (bool quiet, FILE *read_fp, seccomp_data *data);
-
-extern void emulate (ceccomp_args *args);
+extern void emulate (emu_arg_t *emu_arg);
 
 #endif

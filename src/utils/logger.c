@@ -15,8 +15,6 @@
 #define WARN LOG_YELLOW ("[WARN]: ")
 #define ERR LOG_RED ("[ERROR]: ")
 
-bool color_tmp;
-
 void
 debug_print (const char *caller_func, char *fmt, ...)
 {

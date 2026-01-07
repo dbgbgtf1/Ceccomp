@@ -1,9 +1,12 @@
 #ifndef DISASM
 #define DISASM
 
+#include "main.h"
 #include <stdint.h>
 #include <stdio.h>
 
-extern void disasm (uint32_t arch_token, FILE *read_fp);
+extern void print_prog (uint32_t scmp_arch, fprog *prog, FILE *output_fp);
+
+extern void disasm (FILE *fp, uint32_t scmp_arch);
 
 #endif
