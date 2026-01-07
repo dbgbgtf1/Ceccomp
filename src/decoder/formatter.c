@@ -11,68 +11,44 @@
 FILE *fp;
 
 static void
-print_num (obj_t *tk, const char *color)
+print_num (obj_t *tk)
 {
-  if (color_enable)
-    fprintf (fp, "%s", color);
   if (tk->literal.start != NULL)
     fprintf (fp, "%.*s", tk->literal.len, tk->literal.start);
   else
     fprintf (fp, "0x%x", tk->data);
-  if (color_enable)
-    fprintf (fp, "%s", CLR);
 }
 
 static void
-print_str (obj_t *tk, const char *color)
+print_str (obj_t *tk)
 {
-  if (color_enable)
-    fprintf (fp, "%s", color);
   fprintf (fp, "%s", token_pairs[tk->type]);
-  if (color_enable)
-    fprintf (fp, "%s", CLR);
 }
 
 static void
-print_identifier (obj_t *tk, const char *color)
+print_identifier (obj_t *tk)
 {
-  if (color_enable)
-    fprintf (fp, "%s", color);
   fprintf (fp, "%.*s", tk->literal.len, tk->literal.start);
-  if (color_enable)
-    fprintf (fp, "%s", CLR);
 }
 
 static void
-print_dec_bracket (obj_t *tk, const char *color)
+print_dec_bracket (obj_t *tk)
 {
-  if (color_enable)
-    fprintf (fp, "%s", color);
   fprintf (fp, "%s", token_pairs[tk->type]);
-  if (color_enable)
-    fprintf (fp, "%s", CLR);
   fprintf (fp, "[%d]", tk->data);
 }
 
 static void
-print_hex_bracket (obj_t *tk, const char *color)
+print_hex_bracket (obj_t *tk)
 {
-  if (color_enable)
-    fprintf (fp, "%s", color);
   fprintf (fp, "%s", token_pairs[tk->type]);
-  if (color_enable)
-    fprintf (fp, "%s", CLR);
   fprintf (fp, "[0x%x]", tk->data);
 }
 
 static void
-print_paren (obj_t *tk, const char *color)
+print_paren (obj_t *tk)
 {
-  if (color_enable)
-    fprintf (fp, "%s", color);
   fprintf (fp, "%s", token_pairs[tk->type]);
-  if (color_enable)
-    fprintf (fp, "%s", CLR);
   fprintf (fp, "(%d)", tk->data);
 }
 
@@ -105,7 +81,11 @@ obj_print_t obj_print[] = {
 static void
 obj_printer (obj_t *obj)
 {
-  obj_print[obj->type].handler (obj, obj_print[obj->type].color);
+  if (color_enable)
+    fprintf (fp, "%s", obj_print[obj->type].color);
+  obj_print[obj->type].handler (obj);
+  if (color_enable)
+    fprintf (fp, "%s", CLR);
 }
 
 void
@@ -210,6 +190,8 @@ print_comment (statement_t *statement)
 
   char *comment_start = statement->line_start + statement->comment;
   uint16_t comment_len = statement->line_len - statement->comment;
+  if (statement->type != EMPTY_LINE)
+    fputc (' ', fp); // prepend a ' ' if a effective line (return 1 # aa)
   fprintf (fp, LIGHT ("%.*s"), comment_len, comment_start);
 }
 
@@ -223,7 +205,7 @@ print_as_comment (FILE *output_fp, char *comment_fmt, ...)
 
   static char buf[0x400];
   buf[0] = *token_pairs[COMMENT];
-  statement_t statement = { .line_start = buf, .comment = 0 };
+  statement_t statement = { .type = EMPTY_LINE, .line_start = buf, .comment = 0 };
   statement.line_len = vsnprintf (buf + 1, 0x3ff, comment_fmt, args) + 1;
 
   print_comment (&statement);

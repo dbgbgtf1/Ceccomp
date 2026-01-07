@@ -6,7 +6,7 @@
 
 #define DEFAULT_LABEL "L%04d"
 
-typedef void (*print_fn) (obj_t *obj, const char *color);
+typedef void (*print_fn) (obj_t *obj);
 
 typedef struct
 {
