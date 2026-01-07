@@ -2,6 +2,7 @@
 #define FORMATTER
 
 #include "parser.h"
+#include <stdio.h>
 
 #define DEFAULT_LABEL "L%04d"
 
@@ -15,9 +16,9 @@ typedef struct
 
 extern void obj_printer (obj_t *obj);
 
-extern void print_as_comment (char *comment_fmt, ...)
-    __attribute__ ((format (printf, 1, 2)));
+extern void print_as_comment (FILE *output_fp, char *comment_fmt, ...)
+    __attribute__ ((format (printf, 2, 3)));
 
-extern void print_statement (statement_t *statement);
+extern void print_statement (FILE *output_fp, statement_t *statement);
 
 #endif

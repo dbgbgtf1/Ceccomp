@@ -1,6 +1,7 @@
 #include "arch_trans.h"
 #include "asm.h"
 #include "disasm.h"
+#include "trace.h"
 #include "emu.h"
 #include "parse_args.h"
 #include <stdbool.h>
@@ -42,14 +43,14 @@ init_args (ceccomp_arg_t *args)
 {
   uname (&uts);
   uint32_t scmp_arch = str_to_scmp_arch (uts.machine);
-  args->asm_arg->arch_enum = scmp_arch;
+  args->asm_arg->scmp_arch = scmp_arch;
   args->asm_arg->mode = HEXLINE;
   args->asm_arg->text_file = stdin;
 
-  args->disasm_arg->arch_enum = scmp_arch;
+  args->disasm_arg->scmp_arch = scmp_arch;
   args->disasm_arg->raw_file = stdin;
 
-  args->emu_arg->arch_enum = scmp_arch;
+  args->emu_arg->scmp_arch = scmp_arch;
   args->emu_arg->text_file = stdin;
   for (uint32_t i = 0; i <= 5; i++)
     args->emu_arg->args[i] = 0;
@@ -95,10 +96,10 @@ main (int argc, char *argv[])
   switch (args.cmd)
     {
     case ASM_MODE:
-      assemble (asm_arg.text_file, asm_arg.arch_enum, asm_arg.mode);
+      assemble (asm_arg.text_file, asm_arg.scmp_arch, asm_arg.mode);
       break;
     case DISASM_MODE:
-      disasm (disasm_arg.raw_file, disasm_arg.arch_enum);
+      disasm (disasm_arg.raw_file, disasm_arg.scmp_arch);
       break;
     case EMU_MODE:
       emulate (&emu_arg);
@@ -110,6 +111,7 @@ main (int argc, char *argv[])
           printf ("pid: %d\n", args.trace_arg->pid);
           break;
         }
+      program_trace (&argv[trace_arg.prog_idx], trace_arg.output_file, false);
       for (int i = args.trace_arg->prog_idx; i < argc; i++)
         printf (" %s", argv[i]);
       printf (", output_file: %p\n", args.trace_arg->output_file);

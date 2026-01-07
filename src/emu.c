@@ -194,7 +194,7 @@ emulate_printer (statement_t *statement, char *override_color, bool quiet)
     }
 
   print_label_decl (statement);
-  print_statement (statement);
+  print_statement (stdout, statement);
 
   if (override_color)
     {
@@ -254,12 +254,12 @@ init_attr (emu_arg_t *emu_arg)
 {
   if (emu_arg->sys_name == NULL)
     error ("%s", INPUT_SYS_NR);
-  syscall_nr = seccomp_syscall_resolve_name_arch (emu_arg->arch_enum,
+  syscall_nr = seccomp_syscall_resolve_name_arch (emu_arg->scmp_arch,
                                                   emu_arg->sys_name);
   if ((int32_t)syscall_nr == __NR_SCMP_ERROR)
     error ("%s", INVALID_SYSNR);
 
-  scmp_arch = emu_arg->arch_enum;
+  scmp_arch = emu_arg->scmp_arch;
   low_pc = emu_arg->ip & UINT32_MAX;
   high_pc = emu_arg->ip >> 32;
   for (uint32_t i = 0; i < 6; i++)
@@ -275,7 +275,7 @@ emulate (emu_arg_t *emu_arg)
   init_attr (emu_arg);
   init_source (emu_arg->text_file);
   init_scanner (next_line ());
-  init_parser (emu_arg->arch_enum);
+  init_parser (emu_arg->scmp_arch);
   init_table ();
 
   vector_t text_v;

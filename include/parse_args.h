@@ -34,20 +34,20 @@ typedef enum
 
 typedef struct
 {
-  uint32_t arch_enum;
+  uint32_t scmp_arch;
   print_mode_t mode;
   FILE *text_file;
 } asm_arg_t;
 
 typedef struct
 {
-  uint32_t arch_enum;
+  uint32_t scmp_arch;
   FILE *raw_file;
 } disasm_arg_t;
 
 typedef struct
 {
-  uint32_t arch_enum;
+  uint32_t scmp_arch;
   bool quiet;
   FILE *text_file;
   char *sys_name;
