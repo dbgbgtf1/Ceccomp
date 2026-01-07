@@ -210,7 +210,7 @@ ret_data (uint32_t data)
     case SCMP_ACT_ERRNO (0):
       return ERRNO;
     default:
-      assert (0);
+      return NUMBER;
     }
 }
 
@@ -220,10 +220,8 @@ return_line (return_line_t *return_line)
   obj_t *ret = &return_line->ret_obj;
   if (ret->type == NUMBER)
     ret->type = ret_data (ret->data);
-  ret->data &= 0xffff;
-
-  ret->literal.start = token_pairs[ret->type];
-  ret->literal.len = strlen (token_pairs[ret->type]);
+  if (ret->type != NUMBER) // we need to keep data if "return 0x12345678"
+    ret->data &= 0xffff;
 }
 
 static void
