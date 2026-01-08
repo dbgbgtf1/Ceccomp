@@ -89,7 +89,7 @@ init_output ()
 __attribute__ ((noreturn)) static void
 help (int exit_code)
 {
-  printf ("%s", CECCOMP_USAGE);
+  printf ("%s", M_CECCOMP_USAGE);
   putchar ('\n');
   printf ("%s\n", ASM_HINT);
   printf ("%s\n", DISASM_HINT);
@@ -99,16 +99,16 @@ help (int exit_code)
   printf ("%s\n", HELP_HINT);
   printf ("%s\n", VERSION_HINT);
 
-  printf ("\n%s\n", SUBCMD_HINT);
+  printf ("\n%s\n", M_SUBCMD_HINT);
 
-  printf ("\n%s\n", OPTION_HINT);
+  printf ("\n%s\n", M_OPTION_HINT);
   exit (exit_code);
 }
 
 __attribute__ ((noreturn)) static void
 version (void)
 {
-  printf (VERSION_FORMAT, CECCOMP_VERSION, CECCOMP_TAG_TIME, CECCOMP_BUILDER);
+  printf (M_VERSION_FORMAT, CECCOMP_VERSION, CECCOMP_TAG_TIME, CECCOMP_BUILDER);
   exit (0);
 }
 

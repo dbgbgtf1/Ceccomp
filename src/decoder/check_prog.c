@@ -78,14 +78,14 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
   uint32_t k = f.k;
 
   if (!codes[code])
-    error ("%s", INVALID_OPERATION);
+    error ("%s", M_INVALID_OPERATION);
 
   switch (code)
     {
     case BPF_LD | BPF_W | BPF_ABS:
       f.code = BPF_LDX | BPF_W | BPF_ABS;
       if (k >= sizeof (struct seccomp_data) || k & 3)
-        return report_error (INVALID_ATTR_LOAD);
+        return report_error (M_INVALID_ATTR_LOAD);
       return false;
 
     case BPF_LD | BPF_W | BPF_LEN:
@@ -100,33 +100,33 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
 
     case BPF_ALU | BPF_DIV | BPF_K:
       if (f.k == 0)
-        return report_error (ALU_DIV_BY_ZERO);
+        return report_error (M_ALU_DIV_BY_ZERO);
       return false;
 
     case BPF_ALU | BPF_LSH | BPF_K:
     case BPF_ALU | BPF_RSH | BPF_K:
       if (f.k >= 32)
-        return report_error (ALU_SH_OUT_OF_RANGE);
+        return report_error (M_ALU_SH_OUT_OF_RANGE);
       return false;
 
     case BPF_LD | BPF_MEM:
     case BPF_LDX | BPF_MEM:
       if (f.k >= BPF_MEMWORDS)
-        return report_error (MEM_IDX_OUT_OF_RANGE);
+        return report_error (M_MEM_IDX_OUT_OF_RANGE);
       if (!(mem_valid & (1 << fptr[pc].k)))
-        return report_error (UNINITIALIZED_MEM);
+        return report_error (M_UNINITIALIZED_MEM);
       return false;
 
     case BPF_ST:
     case BPF_STX:
       if (f.k >= BPF_MEMWORDS)
-        return report_error (MEM_IDX_OUT_OF_RANGE);
+        return report_error (M_MEM_IDX_OUT_OF_RANGE);
       mem_valid |= (1 << fptr[pc].k);
       return false;
 
     case BPF_JMP | BPF_JA:
       if (f.k >= (uint32_t)(flen - pc - 1))
-        return report_error (JT_TOO_FAR);
+        return report_error (M_JT_TOO_FAR);
       masks[pc + 1 + fptr[pc].k] &= mem_valid;
       mem_valid = ~0;
       return false;
@@ -140,9 +140,9 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
     case BPF_JMP | BPF_JSET | BPF_K:
     case BPF_JMP | BPF_JSET | BPF_X:
       if (pc + f.jt + 1 >= flen)
-        return report_error (JT_TOO_FAR);
+        return report_error (M_JT_TOO_FAR);
       if (pc + f.jf + 1 >= flen)
-        return report_error (JF_TOO_FAR);
+        return report_error (M_JF_TOO_FAR);
       masks[pc + 1 + fptr[pc].jt] &= mem_valid;
       masks[pc + 1 + fptr[pc].jf] &= mem_valid;
       mem_valid = ~0;
@@ -167,7 +167,7 @@ check_prog (fprog *prog)
 
   uint16_t last = prog->filter[prog->len - 1].code;
   if ((last != (BPF_RET | BPF_A)) && (last != (BPF_RET | BPF_K)))
-    return report_error (MUST_END_WITH_RET);
+    return report_error (M_MUST_END_WITH_RET);
 
   return false;
 

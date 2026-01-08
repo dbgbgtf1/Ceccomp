@@ -263,7 +263,7 @@ assemble (FILE *fp, uint32_t scmp_arch, print_mode_t print_mode)
   init_vector (&code_ptr_v, sizeof (statement_t *));
   parser (&text_v, &code_ptr_v);
   if (resolver (&code_ptr_v))
-    error ("%s", ASM_TERMINATED);
+    error ("%s", M_ASM_TERMINATED);
   // if ERROR_LINE exists, then exits
 
   char *fmt = set_print_fmt (print_mode);

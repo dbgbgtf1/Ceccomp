@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-09 16:15+0800\n"
+"POT-Creation-Date: 2026-01-08 19:11+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -25,268 +25,298 @@ msgid ""
 "Build by %s\n"
 msgstr ""
 
-#: ../include/log/error.h:6
-msgid "Unable to open file"
-msgstr ""
-
 #: ../include/log/error.h:7
-msgid "Invalid arch"
+msgid "Probe terminated"
 msgstr ""
 
-#: ../include/log/error.h:8
-msgid "Invalid print mode"
+#: ../include/log/error.h:10
+msgid "Emu terminated"
 msgstr ""
 
-#: ../include/log/error.h:9
-msgid "Invalid color mode"
-msgstr ""
-
-#: ../include/log/error.h:19
-msgid "Invalid syscall_nr"
-msgstr ""
-
-#: ../include/log/error.h:20
-msgid "Invalid syscall args"
-msgstr ""
-
-#: ../include/log/error.h:21
-msgid "Invalid instruction pointer"
-msgstr ""
-
-#: ../include/log/error.h:22
-msgid "Invalid pid"
-msgstr ""
-
-#: ../include/log/error.h:23
+#: ../include/log/error.h:11
 msgid "Please input syscall_nr to emu"
 msgstr ""
 
-#: ../include/log/error.h:25
-#, c-format
-msgid ""
-"Your system arch (%s) does not match any arch supported by libseccomp, "
-"please set an arch by -a manually"
+#: ../include/log/error.h:12
+msgid "Invalid syscall_nr"
 msgstr ""
 
-#: ../include/log/error.h:29
-msgid "Invalid operator"
+#: ../include/log/error.h:15
+msgid "Asm terminated"
 msgstr ""
 
-#: ../include/log/error.h:30
-msgid "Impossible cmp sym enum"
+#: ../include/log/error.h:18
+msgid "Disasm terminated"
 msgstr ""
 
-#: ../include/log/error.h:31
-msgid "Impossible alu sym enum"
-msgstr ""
-
-#: ../include/log/error.h:33
-msgid "Invalid right value"
-msgstr ""
-
-#: ../include/log/error.h:34
-msgid "Invalid left valiable"
-msgstr ""
-
-#: ../include/log/error.h:36
-msgid "Invalid idx of $mem"
-msgstr ""
-
-#: ../include/log/error.h:37
-msgid "Invalid mem statement"
-msgstr ""
-
-#: ../include/log/error.h:39
-msgid "Invalid if line"
-msgstr ""
-
-#: ../include/log/error.h:40
-msgid "Invalid return line"
-msgstr ""
-
-#: ../include/log/error.h:42
-msgid "Missing parentheses in return data, example: ERRNO(2)"
-msgstr ""
-
-#: ../include/log/error.h:43
-msgid "Invalid return data"
-msgstr ""
-
-#: ../include/log/error.h:46
-msgid "Use parentheses to wrap condition, example: (condition)"
-msgstr ""
-
-#: ../include/log/error.h:47
-msgid "Use 'goto' after (condition)"
-msgstr ""
-
-#: ../include/log/error.h:49
-msgid "Line number to go after 'goto'"
-msgstr ""
-
-#: ../include/log/error.h:50
-msgid "Line number to go after ',else goto'"
-msgstr ""
-
-#: ../include/log/error.h:51
-msgid "Invalid line number after goto"
-msgstr ""
-
-#: ../include/log/error.h:52
-msgid "Invalid jmp line number"
-msgstr ""
-
-#: ../include/log/error.h:53
-msgid "Jmp line number less than pc"
-msgstr ""
-
-#: ../include/log/error.h:54
-msgid "Invalid asm code"
-msgstr ""
-
-#: ../include/log/error.h:55
-msgid "Invalid return value"
-msgstr ""
-
-#: ../include/log/error.h:57
-msgid "Line length shall not exceeds 0x400"
-msgstr ""
-
-#: ../include/log/error.h:60
-msgid "Invalid offset of seccomp_data"
-msgstr ""
-
-#: ../include/log/error.h:61
-msgid "Store mem before ld or ldx"
-msgstr ""
-
-#: ../include/log/error.h:62
-msgid "Jt and jf both 0"
-msgstr ""
-
-#: ../include/log/error.h:65
-msgid "Alu div by zero"
-msgstr ""
-
-#: ../include/log/error.h:66
-msgid "Alu lsh or rsh out of range"
-msgstr ""
-
-#: ../include/log/error.h:67
-msgid "Jmp out of bpf len"
-msgstr ""
-
-#: ../include/log/error.h:68
-msgid "Bpf filter must end with return"
-msgstr ""
-
-#: ../include/log/error.h:69
-msgid "Invalid opertion"
-msgstr ""
-
-#: ../include/log/error.h:72
-msgid ""
-"The above code has errors, please check the warnings for specific details"
-msgstr ""
-
-#: ../include/log/error.h:77
-msgid "execv failed executing"
-msgstr ""
-
-#: ../include/log/error.h:78
-msgid "tracee syscall should be exiting here"
-msgstr ""
-
-#: ../include/log/error.h:79
-#, c-format
-msgid "Process %d spawned a new pid %d"
-msgstr ""
-
-#: ../include/log/error.h:80
-#, c-format
-msgid "Process %d exited"
-msgstr ""
-
-#: ../include/log/error.h:81
-#, c-format
-msgid "Parsing %d process seccomp filter"
-msgstr ""
-
-#: ../include/log/error.h:82
+#: ../include/log/error.h:21
 #, c-format
 msgid "Peekdata failed at %p"
 msgstr ""
 
-#: ../include/log/error.h:84
-msgid "Ptrace from 32-bit tracer to 64-bit tracee is limited"
+#: ../include/log/error.h:22
+msgid "execv failed executing"
 msgstr ""
 
-#: ../include/log/error.h:86
+#: ../include/log/error.h:23
 #, c-format
-msgid "libseccomp does not support the tracee's arch (%#x)"
+msgid "Process %d spawned a new pid %d"
 msgstr ""
 
-#: ../include/log/error.h:89
+#: ../include/log/error.h:24
+#, c-format
+msgid "Process %d exited"
+msgstr ""
+
+#: ../include/log/error.h:25
+#, c-format
+msgid "Parsing %d process seccomp filter"
+msgstr ""
+
+#: ../include/log/error.h:26
 msgid "Procfs not accessible, unable to perform"
 msgstr ""
 
-#: ../include/log/error.h:90
+#: ../include/log/error.h:27
+msgid "Non-cbpf found, can't resolve, but continue"
+msgstr ""
+
+#: ../include/log/error.h:28
+msgid "Kernel thread can not be seized"
+msgstr ""
+
+#: ../include/log/error.h:29
+#, c-format
+msgid "No seccomp filters found in pid %d\n"
+msgstr ""
+
+#: ../include/log/error.h:30
 #, c-format
 msgid "Target process is being traced by %d pid process"
 msgstr ""
 
-#: ../include/log/error.h:94
-msgid "Run with CAP_SYS_PTRACE capability to seize a foreign process"
-msgstr ""
-
-#: ../include/log/error.h:95
-msgid "Kernel thread can not be seized"
-msgstr ""
-
-#: ../include/log/error.h:97
+#: ../include/log/error.h:36
 msgid "perhaps seizing kthread or lacking CAP_SYS_PTRACE"
 msgstr ""
 
-#: ../include/log/error.h:98
+#: ../include/log/error.h:38
+msgid "Run with CAP_SYS_ADMIN capability to fetch seccomp filters"
+msgstr ""
+
+#: ../include/log/error.h:40
+msgid "Run with CAP_SYS_PTRACE capability to seize a foreign process"
+msgstr ""
+
+#: ../include/log/error.h:42
+msgid "Ptrace from 32-bit tracer to 64-bit tracee is limited"
+msgstr ""
+
+#: ../include/log/error.h:44
 #, c-format
-msgid "No such process with pid %d in the system"
+msgid "libseccomp does not support the tracee's arch (%#x)"
 msgstr ""
 
-#: ../include/log/error.h:99
-msgid "Non-cbpf found, can't resolve, but continue"
+#: ../include/log/error.h:46
+msgid "perhaps lacking CAP_SYS_ADMIN or ceccomp is in seccomp mode"
 msgstr ""
 
-#: ../include/log/error.h:104
-msgid ""
-"perhaps PTRACE_GET_SECCOMP_FILTER is not supported or no seccomp filter in "
-"target process"
-msgstr ""
-
-#: ../include/log/error.h:107
+#: ../include/log/error.h:48
 msgid "PTRACE_GET_SECCOMP_FILTER is not supported on your system"
 msgstr ""
 
-#: ../include/log/error.h:108
-msgid "Error cause unknown, due to the followings"
-msgstr ""
-
-#: ../include/log/error.h:110
+#: ../include/log/error.h:50
 msgid ""
 "Ceccomp is in seccomp mode, fetch seccomp filters of other process is not "
 "permitted"
 msgstr ""
 
+#: ../include/log/error.h:53
+msgid ""
+"perhaps PTRACE_GET_SECCOMP_FILTER is not supported or no seccomp filter in "
+"target process"
+msgstr ""
+
+#: ../include/log/error.h:57
+msgid "Invalid color mode"
+msgstr ""
+
+#: ../include/log/error.h:58
+msgid "Invalid format mode"
+msgstr ""
+
+#: ../include/log/error.h:59
+msgid "Invalid number"
+msgstr ""
+
+#: ../include/log/error.h:60
+msgid "Unable open file"
+msgstr ""
+
+#: ../include/log/error.h:64
+#, c-format
+msgid "Found '\\0' file offset %lu, perhaps it's not a text file?"
+msgstr ""
+
+#: ../include/log/error.h:66
+msgid "No line break in source file, perhaps it's not a text file?"
+msgstr ""
+
+#: ../include/log/error.h:68
+#, c-format
+msgid "Line %u has more than %u bytes, perhaps the input is not a text file?"
+msgstr ""
+
+#: ../include/log/error.h:69
+msgid "The input file is greater than 1 MiB!"
+msgstr ""
+
+#: ../include/log/error.h:72
+#, c-format
+msgid "Can not find label: %.*s"
+msgstr ""
+
+#: ../include/log/error.h:75
+msgid "Unexpect token"
+msgstr ""
+
+#: ../include/log/error.h:77
+msgid "Expect operator"
+msgstr ""
+
+#: ../include/log/error.h:78
+msgid "Expect right variable"
+msgstr ""
+
+#: ../include/log/error.h:79
+msgid "Expect return value"
+msgstr ""
+
+#: ../include/log/error.h:81
+msgid "Expect number"
+msgstr ""
+
+#: ../include/log/error.h:82
+msgid "Expect paren"
+msgstr ""
+
+#: ../include/log/error.h:83
+msgid "Expect bracket"
+msgstr ""
+
+#: ../include/log/error.h:84
+msgid "Expect comparator"
+msgstr ""
+
+#: ../include/log/error.h:85
+msgid "Expect label"
+msgstr ""
+
+#: ../include/log/error.h:86
+msgid "Expect syscall"
+msgstr ""
+
+#: ../include/log/error.h:87
+msgid "Expect architecture"
+msgstr ""
+
+#: ../include/log/error.h:90
+msgid "Expect 'goto'"
+msgstr ""
+
+#: ../include/log/error.h:91
+msgid "Expect '$A'"
+msgstr ""
+
+#: ../include/log/error.h:92
+msgid "Expect 'else'"
+msgstr ""
+
+#: ../include/log/error.h:95
+msgid "Right operand should be '$A'"
+msgstr ""
+
+#: ../include/log/error.h:96
+msgid "Right operand can not be '$A'"
+msgstr ""
+
+#: ../include/log/error.h:97
+msgid "Right operand can not be '$X'"
+msgstr ""
+
+#: ../include/log/error.h:99
+msgid "Right operand should be '$A' or '$X'"
+msgstr ""
+
+#: ../include/log/error.h:100
+msgid "Right operand should be '$X' or num"
+msgstr ""
+
+#: ../include/log/error.h:101
+msgid "Operator should be '='"
+msgstr ""
+
+#: ../include/log/error.h:102
+msgid "Left operand should be A"
+msgstr ""
+
+#: ../include/log/error.h:103
+msgid "Invalid attribute load"
+msgstr ""
+
+#: ../include/log/error.h:105
+msgid "Args index out of range"
+msgstr ""
+
+#: ../include/log/error.h:106
+msgid "Mem index out of range"
+msgstr ""
+
+#: ../include/log/error.h:107
+msgid "Uninitialized mem"
+msgstr ""
+
+#: ../include/log/error.h:108
+msgid "Alu div by zero"
+msgstr ""
+
+#: ../include/log/error.h:109
+msgid "Alu lsh or rsh out of range"
+msgstr ""
+
+#: ../include/log/error.h:111
+msgid "Ret data too large"
+msgstr ""
+
+#: ../include/log/error.h:112
+msgid "Jt is too far"
+msgstr ""
+
+#: ../include/log/error.h:113
+msgid "Jt must be positive"
+msgstr ""
+
 #: ../include/log/error.h:114
-msgid "Run with CAP_SYS_ADMIN capability to fetch seccomp filters"
+msgid "Jf is too far"
+msgstr ""
+
+#: ../include/log/error.h:115
+msgid "Jf must be positive"
 msgstr ""
 
 #: ../include/log/error.h:116
-msgid "perhaps lacking CAP_SYS_ADMIN or ceccomp is in seccomp mode"
+msgid "Jt to invalid tag"
 msgstr ""
 
-#: ../include/log/error.h:118
-#, c-format
-msgid "No seccomp filters found in pid %d\n"
+#: ../include/log/error.h:117
+msgid "Jf to invalid tag"
+msgstr ""
+
+#: ../include/log/error.h:119
+msgid "Bpf filter must end with return"
+msgstr ""
+
+#: ../include/log/error.h:121
+msgid "Invalid operation"
 msgstr ""
 
 #: ../include/help.h:2
@@ -325,10 +355,10 @@ msgid ""
 "detail, default as stdin\n"
 msgstr ""
 
-#: ../src/trace.c:39
+#: ../src/trace.c:37
 msgid "STRICT MODE DETECTED!"
 msgstr ""
 
-#: ../src/trace.c:40
+#: ../src/trace.c:38
 msgid "Only read, write, _exit, sigreturn available!"
 msgstr ""

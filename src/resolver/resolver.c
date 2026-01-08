@@ -89,20 +89,20 @@ assign_A (assign_line_t *assign_line)
   if (operator == NEGATIVE)
     {
       if (right->type != A)
-        REPORT_ERROR (RIGHT_SHOULD_BE_A);
+        REPORT_ERROR (M_RIGHT_SHOULD_BE_A);
       return;
     }
   else if (match_from_to (operator, ADD_TO, XOR_TO))
     {
       if (right->type != X && right->type != NUMBER)
-        REPORT_ERROR (RIGHT_SHOULD_BE_X_OR_NUM);
+        REPORT_ERROR (M_RIGHT_SHOULD_BE_X_OR_NUM);
 
       if (operator == DIVIDE_TO && right->type == NUMBER && right->data == 0)
-        REPORT_ERROR (ALU_DIV_BY_ZERO);
+        REPORT_ERROR (M_ALU_DIV_BY_ZERO);
 
       if (match_from_to (operator, LSH_TO, RSH_TO))
         if (right->type == NUMBER && right->data >= 32)
-          REPORT_ERROR (ALU_SH_OUT_OF_RANGE);
+          REPORT_ERROR (M_ALU_SH_OUT_OF_RANGE);
       return;
     }
 
@@ -114,16 +114,16 @@ assign_A (assign_line_t *assign_line)
       right->data = LEN_VAL;
     }
   else if (right->type == A)
-    REPORT_ERROR (RIGHT_CAN_NOT_BE_A);
+    REPORT_ERROR (M_RIGHT_CAN_NOT_BE_A);
   else if ((right->type == ATTR_LOWARG || right->type == ATTR_HIGHARG)
            && IS_ARG_OUT_RANGE (right))
-    REPORT_ERROR (ARGS_IDX_OUT_OF_RANGE);
+    REPORT_ERROR (M_ARGS_IDX_OUT_OF_RANGE);
   else if (right->type == MEM)
     {
       if (IS_MEM_OUT_RANGE (right))
-        REPORT_ERROR (MEM_IDX_OUT_OF_RANGE);
+        REPORT_ERROR (M_MEM_IDX_OUT_OF_RANGE);
       if (!(mem_valid & (1 << right->data)))
-        REPORT_ERROR (UNINITIALIZED_MEM);
+        REPORT_ERROR (M_UNINITIALIZED_MEM);
     }
 }
 
@@ -134,7 +134,7 @@ assign_X (assign_line_t *assign_line)
   obj_t *right = &assign_line->right_var;
 
   if (*operator != EQUAL)
-    REPORT_ERROR (OPERATOR_SHOULD_BE_EQUAL);
+    REPORT_ERROR (M_OPERATOR_SHOULD_BE_EQUAL);
 
   if (right->type == ATTR_LEN)
     {
@@ -142,19 +142,19 @@ assign_X (assign_line_t *assign_line)
       right->data = LEN_VAL;
     }
   else if (match_from_to (right->type, ATTR_SYSCALL, ATTR_HIGHARG))
-    REPORT_ERROR (LEFT_SHOULD_BE_A);
+    REPORT_ERROR (M_LEFT_SHOULD_BE_A);
 
   else if (right->type == X)
-    REPORT_ERROR (RIGHT_CAN_NOT_BE_X);
+    REPORT_ERROR (M_RIGHT_CAN_NOT_BE_X);
   else if ((right->type == ATTR_LOWARG || right->type == ATTR_HIGHARG)
            && IS_ARG_OUT_RANGE (right))
-    REPORT_ERROR (ARGS_IDX_OUT_OF_RANGE);
+    REPORT_ERROR (M_ARGS_IDX_OUT_OF_RANGE);
   else if (right->type == MEM)
     {
       if (IS_MEM_OUT_RANGE (right))
-        REPORT_ERROR (MEM_IDX_OUT_OF_RANGE);
+        REPORT_ERROR (M_MEM_IDX_OUT_OF_RANGE);
       if (!(mem_valid & (1 << right->data)))
-        REPORT_ERROR (UNINITIALIZED_MEM);
+        REPORT_ERROR (M_UNINITIALIZED_MEM);
     }
 }
 
@@ -166,13 +166,13 @@ assign_MEM (assign_line_t *assign_line)
   obj_t *right = &assign_line->right_var;
 
   if (operator != EQUAL)
-    REPORT_ERROR (OPERATOR_SHOULD_BE_EQUAL);
+    REPORT_ERROR (M_OPERATOR_SHOULD_BE_EQUAL);
 
   if (IS_MEM_OUT_RANGE (left))
-    REPORT_ERROR (MEM_IDX_OUT_OF_RANGE);
+    REPORT_ERROR (M_MEM_IDX_OUT_OF_RANGE);
 
   if (right->type != A && right->type != X)
-    REPORT_ERROR (RIGHT_SHOULD_BE_A_OR_X);
+    REPORT_ERROR (M_RIGHT_SHOULD_BE_A_OR_X);
 
   mem_valid |= (1 << left->data);
 }
@@ -218,11 +218,11 @@ jump_line ()
   set_jt_jf (&jump_line->jt, jt);
 
   if ((int16_t)jump_line->jt.code_nr < 0)
-    REPORT_ERROR (JT_MUST_BE_POSITIVE);
+    REPORT_ERROR (M_JT_MUST_BE_POSITIVE);
   if (jump_line->jt.code_nr > UINT8_MAX)
-    REPORT_ERROR (JT_TOO_FAR);
+    REPORT_ERROR (M_JT_TOO_FAR);
   if (jt > bpf_len)
-    REPORT_ERROR (JT_INVALID_TAG);
+    REPORT_ERROR (M_JT_INVALID_TAG);
 
   if (jump_line->jf.key.start == NULL)
     set_jt_jf (&jump_line->jf, local->code_nr + 1);
@@ -231,11 +231,11 @@ jump_line ()
 
   uint32_t jf = local->code_nr + jump_line->jf.code_nr + 1;
   if ((int16_t)jump_line->jf.code_nr < 0)
-    REPORT_ERROR (JF_MUST_BE_POSITIVE);
+    REPORT_ERROR (M_JF_MUST_BE_POSITIVE);
   if (jump_line->jf.code_nr > UINT8_MAX)
-    REPORT_ERROR (JF_TOO_FAR);
+    REPORT_ERROR (M_JF_TOO_FAR);
   if (jf > bpf_len)
-    REPORT_ERROR (JF_INVALID_TAG);
+    REPORT_ERROR (M_JF_INVALID_TAG);
 
   masks[jt] &= mem_valid;
   masks[jf] &= mem_valid;
@@ -252,7 +252,7 @@ return_line ()
 
   if ((ret_type == TRACE || ret_type == TRAP || ret_type == ERRNO)
       && return_line->ret_obj.data > 0xffff)
-    REPORT_ERROR (RET_DATA_OVERFLOW);
+    REPORT_ERROR (M_RET_DATA_OVERFLOW);
   // Don't assume the ret_obj.data == zero when not used
 }
 
@@ -302,7 +302,7 @@ resolver (vector_t *code_ptr_v)
 
   statement_t **last = get_vector (code_ptr_v, code_ptr_v->count - 1);
   if ((*last)->type != RETURN_LINE)
-    report_error (MUST_END_WITH_RET);
+    report_error (M_MUST_END_WITH_RET);
 
   reallocate (masks, 0x0);
 

@@ -237,7 +237,7 @@ void
 decode_filters (fprog *prog, vector_t *v)
 {
   if (check_prog (prog))
-    error ("%s", DISASM_TERMINATED);
+    error ("%s", M_DISASM_TERMINATED);
 
   statement_t statement;
   push_vector (v, &statement);

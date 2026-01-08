@@ -28,7 +28,7 @@ fail_fast_fopen (char *file, char *mode)
 {
   FILE *fp = fopen (file, mode);
   if (fp == NULL)
-    error ("%s", UNABLE_OPEN_FILE);
+    error ("%s", M_UNABLE_OPEN_FILE);
   return fp;
 }
 
@@ -63,7 +63,7 @@ parse_color_mode (char *arg)
   else if (!strcmp (arg, "never"))
     return NEVER;
   else
-    error ("%s: %s", INVALID_COLOR_MODE, arg);
+    error ("%s: %s", M_INVALID_COLOR_MODE, arg);
 }
 
 static print_mode_t
@@ -76,7 +76,7 @@ parse_print_mode (char *arg)
   else if (!strcmp (arg, "raw"))
     return RAW;
   else
-    error ("%s: %s", INVALID_FMT_MODE, arg);
+    error ("%s: %s", M_INVALID_FMT_MODE, arg);
 }
 
 static int
@@ -128,9 +128,9 @@ parse_emu (emu_arg_t *args, int key, char *arg, struct argp_state *state)
         args->sys_name = arg;
       else if (state->arg_num >= 3 && state->arg_num <= 8)
         args->args[state->arg_num - 3]
-            = fail_fast_strtoull (arg, INVALID_NUMBER);
+            = fail_fast_strtoull (arg, M_INVALID_NUMBER);
       else if (state->arg_num == 9)
-        args->ip = fail_fast_strtoull (arg, INVALID_NUMBER);
+        args->ip = fail_fast_strtoull (arg, M_INVALID_NUMBER);
       return 0;
     case 'a':
       args->scmp_arch = str_to_scmp_arch (arg);
@@ -159,7 +159,7 @@ parse_trace (trace_arg_t *args, int key, char *arg, struct argp_state *state)
       if (args->mode != UNDECIDED)
         return 0;
       args->mode = TRACE_PID;
-      args->pid = fail_fast_strtoull (arg, INVALID_NUMBER);
+      args->pid = fail_fast_strtoull (arg, M_INVALID_NUMBER);
       return 0;
     case 'o':
       if (args->mode != UNDECIDED)

@@ -91,7 +91,7 @@ peek_data_check (pid_t pid, size_t *addr)
   errno = 0;
   size_t result = ptrace (PTRACE_PEEKDATA, pid, addr, 0);
   if (result == (size_t)-1 && errno != 0)
-    error (PEEKDATA_FAILED_ADR, (void *)addr);
+    error (M_PEEKDATA_FAILED_ADR, (void *)addr);
   return result;
 }
 
@@ -109,7 +109,7 @@ dump_filter (syscall_info *info, int pid, fprog *prog)
   if (is_local_64 && !is_target_64)
     offset /= 2;
   else if (!is_local_64 && is_target_64)
-    error ("%s", CANNOT_WORK_FROM_32_TO_64);
+    error ("%s", M_CANNOT_WORK_FROM_32_TO_64);
 
   size_t filter_adr
       = peek_data_check (pid, (size_t *)((size_t)args2 + offset));
@@ -139,7 +139,7 @@ child (char *argv[])
 
   int err = execv (argv[0], argv);
   if (err)
-    error ("%s: %s, %s\n", EXECV_ERR, argv[0], strerror (errno));
+    error ("%s: %s, %s\n", M_EXECV_ERR, argv[0], strerror (errno));
   exit (0);
 }
 
@@ -152,7 +152,7 @@ handle_fork (pid_t pid, int status)
     {
       uint64_t new_pid;
       ptrace (PTRACE_GETEVENTMSG, pid, NULL, &new_pid);
-      info (PROCESS_FORK, pid, (pid_t)new_pid);
+      info (M_PROCESS_FORK, pid, (pid_t)new_pid);
     }
 }
 
@@ -174,13 +174,13 @@ handle_syscall (pid_t pid, FILE *output_fp, bool oneshot)
       prctl_nr = seccomp_syscall_resolve_name_arch (saved_arch, "prctl");
       // every arch has prctl, so if prctl has no nr, seccomp has no nr, either
       if (prctl_nr == (uint64_t)__NR_SCMP_ERROR)
-        error (TRACEE_ARCH_NOT_SUPPORTED, saved_arch);
+        error (M_TRACEE_ARCH_NOT_SUPPORTED, saved_arch);
     }
 
   seccomp_mode = check_scmp_mode (info, pid, &prog);
 
   if (seccomp_mode != LOAD_FAIL)
-    info (PARSE_PID_BPF, pid);
+    info (M_PARSE_PID_BPF, pid);
   if (seccomp_mode == SECCOMP_SET_MODE_STRICT)
     mode_strict ();
   else if (seccomp_mode == SECCOMP_SET_MODE_FILTER)
@@ -222,7 +222,7 @@ parent (pid_t child_pid, FILE *output_fp, bool oneshot)
 
       if (WIFEXITED (status) || WIFSIGNALED (status))
         {
-          info (PROCESS_EXIT, pid);
+          info (M_PROCESS_EXIT, pid);
           continue;
         }
 
@@ -270,15 +270,15 @@ einval_get_filter (pid_t pid)
 {
   seccomp_mode mode = get_proc_seccomp (pid);
   if ((int)mode == PROCFS_ERROR)
-    error ("%s %s, %s", PROCFS_NOT_ACCESSIBLE, ACTION_GET_FILTER,
-           GET_FILTER_UNSUPPORTED_OR_NO_FILTER);
+    error ("%s %s, %s", M_PROCFS_NOT_ACCESSIBLE, ACTION_GET_FILTER,
+           M_GET_FILTER_UNSUPPORTED_OR_NO_FILTER);
   if (mode == STATUS_STRICT_MODE)
     {
       mode_strict ();
       exit (0);
     }
   else if (mode == STATUS_FILTER_MODE)
-    error ("%s", GET_FILTER_UNSUPPORTED);
+    error ("%s", M_GET_FILTER_UNSUPPORTED);
   // if mode == STATUS_NONE, return to print "no filters found"
 }
 
@@ -287,12 +287,12 @@ eacces_get_filter (pid_t pid)
 {
   seccomp_mode mode = get_proc_seccomp (pid);
   if ((int)mode == PROCFS_ERROR)
-    error ("%s %s, %s", PROCFS_NOT_ACCESSIBLE, ACTION_GET_FILTER,
-           CAP_SYS_ADMIN_OR_IN_SECCOMP);
+    error ("%s %s, %s", M_PROCFS_NOT_ACCESSIBLE, ACTION_GET_FILTER,
+           M_CAP_SYS_ADMIN_OR_IN_SECCOMP);
   if (mode == STATUS_NONE)
-    error ("%s", REQUIRE_CAP_SYS_ADMIN);
+    error ("%s", M_REQUIRE_CAP_SYS_ADMIN);
   else
-    error ("%s", CECCOMP_IN_SECCOMP);
+    error ("%s", M_CECCOMP_IN_SECCOMP);
 }
 
 // return true means continue
@@ -310,7 +310,7 @@ error_get_filter (pid_t pid, int err)
     case EACCES:
       eacces_get_filter (getpid ());
     case EMEDIUMTYPE:
-      warn ("%s", NOT_AN_CBPF);
+      warn ("%s", M_NOT_AN_CBPF);
       return true;
     default:
       error ("trace: %s", strerror (err));
@@ -324,18 +324,18 @@ eperm_seize (pid_t pid)
   // but that will probably not happen
   kthread_mode mode = is_proc_kthread (pid);
   if ((int)mode == PROCFS_ERROR)
-    error ("%s %s, %s", PROCFS_NOT_ACCESSIBLE, ACTION_PTRACE_SEIZE,
-           CAP_SYS_PTRACE_OR_KTHREAD);
+    error ("%s %s, %s", M_PROCFS_NOT_ACCESSIBLE, ACTION_PTRACE_SEIZE,
+           M_CAP_SYS_PTRACE_OR_KTHREAD);
   if (mode == STATUS_KTHREAD)
-    error ("%s", SEIZING_KERNEL_THREAD);
+    error ("%s", M_SEIZING_KERNEL_THREAD);
 
   pid_t tracer = get_tracer_pid (pid);
   assert (tracer != PROCFS_ERROR);
 
   if (tracer)
-    error (TARGET_TRACED_BY, tracer);
+    error (M_TARGET_TRACED_BY, tracer);
   else
-    error ("%s", REQUIRE_CAP_SYS_PTRACE);
+    error ("%s", M_REQUIRE_CAP_SYS_PTRACE);
   // seize needs CAP_SYS_PTRACE
   // get_filter needs CAP_SYS_ADMIN
 }
@@ -386,7 +386,7 @@ pid_trace (int pid)
     }
 
   if (prog_idx == 0)
-    printf (NO_FILTER_FOUND, pid);
+    printf (M_NO_FILTER_FOUND, pid);
   ptrace (PTRACE_DETACH, pid, 0, 0);
   free (prog.filter);
 }

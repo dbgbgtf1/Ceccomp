@@ -96,9 +96,9 @@ paren_num ()
   if (!match (LEFT_PAREN))
     return 0;
   if (!match (NUMBER))
-    error_at (parse.next, EXPECT_NUMBER);
+    error_at (parse.next, M_EXPECT_NUMBER);
   if (!match (RIGHT_PAREN))
-    error_at (parse.next, EXPECT_PAREN);
+    error_at (parse.next, M_EXPECT_PAREN);
   return parse.previous.data;
 }
 
@@ -107,11 +107,11 @@ static uint32_t
 bracket_num ()
 {
   if (!match (LEFT_BRACKET))
-    error_at (parse.next, EXPECT_BRACKET);
+    error_at (parse.next, M_EXPECT_BRACKET);
   if (!match (NUMBER))
-    error_at (parse.next, EXPECT_NUMBER);
+    error_at (parse.next, M_EXPECT_NUMBER);
   if (!match (RIGHT_BRACKET))
-    error_at (parse.next, EXPECT_BRACKET);
+    error_at (parse.next, M_EXPECT_BRACKET);
   return parse.previous.data;
 }
 
@@ -150,7 +150,7 @@ ret_obj ()
   else if (match_from_to (KILL_PROC, LOG) || match (A))
     obj->type = parse.current.type;
   else
-    error_at (parse.next, EXPECT_RETURN_VAL);
+    error_at (parse.next, M_EXPECT_RETURN_VAL);
 
   obj->literal.len = parse.current.token_start + parse.current.token_len
                      - obj->literal.start;
@@ -169,7 +169,7 @@ static void
 label (label_t *label)
 {
   if (!match (IDENTIFIER))
-    error_at (parse.next, EXPECT_LABEL);
+    error_at (parse.next, M_EXPECT_LABEL);
 
   label->type = IDENTIFIER;
   label->key.start = parse.current.token_start;
@@ -209,32 +209,32 @@ compare_obj (obj_t *obj)
     {
       obj->data = resolve_name_arch (local_arch, &parse.current);
       if (obj->data == (uint32_t)-1)
-        error_at (parse.current, EXPECT_SYSCALL);
+        error_at (parse.current, M_EXPECT_SYSCALL);
       return;
     }
   // read
 
   if (!match_from_to (ARCH_X86, ARCH_RISCV64))
-    error_at (parse.next, UNEXPECT_TOKEN);
+    error_at (parse.next, M_UNEXPECT_TOKEN);
 
   if (!match (DOT))
     {
       obj->data = internal_arch_to_scmp_arch (parse.current.type);
       if (obj->data == (uint32_t)-1)
-        error_at (parse.current, EXPECT_ARCH);
+        error_at (parse.current, M_EXPECT_ARCH);
       return;
     }
   // i386
 
   if (!peek (IDENTIFIER))
-    error_at (parse.next, EXPECT_SYSCALL);
+    error_at (parse.next, M_EXPECT_SYSCALL);
 
   uint32_t scmp_arch = internal_arch_to_scmp_arch (parse.previous.type);
   if (scmp_arch == (uint32_t)-1)
-    error_at (parse.previous, EXPECT_ARCH);
+    error_at (parse.previous, M_EXPECT_ARCH);
   obj->data = resolve_name_arch (scmp_arch, &parse.next);
   if (obj->data == (uint32_t)-1)
-    error_at (parse.next, EXPECT_SYSCALL);
+    error_at (parse.next, M_EXPECT_SYSCALL);
 
   obj->literal.len += parse.next.token_len + 1;
   // +1 is for dot
@@ -251,17 +251,17 @@ condition (jump_line_t *jump_line)
     jump_line->if_bang = true;
 
   if (!match (LEFT_PAREN))
-    error_at (parse.next, EXPECT_PAREN);
+    error_at (parse.next, M_EXPECT_PAREN);
   if (!match (A))
-    error_at (parse.next, EXPECT_A);
+    error_at (parse.next, M_EXPECT_A);
   if (!match_from_to (EQUAL_EQUAL, AND))
-    error_at (parse.next, EXPECT_COMPARTOR);
+    error_at (parse.next, M_EXPECT_COMPARTOR);
   jump_line->comparator = parse.current.type;
 
   compare_obj (&jump_line->cmpobj);
 
   if (!match (RIGHT_PAREN))
-    error_at (parse.next, EXPECT_PAREN);
+    error_at (parse.next, M_EXPECT_PAREN);
 }
 
 static void
@@ -283,7 +283,7 @@ jump_line ()
   condition (jump_line);
 
   if (!match (GOTO))
-    error_at (parse.next, EXPECT_GOTO);
+    error_at (parse.next, M_EXPECT_GOTO);
 
   label (&jump_line->jt);
   jump_line->jf.key.start = NULL;
@@ -294,9 +294,9 @@ jump_line ()
   // probably this jump_line has no jf
 
   if (!match (ELSE))
-    error_at (parse.next, EXPECT_ELSE);
+    error_at (parse.next, M_EXPECT_ELSE);
   if (!match (GOTO))
-    error_at (parse.next, EXPECT_GOTO);
+    error_at (parse.next, M_EXPECT_GOTO);
 
   label (&jump_line->jf);
 }
@@ -334,7 +334,7 @@ right (obj_t *obj)
       obj->data = parse.current.data;
     }
   else
-    error_at (parse.next, EXPECT_RIGHT_VAR);
+    error_at (parse.next, M_EXPECT_RIGHT_VAR);
 
   obj->literal.len = parse.current.token_start + parse.current.token_len
                      - obj->literal.start;
@@ -359,7 +359,7 @@ assign_line ()
       assign_line->operator = parse.current.type;
     }
   else
-    error_at (parse.next, EXPECT_OPERATOR);
+    error_at (parse.next, M_EXPECT_OPERATOR);
 
   right (&assign_line->right_var);
 }
@@ -380,7 +380,7 @@ expression ()
   else if (match_from_to (A, MEM))
     assign_line ();
   else
-    error_at (parse.next, UNEXPECT_TOKEN);
+    error_at (parse.next, M_UNEXPECT_TOKEN);
 
   if (match (COMMENT))
     local->comment = parse.current.token_start - local->line_start;
@@ -392,7 +392,7 @@ expression ()
   else if (peek (TOKEN_EOF))
     local->line_len = parse.next.token_start - local->line_start;
   else
-    error_at (parse.next, UNEXPECT_TOKEN);
+    error_at (parse.next, M_UNEXPECT_TOKEN);
 }
 
 static void

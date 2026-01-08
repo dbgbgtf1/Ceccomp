@@ -64,7 +64,7 @@ detect_file_type ()
           return '\r';
         }
       else
-        error ("%s", FOUND_SUS_NO_LF);
+        error ("%s", M_FOUND_SUS_NO_LF);
     }
   else
     {
@@ -91,7 +91,7 @@ process_source (void)
         {
           line_break = memchr (line_start, lf, MAX_LINE_LEN);
           if (!line_break)
-            error (FOUND_SUS_LINE, line_nr, MAX_LINE_LEN);
+            error (M_FOUND_SUS_LINE, line_nr, MAX_LINE_LEN);
         }
       else
         {
@@ -156,12 +156,12 @@ init_source (FILE *read_fp)
         error ("read :%s", strerror (errno));
       current += read_len;
       if (current > MAX_FILE_LEN)
-        error ("%s", FILE_TOO_LARGE);
+        error ("%s", M_FILE_TOO_LARGE);
     }
   while (read_len > 0); // reading via char device may get less than GROW_LEN
 
   if (memchr (source, '\0', current))
-    error ("%s", FOUND_SUS_ZERO);
+    error ("%s", M_FOUND_SUS_ZERO);
 
   if (current % GROW_LEN == 0)
     increase_map (); // scanner expect a trailing \n, which may increase map

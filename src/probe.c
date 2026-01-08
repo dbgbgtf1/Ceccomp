@@ -68,7 +68,7 @@ probe (char *argv[], FILE *output_fp)
   init_vector (&code_ptr_v, sizeof (statement_t *));
   parser (&text_v, &code_ptr_v);
   if (resolver (&code_ptr_v))
-    error ("%s", PROBE_TERMINATED);
+    error ("%s", M_PROBE_TERMINATED);
   // if ERROR_LINE exists, then exits
 
   for (size_t i = 0; i < ARRAY_SIZE (to_test_list); i++)

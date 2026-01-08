@@ -249,11 +249,11 @@ static void
 init_attr (emu_arg_t *emu_arg)
 {
   if (emu_arg->sys_name == NULL)
-    error ("%s", INPUT_SYS_NR);
+    error ("%s", M_INPUT_SYS_NR);
   syscall_nr = seccomp_syscall_resolve_name_arch (emu_arg->scmp_arch,
                                                   emu_arg->sys_name);
   if ((int32_t)syscall_nr == __NR_SCMP_ERROR)
-    error ("%s", INVALID_SYSNR);
+    error ("%s", M_INVALID_SYSNR);
 
   scmp_arch = emu_arg->scmp_arch;
   low_pc = emu_arg->ip & UINT32_MAX;
@@ -297,7 +297,7 @@ emulate (emu_arg_t *emu_arg)
   init_vector (&code_ptr_v, sizeof (statement_t *));
   parser (&text_v, &code_ptr_v);
   if (resolver (&code_ptr_v))
-    error ("%s", EMU_TERMINATED);
+    error ("%s", M_EMU_TERMINATED);
   // if ERROR_LINE exists, then exits
 
   emulate_v (&text_v, &code_ptr_v, emu_arg, stdout);
