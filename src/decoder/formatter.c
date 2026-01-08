@@ -190,6 +190,8 @@ print_comment (statement_t *statement)
 
   char *comment_start = statement->line_start + statement->comment;
   uint16_t comment_len = statement->line_len - statement->comment;
+  if (comment_len == 0)
+    return;
   if (statement->type != EMPTY_LINE)
     fputc (' ', fp); // prepend a ' ' if a effective line (return 1 # aa)
   fprintf (fp, LIGHT ("%.*s"), comment_len, comment_start);
@@ -205,7 +207,8 @@ print_as_comment (FILE *output_fp, char *comment_fmt, ...)
 
   static char buf[0x400];
   buf[0] = *token_pairs[COMMENT];
-  statement_t statement = { .type = EMPTY_LINE, .line_start = buf, .comment = 0 };
+  statement_t statement
+      = { .type = EMPTY_LINE, .line_start = buf, .comment = 0 };
   statement.line_len = vsnprintf (buf + 1, 0x3ff, comment_fmt, args) + 1;
 
   print_comment (&statement);
