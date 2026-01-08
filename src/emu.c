@@ -159,8 +159,6 @@ code_nr_to_text_nr (vector_t *text_v, vector_t *code_ptr_v, statement_t *cur,
   while (true)
     {
       statement = get_vector (text_v, text_nr);
-      if (statement->type != EMPTY_LINE)
-        break;
 
       label_decl = &statement->label_decl;
       if ((label_decl->start) && (label_decl->len == jmp->key.len)
