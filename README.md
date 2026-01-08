@@ -4,7 +4,7 @@ A tool to analyze seccomp filters like `seccomp-tools`, written in C
 
 # Doc
 
-[English Version](docs/ceccomp.adoc) | [中文文档](docs/ceccomp-cn.adoc)
+[English Version](docs/ceccomp.adoc) | [中文文档](docs/ceccomp.zh_CN.adoc)
 
 # Install
 
@@ -14,30 +14,44 @@ A tool to analyze seccomp filters like `seccomp-tools`, written in C
 
     Or install via `archlinuxcn` repo if you have it set in you `pacman.conf`.
 
+- Debian, Ubuntu or Kali users:
+
+    ceccomp is available with `apt` now if you are using distros below:
+
+    [![Debian testing](https://repology.org/badge/version-for-repo/debian_14/ceccomp.svg?header=Debian%20testing)](https://repology.org/project/ceccomp/versions)  
+    [![Debian unstable](https://repology.org/badge/version-for-repo/debian_unstable/ceccomp.svg?header=Debian%20unstable)](https://repology.org/project/ceccomp/versions)  
+    [![Ubuntu 26.04](https://repology.org/badge/version-for-repo/ubuntu_26_04/ceccomp.svg?header=Ubuntu%2026.04)](https://repology.org/project/ceccomp/versions)  
+    [![Kali Linux](https://repology.org/badge/version-for-repo/kali_rolling/ceccomp.svg?header=Kali%20Linux)](https://repology.org/project/ceccomp/versions)
+
+- NixOS users:
+
+    @tesuji helps us submit a PR at NixOS, but it's blocked as nobody cares... If you
+    like our software, please :+1: in NixOS/nixpkgs#462592 to help ceccomp into nixpkgs!
+
 - Stable installation:
 
     Clone the whole repo, then run `./configure`. Add `--without-doc` flag if you don't have `asciidoctor`,
     and add `--without-i18n` flag if you don't have `gettext` package.
 
-```sh
-git clone https://github.com/dbgbgtf1/Ceccomp.git
-cd Ceccomp
-./configure
-./configure # run this again if Makefile is not generated
-make
-make install # install at /usr/bin
-```
+    ```sh
+    git clone https://github.com/dbgbgtf1/Ceccomp.git
+    cd Ceccomp
+    ./configure
+    ./configure # run this again if Makefile is not generated
+    make
+    make install # install at /usr/bin
+    ```
 
 - Testing installation:
 
     Clone the whole repo, and then run `./configure --devmode`.
 
-```sh
-git clone https://github.com/dbgbgtf1/Ceccomp.git
-cd Ceccomp
-./configure --devmode
-make
-```
+    ```sh
+    git clone https://github.com/dbgbgtf1/Ceccomp.git
+    cd Ceccomp
+    ./configure --devmode
+    make
+    ```
 
 # Run Test
 
