@@ -90,8 +90,6 @@
 #define EXPECT_GOTO _ ("Expect 'goto'")
 #define EXPECT_A _ ("Expect '$A'")
 #define EXPECT_ELSE _ ("Expect 'else'")
-#define EXPECT_COMMA _ ("Expect ','")
-#define EXPECT_NEWLINE _ ("Expect '\n'")
 
 // resolver and check_prog
 #define RIGHT_SHOULD_BE_A _ ("Right operand should be '$A'")

@@ -22,9 +22,6 @@ typedef struct {
   uint16_t len;
 } string_t;
 
-#define STRAFTER(str, token)                                                  \
-  (strstr (str, token) ? strstr (str, token) + strlen (token) : NULL)
-
 #define STARTWITH(str, token) (!strncmp (str, token, strlen (token)))
 
 #endif
