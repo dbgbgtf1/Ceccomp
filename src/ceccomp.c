@@ -1,10 +1,12 @@
 #include "arch_trans.h"
 #include "asm.h"
+#include "config.h"
 #include "disasm.h"
 #include "emu.h"
 #include "parse_args.h"
 #include "probe.h"
 #include "trace.h"
+#include <assert.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -84,6 +86,32 @@ init_output ()
 #endif
 }
 
+__attribute__ ((noreturn)) static void
+help (int exit_code)
+{
+  printf ("%s", CECCOMP_USAGE);
+  putchar ('\n');
+  printf ("%s\n", ASM_HINT);
+  printf ("%s\n", DISASM_HINT);
+  printf ("%s\n", EMU_HINT);
+  printf ("%s\n", PROBE_HINT);
+  printf ("%s\n", TRACE_HINT);
+  printf ("%s\n", HELP_HINT);
+  printf ("%s\n", VERSION_HINT);
+
+  printf ("\n%s\n", SUBCMD_HINT);
+
+  printf ("\n%s\n", OPTION_HINT);
+  exit (exit_code);
+}
+
+__attribute__ ((noreturn)) static void
+version (void)
+{
+  printf (VERSION_FORMAT, CECCOMP_VERSION, CECCOMP_TAG_TIME, CECCOMP_BUILDER);
+  exit (0);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -116,13 +144,15 @@ main (int argc, char *argv[])
       probe (&argv[probe_arg.prog_idx], probe_arg.output_file);
       break;
     case HELP_MODE:
-      printf ("HELP_MODE\n");
-      break;
-    case VERSION_MODE:
-      printf ("VERSION_MODE\n");
+      help (0);
       break;
     case HELP_ABNORMAL:
-      printf ("HELP_ABNORMAL\n");
+      help (1);
       break;
+    case VERSION_MODE:
+      version ();
+      break;
+    default:
+      assert (!"unknown mode");
     }
 }
