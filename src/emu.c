@@ -17,6 +17,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 static uint32_t A_reg = 0;
@@ -257,8 +258,14 @@ init_attr (emu_arg_t *emu_arg)
     error ("%s", M_INPUT_SYS_NR);
   syscall_nr = seccomp_syscall_resolve_name_arch (emu_arg->scmp_arch,
                                                   emu_arg->sys_name);
+
   if ((int32_t)syscall_nr == __NR_SCMP_ERROR)
-    error ("%s", M_INVALID_SYSNR);
+    {
+      char *end;
+      syscall_nr = strtoull (emu_arg->sys_name, &end, 0);
+      if (emu_arg->sys_name == end)
+        error ("%s", M_INVALID_SYSNR);
+    }
 
   scmp_arch = emu_arg->scmp_arch;
   low_pc = emu_arg->ip & UINT32_MAX;
