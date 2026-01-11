@@ -24,4 +24,6 @@ typedef struct {
 
 #define STARTWITH(str, token) (!strncmp (str, token, strlen (token)))
 
+#define ARRAY_SIZE(arr) (sizeof (arr) / sizeof (arr[0]))
+
 #endif
