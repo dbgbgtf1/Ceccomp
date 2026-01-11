@@ -156,7 +156,7 @@ code_nr_to_text_nr (vector_t *text_v, vector_t *code_ptr_v, statement_t *cur,
 
   statement_t *statement;
   string_t *label_decl;
-  while (true)
+  while (text_nr > 0)
     {
       statement = get_vector (text_v, text_nr);
 
