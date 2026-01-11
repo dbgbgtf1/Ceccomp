@@ -87,16 +87,17 @@ alu_line (filter f, statement_t *statement)
   assign_line_t *assign_line = &statement->assign_line;
 
   assign_line->left_var.type = A;
+  assign_line->operator = operator_table[BPF_OP (f.code)];
 
   if (BPF_SRC (f.code) == BPF_X)
     assign_line->right_var.type = X;
+  else if (assign_line->operator == NEGATIVE)
+    assign_line->right_var.type = A;
   else
     {
       assign_line->right_var.type = NUMBER;
       assign_line->right_var.data = f.k;
     }
-
-  assign_line->operator = operator_table[BPF_OP (f.code)];
 }
 
 static void
