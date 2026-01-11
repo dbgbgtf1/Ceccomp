@@ -5,10 +5,21 @@ override_bpf()
     ./build/ceccomp asm -c always -f raw $1 > $2 2>&1
 }
 
-for txt in test/text/*; do
-    bpf=${txt/text/bpf}
-    bpf=${bpf}.bpf
-    override_bpf $txt $bpf
+# for txt in test/text/*; do
+#     bpf=${txt/text/bpf}
+#     bpf=${bpf}.bpf
+#     override_bpf $txt $bpf
+# done
+
+override_text()
+{
+    ./build/ceccomp disasm -c always $1 > $2 2>&1
+}
+
+for bpf in test/bpf/*; do
+    txt=${bpf%.bpf}
+    txt=${txt/bpf/text}
+    override_text $bpf $txt
 done
 
 override_emu()
@@ -22,4 +33,3 @@ for text in test/text/*; do
     override_emu $text pipe $emu_result.pipe
     override_emu $text accept $emu_result.accept
 done
-
