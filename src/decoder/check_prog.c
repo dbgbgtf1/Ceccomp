@@ -60,6 +60,8 @@ static const bool codes[] = {
   [BPF_JMP | BPF_JSET | BPF_X] = true,
 };
 
+#define CODE_LENGTH (sizeof (codes) / sizeof (codes[0]))
+
 static uint16_t *masks, mem_valid = 0;
 
 static bool
@@ -77,7 +79,7 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
   uint16_t code = f.code;
   uint32_t k = f.k;
 
-  if (!codes[code])
+  if (code >= CODE_LENGTH || !codes[code])
     error ("%s", M_INVALID_OPERATION);
 
   switch (code)
