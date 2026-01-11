@@ -151,12 +151,15 @@ static uint32_t
 code_nr_to_text_nr (vector_t *text_v, vector_t *code_ptr_v, statement_t *cur,
                     label_t *jmp)
 {
+  if (jmp->code_nr == 0) // if ... goto xxx; false case -> jmp.code_nr is NULL
+    return cur->text_nr + 1;
   statement_t **ptr = get_vector (code_ptr_v, cur->code_nr + jmp->code_nr + 1);
   uint32_t text_nr = (*ptr)->text_nr;
 
   statement_t *statement;
   string_t *label_decl;
-  while (text_nr > 0)
+  uint32_t cur_line_nr = cur->text_nr; // compiler hint
+  while (text_nr > cur_line_nr)
     {
       statement = get_vector (text_v, text_nr);
 
@@ -166,6 +169,7 @@ code_nr_to_text_nr (vector_t *text_v, vector_t *code_ptr_v, statement_t *cur,
         break;
       text_nr--;
     }
+  assert (text_nr != cur_line_nr); // should find a tag to jump to
   return text_nr;
 }
 
