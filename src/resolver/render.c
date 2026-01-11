@@ -261,6 +261,8 @@ render (vector_t *v, vector_t *v_ptr, uint32_t scmp_arch)
   // statement code_nr starts from 1
   list = reallocate (NULL, list_len);
   memset (list, NONE, list_len);
+  // set default_arch in list[1]
+  list[1].arch = scmp_arch;
 
   for (uint32_t i = 1; i < v->count; i++)
     render_statement (get_vector (v, i));
