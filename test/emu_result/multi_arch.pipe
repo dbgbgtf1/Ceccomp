@@ -1,3 +1,5 @@
+[90m#Label  CODE  JT   JF      K[0m
+[90m#---------------------------------[0m
 L0001: [93m$A[0m = [94m$arch[0m
 L0002: if ([93m$A[0m != [96mx86_64[0m) goto L0008
 L0003: [93m$A[0m = [94m$syscall_nr[0m
@@ -21,3 +23,4 @@ L0007: if ([93m$A[0m == [96mbind[0m) goto L0024, else goto L0023
 [0m[90mL0021: if ($A == arm.readv) goto L0024
 [0m[90mL0022: if ($A == arm.clone) goto L0024
 [0mL0023: return [31mKILL[0m
+[90m#... 2 line(s) skipped[0m

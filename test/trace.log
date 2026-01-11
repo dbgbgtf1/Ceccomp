@@ -1,7 +1,7 @@
- Line  CODE  JT   JF      K
----------------------------------
- 0001: 0x20 0x00 0x00 0x00000000 [93m$A[0m = [94m$syscall_nr[0m
- 0002: 0x15 0x01 0x00 0xffffffff if ([93m$A[0m == [96m0xffffffff[0m) goto 0004
- 0003: 0x06 0x00 0x00 0x7fff0000 return [32mALLOW[0m
- 0004: 0x06 0x00 0x00 0x00050001 return [31mERRNO[0m(1)
----------------------------------
+[90m#Label  CODE  JT   JF      K[0m
+[90m#---------------------------------[0m
+ L0001: 0x20 0x00 0x00 0x00000000 [93m$A[0m = [94m$syscall_nr[0m
+ L0002: 0x15 0x01 0x00 0xffffffff if ([93m$A[0m == [96m0xffffffff[0m) goto L0004
+ L0003: 0x06 0x00 0x00 0x7fff0000 return [32mALLOW[0m
+ L0004: 0x06 0x00 0x00 0x00050001 return [31mERRNO(1)[0m
+[90m#---------------------------------[0m

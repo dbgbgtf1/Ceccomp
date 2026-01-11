@@ -1,3 +1,5 @@
+[90m#Label  CODE  JT   JF      K[0m
+[90m#---------------------------------[0m
 L0001: [93m$A[0m = [94m$arch[0m
 L0002: if ([93m$A[0m != [96mx86_64[0m) goto L0011
 L0003: [93m$A[0m = [94m$syscall_nr[0m
@@ -6,4 +8,5 @@ L0005: if ([93m$A[0m == [96mexecveat[0m) goto L0010
 L0006: if ([93m$A[0m == [96mexecve[0m) goto L0010
 L0007: if ([93m$A[0m == [96mfcntl[0m) goto L0010
 L0008: if ([93m$A[0m == [96mexit[0m) goto L0010
-L0009: return [31mERRNO[0m(5)
+L0009: return [31mERRNO(5)[0m
+[90m#... 3 line(s) skipped[0m

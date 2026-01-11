@@ -1,3 +1,5 @@
+[90m#Label  CODE  JT   JF      K[0m
+[90m#---------------------------------[0m
 L0001: [93m$A[0m = [94m$arch[0m
 L0002: if ([93m$A[0m == [96mx86_64[0m) goto L0004
 [90mL0003: return TRAP(10)
@@ -599,4 +601,5 @@ L0151: if ([93m$A[0m >= [96maccess[0m) goto L0171, else goto L0344
 [0m[90mL0599: return TRAP(2)
 [0m[90mL0600: $A = $low_args[3]
 [0m[90mL0601: if ($A & 0xfffd97cc) goto L0604, else goto L0603
-[0mL0602: return [31mERRNO[0m(1)
+[0mL0602: return [31mERRNO(1)[0m
+[90m#... 3 line(s) skipped[0m

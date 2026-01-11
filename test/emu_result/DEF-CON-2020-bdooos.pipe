@@ -1,3 +1,5 @@
+[90m#Label  CODE  JT   JF      K[0m
+[90m#---------------------------------[0m
 L0001: [93m$A[0m = [94m$arch[0m
 L0002: if ([93m$A[0m != [96maarch64[0m) goto L0019
 [90mL0003: $A = $syscall_nr
@@ -17,3 +19,4 @@ L0002: if ([93m$A[0m != [96maarch64[0m) goto L0019
 [0m[90mL0017: return KILL_PROCESS
 [0m[90mL0018: return ALLOW
 [0mL0019: return [31mKILL[0m
+[90m#... 1 line(s) skipped[0m

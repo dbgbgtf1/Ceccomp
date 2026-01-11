@@ -1,3 +1,5 @@
+[90m#Label  CODE  JT   JF      K[0m
+[90m#---------------------------------[0m
 L0001: [93m$A[0m = [94m$arch[0m
 L0002: if ([93m$A[0m != [96mi386[0m) goto L0012
 [90mL0003: $A = $syscall_nr
@@ -10,3 +12,4 @@ L0002: if ([93m$A[0m != [96mi386[0m) goto L0012
 [0m[90mL0010: if ($A == 0x0) goto L0012
 [0m[90mL0011: return ERRNO(5)
 [0mL0012: return [32mALLOW[0m
+[90m#... 1 line(s) skipped[0m

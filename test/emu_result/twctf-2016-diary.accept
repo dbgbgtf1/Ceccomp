@@ -1,3 +1,5 @@
+[90m#Label  CODE  JT   JF      K[0m
+[90m#---------------------------------[0m
 L0001: [93m$A[0m = [94m$syscall_nr[0m
 L0002: if ([93m$A[0m != [96mopen[0m) goto L0004
 [90mL0003: return KILL
@@ -16,3 +18,4 @@ L0002: if ([93m$A[0m != [96mopen[0m) goto L0004
 [0mL0016: if ([93m$A[0m != [96mexecveat[0m) goto L0018
 [90mL0017: return KILL
 [0mL0018: return [32mALLOW[0m
+[90m#... 1 line(s) skipped[0m
