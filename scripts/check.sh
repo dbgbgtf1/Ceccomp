@@ -7,6 +7,7 @@ if [ "$1" == "--tolerant" ]; then
 fi
 errors=0
 debug_file=./build/debug_msg
+echo > $debug_file
 
 # skip chromium if libseccomp lower than 2.5.6
 EXPECT_VER=2.5.6
