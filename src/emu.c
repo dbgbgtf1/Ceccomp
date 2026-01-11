@@ -263,7 +263,7 @@ init_attr (emu_arg_t *emu_arg)
     {
       char *end;
       syscall_nr = strtoull (emu_arg->sys_name, &end, 0);
-      if (emu_arg->sys_name == end)
+      if (*end != '\0')
         error ("%s", M_INVALID_SYSNR);
     }
 
