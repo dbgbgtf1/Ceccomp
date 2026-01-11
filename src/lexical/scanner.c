@@ -8,11 +8,13 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 static scanner_t scanner;
+static uint8_t unknown_count = 0;
 
 #define INIT_TOKEN(type)                                                      \
   do                                                                          \
@@ -148,5 +150,11 @@ scan_token (token_t *token)
       INIT_TOKEN_DATA (NUMBER, num);
     }
 
+  // perhaps that's a wrong file? tell parser to stop using EOF
+  if (unknown_count > 5)
+    INIT_TOKEN (TOKEN_EOF);
+
+  unknown_count += 1;
+  advance (1);
   INIT_TOKEN (UNKNOWN);
 }

@@ -206,7 +206,7 @@ emulator (vector_t *text_v, vector_t *code_ptr_v, bool quiet)
   uint32_t exec_idx = 1;
   label_t *jmp;
 
-  statement_t *statement;
+  statement_t *statement = NULL;
   for (; read_idx < text_v->count; read_idx++)
     {
       statement = get_vector (text_v, read_idx);
@@ -241,6 +241,7 @@ emulator (vector_t *text_v, vector_t *code_ptr_v, bool quiet)
       break;
     }
 
+  assert (statement);
   assert (statement->type == RETURN_LINE);
   return statement;
 }
