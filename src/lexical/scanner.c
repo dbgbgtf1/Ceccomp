@@ -8,7 +8,6 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -72,11 +71,10 @@ match_string (char *expected, uint16_t cmp_len)
 static void
 reset_to_nextline (token_t *token)
 {
-  char *nextline = next_line ();
-  if (nextline == NULL)
-    INIT_TOKEN (TOKEN_EOF);
-
   init_token (token, &scanner, EOL);
+
+  // if nextline == NULL, it means we meet_eof
+  char *nextline = next_line ();
   scanner.token_start = nextline;
   scanner.current_char = scanner.token_start;
   scanner.line_nr++;
@@ -101,6 +99,10 @@ init_scanner (char *start)
 void
 scan_token (token_t *token)
 {
+  // if scanner.token_start == NULL, we meet_eof
+  if (scanner.token_start == NULL)
+    INIT_TOKEN (TOKEN_EOF);
+
   // skip spaces
   skip_spaces ();
 
@@ -116,10 +118,10 @@ scan_token (token_t *token)
     }
 
   // EOL
-  if (peek () == '\n')
+  if (match ('\n'))
     return reset_to_nextline (token);
 
-  // ARCH_X86 : TOKEN_EOF
+  // ARCH_X86 : BANG
   for (uint32_t enum_idx = (int)ARCH_X86; enum_idx < (int)UNKNOWN; enum_idx++)
     {
       if (match_string (token_pairs[enum_idx], strlen (token_pairs[enum_idx])))
