@@ -58,6 +58,7 @@ typedef struct
 typedef struct
 {
   FILE *output_file;
+  bool quiet;
   uint32_t prog_idx;
 } probe_arg_t;
 
@@ -71,6 +72,7 @@ typedef enum
 typedef struct
 {
   trace_mode_t mode;
+  bool quiet;
   FILE *output_file;
   uint32_t prog_idx;
   pid_t pid;

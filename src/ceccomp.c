@@ -108,7 +108,8 @@ help (int exit_code)
 __attribute__ ((noreturn)) static void
 version (void)
 {
-  printf (M_VERSION_FORMAT, CECCOMP_VERSION, CECCOMP_TAG_TIME, CECCOMP_BUILDER);
+  printf (M_VERSION_FORMAT, CECCOMP_VERSION, CECCOMP_TAG_TIME,
+          CECCOMP_BUILDER);
   exit (0);
 }
 
@@ -138,10 +139,10 @@ main (int argc, char *argv[])
         pid_trace (trace_arg.pid);
       else if (trace_arg.mode == TRACE_PROG)
         program_trace (&argv[trace_arg.prog_idx], trace_arg.output_file,
-                       false);
+                       trace_arg.quiet, false);
       break;
     case PROBE_MODE:
-      probe (&argv[probe_arg.prog_idx], probe_arg.output_file);
+      probe (&argv[probe_arg.prog_idx], probe_arg.output_file, probe_arg.quiet);
       break;
     case HELP_MODE:
       help (0);

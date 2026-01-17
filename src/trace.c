@@ -144,7 +144,7 @@ child (char *argv[])
 }
 
 static void
-handle_fork (pid_t pid, int status)
+handle_fork (pid_t pid, int status, bool quiet)
 {
   int event = (status >> 16) & 0xffff;
   if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK
@@ -152,12 +152,13 @@ handle_fork (pid_t pid, int status)
     {
       uint64_t new_pid;
       ptrace (PTRACE_GETEVENTMSG, pid, NULL, &new_pid);
-      info (M_PROCESS_FORK, pid, (pid_t)new_pid);
+      if (!quiet)
+        info (M_PROCESS_FORK, pid, (pid_t)new_pid);
     }
 }
 
 static bool
-handle_syscall (pid_t pid, FILE *output_fp, bool oneshot)
+handle_syscall (pid_t pid, FILE *output_fp, bool quiet, bool oneshot)
 {
   syscall_info info;
   fprog prog;
@@ -179,7 +180,7 @@ handle_syscall (pid_t pid, FILE *output_fp, bool oneshot)
 
   seccomp_mode = check_scmp_mode (info, pid, &prog);
 
-  if (seccomp_mode != LOAD_FAIL)
+  if (seccomp_mode != LOAD_FAIL && !quiet)
     info (M_PARSE_PID_BPF, pid);
   if (seccomp_mode == SECCOMP_SET_MODE_STRICT)
     mode_strict ();
@@ -193,7 +194,7 @@ handle_syscall (pid_t pid, FILE *output_fp, bool oneshot)
 }
 
 static uint32_t
-parent (pid_t child_pid, FILE *output_fp, bool oneshot)
+parent (pid_t child_pid, FILE *output_fp, bool quiet, bool oneshot)
 {
   int status;
 
@@ -222,7 +223,8 @@ parent (pid_t child_pid, FILE *output_fp, bool oneshot)
 
       if (WIFEXITED (status) || WIFSIGNALED (status))
         {
-          info (M_PROCESS_EXIT, pid);
+          if (!quiet)
+            info (M_PROCESS_EXIT, pid);
           continue;
         }
 
@@ -232,13 +234,13 @@ parent (pid_t child_pid, FILE *output_fp, bool oneshot)
       int sig = WSTOPSIG (status);
       if (sig == (SIGTRAP | 0x80))
         {
-          if (handle_syscall (pid, output_fp, oneshot))
+          if (handle_syscall (pid, output_fp, quiet, oneshot))
             return saved_arch;
           ptrace (PTRACE_SYSCALL, pid, 0, 0);
         }
       else if (sig == SIGTRAP)
         {
-          handle_fork (pid, status);
+          handle_fork (pid, status, quiet);
           ptrace (PTRACE_SYSCALL, pid, 0, 0);
         }
       else
@@ -254,7 +256,7 @@ exit_on_sig (int signo)
 }
 
 uint32_t
-program_trace (char *argv[], FILE *output_fp, bool oneshot)
+program_trace (char *argv[], FILE *output_fp, bool quiet, bool oneshot)
 {
   signal (SIGINT, exit_on_sig);
   signal (SIGTERM, exit_on_sig);
@@ -262,7 +264,7 @@ program_trace (char *argv[], FILE *output_fp, bool oneshot)
   if (pid == 0)
     child (argv);
   else
-    return parent (pid, output_fp, oneshot);
+    return parent (pid, output_fp, quiet, oneshot);
 }
 
 static void

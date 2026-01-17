@@ -28,7 +28,7 @@ fail_fast_fopen (char *file, char *mode)
 {
   FILE *fp = fopen (file, mode);
   if (fp == NULL)
-    error ("%s", M_UNABLE_OPEN_FILE);
+    error ("%s", strerror (errno));
   return fp;
 }
 
@@ -166,6 +166,11 @@ parse_trace (trace_arg_t *args, int key, char *arg, struct argp_state *state)
         return 0;
       args->output_file = fail_fast_fopen (arg, "w+");
       return 0;
+    case 'q':
+      if (args->mode != UNDECIDED)
+        return 0;
+      args->quiet = true;
+      return 0;
     }
 
   return 0;
@@ -184,6 +189,9 @@ parse_probe (probe_arg_t *args, int key, char *arg, struct argp_state *state)
       return 0;
     case 'o':
       args->output_file = fail_fast_fopen (arg, "w+");
+      return 0;
+    case 'q':
+      args->quiet = true;
       return 0;
     }
 
