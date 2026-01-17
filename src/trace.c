@@ -124,11 +124,9 @@ dump_filter (syscall_info *info, int pid, fprog *prog)
 static void
 mode_filter (syscall_info *info, int pid, fprog *prog, FILE *output_fp)
 {
-  prog->filter = malloc (prog->len * sizeof (filter));
+  prog->filter = g_filters;
   dump_filter (info, pid, prog);
   print_prog (info->arch, prog, output_fp);
-  free (prog->filter);
-  prog->filter = 0;
 }
 
 __attribute__ ((noreturn)) static void
@@ -358,7 +356,7 @@ void
 pid_trace (int pid)
 {
   fprog prog;
-  prog.filter = malloc (sizeof (filter) * 1024);
+  prog.filter = g_filters;
   int prog_idx = 0;
 
   if (ptrace (PTRACE_SEIZE, pid, 0, 0) != 0)
@@ -390,5 +388,4 @@ pid_trace (int pid)
   if (prog_idx == 0)
     printf (M_NO_FILTER_FOUND, pid);
   ptrace (PTRACE_DETACH, pid, 0, 0);
-  free (prog.filter);
 }
