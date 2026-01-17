@@ -352,12 +352,23 @@ error_seize (pid_t pid, int err)
     }
 }
 
+static void
+pid_seize (int pid, bool quiet)
+{
+  if (ptrace (PTRACE_ATTACH, pid, NULL, NULL) == -1)
+    error ("%s", strerror (errno));
+  parent (pid, stdout, quiet, false);
+}
+
 void
-pid_trace (int pid)
+pid_trace (int pid, bool seize, bool quiet)
 {
   fprog prog;
   prog.filter = g_filters;
   int prog_idx = 0;
+
+  if (seize)
+    return pid_seize (pid, quiet);
 
   if (ptrace (PTRACE_SEIZE, pid, 0, 0) != 0)
     error_seize (pid, errno);

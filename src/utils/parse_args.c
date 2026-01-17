@@ -167,9 +167,10 @@ parse_trace (trace_arg_t *args, int key, char *arg, struct argp_state *state)
       args->output_file = fail_fast_fopen (arg, "w+");
       return 0;
     case 'q':
-      if (args->mode != UNDECIDED)
-        return 0;
       args->quiet = true;
+      return 0;
+    case 's':
+      args->seize = true;
       return 0;
     }
 

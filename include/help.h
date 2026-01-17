@@ -9,13 +9,13 @@
   "args[0-5] ip ]"
 
 #define PROBE_HINT                                                            \
-  "ceccomp probe   [ -c WHEN ] [ -o FILE ] [ -q ] PROGRAM [ "           \
+  "ceccomp probe   [ -c WHEN ] [ -o FILE ] [ -q ] PROGRAM [ "                 \
   "program-args ]"
 
 #define TRACE_HINT                                                            \
-  "ceccomp trace   [ -c WHEN ] [ -o FILE ] [ -q ] PROGRAM [ "           \
+  "ceccomp trace   [ -c WHEN ] [ -o FILE ] [ -q ] PROGRAM [ "                 \
   "program-args ]\n"                                                          \
-  "                [ -c WHEN ] [ -f FOLLOW ] -p PID"
+  "                [ -c WHEN ] [ -s SEIZE ] [ -q ] -p PID"
 
 #define HELP_HINT "ceccomp help"
 #define VERSION_HINT "ceccomp version"
@@ -46,7 +46,10 @@
      "ceccomp output and tracee program output, default as stderr\n"          \
                                                                               \
      "-q, --quiet                      Print emulate result only(In "         \
-     "emu).Ignore the process info message(In trace and probe)\n"            \
+     "emu).Ignore the process info message(In trace and probe)\n"             \
+                                                                              \
+     "-s, --seize                      follow process and trace load filter " \
+     "operation\n"                                                            \
                                                                               \
      "-c, --color                      When to print in color, default as "   \
      "auto\n"                                                                 \

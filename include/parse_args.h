@@ -76,6 +76,7 @@ typedef struct
   FILE *output_file;
   uint32_t prog_idx;
   pid_t pid;
+  bool seize;
 } trace_arg_t;
 
 typedef struct

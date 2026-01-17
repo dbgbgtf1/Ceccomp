@@ -36,6 +36,7 @@ static struct argp_option options[] = {
   { "arch", 'a', "ARCH", 0, NULL, 0 },
   { "pid", 'p', "PID", 0, NULL, 0 },
   { "fmt", 'f', "FMT", 0, NULL, 0 },
+  { "seize", 's', NULL, 0, NULL, 0 },
   { "help", 'h', NULL, 0, NULL, 0 },
   { "usage", 'u', NULL, 0, NULL, 0 },
   { 0 },
@@ -68,6 +69,8 @@ init_args (ceccomp_arg_t *args)
   args->trace_arg->output_file = stderr;
   args->trace_arg->pid = 0;
   args->trace_arg->prog_idx = 0;
+  args->trace_arg->quiet = false;
+  args->trace_arg->seize = false;
 
   char *no_color = getenv ("NO_COLOR");
   if (no_color != NULL && no_color[0] != '\0')
@@ -136,13 +139,14 @@ main (int argc, char *argv[])
       break;
     case TRACE_MODE:
       if (trace_arg.mode == TRACE_PID)
-        pid_trace (trace_arg.pid);
+        pid_trace (trace_arg.pid, trace_arg.seize, trace_arg.quiet);
       else if (trace_arg.mode == TRACE_PROG)
         program_trace (&argv[trace_arg.prog_idx], trace_arg.output_file,
                        trace_arg.quiet, false);
       break;
     case PROBE_MODE:
-      probe (&argv[probe_arg.prog_idx], probe_arg.output_file, probe_arg.quiet);
+      probe (&argv[probe_arg.prog_idx], probe_arg.output_file,
+             probe_arg.quiet);
       break;
     case HELP_MODE:
       help (0);
