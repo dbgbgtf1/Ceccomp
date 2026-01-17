@@ -9,16 +9,18 @@
   "args[0-5] ip ]"
 
 #define PROBE_HINT                                                            \
-  "ceccomp probe   [ -c WHEN ] [ -o FILE ] PROGRAM [ program-args ]"
+  "ceccomp probe   [ -c WHEN ] [ -o FILE ] [ -q quiet ] PROGRAM [ "           \
+  "program-args ]"
 
 #define TRACE_HINT                                                            \
-  "ceccomp trace   [ -c WHEN ] [ -o FILE ] PROGRAM [ program-args ]\n"        \
+  "ceccomp trace   [ -c WHEN ] [ -o FILE ] [ -q quiet ] PROGRAM [ "           \
+  "program-args ]\n"                                                          \
   "                [ -c WHEN ] -p PID"
 
 #define HELP_HINT "ceccomp help"
 #define VERSION_HINT "ceccomp version"
 
-#define M_SUBCMD_HINT                                                           \
+#define M_SUBCMD_HINT                                                         \
   _ ("asm      -- Assemble bpf text to raw bytes\n"                           \
      "disasm   -- Disassemble raw bytes to bpf text\n"                        \
      "emu      -- Emulate bpf program with given syscall and bpf text\n"      \
@@ -30,7 +32,7 @@
      "to text\n"                                                              \
      "version  -- Display ceccomp version\n")
 
-#define M_OPTION_HINT                                                           \
+#define M_OPTION_HINT                                                         \
   _ ("Options:\n"                                                             \
      "-a, --arch (x86_64|aarch64|...)  Which architecture to resolve "        \
      "syscall_nr, default as your arch\n"                                     \
@@ -43,7 +45,8 @@
      "-o, --output file                Print to file to avoid mixing "        \
      "ceccomp output and tracee program output, default as stderr\n"          \
                                                                               \
-     "-q, --quiet                      Print emulate result only\n"           \
+     "-q, --quiet                      Print emulate result only(In "         \
+     "emu).Ignore the process info message(In trace and probe)\n"            \
                                                                               \
      "-c, --color                      When to print in color, default as "   \
      "auto\n"                                                                 \
