@@ -5,27 +5,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
-typedef struct bucket_t bucket_t;
-
 typedef string_t hkey_t;
 
-struct bucket_t
-{
-  bucket_t *next;
-  uint16_t line_nr;
-  hkey_t key;
-};
-
-typedef struct
-{
-  uint32_t count;
-  uint32_t capacity;
-  bucket_t *bucket;
-} table_t;
-
-extern void insert_key (hkey_t *key, uint16_t line_nr);
-
-extern void free_key (hkey_t *key);
+// return 0 if successfully inserted; -1 for ENOMEM; 1 for duplicated key
+extern int insert_key (hkey_t *key, uint16_t line_nr);
 
 extern uint16_t find_key (hkey_t *key);
 
