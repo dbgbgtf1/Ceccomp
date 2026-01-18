@@ -403,8 +403,9 @@ label_decl (string_t *label_decl)
 
   label_decl->start = parse.current.token_start;
   label_decl->len = parse.current.token_len - 1;
+  label_decl->code_nr = parse.code_nr;
   // ignore the ':' character
-  insert_key (label_decl, parse.code_nr);
+  // insert_key (label_decl, parse.code_nr);
 
   // ignore our disasm useless output
   uint32_t count = 0;
@@ -457,7 +458,9 @@ parser (vector_t *text_v, vector_t *code_ptr_v)
 
       if (statement.type == EOF_LINE)
         break;
-      push_vector (text_v, &statement);
+      statement_t *persist = push_vector (text_v, &statement);
+      if (statement.label_decl.start)
+        insert_key (&persist->label_decl, persist->label_decl.code_nr);
     }
 
   // we have to do it after text vector finish

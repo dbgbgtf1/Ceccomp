@@ -21,6 +21,7 @@ typedef struct
 {
   char *start;
   uint16_t len;
+  uint16_t code_nr;
 } string_t;
 
 #define STARTWITH(str, token) (!strncmp (str, token, strlen (token)))
