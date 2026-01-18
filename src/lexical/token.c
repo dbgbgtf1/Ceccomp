@@ -17,11 +17,11 @@ char *token_pairs[] = {
   [KILL_PROC] = "KILL_PROCESS", [KILL] = "KILL", [ALLOW] = "ALLOW", [NOTIFY] = "NOTIFY",
   [LOG] = "LOG", [TRACE] = "TRACE", [TRAP] = "TRAP", [ERRNO] = "ERRNO",
 
+  [RETURN] = "return", [IF] = "if", [GOTO] = "goto", [ELSE] = "else", [COMMA] = ",",
+
   [A] = "$A", [X] = "$X", [MEM] = "$mem", [ATTR_LEN] = "$scmp_data_len",
   [ATTR_SYSCALL] = "$syscall_nr", [ATTR_ARCH] = "$arch", [ATTR_LOWPC] = "$low_pc",
   [ATTR_HIGHPC] = "$high_pc", [ATTR_LOWARG] = "$low_args", [ATTR_HIGHARG] = "$high_args",
-
-  [RETURN] = "return", [IF] = "if", [GOTO] = "goto", [COMMA] = ",", [ELSE] = "else",
 
   [DOT] = ".",
 

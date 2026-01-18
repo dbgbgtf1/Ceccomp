@@ -121,8 +121,11 @@ scan_token (token_t *token)
   if (match ('\n'))
     return reset_to_nextline (token);
 
-  // ARCH_X86 : BANG
-  for (uint32_t enum_idx = (int)ARCH_X86; enum_idx < (int)UNKNOWN; enum_idx++)
+  uint32_t enum_start = ARCH_X86, enum_end = ELSE;
+  if (ispunct (peek ()))
+    enum_start = COMMA, enum_end = BANG;
+  // ARCH_X86 : ELSE or COMMA : BANG
+  for (uint32_t enum_idx = enum_start; enum_idx <= enum_end; enum_idx++)
     {
       if (match_string (token_pairs[enum_idx], strlen (token_pairs[enum_idx])))
         INIT_TOKEN (enum_idx);
