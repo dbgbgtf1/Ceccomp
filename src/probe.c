@@ -2,6 +2,7 @@
 #include "emu.h"
 #include "log/error.h"
 #include "log/logger.h"
+#include "main.h"
 #include "parse_args.h"
 #include "parser.h"
 #include "read_source.h"
@@ -59,13 +60,13 @@ probe (char *argv[], FILE *output_fp, bool quiet)
   vector_t text_v;
   vector_t code_ptr_v;
 
-  init_source (text);
+  size_t lines = init_source (text) + 1;
   init_scanner (next_line ());
   init_parser (scmp_arch);
   init_table ();
 
-  init_vector (&text_v, sizeof (statement_t));
-  init_vector (&code_ptr_v, sizeof (statement_t *));
+  init_vector (&text_v, sizeof (statement_t), lines);
+  init_vector (&code_ptr_v, sizeof (statement_t *), MIN(lines, 1025));
   parser (&text_v, &code_ptr_v);
   if (resolver (&code_ptr_v))
     error ("%s", M_PROBE_TERMINATED);

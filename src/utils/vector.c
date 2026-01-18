@@ -26,10 +26,10 @@ reallocate (void *p, size_t new_size)
   v->data = reallocate (v->data, v->capacity * v->elem_size);
 
 void
-init_vector (vector_t *v, size_t elem_size)
+init_vector (vector_t *v, size_t elem_size, size_t initial_capacity)
 {
   v->count = 0;
-  v->capacity = 0x10;
+  v->capacity = initial_capacity ? initial_capacity : 0x10;
   v->elem_size = elem_size;
   v->data = NULL;
   UPDATE_VECTOR;

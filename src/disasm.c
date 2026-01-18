@@ -22,8 +22,8 @@ print_prog (uint32_t scmp_arch, fprog *prog, FILE *output_fp)
   vector_t v;
   vector_t v_ptr;
 
-  init_vector (&v, sizeof (statement_t));
-  init_vector (&v_ptr, sizeof (char *));
+  init_vector (&v, sizeof (statement_t), prog->len + 1);
+  init_vector (&v_ptr, sizeof (char *), prog->len + 1);
   decode_filters (prog, &v);
   render (&v, &v_ptr, scmp_arch);
   print_as_comment (output_fp, "Label  CODE  JT   JF      K");

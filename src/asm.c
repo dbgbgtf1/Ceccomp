@@ -232,7 +232,6 @@ asm_statement (statement_t *statement)
 }
 
 typedef void (*fmt_handler) (uint8_t f[8], char *template);
-#define LITERAL_STRLEN(str) (sizeof (str) - 1)
 
 static void
 hexify (uint8_t ch, char buf[2])
@@ -291,15 +290,15 @@ set_print_fmt (print_mode_t print_mode, char *template)
 void
 assemble (FILE *fp, uint32_t scmp_arch, print_mode_t print_mode)
 {
-  init_source (fp);
+  size_t lines = init_source (fp) + 1;
   init_scanner (next_line ());
   init_parser (scmp_arch);
   init_table ();
 
   vector_t text_v;
   vector_t code_ptr_v;
-  init_vector (&text_v, sizeof (statement_t));
-  init_vector (&code_ptr_v, sizeof (statement_t *));
+  init_vector (&text_v, sizeof (statement_t), lines);
+  init_vector (&code_ptr_v, sizeof (statement_t *), MIN(lines, 1025));
   parser (&text_v, &code_ptr_v);
   if (resolver (&code_ptr_v))
     error ("%s", M_ASM_TERMINATED);

@@ -15,6 +15,7 @@
 #include <linux/filter.h>
 #include <seccomp.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -298,15 +299,15 @@ emulate_v (vector_t *text_v, vector_t *code_ptr_v, emu_arg_t *emu_arg,
 void
 emulate (emu_arg_t *emu_arg)
 {
-  init_source (emu_arg->text_file);
+  size_t lines = init_source (emu_arg->text_file) + 1;
   init_scanner (next_line ());
   init_parser (emu_arg->scmp_arch);
   init_table ();
 
   vector_t text_v;
   vector_t code_ptr_v;
-  init_vector (&text_v, sizeof (statement_t));
-  init_vector (&code_ptr_v, sizeof (statement_t *));
+  init_vector (&text_v, sizeof (statement_t), lines);
+  init_vector (&code_ptr_v, sizeof (statement_t *), MIN(lines, 1025));
   parser (&text_v, &code_ptr_v);
   if (resolver (&code_ptr_v))
     error ("%s", M_EMU_TERMINATED);
