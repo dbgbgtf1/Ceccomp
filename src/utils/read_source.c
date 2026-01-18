@@ -160,8 +160,9 @@ init_source (FILE *read_fp)
     }
   while (read_len > 0); // reading via char device may get less than GROW_LEN
 
-  if (memchr (source, '\0', current))
-    error ("%s", M_FOUND_SUS_ZERO);
+  const char *found0;
+  if ((found0 = memchr (source, '\0', current)))
+    error (M_FOUND_SUS_ZERO, found0 - source);
 
   if (current % GROW_LEN == 0)
     increase_map (); // scanner expect a trailing \n, which may increase map

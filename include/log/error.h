@@ -61,7 +61,7 @@
 
 // read_source
 #define M_FOUND_SUS_ZERO                                                        \
-  _ ("Found '\\0' file offset %lu, perhaps it's not a text file?")
+  _ ("Found '\\0' at file offset %lu, perhaps it's not a text file?")
 #define M_FOUND_SUS_NO_LF                                                       \
   _ ("No line break in source file, perhaps it's not a text file?")
 #define M_FOUND_SUS_LINE                                                        \
