@@ -1,5 +1,6 @@
 #include "arch_trans.h"
 #include "asm.h"
+#include "color.h"
 #include "config.h"
 #include "disasm.h"
 #include "emu.h"
@@ -126,23 +127,38 @@ main (int argc, char *argv[])
       = { options, parse_opt, NULL, NULL, NULL, NULL, NULL };
   argp_parse (&argp, argc, argv, ARGP_IN_ORDER, 0, &args);
 
+  if (args.cmd == TRACE_MODE && trace_arg.mode == TRACE_PROG)
+    set_color (args.when, trace_arg.output_file);
+  else if (args.cmd == PROBE_MODE)
+    set_color (args.when, probe_arg.output_file);
+  else
+    set_color (args.when, stdout);
+
   switch (args.cmd)
     {
     case ASM_MODE:
+      set_color (args.when, stdout);
       assemble (asm_arg.text_file, asm_arg.scmp_arch, asm_arg.mode);
       break;
     case DISASM_MODE:
+      set_color (args.when, stdout);
       disasm (disasm_arg.raw_file, disasm_arg.scmp_arch);
       break;
     case EMU_MODE:
+      set_color (args.when, stdout);
       emulate (&emu_arg);
       break;
     case TRACE_MODE:
       if (trace_arg.mode == TRACE_PID)
-        pid_trace (trace_arg.pid, trace_arg.seize, trace_arg.quiet);
+        {
+          set_color (args.when, stdout);
+          pid_trace (trace_arg.pid, trace_arg.seize, trace_arg.quiet);
+        }
       else if (trace_arg.mode == TRACE_PROG)
-        program_trace (&argv[trace_arg.prog_idx], trace_arg.output_file,
-                       trace_arg.quiet, false);
+        {
+          program_trace (&argv[trace_arg.prog_idx], trace_arg.output_file,
+                         trace_arg.quiet, false);
+        }
       break;
     case PROBE_MODE:
       probe (&argv[probe_arg.prog_idx], probe_arg.output_file,
