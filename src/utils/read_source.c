@@ -76,7 +76,7 @@ detect_file_type ()
   return '\n';
 }
 
-static void
+static unsigned
 process_source (void)
 {
   register char lf = detect_file_type ();
@@ -112,7 +112,12 @@ process_source (void)
       line_start = line_break + 1;
     }
 
+  if (line_nr >= 4096)
+    error ("%s", M_LINES_TOO_MANY);
+  if (top == line_start)
+    return line_nr;
   clear_color (line_start, top - line_start + 1);
+  return line_nr + 1;
 }
 
 static void
@@ -142,7 +147,7 @@ increase_map ()
   map_len += GROW_LEN;
 }
 
-void
+unsigned
 init_source (FILE *read_fp)
 {
   uint32_t read_len = 0;
@@ -167,7 +172,7 @@ init_source (FILE *read_fp)
   if (current % GROW_LEN == 0)
     increase_map (); // scanner expect a trailing \n, which may increase map
 
-  process_source ();
+  return process_source ();
 }
 
 void
