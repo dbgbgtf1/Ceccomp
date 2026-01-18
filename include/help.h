@@ -46,7 +46,7 @@
      "-q, --quiet                      Print emulate result only "            \
      "or ignore the process info message in trace and probe\n"                \
                                                                               \
-     "-s, --seize                      follow process and trace load filter " \
+     "-s, --seize                      Follow process to trace load-filter "  \
      "operation\n"                                                            \
                                                                               \
      "-c, --color                      When to print in color, default as "   \

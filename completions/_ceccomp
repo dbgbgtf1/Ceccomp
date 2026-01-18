@@ -58,6 +58,8 @@ if (( CURRENT == 2 )) {
                 $arch_compstr \
                 $color_compstr \
                 '(-p --pid)'{-p,--pid}'[Attach to which process to extract its filters]:PID:->getpid' \
+                '(-q --quiet)'{-q,--quiet}'[Print warning and error messages only]' \
+                '(-s --seize)'{-s --seize}'[Follow pid to trace load-filter operation (pid mode)]' \
                 $output_compstr \
                 '*:arguments:_files'
             # complete non-kernel pids like kill
@@ -78,6 +80,7 @@ if (( CURRENT == 2 )) {
                 $arch_compstr \
                 $color_compstr \
                 $output_compstr \
+                '(-q --quiet)'{-q,--quiet}'[Print warning and error messages only]' \
                 '*:arguments:_files'
             ;;
         (emu)
