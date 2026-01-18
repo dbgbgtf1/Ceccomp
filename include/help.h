@@ -9,13 +9,11 @@
   "args[0-5] ip ]"
 
 #define PROBE_HINT                                                            \
-  "ceccomp probe   [ -c WHEN ] [ -o FILE ] [ -q ] PROGRAM [ "                 \
-  "program-args ]"
+  "ceccomp probe   [ -c WHEN ] [ -o FILE ] [ -q ] PROGRAM [ program-args ]"
 
 #define TRACE_HINT                                                            \
-  "ceccomp trace   [ -c WHEN ] [ -o FILE ] [ -q ] PROGRAM [ "                 \
-  "program-args ]\n"                                                          \
-  "                [ -c WHEN ] [ -s SEIZE ] [ -q ] -p PID"
+  "ceccomp trace   [ -c WHEN ] [ -o FILE ] [ -q ] PROGRAM [ program-args ]\n" \
+  "                [ -c WHEN ] [ -s ] [ -q ] -p PID"
 
 #define HELP_HINT "ceccomp help"
 #define VERSION_HINT "ceccomp version"
@@ -28,14 +26,14 @@
      "probe    -- Trace the program for the first filter and emulate common " \
      "syscalls\n"                                                             \
      "trace    -- Run program or trace pid, extract bpf filter and then "     \
-     "print "                                                                 \
-     "to text\n"                                                              \
+     "print to text\n"                                                        \
      "version  -- Display ceccomp version\n")
 
 #define M_OPTION_HINT                                                         \
   _ ("Options:\n"                                                             \
      "-a, --arch (x86_64|aarch64|...)  Which architecture to resolve "        \
-     "syscall_nr, default as your arch\n"                                     \
+     "syscall_nr, read or write bytestream by the byteorder of arch, "        \
+     "default as your arch\n"                                                 \
                                                                               \
      "-f, --fmt (hexline|hexfmt|raw)   Output format, default as hexline\n"   \
                                                                               \
@@ -45,8 +43,8 @@
      "-o, --output file                Print to file to avoid mixing "        \
      "ceccomp output and tracee program output, default as stderr\n"          \
                                                                               \
-     "-q, --quiet                      Print emulate result only(In "         \
-     "emu).Ignore the process info message(In trace and probe)\n"             \
+     "-q, --quiet                      Print emulate result only "            \
+     "or ignore the process info message in trace and probe\n"                \
                                                                               \
      "-s, --seize                      follow process and trace load filter " \
      "operation\n"                                                            \

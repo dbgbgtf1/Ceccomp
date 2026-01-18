@@ -6,6 +6,7 @@
 #include "parser.h"
 #include "read_source.h"
 #include "resolver.h"
+#include "reverse_endian.h"
 #include "scanner.h"
 #include "token.h"
 #include "vector.h"
@@ -306,10 +307,13 @@ assemble (FILE *fp, uint32_t scmp_arch, print_mode_t print_mode)
 
   char fmt_template[64];
   fmt_handler handle = set_print_fmt (print_mode, fmt_template);
+  bool reverse = need_reverse_endian (scmp_arch);
   for (uint32_t i = 1; i < code_ptr_v.count; i++)
     {
       statement_t **ptr = get_vector (&code_ptr_v, i);
       filter f = asm_statement (*ptr);
+      if (reverse)
+        reverse_endian (&f);
       handle ((uint8_t *)&f, fmt_template);
     }
 

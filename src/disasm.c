@@ -4,6 +4,7 @@
 #include "main.h"
 #include "parser.h"
 #include "render.h"
+#include "reverse_endian.h"
 #include "vector.h"
 #include <stdint.h>
 #include <stdio.h>
@@ -14,6 +15,10 @@ filter g_filters[1024];
 void
 print_prog (uint32_t scmp_arch, fprog *prog, FILE *output_fp)
 {
+  if (need_reverse_endian (scmp_arch))
+    for (uint32_t i = 0; i < prog->len; i++)
+      reverse_endian (&prog->filter[i]);
+
   vector_t v;
   vector_t v_ptr;
 
