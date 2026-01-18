@@ -17,6 +17,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 static uint32_t retvals[] = {
   [KILL_PROC] = SCMP_ACT_KILL_PROCESS,
@@ -229,24 +230,61 @@ asm_statement (statement_t *statement)
   assert (0);
 }
 
-static char *
-set_print_fmt (print_mode_t print_mode)
-{
-  if (print_mode == HEXFMT)
-    return "\"\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\",\n";
-  else if (print_mode == HEXLINE)
-    return "\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x\\x%02x";
-  else if (print_mode == RAW)
-    return "%c%c%c%c%c%c%c%c";
+typedef void (*fmt_handler) (uint8_t f[8], char *template);
+#define LITERAL_STRLEN(str) (sizeof (str) - 1)
 
-  assert (0);
+static void
+hexify (uint8_t ch, char buf[2])
+{
+#define HEX_CODE "0123456789abcdef"
+  buf[0] = HEX_CODE[ch >> 4];
+  buf[1] = HEX_CODE[ch & 0xf];
+}
+
+#define HEXFMT_TEMPLATE "\"\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00\",\n"
+#define HEXFMT_TEMPLATE_LEN LITERAL_STRLEN (HEXFMT_TEMPLATE)
+static void
+hexfmt_handle (uint8_t f[8], char *template)
+{
+  for (unsigned i = 0; i < 8; i++)
+    hexify (f[i], template + 3 + 4 * i);
+  fwrite (template, 1, HEXFMT_TEMPLATE_LEN, stdout);
+}
+
+#define HEXLINE_TEMPLATE "\\x00\\x00\\x00\\x00\\x00\\x00\\x00\\x00"
+#define HEXLINE_TEMPLATE_LEN LITERAL_STRLEN (HEXLINE_TEMPLATE)
+static void
+hexline_handle (uint8_t f[8], char *template)
+{
+  for (unsigned i = 0; i < 8; i++)
+    hexify (f[i], template + 2 + 4 * i);
+  fwrite (template, 1, HEXLINE_TEMPLATE_LEN, stdout);
 }
 
 static void
-print_asm (char *fmt, filter f)
+raw_handle (uint8_t f[8], char *template)
 {
-  uint8_t *arr = (void *)&f;
-  printf (fmt, arr[0], arr[1], arr[2], arr[3], arr[4], arr[5], arr[6], arr[7]);
+  (void)template;
+  fwrite (f, 1, 8, stdout);
+}
+
+static fmt_handler
+set_print_fmt (print_mode_t print_mode, char *template)
+{
+  switch (print_mode)
+    {
+    case HEXFMT:
+      memcpy (template, HEXFMT_TEMPLATE, HEXFMT_TEMPLATE_LEN + 1);
+      return hexfmt_handle;
+    case HEXLINE:
+      memcpy (template, HEXLINE_TEMPLATE, HEXLINE_TEMPLATE_LEN + 1);
+      return hexline_handle;
+    case RAW:
+      *template = '\0'; // for debugging, don't hurt performance
+      return raw_handle;
+    default:
+      assert (!"Unknown fmt printer");
+    }
 }
 
 void
@@ -266,11 +304,13 @@ assemble (FILE *fp, uint32_t scmp_arch, print_mode_t print_mode)
     error ("%s", M_ASM_TERMINATED);
   // if ERROR_LINE exists, then exits
 
-  char *fmt = set_print_fmt (print_mode);
+  char fmt_template[64];
+  fmt_handler handle = set_print_fmt (print_mode, fmt_template);
   for (uint32_t i = 1; i < code_ptr_v.count; i++)
     {
       statement_t **ptr = get_vector (&code_ptr_v, i);
-      print_asm (fmt, asm_statement (*ptr));
+      filter f = asm_statement (*ptr);
+      handle ((uint8_t *)&f, fmt_template);
     }
 
   free_table ();
