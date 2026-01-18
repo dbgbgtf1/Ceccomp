@@ -64,6 +64,7 @@ obj_print_t obj_print[] = {
   [ATTR_ARCH] = { print_str, BRIGHT_BLUECLR },
   [ATTR_LOWPC] = { print_str, BRIGHT_BLUECLR },
   [ATTR_HIGHPC] = { print_str, BRIGHT_BLUECLR },
+  [ATTR_LEN] = { print_str, BRIGHT_BLUECLR },
   [IDENTIFIER] = { print_identifier, BRIGHT_CYANCLR },
 
   [NUMBER] = { print_num, BRIGHT_CYANCLR },

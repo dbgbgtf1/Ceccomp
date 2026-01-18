@@ -57,6 +57,9 @@ ld_ldx_line (filter f, statement_t *statement)
       if (right->type == ATTR_LOWARG || right->type == ATTR_HIGHARG)
         right->data = (f.k - offsetof (seccomp_data, args[0])) / 0x8;
       return;
+    case BPF_LEN:
+      right->type = ATTR_LEN;
+      return;
     }
 }
 
