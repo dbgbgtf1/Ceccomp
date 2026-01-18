@@ -119,6 +119,7 @@
 #define M_JF_INVALID_TAG _ ("Jf to invalid tag")
 
 #define M_MUST_END_WITH_RET _ ("Bpf filter must end with return")
+#define M_NO_VALID_CODE _ ("Text inputed doesn't contain any valid code")
 
 #define M_INVALID_OPERATION _ ("Invalid operation")
 

@@ -292,6 +292,8 @@ resolver (vector_t *code_ptr_v)
   mem_valid = 0;
 
   bpf_len = code_ptr_v->count - 1;
+  if (bpf_len == 0)
+    error ("%s", M_NO_VALID_CODE);
 
   for (uint32_t i = 1; i < code_ptr_v->count; i++)
     {
