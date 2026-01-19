@@ -14,7 +14,7 @@ string_t token_pairs[] = {
   [ARCH_MIPSEL] = DEFTK ("mipsel"), [ARCH_MIPS64N32] = DEFTK ("mips64n32"),
   [ARCH_MIPS64] = DEFTK ("mips64"), [ARCH_MIPS] = DEFTK ("mips"),
   [ARCH_PARISC64] = DEFTK ("parisc64"), [ARCH_PARISC] = DEFTK ("parisc"),
-  [ARCH_PPC64LE] = DEFTK ("ppc64le"), [ARCH_PPC64] = DEFTK ("ppc64"), [ARCH_PPC] = DEFTK ("ppc64"),
+  [ARCH_PPC64LE] = DEFTK ("ppc64le"), [ARCH_PPC64] = DEFTK ("ppc64"), [ARCH_PPC] = DEFTK ("ppc"),
   [ARCH_S390X] = DEFTK ("s390x"), [ARCH_S390] = DEFTK ("s390"), [ARCH_RISCV64] = DEFTK ("riscv64"),
 
   [KILL_PROC] = DEFTK ("KILL_PROCESS"), [KILL] = DEFTK ("KILL"), [ALLOW] = DEFTK ("ALLOW"),
