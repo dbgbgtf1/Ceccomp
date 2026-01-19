@@ -10,25 +10,25 @@
 #include "lib/a5hash-5.25.h"
 
 static uint64_t
-hash_hkey (hkey_t *key)
+hash_hkey (hkey_t key)
 {
 #if __SIZEOF_POINTER__ == 8
-  return a5hash (key->start, key->len, 0);
+  return a5hash (key.start, key.len, 0);
 #else
   return a5hash32 (key->start, key->len, 0);
 #endif
 }
 
 static bool
-cmpr_hkey (hkey_t *key1, hkey_t *key2)
+cmpr_hkey (hkey_t key1, hkey_t key2)
 {
-  if (key1->len != key2->len)
+  if (key1.len != key2.len)
     return false;
-  return !memcmp (key1->start, key2->start, key1->len);
+  return !memcmp (key1.start, key2.start, key1.len);
 }
 
 #define NAME str_table
-#define KEY_TY hkey_t *
+#define KEY_TY hkey_t
 #define VAL_TY uint16_t
 #define HASH_FN hash_hkey
 #define CMPR_FN cmpr_hkey
@@ -40,7 +40,7 @@ int
 insert_key (hkey_t *key, uint16_t line_nr)
 {
   size_t prev_size = vt_size (&hash_table);
-  str_table_itr itr = vt_get_or_insert (&hash_table, key, line_nr);
+  str_table_itr itr = vt_get_or_insert (&hash_table, *key, line_nr);
   if (vt_is_end (itr))
     return -1;
   if (prev_size == vt_size (&hash_table))
@@ -51,7 +51,7 @@ insert_key (hkey_t *key, uint16_t line_nr)
 uint16_t
 find_key (hkey_t *key)
 {
-  str_table_itr itr = vt_get (&hash_table, key);
+  str_table_itr itr = vt_get (&hash_table, *key);
   if (vt_is_end (itr))
     error (M_CANNOT_FIND_LABEL, key->len, key->start);
   return itr.data->val;

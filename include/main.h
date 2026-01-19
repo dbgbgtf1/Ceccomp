@@ -20,11 +20,13 @@ typedef struct ptrace_syscall_info syscall_info;
 typedef struct
 {
   char *start;
-  uint16_t len;
-  uint16_t code_nr;
+  uint32_t len;
 } string_t;
 
 #define STARTWITH(str, token) (!strncmp (str, token, strlen (token)))
+
+#define LIKELY(x) __builtin_expect (!!(x), 1)
+#define UNLIKELY(x) __builtin_expect (!!(x), 0)
 
 #define ARRAY_SIZE(arr) (sizeof (arr) / sizeof (arr[0]))
 #define LITERAL_STRLEN(str) (ARRAY_SIZE (str) - 1)

@@ -1,4 +1,5 @@
 #include "vector.h"
+#include "main.h"
 #include "log/logger.h"
 #include <errno.h>
 #include <stddef.h>
@@ -47,7 +48,7 @@ free_vector (vector_t *v)
 void *
 push_vector (vector_t *v, void *elem)
 {
-  if (v->count == v->capacity)
+  if (UNLIKELY (v->count <= v->capacity))
     {
       v->capacity *= 2;
       UPDATE_VECTOR;
