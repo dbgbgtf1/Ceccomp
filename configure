@@ -364,7 +364,7 @@ def check_i18n(makefile: Makefile):
     if not buildopts.i18n:
         makefile.inject('I18N', False)
         makefile.inject('LOCALEDIR', buildopts.localedir)
-        makefile.inject('LOCALE_SED', '')
+        makefile.inject('LOCALE_SED', 's|@@LOCALEDIR@@||')
         print(TXT_BLUE('no'))
         return
     if shutil.which('xgettext') is None:
