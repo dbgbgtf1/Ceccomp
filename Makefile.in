@@ -70,7 +70,7 @@ CECCOMP_C := $(SRC_DIR)/ceccomp.c
 CC := {{CC}}
 
 LOCALE_DIR := {{LOCALEDIR}}
-CFLAGS := -fpie -fstack-protector -Wall -Wextra {{I18N_IF}}'-DLOCALEDIR="$(LOCALE_DIR)"'{{I18N_ENDIF}} {{SYS_INC_DIR}} {{EXTRA_CFLAGS}}
+CFLAGS := -fpie -fstack-protector -Wall -Wextra {{SYS_INC_DIR}} {{EXTRA_CFLAGS}}
 LDFLAGS := -z now -z noexecstack -fpie -fstack-protector -Wall -Wextra {{SYS_LIB_DIR}} -lseccomp {{LIBARGP}} {{EXTRA_LDFLAGS}}
 DEBUG := {{DEBUG_LEVEL}}
 
@@ -233,7 +233,7 @@ uninstall:
 CONFIG_HEADER := $(INC_DIR)/config.h
 $(CONFIG_HEADER): Makefile | $(MARK)
 	$Q$(call ECHO,SED,$@)
-	$Qsed 's/@@VERSION@@/$(VERSION)/;s/@@TAG_TIME@@/$(TAG_TIME)/;s/@@BUILDER@@/{{BUILDER}}/' \
+	$Qsed 's/@@VERSION@@/$(VERSION)/;s/@@TAG_TIME@@/$(TAG_TIME)/;s/@@BUILDER@@/{{BUILDER}}/;{{LOCALE_SED}}' \
 		$(CONFIG_HEADER).in > $(CONFIG_HEADER)
 
 ceccomp: $(BUILD_DIR)/ceccomp
@@ -254,7 +254,7 @@ $(BUILD_DIR)/ceccomp.c.o: $(SRC_DIR)/ceccomp.c $(CONFIG_HEADER) | $(BUILD_DIR) $
 	$Q$(call ECHO,CC,$@)
 	$Q$(CC) -I$(INC_DIR) $(CFLAGS) $< -c -o $@
 
-$(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c | $(BUILD_DIR) $(MARK)
+$(BUILD_DIR)/%.c.o: $(SRC_DIR)/%.c | $(BUILD_DIR) $(MARK) $(CONFIG_HEADER)
 	$Q$(call ECHO,CC,$@)
 	$Q$(CC) -I$(INC_DIR) $(CFLAGS) $< -c -o $@
 $(BUILD_DIR)/%.c.o: $(TEST_DIR)/%.c | $(BUILD_DIR) $(MARK)

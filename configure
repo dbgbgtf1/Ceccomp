@@ -364,6 +364,7 @@ def check_i18n(makefile: Makefile):
     if not buildopts.i18n:
         makefile.inject('I18N', False)
         makefile.inject('LOCALEDIR', buildopts.localedir)
+        makefile.inject('LOCALE_SED', '')
         print(TXT_BLUE('no'))
         return
     if shutil.which('xgettext') is None:
@@ -371,6 +372,7 @@ def check_i18n(makefile: Makefile):
         error('xgettext and other tools not found, pass --without-i18n to disable l10n generation or install gettext package!')
     makefile.inject('I18N', True)
     makefile.inject('LOCALEDIR', buildopts.localedir)
+    makefile.inject('LOCALE_SED', f's|@@LOCALEDIR@@|#define LOCALEDIR "{buildopts.localedir}"|')
     print(TXT_GREEN('yes'))
 
 @new_task

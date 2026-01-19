@@ -1,10 +1,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
-#include "i18n.h"
 
 #define CECCOMP_VERSION "@@VERSION@@"
 #define CECCOMP_TAG_TIME "@@TAG_TIME@@"
 #define CECCOMP_BUILDER "@@BUILDER@@"
+#ifndef LOCALEDIR
+@@LOCALEDIR@@
+#endif
+#include "i18n.h"
 #define M_VERSION_FORMAT _ ("ceccomp %s\nTag at %s\nBuild by %s\n")
 
 #endif
