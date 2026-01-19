@@ -1,5 +1,8 @@
 #include "scanner.h"
+#include "arch_trans.h"
 #include "log/logger.h"
+#include "main.h"
+#include "parser.h"
 #include "read_source.h"
 #include "token.h"
 #include <ctype.h>
@@ -29,6 +32,13 @@ static uint8_t unknown_count = 0;
       return;                                                                 \
     }                                                                         \
   while (0)
+#define INIT_TOKEN_ADV1(type)                                                 \
+  do                                                                          \
+    {                                                                         \
+      advance (1);                                                            \
+      INIT_TOKEN (type);                                                      \
+    }                                                                         \
+  while (0)
 
 static inline bool
 isidentifier (char c)
@@ -37,9 +47,9 @@ isidentifier (char c)
 }
 
 static char
-peek ()
+peek (uint32_t offset)
 {
-  return scanner.current_char[0];
+  return scanner.current_char[offset];
 }
 
 static void
@@ -49,23 +59,40 @@ advance (uint16_t advance_len)
 }
 
 static bool
-match (char expected)
+match_offset (char expected, uint32_t offset)
 {
-  if (peek () != expected)
+  if (peek (offset) != expected)
     return false;
 
-  advance (1);
+  advance (offset + 1);
   return true;
 }
 
 static bool
-match_string (char *expected, uint16_t cmp_len)
+match (char expected)
 {
-  if (strncmp (expected, scanner.current_char, cmp_len))
+  return match_offset (expected, 0);
+}
+
+static bool
+match_token (token_type tk)
+{
+  register string_t token = token_pairs[tk];
+  if (strncmp (token.start, scanner.current_char, token.len))
     return false;
 
-  advance (cmp_len);
+  advance (token.len);
   return true;
+}
+
+// from and to all included
+static token_type
+match_token_range (token_type from, token_type to)
+{
+  for (uint32_t i = from; i <= to; i++)
+    if (match_token (i))
+      return i;
+  return UNKNOWN;
 }
 
 static void
@@ -84,7 +111,7 @@ static void
 skip_spaces ()
 {
   // spaces
-  while (isspace (peek ()) && peek () != '\n')
+  while (isspace (peek (0)) && peek (0) != '\n')
     advance (1);
 }
 
@@ -110,9 +137,9 @@ scan_token (token_t *token)
   scanner.token_start = scanner.current_char;
 
   // COMMENT
-  if (match (*token_pairs[COMMENT]))
+  if (match ('#'))
     {
-      while (peek () != '\n')
+      while (peek (0) != '\n')
         advance (1);
       INIT_TOKEN (COMMENT);
     }
@@ -121,30 +148,116 @@ scan_token (token_t *token)
   if (match ('\n'))
     return reset_to_nextline (token);
 
-  uint32_t enum_start = ARCH_X86, enum_end = ELSE;
-  if (ispunct (peek ()))
-    enum_start = COMMA, enum_end = BANG;
-  // ARCH_X86 : ELSE or COMMA : BANG
-  for (uint32_t enum_idx = enum_start; enum_idx <= enum_end; enum_idx++)
+  char cur_char = peek (0);
+  if (islower (cur_char))
     {
-      if (match_string (token_pairs[enum_idx], strlen (token_pairs[enum_idx])))
-        INIT_TOKEN (enum_idx);
+      token_type tk = match_token_range (RETURN, ELSE);
+      if (tk != UNKNOWN)
+        INIT_TOKEN (tk);
+      tk = str_to_internal_arch (scanner.current_char);
+      if (tk != UNKNOWN)
+        {
+          advance (token_pairs[tk].len);
+          INIT_TOKEN (tk);
+        }
+    }
+  else if (isupper (cur_char))
+    {
+      token_type tk = match_token_range (KILL_PROC, ERRNO);
+      if (tk != UNKNOWN)
+        INIT_TOKEN (tk);
+    }
+  else if (ispunct (cur_char))
+    {
+      switch (cur_char)
+        {
+        case '$':
+          if (match_offset ('A', 1))
+            INIT_TOKEN (A);
+          if (match_offset ('X', 1))
+            INIT_TOKEN (X);
+          token_type tk = match_token_range (MEM, ATTR_HIGHARG);
+          if (tk != UNKNOWN)
+            INIT_TOKEN (tk);
+          break;
+        case ',':
+          INIT_TOKEN_ADV1 (COMMA);
+        case '.':
+          INIT_TOKEN_ADV1 (DOT);
+        case '[':
+          INIT_TOKEN_ADV1 (LEFT_BRACKET);
+        case ']':
+          INIT_TOKEN_ADV1 (RIGHT_BRACKET);
+        case '(':
+          INIT_TOKEN_ADV1 (LEFT_PAREN);
+        case ')':
+          INIT_TOKEN_ADV1 (RIGHT_PAREN);
+        case '+':
+          if (match_offset ('=', 1))
+            INIT_TOKEN (ADD_TO);
+          break;
+        case '-':
+          if (match_offset ('=', 1))
+            INIT_TOKEN (SUB_TO);
+          INIT_TOKEN_ADV1 (NEGATIVE);
+        case '*':
+          if (match_offset ('=', 1))
+            INIT_TOKEN (MULTI_TO);
+          break;
+        case '/':
+          if (match_offset ('=', 1))
+            INIT_TOKEN (DIVIDE_TO);
+          break;
+        case '<':
+          if (match_offset ('=', 1))
+            INIT_TOKEN (LESS_EQUAL);
+          if (peek (1) == '<' && match_offset ('=', 2))
+            INIT_TOKEN (LSH_TO);
+          INIT_TOKEN_ADV1 (LESS_THAN);
+        case '>':
+          if (match_offset ('=', 1))
+            INIT_TOKEN (GREATER_EQUAL);
+          if (peek (1) == '>' && match_offset ('=', 2))
+            INIT_TOKEN (RSH_TO);
+          INIT_TOKEN_ADV1 (GREATER_THAN);
+        case '&':
+          if (match_offset ('=', 1))
+            INIT_TOKEN (AND_TO);
+          INIT_TOKEN_ADV1 (AND);
+        case '|':
+          if (match_offset ('=', 1))
+            INIT_TOKEN (OR_TO);
+          break;
+        case '^':
+          if (match_offset ('=', 1))
+            INIT_TOKEN (XOR_TO);
+          break;
+        case '!':
+          if (match_offset ('=', 1))
+            INIT_TOKEN (BANG_EQUAL);
+          INIT_TOKEN_ADV1 (BANG);
+        case '=':
+          if (match_offset ('=', 1))
+            INIT_TOKEN (EQUAL_EQUAL);
+          INIT_TOKEN_ADV1 (EQUAL);
+        }
+      goto unknown;
     }
 
   // LABEL_DECL : IDENTIFIER
   // IDENTIFIER include SYSCALL and label
   // We don't want hash the SYSCALL, so leave it later
-  if (isalpha (peek ()))
+  if (isalpha (peek (0)))
     {
       do
         advance (1);
-      while (isidentifier (peek ()));
+      while (isidentifier (peek (0)));
 
       INIT_TOKEN (match (':') ? LABEL_DECL : IDENTIFIER);
     }
 
   // NUMBER
-  if (isxdigit (peek ()))
+  if (isxdigit (peek (0)))
     {
       char *end;
       errno = 0;
@@ -159,6 +272,7 @@ scan_token (token_t *token)
   if (unknown_count > 5)
     INIT_TOKEN (TOKEN_EOF);
 
+unknown:
   unknown_count += 1;
   advance (1);
   INIT_TOKEN (UNKNOWN);

@@ -1,4 +1,5 @@
 #include "arch_trans.h"
+#include "parser.h"
 #include "token.h"
 #include <seccomp.h>
 #include <stdint.h>
@@ -79,15 +80,64 @@ scmp_arch_to_internal_arch (uint32_t scmp_arch)
   return -1;
 }
 
+#define MAYBE_MATCH_ARCH(arch)                                                \
+  if (!strncmp (str, token_pairs[arch].start, token_pairs[arch].len))         \
+    return arch;
+
+token_type
+str_to_internal_arch (const char *str)
+{
+  switch (*str)
+    {
+    case 'i':
+      MAYBE_MATCH_ARCH (ARCH_X86);
+      MAYBE_MATCH_ARCH (ARCH_I686);
+      break;
+    case 'x':
+      MAYBE_MATCH_ARCH (ARCH_X86_64);
+      MAYBE_MATCH_ARCH (ARCH_X32);
+      break;
+    case 'a':
+      MAYBE_MATCH_ARCH (ARCH_ARM);
+      MAYBE_MATCH_ARCH (ARCH_AARCH64);
+      break;
+    case 'l':
+      MAYBE_MATCH_ARCH (ARCH_LOONGARCH64);
+      break;
+    case 'm':
+      MAYBE_MATCH_ARCH (ARCH_M68K);
+      MAYBE_MATCH_ARCH (ARCH_MIPSEL64N32);
+      MAYBE_MATCH_ARCH (ARCH_MIPSEL64);
+      MAYBE_MATCH_ARCH (ARCH_MIPSEL);
+      MAYBE_MATCH_ARCH (ARCH_MIPS64N32);
+      MAYBE_MATCH_ARCH (ARCH_MIPS64);
+      MAYBE_MATCH_ARCH (ARCH_MIPS);
+      break;
+    case 'p':
+      MAYBE_MATCH_ARCH (ARCH_PARISC64);
+      MAYBE_MATCH_ARCH (ARCH_PARISC);
+      MAYBE_MATCH_ARCH (ARCH_PPC64LE);
+      MAYBE_MATCH_ARCH (ARCH_PPC64);
+      MAYBE_MATCH_ARCH (ARCH_PPC);
+      break;
+    case 's':
+      MAYBE_MATCH_ARCH (ARCH_S390X);
+      MAYBE_MATCH_ARCH (ARCH_S390);
+      break;
+    case 'r':
+      MAYBE_MATCH_ARCH (ARCH_RISCV64);
+      break;
+    }
+  return UNKNOWN;
+}
+
 uint32_t
 str_to_scmp_arch (char *str)
 {
-  for (uint32_t i = 0; i < ARCH_RISCV64; i++)
-    {
-      if (!strcmp (str, token_pairs[i].start))
-        return internal_arch_to_scmp_arch (i);
-    }
-  return -1;
+  token_type tk = str_to_internal_arch (str);
+  if (tk == UNKNOWN)
+    return -1;
+  return internal_arch_to_scmp_arch (tk);
 }
 
 string_t *
