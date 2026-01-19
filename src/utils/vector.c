@@ -48,7 +48,7 @@ free_vector (vector_t *v)
 void *
 push_vector (vector_t *v, void *elem)
 {
-  if (UNLIKELY (v->count <= v->capacity))
+  if (UNLIKELY (v->count >= v->capacity))
     {
       v->capacity *= 2;
       UPDATE_VECTOR;
