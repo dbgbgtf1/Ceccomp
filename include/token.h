@@ -58,7 +58,7 @@ struct token_t
   // data is for NUMBER
 };
 
-extern string_t token_pairs[];
+extern const string_t token_pairs[];
 
 typedef struct scanner_t scanner_t;
 typedef struct token_t token_t;

@@ -32,7 +32,7 @@ static ceccomp_arg_t args = { .cmd = HELP_ABNORMAL,
                               .probe_arg = &probe_arg,
                               .trace_arg = &trace_arg };
 
-static struct argp_option options[] = {
+static const struct argp_option options[] = {
   { "quiet", 'q', NULL, 0, NULL, 0 },
   { "color", 'c', "COLOR", 0, NULL, 0 },
   { "output", 'o', "OUTPUT", 0, NULL, 0 },
@@ -75,7 +75,7 @@ init_args (ceccomp_arg_t *args)
   args->trace_arg->quiet = false;
   args->trace_arg->seize = false;
 
-  char *no_color = getenv ("NO_COLOR");
+  const char *no_color = getenv ("NO_COLOR");
   if (no_color != NULL && no_color[0] != '\0')
     args->when = NEVER;
   else

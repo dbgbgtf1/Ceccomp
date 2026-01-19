@@ -19,7 +19,7 @@ typedef struct ptrace_syscall_info syscall_info;
 
 typedef struct
 {
-  char *start;
+  const char *start;
   uint32_t len;
 } string_t;
 

@@ -28,7 +28,7 @@ static uint16_t bpf_len = 0;
 #define SPRINTF_CAT(...) print += sprintf (__VA_ARGS__)
 
 static void
-report_error (char *error_msg)
+report_error (const char *error_msg)
 {
   has_error = true;
   char buf[0x400];

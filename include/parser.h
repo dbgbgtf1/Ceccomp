@@ -71,7 +71,7 @@ typedef void *eof_line_t;
 typedef struct
 {
   char *error_start;
-  char *error_msg;
+  const char *error_msg;
 } error_line_t;
 
 typedef enum

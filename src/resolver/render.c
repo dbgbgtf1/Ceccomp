@@ -119,7 +119,7 @@ ja_line (jump_line_t *jump_line)
 static void
 try_resolve_arch (obj_t *cmpobj)
 {
-  string_t *arch_str = scmp_arch_to_str (cmpobj->data);
+  const string_t *arch_str = scmp_arch_to_str (cmpobj->data);
   if (arch_str == NULL)
     return;
   cmpobj->type = IDENTIFIER;
@@ -137,7 +137,7 @@ try_resolve_sysnr (obj_t *cmpobj)
     return;
 
   cmpobj->type = IDENTIFIER;
-  string_t *arch_str = NULL;
+  const string_t *arch_str = NULL;
   if (cur_arch != default_arch)
     arch_str = scmp_arch_to_str (cur_arch);
   cmpobj->literal = persist_object (sys_name, arch_str);

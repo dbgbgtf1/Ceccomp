@@ -6,7 +6,7 @@
 
 #define DEFTK(token) { token, LITERAL_STRLEN (token) }
 // clang-format off
-string_t token_pairs[] = {
+const string_t token_pairs[] = {
   [ARCH_X86] = DEFTK ("i386"), [ARCH_I686] = DEFTK ("i686"), [ARCH_X86_64] = DEFTK ("x86_64"),
   [ARCH_X32] = DEFTK ("x32"), [ARCH_ARM] = DEFTK ("arm"), [ARCH_AARCH64] = DEFTK ("aarch64"),
   [ARCH_LOONGARCH64] = DEFTK ("loongarch64"), [ARCH_M68K] = DEFTK ("m68k"),

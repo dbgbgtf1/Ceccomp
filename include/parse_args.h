@@ -50,7 +50,7 @@ typedef struct
   uint32_t scmp_arch;
   bool quiet;
   FILE *text_file;
-  char *sys_name;
+  const char *sys_name;
   uint64_t args[6];
   uint64_t ip;
 } emu_arg_t;

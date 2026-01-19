@@ -75,7 +75,7 @@ match_from_to (token_type expected_start, token_type expected_end)
 }
 
 static void
-error_at (token_t token, char *err_msg)
+error_at (token_t token, const char *err_msg)
 {
   // sync to the nextline
   while (!(match (EOL) || peek (TOKEN_EOF)))

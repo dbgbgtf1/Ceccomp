@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <string.h>
 
-uint32_t arch_pairs[] = {
+static const uint32_t arch_pairs[] = {
   [ARCH_X86] = SCMP_ARCH_X86,
   [ARCH_I686] = SCMP_ARCH_X86,
   [ARCH_X86_64] = SCMP_ARCH_X86_64,
@@ -132,7 +132,7 @@ str_to_internal_arch (const char *str)
 }
 
 uint32_t
-str_to_scmp_arch (char *str)
+str_to_scmp_arch (const char *str)
 {
   token_type tk = str_to_internal_arch (str);
   if (tk == UNKNOWN)
@@ -140,7 +140,7 @@ str_to_scmp_arch (char *str)
   return internal_arch_to_scmp_arch (tk);
 }
 
-string_t *
+const string_t *
 scmp_arch_to_str (uint32_t scmp_arch)
 {
   int32_t idx = scmp_arch_to_internal_arch (scmp_arch);

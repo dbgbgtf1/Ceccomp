@@ -52,7 +52,7 @@ print_paren (obj_t *tk)
   fprintf (fp, "(%d)", tk->data);
 }
 
-obj_print_t obj_print[] = {
+static const obj_print_t obj_print[] = {
   [A] = { print_str, BRIGHT_YELLOWCLR },
   [X] = { print_str, BRIGHT_YELLOWCLR },
 
@@ -202,7 +202,7 @@ print_comment (statement_t *statement)
 }
 
 void
-print_as_comment (FILE *output_fp, char *comment_fmt, ...)
+print_as_comment (FILE *output_fp, const char *comment_fmt, ...)
 {
   fp = output_fp;
 

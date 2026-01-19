@@ -20,7 +20,7 @@
 #include <string.h>
 #include <unistd.h>
 
-char *to_test_list[]
+static const char *to_test_list[]
     = { "open", "openat",   "read",     "write",  "execve", "execveat",
         "mmap", "mprotect", "sendfile", "ptrace", "fork" };
 

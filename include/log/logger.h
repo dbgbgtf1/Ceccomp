@@ -3,10 +3,10 @@
 
 #include <sys/cdefs.h>
 // clang-format off
-__attribute__ ((noinline)) void debug_print (const char *caller_func, char *fmt, ...) __attribute__ ((format (printf, 2, 3)));
-__attribute__ ((noinline)) void info_print (const char *caller_func, char *fmt, ...) __attribute__ ((format (printf, 2, 3)));
-__attribute__ ((noinline)) void warn_print (const char *caller_func, char *fmt, ...) __attribute__ ((format (printf, 2, 3)));
-__attribute__ ((noinline)) __attribute__ ((noreturn)) void error_print (const char *caller_func, char *fmt, ...) __attribute__ ((format (printf, 2, 3)));
+__attribute__ ((noinline)) void debug_print (const char *caller_func, const char *fmt, ...) __attribute__ ((format (printf, 2, 3)));
+__attribute__ ((noinline)) void info_print (const char *caller_func, const char *fmt, ...) __attribute__ ((format (printf, 2, 3)));
+__attribute__ ((noinline)) void warn_print (const char *caller_func, const char *fmt, ...) __attribute__ ((format (printf, 2, 3)));
+__attribute__ ((noinline)) __attribute__ ((noreturn)) void error_print (const char *caller_func, const char *fmt, ...) __attribute__ ((format (printf, 2, 3)));
 // clang-format on
 
 #ifdef DEBUG

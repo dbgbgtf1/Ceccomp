@@ -63,7 +63,7 @@ static const bool codes[] = {
 static uint16_t *masks, mem_valid = 0;
 
 static bool
-report_error (char *err_msg)
+report_error (const char *err_msg)
 {
   warn ("%s", err_msg);
   return true;

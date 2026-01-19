@@ -16,7 +16,7 @@
 #define ERR LOG_RED ("[ERROR]: ")
 
 void
-debug_print (const char *caller_func, char *fmt, ...)
+debug_print (const char *caller_func, const char *fmt, ...)
 {
   va_list args;
   va_start (args, fmt);
@@ -35,7 +35,7 @@ debug_print (const char *caller_func, char *fmt, ...)
 }
 
 void
-info_print (const char *caller_func, char *fmt, ...)
+info_print (const char *caller_func, const char *fmt, ...)
 {
   va_list args;
   va_start (args, fmt);
@@ -54,7 +54,7 @@ info_print (const char *caller_func, char *fmt, ...)
 }
 
 void
-warn_print (const char *caller_func, char *fmt, ...)
+warn_print (const char *caller_func, const char *fmt, ...)
 {
   va_list args;
   va_start (args, fmt);
@@ -73,7 +73,7 @@ warn_print (const char *caller_func, char *fmt, ...)
 }
 
 void
-error_print (const char *caller_func, char *fmt, ...)
+error_print (const char *caller_func, const char *fmt, ...)
 {
   va_list args;
   va_start (args, fmt);

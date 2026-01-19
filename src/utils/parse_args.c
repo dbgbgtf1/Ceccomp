@@ -13,27 +13,27 @@
 static bool stop_parse = false;
 
 static uint64_t
-fail_fast_strtoull (char *num, char *error_msg)
+fail_fast_strtoull (const char *restrict num, const char *restrict error_msg)
 {
   char *end;
   errno = 0;
   uint64_t result = strtoull (num, &end, 0);
-  if (result == 0 && errno)
+  if ((result == 0 && errno) || *end != '\0')
     error ("%s", error_msg);
   return result;
 }
 
 static FILE *
-fail_fast_fopen (char *file, char *mode)
+fail_fast_fopen (const char *restrict filename, const char *restrict mode)
 {
-  FILE *fp = fopen (file, mode);
+  FILE *fp = fopen (filename, mode);
   if (fp == NULL)
     error ("%s", strerror (errno));
   return fp;
 }
 
 static subcommand_t
-parse_subcommand (char *arg)
+parse_subcommand (const char *arg)
 {
   if (!strcmp (arg, "asm"))
     return ASM_MODE;
@@ -54,7 +54,7 @@ parse_subcommand (char *arg)
 }
 
 static color_mode_t
-parse_color_mode (char *arg)
+parse_color_mode (const char *arg)
 {
   if (!strcmp (arg, "always"))
     return ALWAYS;
@@ -67,7 +67,7 @@ parse_color_mode (char *arg)
 }
 
 static print_mode_t
-parse_print_mode (char *arg)
+parse_print_mode (const char *arg)
 {
   if (!strcmp (arg, "hexfmt"))
     return HEXFMT;
@@ -80,7 +80,7 @@ parse_print_mode (char *arg)
 }
 
 static int
-parse_asm (asm_arg_t *args, int key, char *arg, struct argp_state *state)
+parse_asm (asm_arg_t *args, int key, const char *arg, struct argp_state *state)
 {
   switch (key)
     {
@@ -100,7 +100,7 @@ parse_asm (asm_arg_t *args, int key, char *arg, struct argp_state *state)
 }
 
 static int
-parse_disasm (disasm_arg_t *args, int key, char *arg, struct argp_state *state)
+parse_disasm (disasm_arg_t *args, int key, const char *arg, struct argp_state *state)
 {
   switch (key)
     {
@@ -117,7 +117,7 @@ parse_disasm (disasm_arg_t *args, int key, char *arg, struct argp_state *state)
 }
 
 static int
-parse_emu (emu_arg_t *args, int key, char *arg, struct argp_state *state)
+parse_emu (emu_arg_t *args, int key, const char *arg, struct argp_state *state)
 {
   switch (key)
     {
@@ -144,7 +144,7 @@ parse_emu (emu_arg_t *args, int key, char *arg, struct argp_state *state)
 }
 
 static int
-parse_trace (trace_arg_t *args, int key, char *arg, struct argp_state *state)
+parse_trace (trace_arg_t *args, int key, const char *arg, struct argp_state *state)
 {
   switch (key)
     {
@@ -178,7 +178,7 @@ parse_trace (trace_arg_t *args, int key, char *arg, struct argp_state *state)
 }
 
 static int
-parse_probe (probe_arg_t *args, int key, char *arg, struct argp_state *state)
+parse_probe (probe_arg_t *args, int key, const char *arg, struct argp_state *state)
 {
   switch (key)
     {

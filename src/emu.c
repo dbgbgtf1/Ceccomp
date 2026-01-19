@@ -184,7 +184,7 @@ print_label_decl (statement_t *statement)
 }
 
 static void
-emulate_printer (statement_t *statement, char *override_color, bool quiet)
+emulate_printer (statement_t *statement, const char *override_color, bool quiet)
 {
   if (quiet)
     return;
