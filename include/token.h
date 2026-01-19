@@ -1,6 +1,7 @@
 #ifndef TOKEN
 #define TOKEN
 
+#include "main.h"
 #include <stddef.h>
 #include <stdint.h>
 // clang-format off
@@ -57,7 +58,7 @@ struct token_t
   // data is for NUMBER
 };
 
-extern char *token_pairs[];
+extern string_t token_pairs[];
 
 typedef struct scanner_t scanner_t;
 typedef struct token_t token_t;

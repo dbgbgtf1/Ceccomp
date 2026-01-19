@@ -22,33 +22,33 @@ print_num (obj_t *tk)
 static void
 print_str (obj_t *tk)
 {
-  fprintf (fp, "%s", token_pairs[tk->type]);
+  fwrite (token_pairs[tk->type].start, 1, token_pairs[tk->type].len, fp);
 }
 
 static void
 print_identifier (obj_t *tk)
 {
-  fprintf (fp, "%.*s", tk->literal.len, tk->literal.start);
+  fwrite (tk->literal.start, 1, tk->literal.len, fp);
 }
 
 static void
 print_dec_bracket (obj_t *tk)
 {
-  fprintf (fp, "%s", token_pairs[tk->type]);
+  fwrite (token_pairs[tk->type].start, 1, token_pairs[tk->type].len, fp);
   fprintf (fp, "[%d]", tk->data);
 }
 
 static void
 print_hex_bracket (obj_t *tk)
 {
-  fprintf (fp, "%s", token_pairs[tk->type]);
+  fwrite (token_pairs[tk->type].start, 1, token_pairs[tk->type].len, fp);
   fprintf (fp, "[0x%x]", tk->data);
 }
 
 static void
 print_paren (obj_t *tk)
 {
-  fprintf (fp, "%s", token_pairs[tk->type]);
+  fwrite (token_pairs[tk->type].start, 1, token_pairs[tk->type].len, fp);
   fprintf (fp, "(%d)", tk->data);
 }
 
@@ -99,7 +99,7 @@ extern_obj_printer (FILE *output_fp, obj_t *obj)
 static inline void
 print_token_pair (token_type type)
 {
-  fprintf (fp, "%s", token_pairs[type]);
+  fwrite (token_pairs[type].start, 1, token_pairs[type].len, fp);
 }
 
 static void
@@ -128,7 +128,7 @@ print_label (label_t *label, uint16_t pc)
   if (label->key.start == NULL)
     fprintf (fp, DEFAULT_LABEL, pc + label->code_nr + 1);
   else
-    fprintf (fp, "%.*s", label->key.len, label->key.start);
+    fwrite (label->key.start, 1, label->key.len, fp);
 }
 
 static void
@@ -207,7 +207,7 @@ print_as_comment (FILE *output_fp, char *comment_fmt, ...)
   va_start (args, comment_fmt);
 
   static char buf[0x400];
-  buf[0] = *token_pairs[COMMENT];
+  buf[0] = '#';
   statement_t statement
       = { .type = EMPTY_LINE, .line_start = buf, .comment = 0 };
   statement.line_len = vsnprintf (buf + 1, 0x3ff, comment_fmt, args) + 1;

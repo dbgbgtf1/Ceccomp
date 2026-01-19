@@ -1,45 +1,52 @@
 #include "token.h"
+#include "main.h"
 #include "scanner.h"
 #include <stddef.h>
 #include <stdint.h>
 
+#define DEFTK(token) { token, LITERAL_STRLEN (token) }
 // clang-format off
-char *token_pairs[] = {
-  [ARCH_X86] = "i386", [ARCH_I686] = "i686", [ARCH_X86_64] = "x86_64",
-  [ARCH_X32] = "x32", [ARCH_ARM] = "arm", [ARCH_AARCH64] = "aarch64",
-  [ARCH_LOONGARCH64] = "loongarch64", [ARCH_M68K] = "m68k", [ARCH_MIPSEL64N32] = "mipsel64n32",
-  [ARCH_MIPSEL64] = "mipsel64", [ARCH_MIPSEL] = "mipsel", [ARCH_MIPS64N32] = "mips64n32", 
-  [ARCH_MIPS64] = "mips64", [ARCH_MIPS] = "mips", [ARCH_PARISC64] = "parisc64",
-  [ARCH_PARISC] = "parisc", [ARCH_PPC64LE] = "ppc64le", [ARCH_PPC64] = "ppc64",
-  [ARCH_PPC] = "ppc64", [ARCH_S390X] = "s390x", [ARCH_S390] = "s390",
-  [ARCH_RISCV64] = "riscv64",
+string_t token_pairs[] = {
+  [ARCH_X86] = DEFTK ("i386"), [ARCH_I686] = DEFTK ("i686"), [ARCH_X86_64] = DEFTK ("x86_64"),
+  [ARCH_X32] = DEFTK ("x32"), [ARCH_ARM] = DEFTK ("arm"), [ARCH_AARCH64] = DEFTK ("aarch64"),
+  [ARCH_LOONGARCH64] = DEFTK ("loongarch64"), [ARCH_M68K] = DEFTK ("m68k"),
+  [ARCH_MIPSEL64N32] = DEFTK ("mipsel64n32"), [ARCH_MIPSEL64] = DEFTK ("mipsel64"),
+  [ARCH_MIPSEL] = DEFTK ("mipsel"), [ARCH_MIPS64N32] = DEFTK ("mips64n32"),
+  [ARCH_MIPS64] = DEFTK ("mips64"), [ARCH_MIPS] = DEFTK ("mips"),
+  [ARCH_PARISC64] = DEFTK ("parisc64"), [ARCH_PARISC] = DEFTK ("parisc"),
+  [ARCH_PPC64LE] = DEFTK ("ppc64le"), [ARCH_PPC64] = DEFTK ("ppc64"), [ARCH_PPC] = DEFTK ("ppc64"),
+  [ARCH_S390X] = DEFTK ("s390x"), [ARCH_S390] = DEFTK ("s390"), [ARCH_RISCV64] = DEFTK ("riscv64"),
 
-  [KILL_PROC] = "KILL_PROCESS", [KILL] = "KILL", [ALLOW] = "ALLOW", [NOTIFY] = "NOTIFY",
-  [LOG] = "LOG", [TRACE] = "TRACE", [TRAP] = "TRAP", [ERRNO] = "ERRNO",
+  [KILL_PROC] = DEFTK ("KILL_PROCESS"), [KILL] = DEFTK ("KILL"), [ALLOW] = DEFTK ("ALLOW"),
+  [NOTIFY] = DEFTK ("NOTIFY"), [LOG] = DEFTK ("LOG"), [TRACE] = DEFTK ("TRACE"),
+  [TRAP] = DEFTK ("TRAP"), [ERRNO] = DEFTK ("ERRNO"),
 
-  [RETURN] = "return", [IF] = "if", [GOTO] = "goto", [ELSE] = "else", [COMMA] = ",",
+  [RETURN] = DEFTK ("return"), [IF] = DEFTK ("if"), [GOTO] = DEFTK ("goto"),
+  [ELSE] = DEFTK ("else"), [COMMA] = DEFTK (","),
 
-  [A] = "$A", [X] = "$X", [MEM] = "$mem", [ATTR_LEN] = "$scmp_data_len",
-  [ATTR_SYSCALL] = "$syscall_nr", [ATTR_ARCH] = "$arch", [ATTR_LOWPC] = "$low_pc",
-  [ATTR_HIGHPC] = "$high_pc", [ATTR_LOWARG] = "$low_args", [ATTR_HIGHARG] = "$high_args",
+  [A] = DEFTK ("$A"), [X] = DEFTK ("$X"), [MEM] = DEFTK ("$mem"),
+  [ATTR_LEN] = DEFTK ("$scmp_data_len"), [ATTR_SYSCALL] = DEFTK ("$syscall_nr"),
+  [ATTR_ARCH] = DEFTK ("$arch"), [ATTR_LOWPC] = DEFTK ("$low_pc"),
+  [ATTR_HIGHPC] = DEFTK ("$high_pc"), [ATTR_LOWARG] = DEFTK ("$low_args"),
+  [ATTR_HIGHARG] = DEFTK ("$high_args"),
 
-  [DOT] = ".",
+  [DOT] = DEFTK ("."),
 
-  [LEFT_BRACKET] = "[", [RIGHT_BRACKET] = "]",
-  [LEFT_PAREN] = "(", [RIGHT_PAREN] = ")",
-  [ADD_TO] = "+=", [SUB_TO] = "-=", [MULTI_TO] = "*=",
-  [DIVIDE_TO] = "/=", [LSH_TO] = "<<=", [RSH_TO] = ">>=",
-  [AND_TO] = "&=", [OR_TO] = "|=", [XOR_TO] = "^=",
+  [LEFT_BRACKET] = DEFTK ("["), [RIGHT_BRACKET] = DEFTK ("]"), [LEFT_PAREN] = DEFTK ("("),
+  [RIGHT_PAREN] = DEFTK (")"), [ADD_TO] = DEFTK ("+="), [SUB_TO] = DEFTK ("-="),
+  [MULTI_TO] = DEFTK ("*="), [DIVIDE_TO] = DEFTK ("/="), [LSH_TO] = DEFTK ("<<="),
+  [RSH_TO] = DEFTK (">>="), [AND_TO] = DEFTK ("&="), [OR_TO] = DEFTK ("|="),
+  [XOR_TO] = DEFTK ("^="),
 
-  [EQUAL_EQUAL] = "==", [BANG_EQUAL] = "!=",
-  [GREATER_EQUAL] = ">=", [GREATER_THAN] = ">",
-  [LESS_EQUAL] = "<=", [LESS_THAN] = "<",
-  [AND] = "&", [EQUAL] = "=",
-  [NEGATIVE] = "-", [BANG] = "!",
+  [EQUAL_EQUAL] = DEFTK ("=="), [BANG_EQUAL] = DEFTK ("!="), [GREATER_EQUAL] = DEFTK (">="),
+  [GREATER_THAN] = DEFTK (">"), [LESS_EQUAL] = DEFTK ("<="), [LESS_THAN] = DEFTK ("<"),
+  [AND] = DEFTK ("&"), [EQUAL] = DEFTK ("="), [NEGATIVE] = DEFTK ("-"),
+  [BANG] = DEFTK ("!"),
 
-  [UNKNOWN] = "unknown", [COMMENT] = "#", [EOL] = "line_end", [TOKEN_EOF] = "eof",
-  [IDENTIFIER] = "identifier", [LABEL_DECL] = "label_decl", [NUMBER] = "number",
-  // label_decl ::= IDENTIFIER + ":"
+  [UNKNOWN] = DEFTK ("unknown"), [COMMENT] = DEFTK ("#"), [EOL] = DEFTK ("line_end"),
+  [TOKEN_EOF] = DEFTK ("eof"), [IDENTIFIER] = DEFTK ("identifier"),
+  [LABEL_DECL] = DEFTK ("label_decl"), [NUMBER] = DEFTK ("number"),
+  // label_decl ::= IDENTIFIER + DEFTK(":")
 };
 // clang-format on
 

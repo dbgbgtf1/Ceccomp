@@ -1,5 +1,6 @@
 #include "render.h"
 #include "arch_trans.h"
+#include "main.h"
 #include "parser.h"
 #include "resolver.h"
 #include "token.h"
@@ -119,12 +120,11 @@ ja_line (jump_line_t *jump_line)
 static void
 try_resolve_arch (obj_t *cmpobj)
 {
-  char *arch_str = scmp_arch_to_str (cmpobj->data);
+  string_t *arch_str = scmp_arch_to_str (cmpobj->data);
   if (arch_str == NULL)
     return;
   cmpobj->type = IDENTIFIER;
-  cmpobj->literal.start = arch_str;
-  cmpobj->literal.len = strlen (arch_str);
+  cmpobj->literal = *arch_str;
 }
 
 static void
@@ -147,9 +147,9 @@ try_resolve_sysnr (obj_t *cmpobj)
   else
     {
       char *buf = malloc (0x30);
-      char *arch = scmp_arch_to_str (cur_arch);
+      string_t *arch = scmp_arch_to_str (cur_arch);
       cmpobj->literal.start = buf;
-      cmpobj->literal.len = snprintf (buf, 0x30, "%s.%s", arch, sys_name);
+      cmpobj->literal.len = snprintf (buf, 0x30, "%s.%s", arch->start, sys_name);
       push_vector (ptr_list, &buf);
       free (sys_name);
     }

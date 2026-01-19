@@ -84,17 +84,17 @@ str_to_scmp_arch (char *str)
 {
   for (uint32_t i = 0; i < ARCH_RISCV64; i++)
     {
-      if (!strcmp (str, token_pairs[i]))
+      if (!strcmp (str, token_pairs[i].start))
         return internal_arch_to_scmp_arch (i);
     }
   return -1;
 }
 
-char *
+string_t *
 scmp_arch_to_str (uint32_t scmp_arch)
 {
   int32_t idx = scmp_arch_to_internal_arch (scmp_arch);
   if (idx == -1)
     return NULL;
-  return token_pairs[idx];
+  return &token_pairs[idx];
 }
