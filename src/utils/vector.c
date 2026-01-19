@@ -1,6 +1,6 @@
 #include "vector.h"
-#include "main.h"
 #include "log/logger.h"
+#include "main.h"
 #include <errno.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -54,7 +54,7 @@ push_vector (vector_t *v, void *elem)
       UPDATE_VECTOR;
     }
 
-  void *dst = v->data + v->count * v->elem_size;
+  void *dst = (uint8_t *)v->data + v->count * v->elem_size;
   memcpy (dst, elem, v->elem_size);
   v->count++;
   return dst;
@@ -63,5 +63,5 @@ push_vector (vector_t *v, void *elem)
 void *
 get_vector (vector_t *v, uint32_t idx)
 {
-  return v->data + idx * v->elem_size;
+  return (uint8_t *)v->data + idx * v->elem_size;
 }

@@ -20,10 +20,10 @@ static uint32_t default_arch;
 
 typedef enum
 {
-  NONE = 0b00,
-  SYSNR = 0b10,
-  ARCH = 0b01,
-  MIXED = 0b11,
+  NONE = 0,  // 0b00
+  ARCH = 1,  // 0b01
+  SYSNR = 2, // 0b10
+  MIXED = 3, // 0b11
 } stat_t;
 
 typedef struct
@@ -148,7 +148,10 @@ static void
 jump_line (jump_line_t *jump_line)
 {
   if (!jump_line->if_condition)
-    return ja_line (jump_line);
+    {
+      ja_line (jump_line);
+      return;
+    }
 
   uint32_t pc = local->code_nr;
   uint8_t jt = pc + jump_line->jt.code_nr + 1;

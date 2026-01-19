@@ -58,13 +58,13 @@ find_key (hkey_t *key)
 }
 
 void
-init_table ()
+init_table (void)
 {
   vt_init (&hash_table);
 }
 
 void
-free_table ()
+free_table (void)
 {
   vt_cleanup (&hash_table);
 }

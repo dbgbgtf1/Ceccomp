@@ -62,7 +62,7 @@ ld_ldx_line (filter f, statement_t *statement)
       right->type = ATTR_LEN;
       return;
     default:
-      assert(!"Unknown BPF_MODE for ld or ldx");
+      assert (!"Unknown BPF_MODE for ld or ldx");
     }
 }
 
@@ -156,7 +156,10 @@ jump_line (filter f, statement_t *statement)
   jump_line_t *jump_line = &statement->jump_line;
 
   if (BPF_OP (f.code) == BPF_JA)
-    return ja_line (f, jump_line);
+    {
+      ja_line (f, jump_line);
+      return;
+    }
 
   jump_line->if_condition = true;
   jump_line->jt.type = NUMBER;

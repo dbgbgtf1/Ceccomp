@@ -12,7 +12,7 @@ extern void set_color (color_mode_t color, FILE *output);
 
 extern void push_color (bool enable);
 
-extern void pop_color ();
+extern void pop_color (void);
 
 #define CLR "\x1b[0m"
 

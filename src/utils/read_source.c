@@ -4,11 +4,13 @@
 #include "log/logger.h"
 #include <assert.h>
 #include <errno.h>
+#include <linux/prctl.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <sys/prctl.h>
 #include <unistd.h>
 
 #define GROW_LEN 0x4000
@@ -52,7 +54,7 @@ clear_color (char *text, uint32_t line_len)
 }
 
 static char
-detect_file_type ()
+detect_file_type (void)
 {
   char lf = '\n';
   char *line_break = memchr (source, lf, current);
@@ -121,7 +123,7 @@ process_source (void)
 }
 
 static void
-init_map ()
+init_map (void)
 {
   source = mmap (NULL, GROW_LEN, PROT_READ | PROT_WRITE,
                  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -132,10 +134,13 @@ init_map ()
 }
 
 static void
-increase_map ()
+increase_map (void)
 {
   if (source == NULL)
-    return init_map ();
+    {
+      init_map ();
+      return;
+    }
 
   if (current + GROW_LEN <= map_len)
     return;
@@ -158,7 +163,7 @@ init_source (FILE *read_fp)
       increase_map ();
       read_len = read (fd, source + current, GROW_LEN);
       if (read_len == (uint32_t)-1)
-        error ("read :%s", strerror (errno));
+        error ("read: %s", strerror (errno));
       current += read_len;
       if (current > MAX_FILE_LEN)
         error ("%s", M_FILE_TOO_LARGE);
@@ -172,11 +177,15 @@ init_source (FILE *read_fp)
   if (current % GROW_LEN == 0 || current % GROW_LEN > GROW_LEN - 0x20)
     increase_map (); // scanner expect a trailing \n, which may increase map
 
+#ifdef PR_SET_VMA
+  prctl (PR_SET_VMA, PR_SET_VMA_ANON_NAME, source, map_len, "asm source");
+#endif
+
   return process_source ();
 }
 
 void
-free_source ()
+free_source (void)
 {
   munmap (source, map_len);
 }

@@ -144,7 +144,10 @@ jump_line (statement_t *statement)
 {
   jump_line_t *jump_line = &statement->jump_line;
   if (!jump_line->if_condition)
-    return print_ja (statement);
+    {
+      print_ja (statement);
+      return;
+    }
 
   print_token_pair (IF);
   fputc (' ', fp);

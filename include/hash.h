@@ -12,8 +12,8 @@ extern int insert_key (hkey_t *key, uint16_t line_nr);
 
 extern uint16_t find_key (hkey_t *key);
 
-extern void init_table ();
+extern void init_table (void);
 
-extern void free_table ();
+extern void free_table (void);
 
 #endif

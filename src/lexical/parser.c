@@ -29,7 +29,7 @@ static uint32_t local_arch;
 static jmp_buf g_env;
 
 static void
-advance ()
+advance (void)
 {
   parse.previous = parse.current;
   parse.current = parse.next;
@@ -91,7 +91,7 @@ error_at (token_t token, char *err_msg)
 
 // paren_num can be ignored, default as 0
 static uint32_t
-paren_num ()
+paren_num (void)
 {
   if (!match (LEFT_PAREN))
     return 0;
@@ -104,7 +104,7 @@ paren_num ()
 
 // but bracket_num can not be ignored
 static uint32_t
-bracket_num ()
+bracket_num (void)
 {
   if (!match (LEFT_BRACKET))
     error_at (parse.next, M_EXPECT_BRACKET);
@@ -116,7 +116,7 @@ bracket_num ()
 }
 
 static void
-empty_line ()
+empty_line (void)
 {
   local->type = EMPTY_LINE;
   parse.code_nr--;
@@ -125,14 +125,14 @@ empty_line ()
 }
 
 static void
-eof_line ()
+eof_line (void)
 {
   local->type = EOF_LINE;
   return;
 }
 
 static void
-ret_obj ()
+ret_obj (void)
 {
   obj_t *obj = &local->return_line.ret_obj;
   obj->literal.start = parse.next.token_start;
@@ -158,7 +158,7 @@ ret_obj ()
 }
 
 static void
-return_line ()
+return_line (void)
 {
   local->type = RETURN_LINE;
 
@@ -265,7 +265,7 @@ condition (jump_line_t *jump_line)
 }
 
 static void
-ja_line ()
+ja_line (void)
 {
   local->type = JUMP_LINE;
   jump_line_t *jump_line = &local->jump_line;
@@ -275,7 +275,7 @@ ja_line ()
 }
 
 static void
-jump_line ()
+jump_line (void)
 {
   local->type = JUMP_LINE;
   jump_line_t *jump_line = &local->jump_line;
@@ -342,7 +342,7 @@ right (obj_t *obj)
 }
 
 static void
-assign_line ()
+assign_line (void)
 {
   local->type = ASSIGN_LINE;
   assign_line_t *assign_line = &local->assign_line;
@@ -365,7 +365,7 @@ assign_line ()
 }
 
 static void
-expression ()
+expression (void)
 {
   if (peek (EOL) || peek (COMMENT))
     empty_line ();

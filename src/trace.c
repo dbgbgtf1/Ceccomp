@@ -368,7 +368,10 @@ pid_trace (int pid, bool seize, bool quiet)
   int prog_idx = 0;
 
   if (seize)
-    return pid_seize (pid, quiet);
+    {
+      pid_seize (pid, quiet);
+      return;
+    }
 
   if (ptrace (PTRACE_SEIZE, pid, 0, 0) != 0)
     error_seize (pid, errno);

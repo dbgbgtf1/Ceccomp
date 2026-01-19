@@ -73,7 +73,7 @@ alu_line (assign_line_t *assign_line)
 }
 
 static filter
-negative_line ()
+negative_line (void)
 {
   filter f = { .code = BPF_ALU | BPF_NEG, .jf = 0, .jt = 0, .k = 0 };
   return f;

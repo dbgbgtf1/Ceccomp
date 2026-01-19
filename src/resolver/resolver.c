@@ -51,7 +51,7 @@ match_from_to (token_type type, token_type from, token_type to)
 }
 
 static void
-error_line ()
+error_line (void)
 {
   has_error = true;
   char buf[0x400];
@@ -178,7 +178,7 @@ assign_MEM (assign_line_t *assign_line)
 }
 
 static void
-assign_line ()
+assign_line (void)
 {
   assign_line_t *assign_line = &local->assign_line;
   if (assign_line->left_var.type == A)
@@ -207,12 +207,15 @@ ja_line (jump_line_t *jump_line)
 }
 
 static void
-jump_line ()
+jump_line (void)
 {
   jump_line_t *jump_line = &local->jump_line;
 
   if (!jump_line->if_condition)
-    return ja_line (jump_line);
+    {
+      ja_line (jump_line);
+      return;
+    }
 
   uint32_t jt = find_key (&jump_line->jt.key);
   set_jt_jf (&jump_line->jt, jt);
@@ -243,7 +246,7 @@ jump_line ()
 }
 
 static void
-return_line ()
+return_line (void)
 {
   return_line_t *return_line = &local->return_line;
   token_type ret_type = return_line->ret_obj.type;

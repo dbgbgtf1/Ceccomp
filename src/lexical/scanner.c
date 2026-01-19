@@ -108,7 +108,7 @@ reset_to_nextline (token_t *token)
 }
 
 static void
-skip_spaces ()
+skip_spaces (void)
 {
   // spaces
   while (isspace (peek (0)) && peek (0) != '\n')
@@ -146,7 +146,10 @@ scan_token (token_t *token)
 
   // EOL
   if (match ('\n'))
-    return reset_to_nextline (token);
+    {
+      reset_to_nextline (token);
+      return;
+    }
 
   char cur_char = peek (0);
   if (islower (cur_char))

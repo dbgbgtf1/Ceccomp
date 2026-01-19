@@ -47,7 +47,7 @@ push_color (bool enable)
 }
 
 void
-pop_color ()
+pop_color (void)
 {
   color_enable = enable_stack[--enable_sp];
 }

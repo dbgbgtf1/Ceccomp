@@ -52,7 +52,7 @@ persist_object (const char *sysname, const string_t *arch)
 }
 
 void
-free_pile ()
+free_pile (void)
 {
   assert (!munmap (str_pile, pile_top - str_pile));
 }
