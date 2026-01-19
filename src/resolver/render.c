@@ -3,6 +3,7 @@
 #include "main.h"
 #include "parser.h"
 #include "resolver.h"
+#include "str_pile.h"
 #include "token.h"
 #include "vector.h"
 #include <assert.h>
@@ -11,13 +12,11 @@
 #include <seccomp.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 static statement_t *local;
 static uint32_t default_arch;
-static vector_t *ptr_list;
 
 typedef enum
 {
@@ -138,21 +137,11 @@ try_resolve_sysnr (obj_t *cmpobj)
     return;
 
   cmpobj->type = IDENTIFIER;
-  if (cur_arch == default_arch)
-    {
-      cmpobj->literal.start = sys_name;
-      cmpobj->literal.len = strlen (sys_name);
-      push_vector (ptr_list, &sys_name);
-    }
-  else
-    {
-      char *buf = malloc (0x30);
-      string_t *arch = scmp_arch_to_str (cur_arch);
-      cmpobj->literal.start = buf;
-      cmpobj->literal.len = snprintf (buf, 0x30, "%s.%s", arch->start, sys_name);
-      push_vector (ptr_list, &buf);
-      free (sys_name);
-    }
+  string_t *arch_str = NULL;
+  if (cur_arch != default_arch)
+    arch_str = scmp_arch_to_str (cur_arch);
+  cmpobj->literal = persist_object (sys_name, arch_str);
+  free (sys_name);
 }
 
 static void
@@ -252,10 +241,9 @@ render_statement (statement_t *statement)
 }
 
 void
-render (vector_t *v, vector_t *v_ptr, uint32_t scmp_arch)
+render (vector_t *v, uint32_t scmp_arch)
 {
   default_arch = scmp_arch;
-  ptr_list = v_ptr;
 
   uint32_t list_len = sizeof (stat_ctx_t) * (v->count + 1);
   // statement code_nr starts from 1

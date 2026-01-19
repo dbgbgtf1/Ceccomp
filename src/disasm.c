@@ -5,10 +5,10 @@
 #include "parser.h"
 #include "render.h"
 #include "reverse_endian.h"
+#include "str_pile.h"
 #include "vector.h"
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 filter g_filters[1024];
 
@@ -20,12 +20,11 @@ print_prog (uint32_t scmp_arch, fprog *prog, FILE *output_fp)
       reverse_endian (&prog->filter[i]);
 
   vector_t v;
-  vector_t v_ptr;
 
+  init_pile (prog->len * 40 /* statistical choice */); // str pile for syscall names
   init_vector (&v, sizeof (statement_t), prog->len + 1);
-  init_vector (&v_ptr, sizeof (char *), prog->len + 1);
   decode_filters (prog, &v);
-  render (&v, &v_ptr, scmp_arch);
+  render (&v, scmp_arch);
   print_as_comment (output_fp, "Label  CODE  JT   JF      K");
   print_as_comment (output_fp, "---------------------------------");
 
@@ -40,10 +39,8 @@ print_prog (uint32_t scmp_arch, fprog *prog, FILE *output_fp)
 
   print_as_comment (output_fp, "---------------------------------");
 
-  for (uint32_t i = 0; i < v_ptr.count; i++)
-    free (*((char **)get_vector (&v_ptr, i)));
   free_vector (&v);
-  free_vector (&v_ptr);
+  free_pile ();
 }
 
 void
