@@ -2,6 +2,7 @@
 #include "arch_trans.h"
 #include "hash.h"
 #include "log/error.h"
+#include "log/logger.h"
 #include "main.h"
 #include "scanner.h"
 #include "token.h"
@@ -404,7 +405,10 @@ label_decl (string_t *label_decl)
   label_decl->start = parse.current.token_start;
   label_decl->len = parse.current.token_len - 1;
   // ignore the ':' character
-  insert_key (label_decl, parse.code_nr);
+  if (insert_key (label_decl, parse.code_nr) == 1)
+    {
+      warn ("Found duplicated tag %.*s\n", label_decl->len, label_decl->start);
+    }
 
   // ignore our disasm useless output
   uint32_t count = 0;
