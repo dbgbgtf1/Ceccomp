@@ -8,6 +8,8 @@
 #include "probe.h"
 #include "trace.h"
 #include <assert.h>
+#include <libintl.h>
+#include <locale.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -110,6 +112,13 @@ version (void)
 int
 main (int argc, char *argv[])
 {
+#ifdef LOCALEDIR
+  setlocale (LC_ALL, "");
+  setlocale (LC_CTYPE, "C"); // scanner are designed based on ascii
+  bindtextdomain ("ceccomp", LOCALEDIR);
+  textdomain ("ceccomp");
+#endif
+
 #ifdef DEBUG
   setbuf (stdin, NULL);
   setbuf (stdout, NULL);

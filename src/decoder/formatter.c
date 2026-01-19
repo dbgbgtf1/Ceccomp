@@ -14,7 +14,7 @@ static void
 print_num (obj_t *tk)
 {
   if (tk->literal.start != NULL)
-    fprintf (fp, "%.*s", tk->literal.len, tk->literal.start);
+    fwrite (tk->literal.start, 1, tk->literal.len, fp);
   else
     fprintf (fp, "0x%x", tk->data);
 }
