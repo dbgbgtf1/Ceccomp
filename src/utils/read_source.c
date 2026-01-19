@@ -169,7 +169,7 @@ init_source (FILE *read_fp)
   if ((found0 = memchr (source, '\0', current)))
     error (M_FOUND_SUS_ZERO, found0 - source);
 
-  if (current % GROW_LEN == 0)
+  if (current % GROW_LEN == 0 || current % GROW_LEN > GROW_LEN - 0x20)
     increase_map (); // scanner expect a trailing \n, which may increase map
 
   return process_source ();
