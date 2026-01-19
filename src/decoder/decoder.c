@@ -14,23 +14,26 @@
 #include <stdint.h>
 #include <string.h>
 
-static token_type abs_table[] = {
-  [offsetof (seccomp_data, nr)] = ATTR_SYSCALL,
-  [offsetof (seccomp_data, arch)] = ATTR_ARCH,
-  [offsetof (seccomp_data, instruction_pointer)] = ATTR_LOWPC,
-  [offsetof (seccomp_data, instruction_pointer) + 4] = ATTR_HIGHPC,
-  [offsetof (seccomp_data, args[0])] = ATTR_LOWARG,
-  [offsetof (seccomp_data, args[0]) + 4] = ATTR_HIGHARG,
-  [offsetof (seccomp_data, args[1])] = ATTR_LOWARG,
-  [offsetof (seccomp_data, args[1]) + 4] = ATTR_HIGHARG,
-  [offsetof (seccomp_data, args[2])] = ATTR_LOWARG,
-  [offsetof (seccomp_data, args[2]) + 4] = ATTR_HIGHARG,
-  [offsetof (seccomp_data, args[3])] = ATTR_LOWARG,
-  [offsetof (seccomp_data, args[3]) + 4] = ATTR_HIGHARG,
-  [offsetof (seccomp_data, args[4])] = ATTR_LOWARG,
-  [offsetof (seccomp_data, args[4]) + 4] = ATTR_HIGHARG,
-  [offsetof (seccomp_data, args[5])] = ATTR_LOWARG,
-  [offsetof (seccomp_data, args[5]) + 4] = ATTR_HIGHARG,
+#define RSH2(value) ((value) >> 2)
+#define RSH4(value) ((value) >> 4)
+
+static const token_type abs_table[] = {
+  [RSH2 (offsetof (seccomp_data, nr))] = ATTR_SYSCALL,
+  [RSH2 (offsetof (seccomp_data, arch))] = ATTR_ARCH,
+  [RSH2 (offsetof (seccomp_data, instruction_pointer))] = ATTR_LOWPC,
+  [RSH2 (offsetof (seccomp_data, instruction_pointer) + 4)] = ATTR_HIGHPC,
+  [RSH2 (offsetof (seccomp_data, args[0]))] = ATTR_LOWARG,
+  [RSH2 (offsetof (seccomp_data, args[0]) + 4)] = ATTR_HIGHARG,
+  [RSH2 (offsetof (seccomp_data, args[1]))] = ATTR_LOWARG,
+  [RSH2 (offsetof (seccomp_data, args[1]) + 4)] = ATTR_HIGHARG,
+  [RSH2 (offsetof (seccomp_data, args[2]))] = ATTR_LOWARG,
+  [RSH2 (offsetof (seccomp_data, args[2]) + 4)] = ATTR_HIGHARG,
+  [RSH2 (offsetof (seccomp_data, args[3]))] = ATTR_LOWARG,
+  [RSH2 (offsetof (seccomp_data, args[3]) + 4)] = ATTR_HIGHARG,
+  [RSH2 (offsetof (seccomp_data, args[4]))] = ATTR_LOWARG,
+  [RSH2 (offsetof (seccomp_data, args[4]) + 4)] = ATTR_HIGHARG,
+  [RSH2 (offsetof (seccomp_data, args[5]))] = ATTR_LOWARG,
+  [RSH2 (offsetof (seccomp_data, args[5]) + 4)] = ATTR_HIGHARG,
 };
 
 static void
@@ -54,7 +57,7 @@ ld_ldx_line (filter f, statement_t *statement)
       right->data = f.k;
       return;
     case BPF_ABS:
-      right->type = abs_table[f.k];
+      right->type = abs_table[RSH2 (f.k)];
       if (right->type == ATTR_LOWARG || right->type == ATTR_HIGHARG)
         right->data = (f.k - offsetof (seccomp_data, args[0])) / 0x8;
       return;
@@ -79,11 +82,12 @@ st_stx_line (filter f, statement_t *statement)
   assign_line->right_var.type = (BPF_CLASS (f.code) == BPF_ST) ? A : X;
 }
 
-static token_type operator_table[] = {
-  [BPF_ADD] = ADD_TO,    [BPF_SUB] = SUB_TO, [BPF_MUL] = MULTI_TO,
-  [BPF_DIV] = DIVIDE_TO, [BPF_OR] = OR_TO,   [BPF_AND] = AND_TO,
-  [BPF_LSH] = LSH_TO,    [BPF_RSH] = RSH_TO, [BPF_NEG] = NEGATIVE,
-  [BPF_XOR] = XOR_TO,
+static const token_type operator_table[] = {
+  [RSH4 (BPF_ADD)] = ADD_TO,   [RSH4 (BPF_SUB)] = SUB_TO,
+  [RSH4 (BPF_MUL)] = MULTI_TO, [RSH4 (BPF_DIV)] = DIVIDE_TO,
+  [RSH4 (BPF_OR)] = OR_TO,     [RSH4 (BPF_AND)] = AND_TO,
+  [RSH4 (BPF_LSH)] = LSH_TO,   [RSH4 (BPF_RSH)] = RSH_TO,
+  [RSH4 (BPF_NEG)] = NEGATIVE, [RSH4 (BPF_XOR)] = XOR_TO,
 };
 
 static void
@@ -93,7 +97,7 @@ alu_line (filter f, statement_t *statement)
   assign_line_t *assign_line = &statement->assign_line;
 
   assign_line->left_var.type = A;
-  assign_line->operator = operator_table[BPF_OP (f.code)];
+  assign_line->operator = operator_table[RSH4 (BPF_OP (f.code))];
 
   if (BPF_SRC (f.code) == BPF_X)
     assign_line->right_var.type = X;
@@ -106,26 +110,17 @@ alu_line (filter f, statement_t *statement)
     }
 }
 
-static void
-ja_line (filter f, jump_line_t *statement)
-{
-  statement->if_bang = false;
-  statement->if_condition = false;
-  statement->jt.type = NUMBER;
-  statement->jt.code_nr = f.k;
-}
-
-static token_type comparator_table[] = {
-  [BPF_JEQ] = EQUAL_EQUAL,
-  [BPF_JGT] = GREATER_THAN,
-  [BPF_JGE] = GREATER_EQUAL,
-  [BPF_JSET] = AND,
+static const token_type comparator_table[] = {
+  [RSH4 (BPF_JEQ)] = EQUAL_EQUAL,
+  [RSH4 (BPF_JGT)] = GREATER_THAN,
+  [RSH4 (BPF_JGE)] = GREATER_EQUAL,
+  [RSH4 (BPF_JSET)] = AND,
 };
 
-static token_type reverse_table[] = {
-  [BPF_JEQ] = BANG_EQUAL,
-  [BPF_JGT] = LESS_EQUAL,
-  [BPF_JGE] = LESS_THAN,
+static const token_type reverse_table[] = {
+  [RSH4 (BPF_JEQ)] = BANG_EQUAL,
+  [RSH4 (BPF_JGT)] = LESS_EQUAL,
+  [RSH4 (BPF_JGE)] = LESS_THAN,
 };
 
 static void
@@ -133,10 +128,10 @@ condition (filter f, token_type *comparator, obj_t *cmpobj, bool *if_bang)
 {
   uint32_t op = BPF_OP (f.code);
   if ((!*if_bang) || op == BPF_JSET)
-    *comparator = comparator_table[op];
+    *comparator = comparator_table[RSH4 (op)];
   else
     {
-      *comparator = reverse_table[op];
+      *comparator = reverse_table[RSH4 (op)];
       *if_bang = false;
     }
 
@@ -157,7 +152,10 @@ jump_line (filter f, statement_t *statement)
 
   if (BPF_OP (f.code) == BPF_JA)
     {
-      ja_line (f, jump_line);
+      jump_line->if_bang = false;
+      jump_line->if_condition = false;
+      jump_line->jt.type = NUMBER;
+      jump_line->jt.code_nr = f.k;
       return;
     }
 

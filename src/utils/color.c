@@ -35,9 +35,9 @@ set_color (color_mode_t color, FILE *output)
     }
 }
 
-bool enable_stack[0x10];
+static bool enable_stack[0x10];
 // 0x10 is definitely enough;
-static uint8_t enable_sp = 0x0;
+static uint32_t enable_sp = 0;
 
 void
 push_color (bool enable)

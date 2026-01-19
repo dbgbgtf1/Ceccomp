@@ -40,19 +40,13 @@ advance (void)
 static bool
 peek (token_type expected)
 {
-  if (expected != parse.next.type)
-    return false;
-
-  return true;
+  return expected == parse.next.type;
 }
 
 static bool
 peek_from_to (token_type from, token_type to)
 {
-  if (parse.next.type < from || parse.next.type > to)
-    return false;
-
-  return true;
+  return parse.next.type >= from && parse.next.type <= to;
 }
 
 static bool
@@ -180,9 +174,12 @@ label (label_t *label)
 static uint32_t
 resolve_name_arch (uint32_t arch_token, token_t *sys_token)
 {
-  char *sys_name = strndup (sys_token->token_start, sys_token->token_len);
-  uint32_t sys_nr = seccomp_syscall_resolve_name_arch (arch_token, sys_name);
-  free (sys_name);
+  char *sysname = sys_token->token_start;
+  char *strend = sys_token->token_start + sys_token->token_len;
+  char save = *strend;
+  *strend = '\0';
+  uint32_t sys_nr = seccomp_syscall_resolve_name_arch (arch_token, sysname);
+  *strend = save;
   return sys_nr;
 }
 
@@ -420,7 +417,7 @@ static void
 parse_line (statement_t *statement)
 {
   local = statement;
-  memset (local, '\0', sizeof (statement_t));
+  memset (local, 0, sizeof (statement_t));
 
   parse.text_nr++;
   parse.code_nr++;

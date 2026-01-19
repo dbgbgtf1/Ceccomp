@@ -108,15 +108,6 @@ assign_line (assign_line_t *assign_line, stat_ctx_t *ctx)
 }
 
 static void
-ja_line (jump_line_t *jump_line)
-{
-  uint32_t pc = local->code_nr;
-  uint32_t jt = pc + jump_line->jt.code_nr + 1;
-  set_ctx (jt, pc, !FORCE);
-  set_arch (jt, list[pc].arch);
-}
-
-static void
 try_resolve_arch (obj_t *cmpobj)
 {
   const string_t *arch_str = scmp_arch_to_str (cmpobj->data);
@@ -149,7 +140,11 @@ jump_line (jump_line_t *jump_line)
 {
   if (!jump_line->if_condition)
     {
-      ja_line (jump_line);
+      // ja line
+      uint32_t pc = local->code_nr;
+      uint32_t jt = pc + jump_line->jt.code_nr + 1;
+      set_ctx (jt, pc, !FORCE);
+      set_arch (jt, list[pc].arch);
       return;
     }
 

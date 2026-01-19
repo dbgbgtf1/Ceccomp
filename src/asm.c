@@ -20,15 +20,16 @@
 #include <stdio.h>
 #include <string.h>
 
+#define BASE_retvals(value) ((value) - KILL_PROC)
 static uint32_t retvals[] = {
-  [KILL_PROC] = SCMP_ACT_KILL_PROCESS,
-  [KILL] = SCMP_ACT_KILL,
-  [ALLOW] = SCMP_ACT_ALLOW,
-  [NOTIFY] = SCMP_ACT_NOTIFY,
-  [LOG] = SCMP_ACT_LOG,
-  [TRACE] = SCMP_ACT_TRACE (0),
-  [TRAP] = _SCMP_ACT_TRAP (0),
-  [ERRNO] = SCMP_ACT_ERRNO (0),
+  [BASE_retvals (KILL_PROC)] = SCMP_ACT_KILL_PROCESS,
+  [BASE_retvals (KILL)] = SCMP_ACT_KILL,
+  [BASE_retvals (ALLOW)] = SCMP_ACT_ALLOW,
+  [BASE_retvals (NOTIFY)] = SCMP_ACT_NOTIFY,
+  [BASE_retvals (LOG)] = SCMP_ACT_LOG,
+  [BASE_retvals (TRACE)] = SCMP_ACT_TRACE (0),
+  [BASE_retvals (TRAP)] = _SCMP_ACT_TRAP (0),
+  [BASE_retvals (ERRNO)] = SCMP_ACT_ERRNO (0),
 };
 
 static filter
@@ -45,21 +46,26 @@ return_line (return_line_t *return_line)
     f.k = return_line->ret_obj.data;
   else
     // KILL, KILL_PROC, ALLOW, NOTIFY, LOG has data = 0
-    f.k = retvals[return_line->ret_obj.type] | return_line->ret_obj.data;
+    f.k = retvals[BASE_retvals (return_line->ret_obj.type)]
+          | return_line->ret_obj.data;
   return f;
 }
+#undef BASE_retvals
 
-static uint32_t operator_table[] = {
-  [ADD_TO] = BPF_ADD,    [SUB_TO] = BPF_SUB, [MULTI_TO] = BPF_MUL,
-  [DIVIDE_TO] = BPF_DIV, [LSH_TO] = BPF_LSH, [RSH_TO] = BPF_RSH,
-  [AND_TO] = BPF_AND,    [OR_TO] = BPF_OR,   [XOR_TO] = BPF_XOR,
+#define BASE_operator(value) ((value) - ADD_TO)
+static const uint32_t operator_table[] = {
+  [BASE_operator (ADD_TO)] = BPF_ADD,   [BASE_operator (SUB_TO)] = BPF_SUB,
+  [BASE_operator (MULTI_TO)] = BPF_MUL, [BASE_operator (DIVIDE_TO)] = BPF_DIV,
+  [BASE_operator (LSH_TO)] = BPF_LSH,   [BASE_operator (RSH_TO)] = BPF_RSH,
+  [BASE_operator (AND_TO)] = BPF_AND,   [BASE_operator (OR_TO)] = BPF_OR,
+  [BASE_operator (XOR_TO)] = BPF_XOR,
 };
 
 static filter
 alu_line (assign_line_t *assign_line)
 {
   filter f = { .code = BPF_ALU, .jf = 0, .jt = 0, .k = 0 };
-  f.code |= operator_table[assign_line->operator];
+  f.code |= operator_table[BASE_operator (assign_line->operator)];
 
   if (assign_line->right_var.type == X)
     f.code |= BPF_X;
@@ -71,6 +77,7 @@ alu_line (assign_line_t *assign_line)
 
   return f;
 }
+#undef BASE_operator
 
 static filter
 negative_line (void)
@@ -104,28 +111,34 @@ ldx_line (assign_line_t *assign_line)
     f.code |= BPF_LDX | BPF_IMM;
   else if (assign_line->right_var.type == MEM)
     f.code |= BPF_LDX | BPF_MEM;
+  else if (assign_line->right_var.type == ATTR_LEN)
+    f.code |= BPF_LDX | BPF_LEN;
+  else
+    assert (!"right_var is neither NUM, MEM nor ATTR_LEN");
 
   f.k = assign_line->right_var.data;
   return f;
 }
 
-static uint32_t offset_table[] = {
-  [ATTR_SYSCALL] = offsetof (seccomp_data, nr),
-  [ATTR_ARCH] = offsetof (seccomp_data, arch),
-  [ATTR_LOWPC] = offsetof (seccomp_data, instruction_pointer),
-  [ATTR_HIGHPC] = offsetof (seccomp_data, instruction_pointer) + 4,
-  [ATTR_LOWARG] = offsetof (seccomp_data, args),
-  [ATTR_HIGHARG] = offsetof (seccomp_data, args) + 4,
+#define BASE_off(value) ((value) - ATTR_SYSCALL)
+static const uint32_t offset_table[] = {
+  [BASE_off (ATTR_SYSCALL)] = offsetof (seccomp_data, nr),
+  [BASE_off (ATTR_ARCH)] = offsetof (seccomp_data, arch),
+  [BASE_off (ATTR_LOWPC)] = offsetof (seccomp_data, instruction_pointer),
+  [BASE_off (ATTR_HIGHPC)] = offsetof (seccomp_data, instruction_pointer) + 4,
+  [BASE_off (ATTR_LOWARG)] = offsetof (seccomp_data, args),
+  [BASE_off (ATTR_HIGHARG)] = offsetof (seccomp_data, args) + 4,
 };
 
 static uint32_t
 offset_abs (obj_t *obj)
 {
-  uint32_t offset = offset_table[obj->type];
+  uint32_t offset = offset_table[BASE_off (obj->type)];
   if (obj->type == ATTR_LOWARG || obj->type == ATTR_HIGHARG)
     offset += obj->data * sizeof (uint64_t);
   return offset;
 }
+#undef BASE_off
 
 static filter
 ld_line (assign_line_t *assign_line)
@@ -143,6 +156,10 @@ ld_line (assign_line_t *assign_line)
     {
       f.code |= BPF_LD | BPF_MEM;
       f.k = assign_line->right_var.data;
+    }
+  else if (assign_line->right_var.type == ATTR_LEN)
+    {
+      f.code |= BPF_LD | BPF_LEN;
     }
   else
     {
@@ -171,17 +188,22 @@ assign_line (assign_line_t *assign_line)
 }
 
 static void
-reverse_jt_jt (jump_line_t *jump_line)
+reverse_jf_jt (jump_line_t *jump_line)
 {
   label_t tmp = jump_line->jt;
   jump_line->jt = jump_line->jf;
   jump_line->jf = tmp;
 }
 
-static uint32_t comparator_table[] = {
-  [EQUAL_EQUAL] = BPF_JEQ, [BANG_EQUAL] = BPF_JEQ,   [GREATER_EQUAL] = BPF_JGE,
-  [LESS_THAN] = BPF_JGE,   [GREATER_THAN] = BPF_JGT, [LESS_EQUAL] = BPF_JGT,
-  [AND] = BPF_JSET,
+#define BASE_comparator(value) ((value) - EQUAL_EQUAL)
+static const uint32_t comparator_table[] = {
+  [BASE_comparator (EQUAL_EQUAL)] = BPF_JEQ,
+  [BASE_comparator (BANG_EQUAL)] = BPF_JEQ,
+  [BASE_comparator (GREATER_EQUAL)] = BPF_JGE,
+  [BASE_comparator (LESS_THAN)] = BPF_JGE,
+  [BASE_comparator (GREATER_THAN)] = BPF_JGT,
+  [BASE_comparator (LESS_EQUAL)] = BPF_JGT,
+  [BASE_comparator (AND)] = BPF_JSET,
 };
 
 static filter
@@ -201,9 +223,9 @@ jump_line (jump_line_t *jump_line)
       || comparator == LESS_THAN)
     sym_reverse = true;
 
-  f.code |= comparator_table[jump_line->comparator];
+  f.code |= comparator_table[BASE_comparator (jump_line->comparator)];
   if (sym_reverse ^ jump_line->if_bang)
-    reverse_jt_jt (jump_line);
+    reverse_jf_jt (jump_line);
   f.jt = jump_line->jt.code_nr;
   f.jf = jump_line->jf.code_nr;
 
@@ -217,6 +239,7 @@ jump_line (jump_line_t *jump_line)
 
   return f;
 }
+#undef BASE_comparator
 
 static filter
 asm_statement (statement_t *statement)
@@ -298,7 +321,7 @@ assemble (FILE *fp, uint32_t scmp_arch, print_mode_t print_mode)
   vector_t text_v;
   vector_t code_ptr_v;
   init_vector (&text_v, sizeof (statement_t), lines);
-  init_vector (&code_ptr_v, sizeof (statement_t *), MIN(lines, 1025));
+  init_vector (&code_ptr_v, sizeof (statement_t *), MIN (lines, 1025));
   parser (&text_v, &code_ptr_v);
   if (resolver (&code_ptr_v))
     error ("%s", M_ASM_TERMINATED);

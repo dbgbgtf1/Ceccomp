@@ -1,5 +1,6 @@
 #include "formatter.h"
 #include "color.h"
+#include "main.h"
 #include "parser.h"
 #include "token.h"
 #include <assert.h>
@@ -198,7 +199,11 @@ print_comment (statement_t *statement)
     return;
   if (statement->type != EMPTY_LINE)
     fputc (' ', fp); // prepend a ' ' if a effective line (return 1 # aa)
-  fprintf (fp, LIGHT ("%.*s"), comment_len, comment_start);
+  if (color_enable)
+    fwrite (LIGHTCLR, 1, LITERAL_STRLEN (LIGHTCLR), fp);
+  fwrite (comment_start, 1, comment_len, fp);
+  if (color_enable)
+    fwrite (CLR, 1, LITERAL_STRLEN (CLR), fp);
 }
 
 void
@@ -209,7 +214,7 @@ print_as_comment (FILE *output_fp, const char *comment_fmt, ...)
   va_list args;
   va_start (args, comment_fmt);
 
-  static char buf[0x400];
+  char buf[0x400];
   buf[0] = '#';
   statement_t statement
       = { .type = EMPTY_LINE, .line_start = buf, .comment = 0 };

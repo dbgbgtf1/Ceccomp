@@ -6,20 +6,15 @@
 #include <linux/audit.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <sys/utsname.h>
 
 static inline bool
 need_reverse_endian (uint32_t target_scmp_arch)
 {
-  bool local_le;
-
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-  local_le = false;
+  return (target_scmp_arch & __AUDIT_ARCH_LE);
 #else
-  local_le = true;
+  return !(target_scmp_arch & __AUDIT_ARCH_LE);
 #endif
-
-  return ((bool)(target_scmp_arch & __AUDIT_ARCH_LE) ^ (local_le));
 }
 
 static inline void

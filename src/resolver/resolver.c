@@ -34,8 +34,7 @@ report_error (const char *error_msg)
   char buf[0x400];
   char *print = buf;
 
-  SPRINTF_CAT (print, "At %04d: ", local->text_nr);
-  SPRINTF_CAT (print, "%s\n", error_msg);
+  SPRINTF_CAT (print, "At %04d: %s\n", local->text_nr, error_msg);
   SPRINTF_CAT (print, "%.*s", local->line_len, local->line_start);
 
   warn ("%s", buf);
@@ -44,10 +43,7 @@ report_error (const char *error_msg)
 static bool
 match_from_to (token_type type, token_type from, token_type to)
 {
-  if (type < from || type > to)
-    return false;
-
-  return true;
+  return type >= from && type <= to;
 }
 
 static void
@@ -59,11 +55,10 @@ error_line (void)
 
   error_line_t *error_line = &local->error_line;
 
-  SPRINTF_CAT (print, "At %04d: ", local->text_nr);
-  SPRINTF_CAT (print, "%s\n", error_line->error_msg);
+  SPRINTF_CAT (print, "At %04d: %s\n", local->text_nr, error_line->error_msg);
   uint16_t err_len = error_line->error_start - local->line_start;
-  SPRINTF_CAT (print, "%.*s\n", local->line_len, local->line_start);
-  SPRINTF_CAT (print, "%*s", err_len + 1, "^");
+  SPRINTF_CAT (print, "%.*s\n%*c", local->line_len, local->line_start,
+               err_len + 1, '^');
 
   warn ("%s", buf);
 }
@@ -75,9 +70,7 @@ error_line (void)
 static bool
 is_out_range (obj_t *obj, uint32_t max_idx)
 {
-  if (obj->data > max_idx)
-    return true;
-  return false;
+  return obj->data > max_idx;
 }
 
 static void
@@ -100,20 +93,17 @@ assign_A (assign_line_t *assign_line)
       if (operator == DIVIDE_TO && right->type == NUMBER && right->data == 0)
         REPORT_ERROR (M_ALU_DIV_BY_ZERO);
 
-      if (match_from_to (operator, LSH_TO, RSH_TO))
-        if (right->type == NUMBER && right->data >= 32)
-          REPORT_ERROR (M_ALU_SH_OUT_OF_RANGE);
+      // clang-format off
+      if (match_from_to (operator, LSH_TO, RSH_TO) &&
+          right->type == NUMBER && right->data >= 32)
+        // clang-format on
+        REPORT_ERROR (M_ALU_SH_OUT_OF_RANGE);
       return;
     }
 
   assert (operator == EQUAL);
 
-  if (right->type == ATTR_LEN)
-    {
-      right->type = NUMBER;
-      right->data = LEN_VAL;
-    }
-  else if (right->type == A)
+  if (right->type == A)
     REPORT_ERROR (M_RIGHT_CAN_NOT_BE_A);
   else if ((right->type == ATTR_LOWARG || right->type == ATTR_HIGHARG)
            && IS_ARG_OUT_RANGE (right))
@@ -136,12 +126,7 @@ assign_X (assign_line_t *assign_line)
   if (*operator != EQUAL)
     REPORT_ERROR (M_OPERATOR_SHOULD_BE_EQUAL);
 
-  if (right->type == ATTR_LEN)
-    {
-      right->type = NUMBER;
-      right->data = LEN_VAL;
-    }
-  else if (match_from_to (right->type, ATTR_SYSCALL, ATTR_HIGHARG))
+  if (match_from_to (right->type, ATTR_SYSCALL, ATTR_HIGHARG))
     REPORT_ERROR (M_LEFT_SHOULD_BE_A);
 
   else if (right->type == X)
@@ -281,7 +266,7 @@ resolve_statement (statement_t *statement)
     // nothing need to be done for these line
     case EMPTY_LINE:
     case EOF_LINE:
-      assert (0);
+      assert (!"Resolving EMPTY_LINE/EOF_LINE??");
     }
 }
 
