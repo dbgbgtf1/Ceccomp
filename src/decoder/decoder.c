@@ -6,6 +6,7 @@
 #include "parser.h"
 #include "token.h"
 #include "vector.h"
+#include <assert.h>
 #include <linux/bpf_common.h>
 #include <linux/filter.h>
 #include <stdbool.h>
@@ -60,6 +61,8 @@ ld_ldx_line (filter f, statement_t *statement)
     case BPF_LEN:
       right->type = ATTR_LEN;
       return;
+    default:
+      assert(!"Unknown BPF_MODE for ld or ldx");
     }
 }
 

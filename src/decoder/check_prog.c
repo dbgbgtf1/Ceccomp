@@ -77,7 +77,7 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
   uint16_t code = f.code;
   uint32_t k = f.k;
 
-  if (code >= ARRAY_SIZE(codes) || !codes[code])
+  if (code >= ARRAY_SIZE (codes) || !codes[code])
     error ("%s", M_INVALID_OPERATION);
 
   switch (code)
@@ -154,6 +154,7 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
 bool
 check_prog (fprog *prog)
 {
+  bool err = true;
   masks = reallocate (NULL, sizeof (*masks) * prog->len);
   memset (masks, 0xff, sizeof (*masks) * prog->len);
   mem_valid = 0;
@@ -162,16 +163,19 @@ check_prog (fprog *prog)
     {
 
       if (check_filter (prog->filter, i, prog->len))
-        goto err;
+        goto complete;
     }
 
   uint16_t last = prog->filter[prog->len - 1].code;
   if ((last != (BPF_RET | BPF_A)) && (last != (BPF_RET | BPF_K)))
-    return report_error (M_MUST_END_WITH_RET);
+    {
+      report_error (M_MUST_END_WITH_RET);
+      goto complete;
+    }
 
-  return false;
+  err = false;
 
-err:
+complete:
   reallocate (masks, 0x0);
-  return true;
+  return err;
 }
