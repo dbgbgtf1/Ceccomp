@@ -112,9 +112,9 @@ version (void)
 int
 main (int argc, char *argv[])
 {
+  lc_c = newlocale (LC_ALL_MASK, "C", NULL);
 #ifdef LOCALEDIR
   setlocale (LC_ALL, "");
-  setlocale (LC_CTYPE, "C"); // scanner are designed based on ascii
   bindtextdomain ("ceccomp", LOCALEDIR);
   textdomain ("ceccomp");
 #endif

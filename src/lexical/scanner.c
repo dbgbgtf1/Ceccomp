@@ -1,5 +1,6 @@
 #include "scanner.h"
 #include "arch_trans.h"
+#include "config.h"
 #include "log/logger.h"
 #include "main.h"
 #include "parser.h"
@@ -43,7 +44,7 @@ static uint8_t unknown_count = 0;
 static inline bool
 isidentifier (char c)
 {
-  return isalnum (c) || c == '_';
+  return isalnum_l (c, lc_c) || c == '_';
 }
 
 static char
@@ -111,7 +112,7 @@ static void
 skip_spaces (void)
 {
   // spaces
-  while (isspace (peek (0)) && peek (0) != '\n')
+  while (isspace_l (peek (0), lc_c) && peek (0) != '\n')
     advance (1);
 }
 
@@ -152,7 +153,7 @@ scan_token (token_t *token)
     }
 
   char cur_char = peek (0);
-  if (islower (cur_char))
+  if (islower_l (cur_char, lc_c))
     {
       token_type tk = match_token_range (RETURN, ELSE);
       if (tk != UNKNOWN)
@@ -164,13 +165,13 @@ scan_token (token_t *token)
           INIT_TOKEN (tk);
         }
     }
-  else if (isupper (cur_char))
+  else if (isupper_l (cur_char, lc_c))
     {
       token_type tk = match_token_range (KILL_PROC, ERRNO);
       if (tk != UNKNOWN)
         INIT_TOKEN (tk);
     }
-  else if (ispunct (cur_char))
+  else if (ispunct_l (cur_char, lc_c))
     {
       switch (cur_char)
         {
@@ -250,7 +251,7 @@ scan_token (token_t *token)
   // LABEL_DECL : IDENTIFIER
   // IDENTIFIER include SYSCALL and label
   // We don't want hash the SYSCALL, so leave it later
-  if (isalpha (peek (0)))
+  if (isalpha_l (peek (0), lc_c))
     {
       do
         advance (1);
@@ -260,7 +261,7 @@ scan_token (token_t *token)
     }
 
   // NUMBER
-  if (isxdigit (peek (0)))
+  if (isxdigit_l (peek (0), lc_c))
     {
       char *end;
       errno = 0;
