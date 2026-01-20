@@ -194,7 +194,8 @@ emulate_printer (statement_t *statement, bool is_skipped, bool quiet)
   if (quiet)
     return;
 
-  if (is_skipped && color_enable)
+  bool global_color = color_enable;
+  if (is_skipped && global_color)
     {
       fwrite (LIGHTCLR, 1, LITERAL_STRLEN (LIGHTCLR), stdout);
       push_color (false);
@@ -203,7 +204,7 @@ emulate_printer (statement_t *statement, bool is_skipped, bool quiet)
   print_label_decl (statement);
   print_statement (stdout, statement);
 
-  if (is_skipped && color_enable)
+  if (is_skipped && global_color)
     {
       pop_color ();
       fwrite (CLR, 1, LITERAL_STRLEN (CLR), stdout);
