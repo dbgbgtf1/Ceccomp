@@ -271,11 +271,11 @@ scan_token (token_t *token)
       INIT_TOKEN_DATA (NUMBER, num);
     }
 
+unknown:
   // perhaps that's a wrong file? tell parser to stop using EOF
   if (unknown_count > 5)
     INIT_TOKEN (TOKEN_EOF);
 
-unknown:
   unknown_count += 1;
   advance (1);
   INIT_TOKEN (UNKNOWN);
