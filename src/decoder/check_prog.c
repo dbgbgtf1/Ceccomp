@@ -1,3 +1,19 @@
+// SPDX-License-Identifier: GPL-2.0-or-later
+/**
+ * This part of code are adapted from Linux kernel,
+ * source files are: net/core/filter.c and kernel/seccomp.c
+ *
+ * Thanks to following authors and their commit time:
+ *
+ * 2012       Will Drewry <wad@chromium.org>
+ * 2004-2005  Andrea Arcangeli <andrea@cpushare.com>
+ * 2011-2014  PLUMgrid, http://plumgrid.com
+ *            Jay Schulist <jschlst@samba.org>
+ *            Alexei Starovoitov <ast@plumgrid.com>
+ *            Daniel Borkmann <dborkman@redhat.com>
+ *            Andi Kleen
+ *            Kris Katterjohn
+ */
 #include "check_prog.h"
 #include "log/error.h"
 #include "log/logger.h"

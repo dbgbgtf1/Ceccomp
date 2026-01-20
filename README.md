@@ -76,6 +76,9 @@ Any Issue or Pr are welcome!
 
 - [seccomp-tools](https://github.com/david942j/seccomp-tools): The tool in Ruby inspires us to write ceccomp
 - [Bootswatch](https://bootswatch.com/slate/): Provides awesome css for html doc under MIT
+- [Linux kernel](https://github.com/torvalds/linux): Port some bpf checks
+- [Verstable](https://github.com/JacksonAllan/Verstable): High-performance hash table implementation in C
+- [a5hash](https://github.com/avaneev/a5hash): High-performance hash implementation for short strings in C
 
 # License
 
