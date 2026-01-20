@@ -97,11 +97,13 @@ uint32_t err_len[] = {
 };
 
 #define SPRINTF_CAT(...) print += sprintf (print, __VA_ARGS__)
-static bool
+static uint32_t
 report_error (filter f, err_idx idx, const char *err_msg)
 {
   char buf[0x400];
   char *print = buf;
+  static uint32_t err_count = 0;
+  err_count += 1;
 
   SPRINTF_CAT ("%s\nCODE:0x%04x JT:0x%02x JF:0x%02x K:0x%08x\n", err_msg,
                f.code, f.jt, f.jf, f.k);
@@ -115,11 +117,11 @@ report_error (filter f, err_idx idx, const char *err_msg)
     }
   warn ("%s", buf);
 
-  return true;
+  return err_count;
 }
 
-// return true if error
-static bool
+// return true means stop check
+static uint32_t
 check_filter (filter *fptr, uint32_t pc, uint32_t flen)
 {
   filter f = fptr[pc];
@@ -127,7 +129,7 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
   uint32_t k = f.k;
 
   if (code >= ARRAY_SIZE (codes) || !codes[code])
-    error ("%s", M_INVALID_OPERATION);
+    return report_error (f, NONE, M_INVALID_OPERATION);
 
   switch (code)
     {
@@ -210,8 +212,7 @@ check_prog (fprog *prog)
 
   for (uint16_t i = 0; i < prog->len; i++)
     {
-
-      if (check_filter (prog->filter, i, prog->len))
+      if (check_filter (prog->filter, i, prog->len) > 5)
         goto complete;
     }
 
