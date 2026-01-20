@@ -78,6 +78,8 @@ static const bool codes[] = {
 };
 
 static uint16_t *masks, mem_valid = 0;
+static uint32_t fatal_count = 0;
+static uint32_t error_count = 0;
 
 typedef enum
 {
@@ -97,13 +99,16 @@ uint32_t err_len[] = {
 };
 
 #define SPRINTF_CAT(...) print += sprintf (print, __VA_ARGS__)
-static uint32_t
-report_error (filter f, err_idx idx, const char *err_msg)
+static void
+report_error (filter f, err_idx idx, bool fatal, const char *err_msg)
 {
+  if (fatal)
+    fatal_count++;
+  else
+    error_count++;
+
   char buf[0x400];
   char *print = buf;
-  static uint32_t err_count = 0;
-  err_count += 1;
 
   SPRINTF_CAT ("%s\nCODE:0x%04x JT:0x%02x JF:0x%02x K:0x%08x\n", err_msg,
                f.code, f.jt, f.jf, f.k);
@@ -116,12 +121,11 @@ report_error (filter f, err_idx idx, const char *err_msg)
       print[err_len[idx] + 1] = '\0';
     }
   warn ("%s", buf);
-
-  return err_count;
 }
 
+#define FATAL true
 // return true means stop check
-static uint32_t
+static void
 check_filter (filter *fptr, uint32_t pc, uint32_t flen)
 {
   filter f = fptr[pc];
@@ -129,58 +133,50 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
   uint32_t k = f.k;
 
   if (code >= ARRAY_SIZE (codes) || !codes[code])
-    return report_error (f, NONE, M_INVALID_OPERATION);
+    return report_error (f, NONE, FATAL, M_INVALID_OPERATION);
 
   switch (code)
     {
     case BPF_LD | BPF_W | BPF_ABS:
       f.code = BPF_LDX | BPF_W | BPF_ABS;
       if (k >= sizeof (struct seccomp_data) || k & 3)
-        return report_error (f, K_ERR, M_INVALID_ATTR_LOAD);
-      return false;
+        return report_error (f, K_ERR, FATAL, M_INVALID_ATTR_LOAD);
 
     case BPF_LD | BPF_W | BPF_LEN:
       f.code = BPF_LD | BPF_IMM;
       f.k = sizeof (struct seccomp_data);
-      return false;
 
     case BPF_LDX | BPF_W | BPF_LEN:
       f.code = BPF_LDX | BPF_IMM;
       f.k = sizeof (struct seccomp_data);
-      return false;
 
     case BPF_ALU | BPF_DIV | BPF_K:
       if (f.k == 0)
-        return report_error (f, K_ERR, M_ALU_DIV_BY_ZERO);
-      return false;
+        return report_error (f, K_ERR, !FATAL, M_ALU_DIV_BY_ZERO);
 
     case BPF_ALU | BPF_LSH | BPF_K:
     case BPF_ALU | BPF_RSH | BPF_K:
       if (f.k >= 32)
-        return report_error (f, K_ERR, M_ALU_SH_OUT_OF_RANGE);
-      return false;
+        return report_error (f, K_ERR, !FATAL, M_ALU_SH_OUT_OF_RANGE);
 
     case BPF_LD | BPF_MEM:
     case BPF_LDX | BPF_MEM:
       if (f.k >= BPF_MEMWORDS)
-        return report_error (f, K_ERR, M_MEM_IDX_OUT_OF_RANGE);
+        return report_error (f, K_ERR, !FATAL, M_MEM_IDX_OUT_OF_RANGE);
       if (!(mem_valid & (1 << fptr[pc].k)))
-        return report_error (f, NONE, M_UNINITIALIZED_MEM);
-      return false;
+        return report_error (f, NONE, !FATAL, M_UNINITIALIZED_MEM);
 
     case BPF_ST:
     case BPF_STX:
       if (f.k >= BPF_MEMWORDS)
-        return report_error (f, K_ERR, M_MEM_IDX_OUT_OF_RANGE);
+        return report_error (f, K_ERR, !FATAL, M_MEM_IDX_OUT_OF_RANGE);
       mem_valid |= (1 << fptr[pc].k);
-      return false;
 
     case BPF_JMP | BPF_JA:
       if (f.k >= (uint32_t)(flen - pc - 1))
-        return report_error (f, K_ERR, M_JT_TOO_FAR);
+        return report_error (f, K_ERR, !FATAL, M_JT_TOO_FAR);
       masks[pc + 1 + fptr[pc].k] &= mem_valid;
       mem_valid = ~0;
-      return false;
 
     case BPF_JMP | BPF_JEQ | BPF_K:
     case BPF_JMP | BPF_JEQ | BPF_X:
@@ -191,28 +187,28 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
     case BPF_JMP | BPF_JSET | BPF_K:
     case BPF_JMP | BPF_JSET | BPF_X:
       if (pc + f.jt + 1 >= flen)
-        return report_error (f, JT_ERR, M_JT_TOO_FAR);
+        return report_error (f, JT_ERR, !FATAL, M_JT_TOO_FAR);
       if (pc + f.jf + 1 >= flen)
-        return report_error (f, JF_ERR, M_JF_TOO_FAR);
+        return report_error (f, JF_ERR, !FATAL, M_JF_TOO_FAR);
       masks[pc + 1 + fptr[pc].jt] &= mem_valid;
       masks[pc + 1 + fptr[pc].jf] &= mem_valid;
       mem_valid = ~0;
-      return false;
     }
-  return false;
 }
 
 bool
 check_prog (fprog *prog)
 {
-  bool err = true;
   masks = reallocate (NULL, sizeof (*masks) * prog->len);
   memset (masks, 0xff, sizeof (*masks) * prog->len);
   mem_valid = 0;
 
   for (uint16_t i = 0; i < prog->len; i++)
     {
-      if (check_filter (prog->filter, i, prog->len) > 5)
+      check_filter (prog->filter, i, prog->len);
+      // if fatal_count > 5, stop disasm immediately
+      // perhaps a wrong file?
+      if (fatal_count > 5)
         goto complete;
     }
 
@@ -220,13 +216,17 @@ check_prog (fprog *prog)
   uint16_t last_code = last.code;
   if ((last_code != (BPF_RET | BPF_A)) && (last_code != (BPF_RET | BPF_K)))
     {
-      report_error (last, NONE, M_MUST_END_WITH_RET);
+      report_error (last, NONE, !FATAL, M_MUST_END_WITH_RET);
       goto complete;
     }
 
-  err = false;
-
 complete:
+  // set has_error to skip render.
+  // some error might cause mem overflow in render
+  if (error_count)
+    has_error = true;
+
   reallocate (masks, 0x0);
-  return err;
+  // if fatal_error occurs, stop disasm
+  return (bool)fatal_count;
 }

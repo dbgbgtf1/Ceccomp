@@ -241,6 +241,8 @@ decode_filter (filter f, statement_t *statement)
 void
 decode_filters (fprog *prog, vector_t *v)
 {
+  // make sure all filter are valid
+  // give warning about fatal and normal errors
   if (check_prog (prog))
     error ("%s", M_DISASM_TERMINATED);
 

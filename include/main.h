@@ -2,6 +2,7 @@
 #define MAIN
 
 // clang-format off
+#include <stdbool.h>
 #include <stdint.h>
 #include <sys/ptrace.h>
 #include <linux/filter.h>
@@ -22,6 +23,8 @@ typedef struct
   const char *start;
   uint32_t len;
 } string_t;
+
+extern bool has_error;
 
 #define STARTWITH(str, token) (!strncmp (str, token, strlen (token)))
 
