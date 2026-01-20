@@ -24,6 +24,7 @@
 #include <linux/filter.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <string.h>
 
 static const bool codes[] = {
@@ -78,10 +79,42 @@ static const bool codes[] = {
 
 static uint16_t *masks, mem_valid = 0;
 
-static bool
-report_error (const char *err_msg)
+typedef enum
 {
-  warn ("%s", err_msg);
+  CODE_ERR,
+  JT_ERR,
+  JF_ERR,
+  K_ERR,
+  NONE,
+} err_idx;
+
+uint32_t err_len[] = {
+  [CODE_ERR] = 0,
+  [JT_ERR] = LITERAL_STRLEN ("CODE:0x1234 "),
+  [JF_ERR] = LITERAL_STRLEN ("CODE:0x1234 JT:0x56"),
+  [K_ERR] = LITERAL_STRLEN ("CODE:0x1234 JF:0x56 JT:0x78 "),
+  [NONE] = LITERAL_STRLEN ("CODE:0x1234 JF:0x56 JF:0x78 K:0x9abcdef0"),
+};
+
+#define SPRINTF_CAT(...) print += sprintf (print, __VA_ARGS__)
+static bool
+report_error (filter f, err_idx idx, const char *err_msg)
+{
+  char buf[0x400];
+  char *print = buf;
+
+  SPRINTF_CAT ("%s\nCODE:0x%04x JT:0x%02x JF:0x%02x K:0x%08x\n", err_msg,
+               f.code, f.jt, f.jf, f.k);
+  if (idx == NONE)
+    memset (print, '~', err_len[NONE]);
+  else
+    {
+      memset (print, ' ', err_len[idx]);
+      print[err_len[idx]] = '^';
+      print[err_len[idx] + 1] = '\0';
+    }
+  warn ("%s", buf);
+
   return true;
 }
 
@@ -101,7 +134,7 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
     case BPF_LD | BPF_W | BPF_ABS:
       f.code = BPF_LDX | BPF_W | BPF_ABS;
       if (k >= sizeof (struct seccomp_data) || k & 3)
-        return report_error (M_INVALID_ATTR_LOAD);
+        return report_error (f, K_ERR, M_INVALID_ATTR_LOAD);
       return false;
 
     case BPF_LD | BPF_W | BPF_LEN:
@@ -116,33 +149,33 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
 
     case BPF_ALU | BPF_DIV | BPF_K:
       if (f.k == 0)
-        return report_error (M_ALU_DIV_BY_ZERO);
+        return report_error (f, K_ERR, M_ALU_DIV_BY_ZERO);
       return false;
 
     case BPF_ALU | BPF_LSH | BPF_K:
     case BPF_ALU | BPF_RSH | BPF_K:
       if (f.k >= 32)
-        return report_error (M_ALU_SH_OUT_OF_RANGE);
+        return report_error (f, K_ERR, M_ALU_SH_OUT_OF_RANGE);
       return false;
 
     case BPF_LD | BPF_MEM:
     case BPF_LDX | BPF_MEM:
       if (f.k >= BPF_MEMWORDS)
-        return report_error (M_MEM_IDX_OUT_OF_RANGE);
+        return report_error (f, K_ERR, M_MEM_IDX_OUT_OF_RANGE);
       if (!(mem_valid & (1 << fptr[pc].k)))
-        return report_error (M_UNINITIALIZED_MEM);
+        return report_error (f, NONE, M_UNINITIALIZED_MEM);
       return false;
 
     case BPF_ST:
     case BPF_STX:
       if (f.k >= BPF_MEMWORDS)
-        return report_error (M_MEM_IDX_OUT_OF_RANGE);
+        return report_error (f, K_ERR, M_MEM_IDX_OUT_OF_RANGE);
       mem_valid |= (1 << fptr[pc].k);
       return false;
 
     case BPF_JMP | BPF_JA:
       if (f.k >= (uint32_t)(flen - pc - 1))
-        return report_error (M_JT_TOO_FAR);
+        return report_error (f, K_ERR, M_JT_TOO_FAR);
       masks[pc + 1 + fptr[pc].k] &= mem_valid;
       mem_valid = ~0;
       return false;
@@ -156,9 +189,9 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
     case BPF_JMP | BPF_JSET | BPF_K:
     case BPF_JMP | BPF_JSET | BPF_X:
       if (pc + f.jt + 1 >= flen)
-        return report_error (M_JT_TOO_FAR);
+        return report_error (f, JT_ERR, M_JT_TOO_FAR);
       if (pc + f.jf + 1 >= flen)
-        return report_error (M_JF_TOO_FAR);
+        return report_error (f, JF_ERR, M_JF_TOO_FAR);
       masks[pc + 1 + fptr[pc].jt] &= mem_valid;
       masks[pc + 1 + fptr[pc].jf] &= mem_valid;
       mem_valid = ~0;
@@ -182,10 +215,11 @@ check_prog (fprog *prog)
         goto complete;
     }
 
-  uint16_t last = prog->filter[prog->len - 1].code;
-  if ((last != (BPF_RET | BPF_A)) && (last != (BPF_RET | BPF_K)))
+  filter last = prog->filter[prog->len - 1];
+  uint16_t last_code = last.code;
+  if ((last_code != (BPF_RET | BPF_A)) && (last_code != (BPF_RET | BPF_K)))
     {
-      report_error (M_MUST_END_WITH_RET);
+      report_error (last, NONE, M_MUST_END_WITH_RET);
       goto complete;
     }
 
