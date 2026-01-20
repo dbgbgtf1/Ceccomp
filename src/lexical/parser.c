@@ -402,9 +402,7 @@ label_decl (string_t *label_decl)
   label_decl->len = parse.current.token_len - 1;
   // ignore the ':' character
   if (insert_key (label_decl, parse.code_nr) == 1)
-    {
-      warn ("Found duplicated tag %.*s\n", label_decl->len, label_decl->start);
-    }
+    error_at(parse.current, M_DUPLICATED_LABEL);
 
   // ignore our disasm useless output
   uint32_t count = 0;

@@ -75,6 +75,7 @@
 
 // parser
 #define M_UNEXPECT_TOKEN _ ("Unexpect token")
+#define M_DUPLICATED_LABEL _ ("Found duplicated label declaration")
 
 #define M_EXPECT_OPERATOR _ ("Expect operator")
 #define M_EXPECT_RIGHT_VAR _ ("Expect right variable")
