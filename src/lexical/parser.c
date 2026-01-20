@@ -2,7 +2,6 @@
 #include "arch_trans.h"
 #include "hash.h"
 #include "log/error.h"
-#include "log/logger.h"
 #include "main.h"
 #include "scanner.h"
 #include "token.h"
@@ -11,7 +10,6 @@
 #include <setjmp.h>
 #include <stdbool.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
 
 typedef struct
@@ -77,8 +75,7 @@ error_at (token_t token, const char *err_msg)
     advance ();
 
   local->type = ERROR_LINE;
-  local->line_len = parse.current.token_start + parse.current.token_len
-                    - local->line_start;
+  local->line_len = parse.current.token_start - local->line_start;
   local->error_line.error_start = token.token_start;
   local->error_line.error_msg = err_msg;
   longjmp (g_env, 1);
@@ -402,7 +399,7 @@ label_decl (string_t *label_decl)
   label_decl->len = parse.current.token_len - 1;
   // ignore the ':' character
   if (insert_key (label_decl, parse.code_nr) == 1)
-    error_at(parse.current, M_DUPLICATED_LABEL);
+    error_at (parse.current, M_DUPLICATED_LABEL);
 
   // ignore our disasm useless output
   uint32_t count = 0;

@@ -25,8 +25,7 @@ static uint16_t bpf_len = 0;
     }                                                                         \
   while (0)
 
-#define SPRINTF_CAT(...) print += sprintf (__VA_ARGS__)
-
+#define SPRINTF_CAT(...) print += sprintf (print, __VA_ARGS__)
 static void
 report_error (const char *error_msg)
 {
@@ -34,8 +33,14 @@ report_error (const char *error_msg)
   char buf[0x400];
   char *print = buf;
 
-  SPRINTF_CAT (print, "At %04d: %s\n", local->text_nr, error_msg);
-  SPRINTF_CAT (print, "%.*s", local->line_len, local->line_start);
+  SPRINTF_CAT ("%d:-: %s\n", local->text_nr, error_msg);
+  // During the resolution phase, errors do not have a clear starting point
+  // errors in this stage indicate a semantic error in an entire line of code.
+  SPRINTF_CAT ("%.*s\n", local->line_len, local->line_start);
+  // line_len shouldn't include a '\n'
+  memset (print, '~', local->line_len);
+  print[local->line_len] = '\0';
+  // warn will print a '\n'
 
   warn ("%s", buf);
 }
@@ -55,10 +60,14 @@ error_line (void)
 
   error_line_t *error_line = &local->error_line;
 
-  SPRINTF_CAT (print, "At %04d: %s\n", local->text_nr, error_line->error_msg);
   uint16_t err_len = error_line->error_start - local->line_start;
-  SPRINTF_CAT (print, "%.*s\n%*c", local->line_len, local->line_start,
-               err_len + 1, '^');
+  SPRINTF_CAT ("%d:%d: %s\n", local->text_nr, err_len + 1,
+               error_line->error_msg);
+  SPRINTF_CAT ("%.*s\n", local->line_len, local->line_start);
+  // line_len shouldn't include a '\n'
+  memset (print, ' ', err_len);
+  print[err_len] = '^';
+  // warn will print a '\n'
 
   warn ("%s", buf);
 }
