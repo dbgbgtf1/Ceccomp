@@ -71,7 +71,7 @@
   _ ("Found more than 4096 lines of text, perhaps it's not for ceccomp?")
 
 // hash
-#define M_CANNOT_FIND_LABEL _ ("Can not find label: %.*s")
+#define M_CANNOT_FIND_LABEL _ ("Can not find label")
 
 // parser
 #define M_UNEXPECT_TOKEN _ ("Unexpect token")

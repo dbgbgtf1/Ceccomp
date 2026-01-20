@@ -3,7 +3,6 @@
 #include "config.h"
 #include "log/logger.h"
 #include "main.h"
-#include "parser.h"
 #include "read_source.h"
 #include "token.h"
 #include <ctype.h>

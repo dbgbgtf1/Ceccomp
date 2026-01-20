@@ -193,6 +193,8 @@ static void
 ja_line (jump_line_t *jump_line)
 {
   uint32_t jt = find_key (&jump_line->jt.key);
+  if (jt == (uint16_t)-1)
+    REPORT_ERROR (M_CANNOT_FIND_LABEL);
   set_jt_jf (&jump_line->jt, jt);
 
   masks[jt] &= mem_valid;
@@ -211,6 +213,8 @@ jump_line (void)
     }
 
   uint32_t jt = find_key (&jump_line->jt.key);
+  if (jt == (uint16_t)-1)
+    REPORT_ERROR (M_CANNOT_FIND_LABEL);
   set_jt_jf (&jump_line->jt, jt);
 
   if ((int16_t)jump_line->jt.code_nr < 0)
@@ -220,12 +224,19 @@ jump_line (void)
   if (jt > bpf_len)
     REPORT_ERROR (M_JT_INVALID_TAG);
 
+  uint32_t jf;
   if (jump_line->jf.key.start == NULL)
-    set_jt_jf (&jump_line->jf, local->code_nr + 1);
+    jf = local->code_nr + 1;
   else
-    set_jt_jf (&jump_line->jf, find_key (&jump_line->jf.key));
+    {
+      jf = find_key (&jump_line->jf.key);
+      if (jf == (uint16_t)-1)
+        REPORT_ERROR (M_CANNOT_FIND_LABEL);
+    }
 
-  uint32_t jf = local->code_nr + jump_line->jf.code_nr + 1;
+  set_jt_jf (&jump_line->jf, jf);
+
+  jf = local->code_nr + jump_line->jf.code_nr + 1;
   if ((int16_t)jump_line->jf.code_nr < 0)
     REPORT_ERROR (M_JF_MUST_BE_POSITIVE);
   if (jump_line->jf.code_nr > UINT8_MAX)

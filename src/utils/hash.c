@@ -53,7 +53,7 @@ find_key (hkey_t *key)
 {
   str_table_itr itr = vt_get (&hash_table, *key);
   if (vt_is_end (itr))
-    error (M_CANNOT_FIND_LABEL, key->len, key->start);
+    return -1;
   return itr.data->val;
 }
 
