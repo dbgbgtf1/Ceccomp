@@ -67,6 +67,7 @@ error_line (void)
   // line_len shouldn't include a '\n'
   memset (print, ' ', err_len);
   print[err_len] = '^';
+  print[err_len + 1] = '\0';
   // warn will print a '\n'
 
   warn ("%s", buf);
