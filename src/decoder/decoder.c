@@ -154,14 +154,11 @@ jump_line (filter f, statement_t *statement)
     {
       jump_line->if_bang = false;
       jump_line->if_condition = false;
-      jump_line->jt.type = NUMBER;
       jump_line->jt.code_nr = f.k;
       return;
     }
 
   jump_line->if_condition = true;
-  jump_line->jt.type = NUMBER;
-  jump_line->jf.type = NUMBER;
 
   if (f.jt == 0 && f.jf != 0)
     {

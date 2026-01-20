@@ -177,7 +177,6 @@ assign_line (void)
 static void
 set_jt_jf (label_t *label, uint32_t code_nr)
 {
-  label->type = NUMBER;
   label->code_nr = code_nr - local->code_nr - 1;
 }
 

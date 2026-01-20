@@ -166,7 +166,6 @@ label (label_t *label)
   if (!match (IDENTIFIER))
     error_at (parse.next, M_EXPECT_LABEL);
 
-  label->type = IDENTIFIER;
   label->key.start = parse.current.token_start;
   label->key.len = parse.current.token_len;
 }

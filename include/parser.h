@@ -10,11 +10,8 @@
 
 typedef struct
 {
-  token_type type;
-  uint16_t code_nr;
   hkey_t key;
-  // store code_nr when type is NUMBER
-  // store identifier when type is IDENTIFIER
+  uint16_t code_nr;
   // when key.string != NULL, key stores the label string
 } label_t;
 
@@ -88,9 +85,9 @@ typedef struct
 {
   expr_type type;
   string_t label_decl;
-  char *line_start;
   uint16_t text_nr;
   uint16_t code_nr;
+  char *line_start;
   uint16_t comment;
   uint16_t line_len;
 
