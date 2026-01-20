@@ -43,9 +43,10 @@ const string_t token_pairs[] = {
   [AND] = DEFTK ("&"), [EQUAL] = DEFTK ("="), [NEGATIVE] = DEFTK ("-"),
   [BANG] = DEFTK ("!"),
 
-  [UNKNOWN] = DEFTK ("unknown"), [COMMENT] = DEFTK ("#"), [EOL] = DEFTK ("line_end"),
-  [TOKEN_EOF] = DEFTK ("eof"), [IDENTIFIER] = DEFTK ("identifier"),
-  [LABEL_DECL] = DEFTK ("label_decl"), [NUMBER] = DEFTK ("number"),
+  [NUMBER] = DEFTK ("number"), [IDENTIFIER] = DEFTK ("identifier"),
+  [UNKNOWN] = DEFTK ("unknown"), [COMMENT] = DEFTK ("#"),
+  [EOL] = DEFTK ("line_end"), [TOKEN_EOF] = DEFTK ("eof"),
+  [LABEL_DECL] = DEFTK ("label_decl"),
   // label_decl ::= IDENTIFIER + DEFTK(":")
 };
 // clang-format on

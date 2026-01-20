@@ -18,7 +18,7 @@ fail_fast_strtoull (const char *restrict num, const char *restrict error_msg)
   char *end;
   errno = 0;
   uint64_t result = strtoull (num, &end, 0);
-  if ((result == 0 && errno) || *end != '\0')
+  if (*end != '\0' && errno)
     error ("%s", error_msg);
   return result;
 }

@@ -32,16 +32,17 @@ static uint32_t high_pc = 0;
 static uint32_t low_args[6] = { 0 };
 static uint32_t high_args[6] = { 0 };
 
+#define BASE_vars(value) ((value) - A)
 static uint32_t *vars[] = {
-  [ATTR_SYSCALL] = &syscall_nr,
-  [ATTR_ARCH] = &scmp_arch,
-  [ATTR_LOWPC] = &low_pc,
-  [ATTR_HIGHPC] = &high_pc,
-  [ATTR_LOWARG] = low_args,
-  [ATTR_HIGHARG] = high_args,
-  [A] = &A_reg,
-  [X] = &X_reg,
-  [MEM] = mem,
+  [BASE_vars (A)] = &A_reg,
+  [BASE_vars (X)] = &X_reg,
+  [BASE_vars (MEM)] = mem,
+  [BASE_vars (ATTR_SYSCALL)] = &syscall_nr,
+  [BASE_vars (ATTR_ARCH)] = &scmp_arch,
+  [BASE_vars (ATTR_LOWPC)] = &low_pc,
+  [BASE_vars (ATTR_HIGHPC)] = &high_pc,
+  [BASE_vars (ATTR_LOWARG)] = low_args,
+  [BASE_vars (ATTR_HIGHARG)] = high_args,
 };
 
 #define DO_OPERATE(operator) (*left operator (*right))
@@ -49,10 +50,10 @@ static uint32_t *vars[] = {
 static void
 assign_line (assign_line_t *assign_line)
 {
-  uint32_t *left = vars[assign_line->left_var.type];
+  uint32_t *left = vars[BASE_vars (assign_line->left_var.type)];
 
   token_type right_type = assign_line->right_var.type;
-  uint32_t *right = vars[right_type];
+  uint32_t *right = vars[BASE_vars (right_type)];
   if (right_type == ATTR_LOWARG || right_type == ATTR_HIGHARG)
     right += assign_line->right_var.data;
   if (right_type == NUMBER)
@@ -94,7 +95,7 @@ assign_line (assign_line_t *assign_line)
       DO_OPERATE (= -);
       break;
     default:
-      assert (0);
+      assert (!"Unknown alu operation");
     }
 }
 
@@ -143,7 +144,7 @@ jump_line (jump_line_t *jump_line)
       cond_true ^= DO_COMPARE (&);
       break;
     default:
-      assert (0);
+      assert (!"Unknown comparator");
     }
 
   return (cond_true ? jt : jf);
@@ -179,29 +180,33 @@ static void
 print_label_decl (statement_t *statement)
 {
   string_t *label_decl = &statement->label_decl;
-  if (label_decl->start != NULL)
-    printf ("%.*s: ", label_decl->len, label_decl->start);
+  if (label_decl->start)
+    {
+      fwrite (label_decl->start, 1, label_decl->len, stdout);
+      fputc (':', stdout);
+      fputc (' ', stdout);
+    }
 }
 
 static void
-emulate_printer (statement_t *statement, const char *override_color, bool quiet)
+emulate_printer (statement_t *statement, bool is_skipped, bool quiet)
 {
   if (quiet)
     return;
 
-  if (override_color)
+  if (is_skipped && color_enable)
     {
-      printf ("%s", override_color);
+      fwrite (LIGHTCLR, 1, LITERAL_STRLEN (LIGHTCLR), stdout);
       push_color (false);
     }
 
   print_label_decl (statement);
   print_statement (stdout, statement);
 
-  if (override_color)
+  if (is_skipped && color_enable)
     {
       pop_color ();
-      printf ("%s", CLR);
+      fwrite (CLR, 1, LITERAL_STRLEN (CLR), stdout);
     }
 }
 
@@ -219,11 +224,11 @@ emulator (vector_t *text_v, vector_t *code_ptr_v, bool quiet)
 
       if (read_idx < exec_idx)
         {
-          emulate_printer (statement, LIGHTCLR, quiet);
+          emulate_printer (statement, true, quiet);
           continue;
         }
 
-      emulate_printer (statement, NULL, quiet);
+      emulate_printer (statement, false, quiet);
       exec_idx++;
 
       switch (statement->type)
@@ -241,7 +246,7 @@ emulator (vector_t *text_v, vector_t *code_ptr_v, bool quiet)
           continue;
         case EOF_LINE:
         case ERROR_LINE:
-          assert (0);
+          assert (!"Emulating EOF/ERROR line??");
         }
 
       break;
@@ -307,7 +312,7 @@ emulate (emu_arg_t *emu_arg)
   vector_t text_v;
   vector_t code_ptr_v;
   init_vector (&text_v, sizeof (statement_t), lines);
-  init_vector (&code_ptr_v, sizeof (statement_t *), MIN(lines, 1025));
+  init_vector (&code_ptr_v, sizeof (statement_t *), MIN (lines, 1025));
   parser (&text_v, &code_ptr_v);
   if (resolver (&code_ptr_v))
     error ("%s", M_EMU_TERMINATED);
