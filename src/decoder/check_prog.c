@@ -140,44 +140,44 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
     case BPF_LD | BPF_W | BPF_ABS:
       f.code = BPF_LDX | BPF_W | BPF_ABS;
       if (k >= sizeof (struct seccomp_data) || k & 3)
-        return report_error (f, K_ERR, FATAL, M_INVALID_ATTR_LOAD);
-
+        report_error (f, K_ERR, FATAL, M_INVALID_ATTR_LOAD);
+      return;
     case BPF_LD | BPF_W | BPF_LEN:
       f.code = BPF_LD | BPF_IMM;
       f.k = sizeof (struct seccomp_data);
-
+      return;
     case BPF_LDX | BPF_W | BPF_LEN:
       f.code = BPF_LDX | BPF_IMM;
       f.k = sizeof (struct seccomp_data);
-
+      return;
     case BPF_ALU | BPF_DIV | BPF_K:
       if (f.k == 0)
-        return report_error (f, K_ERR, !FATAL, M_ALU_DIV_BY_ZERO);
-
+        report_error (f, K_ERR, !FATAL, M_ALU_DIV_BY_ZERO);
+      return;
     case BPF_ALU | BPF_LSH | BPF_K:
     case BPF_ALU | BPF_RSH | BPF_K:
       if (f.k >= 32)
-        return report_error (f, K_ERR, !FATAL, M_ALU_SH_OUT_OF_RANGE);
-
+        report_error (f, K_ERR, !FATAL, M_ALU_SH_OUT_OF_RANGE);
+      return;
     case BPF_LD | BPF_MEM:
     case BPF_LDX | BPF_MEM:
       if (f.k >= BPF_MEMWORDS)
-        return report_error (f, K_ERR, !FATAL, M_MEM_IDX_OUT_OF_RANGE);
+        report_error (f, K_ERR, !FATAL, M_MEM_IDX_OUT_OF_RANGE);
       if (!(mem_valid & (1 << fptr[pc].k)))
-        return report_error (f, NONE, !FATAL, M_UNINITIALIZED_MEM);
-
+        report_error (f, NONE, !FATAL, M_UNINITIALIZED_MEM);
+      return;
     case BPF_ST:
     case BPF_STX:
       if (f.k >= BPF_MEMWORDS)
         return report_error (f, K_ERR, !FATAL, M_MEM_IDX_OUT_OF_RANGE);
       mem_valid |= (1 << fptr[pc].k);
-
+      return;
     case BPF_JMP | BPF_JA:
       if (f.k >= (uint32_t)(flen - pc - 1))
         return report_error (f, K_ERR, !FATAL, M_JT_TOO_FAR);
       masks[pc + 1 + fptr[pc].k] &= mem_valid;
       mem_valid = ~0;
-
+      return;
     case BPF_JMP | BPF_JEQ | BPF_K:
     case BPF_JMP | BPF_JEQ | BPF_X:
     case BPF_JMP | BPF_JGE | BPF_K:
@@ -193,6 +193,7 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
       masks[pc + 1 + fptr[pc].jt] &= mem_valid;
       masks[pc + 1 + fptr[pc].jf] &= mem_valid;
       mem_valid = ~0;
+      return;
     }
 }
 
@@ -221,12 +222,12 @@ check_prog (fprog *prog)
     }
 
 complete:
-  // set has_error to skip render.
-  // some error might cause mem overflow in render
-  if (error_count)
-    has_error = true;
-
   reallocate (masks, 0x0);
   // if fatal_error occurs, stop disasm
-  return (bool)fatal_count;
+  if (fatal_count)
+    error ("%s", M_DISASM_TERMINATED);
+
+  // some error might cause mem overflow in render
+  // if error_count != 0, skip render
+  return (bool)error_count;
 }

@@ -5,6 +5,6 @@
 #include "vector.h"
 
 // see vector.h for vector details
-extern void decode_filters (fprog *prog, vector_t *v);
+extern bool decode_filters (fprog *prog, vector_t *v);
 
 #endif

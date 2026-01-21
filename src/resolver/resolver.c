@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 
-bool has_error;
+static bool has_error;
 static statement_t *local;
 static uint16_t *masks, mem_valid = 0;
 static uint16_t bpf_len = 0;
@@ -316,7 +316,5 @@ resolver (vector_t *code_ptr_v)
 
   reallocate (masks, 0x0);
 
-  if (has_error)
-    return true;
-  return false;
+  return has_error;
 }

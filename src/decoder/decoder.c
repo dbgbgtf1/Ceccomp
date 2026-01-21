@@ -1,7 +1,5 @@
 #include "decoder.h"
 #include "check_prog.h"
-#include "log/error.h"
-#include "log/logger.h"
 #include "main.h"
 #include "parser.h"
 #include "token.h"
@@ -238,13 +236,12 @@ decode_filter (filter f, statement_t *statement)
     }
 }
 
-void
+bool
 decode_filters (fprog *prog, vector_t *v)
 {
   // make sure all filter are valid
   // give warning about fatal and normal errors
-  if (check_prog (prog))
-    error ("%s", M_DISASM_TERMINATED);
+  bool error = check_prog (prog);
 
   statement_t statement;
   push_vector (v, &statement);
@@ -259,4 +256,5 @@ decode_filters (fprog *prog, vector_t *v)
       decode_filter (prog->filter[i], &statement);
       push_vector (v, &statement);
     }
+  return error;
 }

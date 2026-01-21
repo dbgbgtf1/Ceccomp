@@ -24,8 +24,6 @@ typedef struct
   uint32_t len;
 } string_t;
 
-extern bool has_error;
-
 #define STARTWITH(str, token) (!strncmp (str, token, strlen (token)))
 
 #define LIKELY(x) __builtin_expect (!!(x), 1)

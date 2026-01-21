@@ -24,10 +24,9 @@ print_prog (uint32_t scmp_arch, fprog *prog, FILE *output_fp)
   init_pile (prog->len
              * 40 /* statistical choice */); // str pile for syscall names
   init_vector (&v, sizeof (statement_t), prog->len + 1);
-  decode_filters (prog, &v);
-  // check_prog in decode_filters might set has_error if error occurs
-  // in that case render might mem overflow, so skip render
-  if (!has_error)
+  // check_prog in decode_filters might decect some errors
+  // render might mem overflow, so skip render
+  if (decode_filters (prog, &v))
     render (&v, scmp_arch);
   print_as_comment (output_fp, "Label  CODE  JT   JF      K");
   print_as_comment (output_fp, "---------------------------------");
