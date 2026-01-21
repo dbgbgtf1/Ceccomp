@@ -199,7 +199,8 @@ handle_syscall (pid_t pid, FILE *output_fp, bool quiet, bool oneshot)
 }
 
 static uint32_t
-parent (pid_t child_pid, FILE *output_fp, bool quiet, bool oneshot)
+parent (pid_t child_pid, FILE *output_fp, uint32_t extra_ptrace_flags,
+        bool quiet, bool oneshot)
 {
   int status;
 
@@ -212,7 +213,7 @@ parent (pid_t child_pid, FILE *output_fp, bool quiet, bool oneshot)
           | PTRACE_O_TRACEFORK
           | PTRACE_O_TRACEVFORK
           | PTRACE_O_TRACECLONE
-          | PTRACE_O_EXITKILL);
+          | extra_ptrace_flags);
   // clang-format on
 
   ptrace (PTRACE_SYSCALL, child_pid, 0, 0);
@@ -269,7 +270,7 @@ program_trace (char *argv[], FILE *output_fp, bool quiet, bool oneshot)
   if (pid == 0)
     child (argv);
   else
-    return parent (pid, output_fp, quiet, oneshot);
+    return parent (pid, output_fp, PTRACE_O_EXITKILL, quiet, oneshot);
 }
 
 static void
@@ -364,7 +365,7 @@ pid_seize (int pid, bool quiet)
 {
   if (ptrace (PTRACE_ATTACH, pid, NULL, NULL) == -1)
     error ("%s", strerror (errno));
-  parent (pid, stdout, quiet, false);
+  parent (pid, stdout, 0, quiet, false);
 }
 
 void
