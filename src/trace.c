@@ -30,6 +30,7 @@
 #include <unistd.h>
 
 #define LOAD_FAIL 2
+#define LOAD_ELSE 3
 
 static void
 mode_strict (void)
@@ -45,7 +46,7 @@ static uint32_t saved_arch = -1;
 static uint64_t
 check_scmp_mode (syscall_info info, int pid, fprog *prog)
 {
-  uint64_t seccomp_mode = LOAD_FAIL;
+  uint64_t seccomp_mode = LOAD_ELSE;
   uint64_t nr = info.entry.nr;
   uint64_t arg0 = info.entry.args[0];
   uint64_t arg1 = info.entry.args[1];
@@ -178,8 +179,14 @@ handle_syscall (pid_t pid, FILE *output_fp, bool quiet, bool oneshot)
 
   seccomp_mode = check_scmp_mode (info, pid, &prog);
 
-  if (seccomp_mode != LOAD_FAIL && !quiet)
-    info (M_PARSE_PID_BPF, pid);
+  if (!quiet)
+    {
+      if (seccomp_mode == LOAD_FAIL)
+        info (M_PID_BPF_LOAD_FAIL, pid);
+      else if (seccomp_mode == SECCOMP_SET_MODE_FILTER
+               || seccomp_mode == SECCOMP_SET_MODE_STRICT)
+        info (M_PARSE_PID_BPF, pid);
+    }
   if (seccomp_mode == SECCOMP_SET_MODE_STRICT)
     mode_strict ();
   else if (seccomp_mode == SECCOMP_SET_MODE_FILTER)

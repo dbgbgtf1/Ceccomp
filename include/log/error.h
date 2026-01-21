@@ -23,6 +23,7 @@
 #define M_PROCESS_FORK _ ("Process %d spawned a new pid %d")
 #define M_PROCESS_EXIT _ ("Process %d exited")
 #define M_PARSE_PID_BPF _ ("Parsing %d process seccomp filter")
+#define M_PID_BPF_LOAD_FAIL _ ("%d process load seccomp filter failed")
 #define M_PROCFS_NOT_ACCESSIBLE _ ("Procfs not accessible, unable to perform")
 #define M_NOT_AN_CBPF _ ("Non-cbpf found, can't resolve, but continue")
 #define M_SEIZING_KERNEL_THREAD _ ("Kernel thread can not be seized")
