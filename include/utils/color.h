@@ -1,5 +1,5 @@
-#ifndef COLOR
-#define COLOR
+#ifndef COLOR_H
+#define COLOR_H
 
 #include "parse_args.h"
 #include <stdbool.h>

@@ -1,5 +1,5 @@
-#ifndef PARSEARGS
-#define PARSEARGS
+#ifndef PARSEARGS_H
+#define PARSEARGS_H
 
 #include <argp.h>
 #include <stdbool.h>

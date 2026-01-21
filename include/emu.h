@@ -1,5 +1,5 @@
-#ifndef EMU
-#define EMU
+#ifndef EMU_H
+#define EMU_H
 
 #include "utils/parse_args.h"
 #include "utils/vector.h"

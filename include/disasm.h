@@ -1,5 +1,5 @@
-#ifndef DISASM
-#define DISASM
+#ifndef DISASM_H
+#define DISASM_H
 
 #include "main.h"
 #include <stdint.h>

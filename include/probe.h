@@ -1,5 +1,5 @@
-#ifndef PROBE
-#define PROBE
+#ifndef PROBE_H
+#define PROBE_H
 
 #include <stdbool.h>
 #include <stdint.h>

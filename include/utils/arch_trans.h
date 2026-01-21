@@ -1,5 +1,5 @@
-#ifndef ARCH_TRANS
-#define ARCH_TRANS
+#ifndef ARCH_TRANS_H
+#define ARCH_TRANS_H
 
 #include "lexical/token.h"
 #include "main.h"

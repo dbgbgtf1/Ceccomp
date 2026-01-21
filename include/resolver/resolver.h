@@ -1,5 +1,5 @@
-#ifndef RESOLVER
-#define RESOLVER
+#ifndef RESOLVER_H
+#define RESOLVER_H
 
 #include "utils/vector.h"
 #include <stdbool.h>

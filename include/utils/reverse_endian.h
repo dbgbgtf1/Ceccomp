@@ -1,5 +1,5 @@
-#ifndef REVERSE_ENDIAN
-#define REVERSE_ENDIAN
+#ifndef REVERSE_ENDIAN_H
+#define REVERSE_ENDIAN_H
 
 #include "main.h"
 #include <byteswap.h>

@@ -1,5 +1,5 @@
-#ifndef ERROR
-#define ERROR
+#ifndef ERROR_H
+#define ERROR_H
 
 #include "i18n.h"
 
@@ -28,29 +28,30 @@
 #define M_NOT_AN_CBPF _ ("Non-cbpf found, can't resolve, but continue")
 #define M_SEIZING_KERNEL_THREAD _ ("Kernel thread can not be seized")
 #define M_NO_FILTER_FOUND _ ("No seccomp filters found in pid %d\n")
-#define M_TARGET_TRACED_BY _ ("Target process is being traced by %d pid process")
+#define M_TARGET_TRACED_BY                                                    \
+  _ ("Target process is being traced by %d pid process")
 // no translation due to terms
 #define ACTION_GET_FILTER "ptrace get seccomp filters"
 #define ACTION_PTRACE_SEIZE "ptrace seizing"
 
-#define M_CAP_SYS_PTRACE_OR_KTHREAD                                             \
+#define M_CAP_SYS_PTRACE_OR_KTHREAD                                           \
   _ ("perhaps seizing kthread or lacking CAP_SYS_PTRACE")
-#define M_REQUIRE_CAP_SYS_ADMIN                                                 \
+#define M_REQUIRE_CAP_SYS_ADMIN                                               \
   _ ("Run with CAP_SYS_ADMIN capability to fetch seccomp filters")
-#define M_REQUIRE_CAP_SYS_PTRACE                                                \
+#define M_REQUIRE_CAP_SYS_PTRACE                                              \
   _ ("Run with CAP_SYS_PTRACE capability to seize a foreign process")
-#define M_CANNOT_WORK_FROM_32_TO_64                                             \
+#define M_CANNOT_WORK_FROM_32_TO_64                                           \
   _ ("Ptrace from 32-bit tracer to 64-bit tracee is limited")
-#define M_TRACEE_ARCH_NOT_SUPPORTED                                             \
+#define M_TRACEE_ARCH_NOT_SUPPORTED                                           \
   _ ("libseccomp does not support the tracee's arch (%#x)")
-#define M_CAP_SYS_ADMIN_OR_IN_SECCOMP                                           \
+#define M_CAP_SYS_ADMIN_OR_IN_SECCOMP                                         \
   _ ("perhaps lacking CAP_SYS_ADMIN or ceccomp is in seccomp mode")
-#define M_GET_FILTER_UNSUPPORTED                                                \
+#define M_GET_FILTER_UNSUPPORTED                                              \
   _ ("PTRACE_GET_SECCOMP_FILTER is not supported on your system")
-#define M_CECCOMP_IN_SECCOMP                                                    \
+#define M_CECCOMP_IN_SECCOMP                                                  \
   _ ("Ceccomp is in seccomp mode, fetch seccomp filters of other process is " \
      "not permitted")
-#define M_GET_FILTER_UNSUPPORTED_OR_NO_FILTER                                   \
+#define M_GET_FILTER_UNSUPPORTED_OR_NO_FILTER                                 \
   _ ("perhaps PTRACE_GET_SECCOMP_FILTER is not supported or no seccomp "      \
      "filter in target process")
 
@@ -61,14 +62,14 @@
 #define M_UNABLE_OPEN_FILE _ ("Unable open file")
 
 // read_source
-#define M_FOUND_SUS_ZERO                                                        \
+#define M_FOUND_SUS_ZERO                                                      \
   _ ("Found '\\0' at file offset %lu, perhaps it's not a text file?")
-#define M_FOUND_SUS_NO_LF                                                       \
+#define M_FOUND_SUS_NO_LF                                                     \
   _ ("No line break in source file, perhaps it's not a text file?")
-#define M_FOUND_SUS_LINE                                                        \
+#define M_FOUND_SUS_LINE                                                      \
   _ ("Line %u has more than %u bytes, perhaps the input is not a text file?")
 #define M_FILE_TOO_LARGE _ ("The input file is greater than 1 MiB!")
-#define M_LINES_TOO_MANY                                                        \
+#define M_LINES_TOO_MANY                                                      \
   _ ("Found more than 4096 lines of text, perhaps it's not for ceccomp?")
 
 // hash

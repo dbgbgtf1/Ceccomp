@@ -1,5 +1,5 @@
-#ifndef FORMATTER
-#define FORMATTER
+#ifndef FORMATTER_H
+#define FORMATTER_H
 
 #include "lexical/parser.h"
 #include <stdio.h>

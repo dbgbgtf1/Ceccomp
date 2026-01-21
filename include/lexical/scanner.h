@@ -1,5 +1,5 @@
-#ifndef SCANNER
-#define SCANNER
+#ifndef SCANNER_H
+#define SCANNER_H
 
 #include "token.h"
 #include <stdint.h>

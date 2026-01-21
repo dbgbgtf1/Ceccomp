@@ -1,5 +1,5 @@
-#ifndef CHECK_PROG
-#define CHECK_PROG
+#ifndef CHECK_PROG_H
+#define CHECK_PROG_H
 
 #include "main.h"
 #include <stdbool.h>

@@ -1,3 +1,6 @@
+#ifndef HELP_H
+#define HELP_H
+
 #include "i18n.h"
 #define M_CECCOMP_USAGE _ ("Usage: ceccomp <subcommand> <args> <options>\n")
 #define ASM_HINT "ceccomp asm     [ -c WHEN ] [ -a ARCH ] [ -f FMT ] [ text ]"
@@ -58,3 +61,5 @@
      "used for emulation, default as 0\n"                                     \
      "raw, text                        File with BPF RAW or BPF TEXT, see "   \
      "docs for detail, default as stdin\n")
+
+#endif

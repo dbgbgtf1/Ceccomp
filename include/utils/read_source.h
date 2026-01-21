@@ -1,5 +1,5 @@
-#ifndef READ_SOURCE
-#define READ_SOURCE
+#ifndef READ_SOURCE_H
+#define READ_SOURCE_H
 
 #include <stdio.h>
 

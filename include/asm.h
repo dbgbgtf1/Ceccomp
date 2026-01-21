@@ -1,5 +1,5 @@
-#ifndef ASM
-#define ASM
+#ifndef ASM_H
+#define ASM_H
 
 #include "utils/parse_args.h"
 #include <stdint.h>

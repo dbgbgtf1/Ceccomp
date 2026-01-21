@@ -1,5 +1,5 @@
-#ifndef PROCSTATUS
-#define PROCSTATUS
+#ifndef PROCSTATUS_H
+#define PROCSTATUS_H
 
 #include <sys/types.h>
 #define PROCFS_ERROR -1
