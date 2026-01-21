@@ -182,7 +182,7 @@ handle_syscall (pid_t pid, FILE *output_fp, bool quiet, bool oneshot)
   if (!quiet)
     {
       if (seccomp_mode == LOAD_FAIL)
-        info (M_PID_BPF_LOAD_FAIL, pid);
+        warn (M_PID_BPF_LOAD_FAIL, pid);
       else if (seccomp_mode == SECCOMP_SET_MODE_FILTER
                || seccomp_mode == SECCOMP_SET_MODE_STRICT)
         info (M_PARSE_PID_BPF, pid);
