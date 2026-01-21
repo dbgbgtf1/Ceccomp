@@ -1,8 +1,8 @@
 #ifndef ARCH_TRANS
 #define ARCH_TRANS
 
+#include "lexical/token.h"
 #include "main.h"
-#include "token.h"
 #include <seccomp.h>
 #include <stdint.h>
 

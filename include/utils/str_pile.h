@@ -2,8 +2,8 @@
 #define STRING_PILE
 
 #include "main.h"
-#include <stddef.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 /**
  * Initialize string pile with init_size to mmap. init_size will be aligned up

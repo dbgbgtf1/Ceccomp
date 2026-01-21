@@ -1,6 +1,6 @@
-#include "vector.h"
-#include "log/logger.h"
+#include "utils/vector.h"
 #include "main.h"
+#include "utils/logger.h"
 #include <errno.h>
 #include <stddef.h>
 #include <stdint.h>

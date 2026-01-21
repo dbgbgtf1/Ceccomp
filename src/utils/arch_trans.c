@@ -1,6 +1,5 @@
-#include "arch_trans.h"
-#include "parser.h"
-#include "token.h"
+#include "utils/arch_trans.h"
+#include "lexical/token.h"
 #include <seccomp.h>
 #include <stdint.h>
 #include <string.h>

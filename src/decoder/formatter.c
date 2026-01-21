@@ -1,8 +1,8 @@
-#include "formatter.h"
-#include "color.h"
+#include "decoder/formatter.h"
+#include "lexical/parser.h"
+#include "lexical/token.h"
 #include "main.h"
-#include "parser.h"
-#include "token.h"
+#include "utils/color.h"
 #include <assert.h>
 #include <stdarg.h>
 #include <stdint.h>

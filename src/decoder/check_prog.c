@@ -14,11 +14,11 @@
  *            Andi Kleen
  *            Kris Katterjohn
  */
-#include "check_prog.h"
-#include "log/error.h"
-#include "log/logger.h"
+#include "decoder/check_prog.h"
 #include "main.h"
-#include "vector.h"
+#include "utils/error.h"
+#include "utils/logger.h"
+#include "utils/vector.h"
 #include <assert.h>
 #include <linux/bpf_common.h>
 #include <linux/filter.h>

@@ -1,5 +1,5 @@
-#include "log/logger.h"
-#include "color.h"
+#include "utils/logger.h"
+#include "utils/color.h"
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdio.h>

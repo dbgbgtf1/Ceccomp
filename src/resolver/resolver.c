@@ -1,10 +1,10 @@
-#include "resolver.h"
-#include "hash.h"
-#include "log/error.h"
-#include "log/logger.h"
-#include "parser.h"
-#include "token.h"
-#include "vector.h"
+#include "resolver/resolver.h"
+#include "lexical/parser.h"
+#include "lexical/token.h"
+#include "utils/error.h"
+#include "utils/hash.h"
+#include "utils/logger.h"
+#include "utils/vector.h"
 #include <assert.h>
 #include <seccomp.h>
 #include <stdbool.h>

@@ -1,7 +1,7 @@
 #define _GNU_SOURCE
-#include "read_source.h"
-#include "log/error.h"
-#include "log/logger.h"
+#include "utils/read_source.h"
+#include "utils/error.h"
+#include "utils/logger.h"
 #include <assert.h>
 #include <errno.h>
 #include <linux/prctl.h>

@@ -1,7 +1,7 @@
 #ifndef FORMATTER
 #define FORMATTER
 
-#include "parser.h"
+#include "lexical/parser.h"
 #include <stdio.h>
 
 #define DEFAULT_LABEL "L%04d"

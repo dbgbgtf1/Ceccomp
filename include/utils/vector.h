@@ -23,7 +23,8 @@ typedef struct
 extern void *reallocate (void *p, size_t new_size);
 
 // set initial_capcity to 0 to let vector grow itself
-extern void init_vector (vector_t *v, size_t elem_size, size_t initial_capcity);
+extern void init_vector (vector_t *v, size_t elem_size,
+                         size_t initial_capcity);
 
 extern void free_vector (vector_t *v);
 

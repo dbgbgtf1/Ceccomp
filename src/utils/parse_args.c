@@ -1,7 +1,7 @@
-#include "parse_args.h"
-#include "arch_trans.h"
-#include "log/error.h"
-#include "log/logger.h"
+#include "utils/parse_args.h"
+#include "utils/arch_trans.h"
+#include "utils/error.h"
+#include "utils/logger.h"
 #include <argp.h>
 #include <errno.h>
 #include <stdbool.h>
@@ -100,7 +100,8 @@ parse_asm (asm_arg_t *args, int key, const char *arg, struct argp_state *state)
 }
 
 static int
-parse_disasm (disasm_arg_t *args, int key, const char *arg, struct argp_state *state)
+parse_disasm (disasm_arg_t *args, int key, const char *arg,
+              struct argp_state *state)
 {
   switch (key)
     {
@@ -144,7 +145,8 @@ parse_emu (emu_arg_t *args, int key, const char *arg, struct argp_state *state)
 }
 
 static int
-parse_trace (trace_arg_t *args, int key, const char *arg, struct argp_state *state)
+parse_trace (trace_arg_t *args, int key, const char *arg,
+             struct argp_state *state)
 {
   switch (key)
     {
@@ -178,7 +180,8 @@ parse_trace (trace_arg_t *args, int key, const char *arg, struct argp_state *sta
 }
 
 static int
-parse_probe (probe_arg_t *args, int key, const char *arg, struct argp_state *state)
+parse_probe (probe_arg_t *args, int key, const char *arg,
+             struct argp_state *state)
 {
   switch (key)
     {

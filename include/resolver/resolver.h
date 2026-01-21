@@ -1,7 +1,7 @@
 #ifndef RESOLVER
 #define RESOLVER
 
-#include "vector.h"
+#include "utils/vector.h"
 #include <stdbool.h>
 #include <stdint.h>
 

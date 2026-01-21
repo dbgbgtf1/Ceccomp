@@ -1,6 +1,6 @@
-#include "token.h"
+#include "lexical/token.h"
+#include "lexical/scanner.h"
 #include "main.h"
-#include "scanner.h"
 #include <stddef.h>
 #include <stdint.h>
 

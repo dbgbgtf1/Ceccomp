@@ -1,9 +1,9 @@
-#include "decoder.h"
-#include "check_prog.h"
+#include "decoder/decoder.h"
+#include "decoder/check_prog.h"
+#include "lexical/parser.h"
+#include "lexical/token.h"
 #include "main.h"
-#include "parser.h"
-#include "token.h"
-#include "vector.h"
+#include "utils/vector.h"
 #include <assert.h>
 #include <linux/bpf_common.h>
 #include <linux/filter.h>

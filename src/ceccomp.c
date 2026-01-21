@@ -1,12 +1,12 @@
-#include "arch_trans.h"
+#include "utils/arch_trans.h"
 #include "asm.h"
-#include "color.h"
-#include "config.h"
 #include "disasm.h"
 #include "emu.h"
-#include "parse_args.h"
 #include "probe.h"
 #include "trace.h"
+#include "utils/color.h"
+#include "utils/parse_args.h"
+#include "config.h"
 #include <assert.h>
 #include <libintl.h>
 #include <locale.h>

@@ -1,10 +1,10 @@
 #include "trace.h"
-#include "color.h"
 #include "disasm.h"
-#include "log/error.h"
-#include "log/logger.h"
 #include "main.h"
-#include "proc_status.h"
+#include "utils/color.h"
+#include "utils/error.h"
+#include "utils/logger.h"
+#include "utils/proc_status.h"
 #include <asm-generic/errno-base.h>
 #include <asm-generic/errno.h>
 #include <assert.h>

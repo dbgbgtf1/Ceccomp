@@ -1,11 +1,10 @@
-#include "parser.h"
-#include "arch_trans.h"
-#include "hash.h"
-#include "log/error.h"
+#include "lexical/parser.h"
+#include "lexical/scanner.h"
 #include "main.h"
-#include "scanner.h"
-#include "token.h"
-#include "vector.h"
+#include "utils/arch_trans.h"
+#include "utils/error.h"
+#include "utils/hash.h"
+#include "utils/vector.h"
 #include <seccomp.h>
 #include <setjmp.h>
 #include <stdbool.h>

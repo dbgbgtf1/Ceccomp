@@ -1,4 +1,4 @@
-#include "color.h"
+#include "utils/color.h"
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>

@@ -1,15 +1,15 @@
 #include "probe.h"
 #include "emu.h"
-#include "log/error.h"
-#include "log/logger.h"
+#include "lexical/parser.h"
+#include "lexical/scanner.h"
 #include "main.h"
-#include "parse_args.h"
-#include "parser.h"
-#include "read_source.h"
-#include "resolver.h"
-#include "scanner.h"
+#include "resolver/resolver.h"
 #include "trace.h"
-#include "vector.h"
+#include "utils/error.h"
+#include "utils/logger.h"
+#include "utils/parse_args.h"
+#include "utils/read_source.h"
+#include "utils/vector.h"
 #include <fcntl.h>
 #include <seccomp.h>
 #include <stdbool.h>
@@ -66,7 +66,7 @@ probe (char *argv[], FILE *output_fp, bool quiet)
   init_table ();
 
   init_vector (&text_v, sizeof (statement_t), lines);
-  init_vector (&code_ptr_v, sizeof (statement_t *), MIN(lines, 1025));
+  init_vector (&code_ptr_v, sizeof (statement_t *), MIN (lines, 1025));
   parser (&text_v, &code_ptr_v);
   if (resolver (&code_ptr_v))
     error ("%s", M_PROBE_TERMINATED);

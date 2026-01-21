@@ -1,12 +1,12 @@
 #include "disasm.h"
-#include "decoder.h"
-#include "formatter.h"
+#include "decoder/decoder.h"
+#include "decoder/formatter.h"
+#include "lexical/parser.h"
 #include "main.h"
-#include "parser.h"
-#include "render.h"
-#include "reverse_endian.h"
-#include "str_pile.h"
-#include "vector.h"
+#include "resolver/render.h"
+#include "utils/reverse_endian.h"
+#include "utils/str_pile.h"
+#include "utils/vector.h"
 #include <stdint.h>
 #include <stdio.h>
 

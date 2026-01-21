@@ -1,10 +1,10 @@
 #ifndef PARSER
 #define PARSER
 
-#include "hash.h"
 #include "main.h"
 #include "token.h"
-#include "vector.h"
+#include "utils/hash.h"
+#include "utils/vector.h"
 #include <stdbool.h>
 #include <stdint.h>
 

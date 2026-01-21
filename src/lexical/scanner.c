@@ -1,10 +1,10 @@
-#include "scanner.h"
-#include "arch_trans.h"
+#include "lexical/scanner.h"
 #include "config.h"
-#include "log/logger.h"
+#include "lexical/token.h"
 #include "main.h"
-#include "read_source.h"
-#include "token.h"
+#include "utils/arch_trans.h"
+#include "utils/logger.h"
+#include "utils/read_source.h"
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
