@@ -338,6 +338,8 @@ assemble (FILE *fp, uint32_t scmp_arch, print_mode_t print_mode)
         reverse_endian (&f);
       handle ((uint8_t *)&f, fmt_template);
     }
+  if (print_mode == HEXLINE)
+    putc ('\n', stdout);
 
   free_table ();
   free_source ();
