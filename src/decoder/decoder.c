@@ -34,6 +34,7 @@ static const token_type abs_table[] = {
   [RSH2 (offsetof (seccomp_data, args[5]) + 4)] = ATTR_HIGHARG,
 };
 
+#define SCMP_DATA_LEN_STR "# 0x40"
 static void
 ld_ldx_line (filter f, statement_t *statement)
 {
@@ -61,6 +62,10 @@ ld_ldx_line (filter f, statement_t *statement)
       return;
     case BPF_LEN:
       right->type = ATTR_LEN;
+      statement->line_start = SCMP_DATA_LEN_STR;
+      statement->comment = 0;
+      statement->line_len = LITERAL_STRLEN (SCMP_DATA_LEN_STR);
+      static_assert (sizeof (seccomp_data) == 0x40);
       return;
     default:
       assert (!"Unknown BPF_MODE for ld or ldx");
