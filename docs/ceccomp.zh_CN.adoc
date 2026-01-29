@@ -15,7 +15,7 @@ ceccomp - 一个分析安全计算 (seccomp) 过滤器的工具
 == 大纲
 
     usage: ceccomp <asm|disasm|emu|trace|probe|version|help> [FILE] [-q|--quiet]
-                   [-f|--format FMT] [-a|--arch ARCH] [-p|--pid PID]
+                   [-f|--format FMT] [-a|--arch ARCH] [-p|--pid PID] [-s|--seize]
                    [-o|--output FILE] [-c|--color WHEN] ...
 
 == 概念
@@ -47,11 +47,15 @@ WHEN::
 ARCH::
 可以设置为任何 libseccomp 支持的架构。它将被用于决定系统调用名称对应的系统调用号。 例如，在 x86_64 上，就像上面的基本示例，你可以写 `"execve"` 而不是数字 `59` 指代系统调用号。如果不设置这个参数，则通过 `uname` 提取当前系统的架构。 你的系统上的默认值是 {ARCH} 。
 
+NOTE: 从 _4.0 版本_ 开始考虑端序。如果目标架构 *ARCH* 的端序与机器端序不同，则会在输出前反转过滤器（CODE 和 K）。
+
 FMT::
 决定了 `ceccomp` 如何输出二进制格式的BPF字节码。可以是 _hexfmt_ 、 _hexline_ 或者 _raw_ 。你可以在 <<ceccomp 示例>> 节中找到示例输出。默认值是 _hexline_ 。
 
 TEXT::
 一个可选的文件名，其中存放了需要被汇编的 _TEXT_ 。不设置则从 _标准输入_ 中读取。
+
+IMPORTANT: _4.0 版本_ 大幅修改了汇编的语法，请查阅下面的语法参考！
 
 查看 <<TEXT 语法参考>> 一节可以找到如何手写规则。一些示例会在 <<ceccomp 示例>> 一节中展示。
 
@@ -59,7 +63,7 @@ TEXT::
 |命令|差别
 
 |`seccomp-tools asm`
-|使用它自己的语法汇编，有点像脚本
+|使用它自己的语法汇编，有点像脚本；可以汇编会被内核拒绝的错误 _TEXT_
 
 |`ceccomp asm`
 |你可以直接拿着 `disasm` 的输出来汇编，不需要学习新语法；默认使用 _标准输入_ 作为输入
@@ -76,6 +80,8 @@ WHEN::
 
 ARCH::
 可以设置为任何 libseccomp 支持的架构。它将被用于决定 _RAW_ 中的系统调用号如何被翻译为系统调用名。 例如，在 x86_64 上，在比较系统调用号时，数字 `0x3b` 将被翻译为 `execve` ，可以看上面的基本示例。 你的系统上的默认值是 {ARCH} 。
+
+NOTE: 从 _4.0 版本_ 开始考虑端序。如果目标架构 *ARCH* 的端序与机器端序不同，则会在解码前反转过滤器（CODE 和 K）。
 
 NOTE: 当且仅当在某一行的架构可以被确定时，ceccomp 才会尝试用那个架构解析那个系统调用号。 如果是外部架构（不等于你设置的架构），它会被附加到系统调用名前。你可能会注意到在一些情况下， seccomp-tools 能解析一些系统调用名，而 ceccomp 不能，这可能是因为此时架构不能被确定。
 
@@ -111,6 +117,9 @@ ARCH::
 TEXT::
 一个可选的文件名，其中存放了需要被测试的 _TEXT_ 规则。不设置则从 _标准输入_ 中读取。
 
+-q, --quiet::
+只打印过滤器的模拟结果。例如，最后一行模拟的伪代码是 `return KILL`，那么将会打印 `KILL`。
+
 |===
 |命令|差别
 
@@ -124,9 +133,9 @@ TEXT::
 === trace - 运行时捕获过滤器
 
     ceccomp trace [-c WHEN] [-o FILE] PROGRAM [program-args]
-                  [-c WHEN] -p PID
+                  [-c WHEN] -p PID [-s]
 
-使用第一行的命令可以利用调试在 *PROGRAM* 运行中加载过滤器时动态捕获过滤器； 第二行的命令可以从 *PID* 对应的进程中提取出 seccomp 过滤器；一旦捕获到了过滤器， 将会以 _TEXT_ 的格式将它打印出来。你可以从两个格式中选择一个使用。 适用于运行一个程序是捕获BPF过滤器最简单的方式或者一个安装了 seccomp 过滤器的程序正在等待输入。
+使用第一行的命令可以利用调试在 *PROGRAM* 运行中加载过滤器时动态捕获过滤器； 第二行的命令可以从 *PID* 对应的进程中提取出 seccomp 过滤器，或通过调试 *PID* 捕获后续的 seccomp 过滤器；一旦捕获到了过滤器， 将会以 _TEXT_ 的格式将它打印出来。你可以从两个格式中选择一个使用。 适用于运行一个程序是捕获BPF过滤器最简单的方式或者一个安装了 seccomp 过滤器的程序正在等待输入。
 
 WHEN::
 参数描述可以在 <<asm - 汇编>> 一节中找到。 `trace` 可能会打印更多有颜色的文本，包括针对 _TEXT_ 的语法高亮。
@@ -138,11 +147,17 @@ PROGRAM::
 设置为你想运行的程序，并且 *program-args* 将作为它的参数， 就像运行 shell 命令 `exec PROGRAM program-args` 。
 
 PID::
-设置为你想检查的 pid。 *PID* 和 *PROGRAM* 相冲突；你只能在一条命令中动态运行一个程序， 或者检查一个 pid。
+设置为你想检查的 pid。 *PID* 和 *PROGRAM* 相冲突；你只能在一条命令中动态运行一个程序， 或者检查一个 pid。没有 `-s` 标志，trace pid 会尝试使用 `ptrace(PTRACE_SECCOMP_GET_FILTER)` 从 *PID* 中提取 seccomp 过滤器，这个操作在一些系统上可能不可用。
 
-NOTE: 要想从 *PID* 中提取过滤器，你需要 `CAP_SYS_ADMIN` ，同时还可能需要 `CAP_SYS_PTRACE` ，最简单的获取它们的方法是用 `sudo` 运行 `ceccomp` 。
+-s, --seize::
+*只适用于 TRACE PID 模式。* 设置这个标志将会覆盖 trace pid 的行为为像 trace prog 模式一样把调试器挂到 *PID* 上并持续跟踪 seccomp 过滤器的加载。_这个标志引入于 4.0 版本。_
 
-NOTE: 从 _version 3.1_ 开始引入了多进程支持，并且当被调试进程 fork/resolve/exit 时，将会打印一条额外的 INFO 信息。你可以使用像 `ceccomp trace -o $(tty) PROG 2>/dev/null` 这样的命令丢弃它。
+-q, --quiet::
+设置这个标志将会在检测到进程分叉、退出或加载 seccomp 过滤器时抑制多余的 *[INFO]* 输出。 _这个标志引入于 4.0 版本。_
+
+NOTE: 要想从 *PID* 中提取过滤器，你需要 `CAP_SYS_ADMIN` （没有 `-s` 标志），同时还可能需要 `CAP_SYS_PTRACE` ，最简单的获取它们的方法是用 `sudo` 运行 `ceccomp` 。
+
+NOTE: 从 _3.1 版本_ 开始引入了多进程支持，并且当被调试进程 fork/resolve/exit 时，将会打印一条额外的 INFO 信息。你可以使用像 `ceccomp trace -q PROG 2>/dev/null` 这样的命令丢弃它。
 
 |===
 |命令|差别
@@ -153,12 +168,12 @@ NOTE: 从 _version 3.1_ 开始引入了多进程支持，并且当被调试进�
 
 |`ceccomp trace`
 |所有过滤器被输出到同一个文件；永远不会杀死 *PROGRAM* ； *PROGRAM* 是直接被执行的，
-所以不需要 `./` ；当 fork 时，显式打印事件
+所以不需要 `./` ；当 fork 时，显式打印事件；能够附加调试器到 pid 上动态捕捉 seccomp 过滤器
 |===
 
 === probe - 快速测试常见的系统调用
 
-    ceccomp probe [-c WHEN] [-o FILE] PROGRAM [program-args]
+    ceccomp probe [-c WHEN] [-o FILE] [-q] PROGRAM [program-args]
 
 以 *program-args* 为参数运行 *PROGRAM* 来捕获 *第一个* seccomp 过滤器， 然后杀死所有子进程。适用于快速测试一个程序的规则并检测潜在的 seccomp 规则问题。
 
@@ -184,20 +199,25 @@ NOTE: `seccomp-tools` 没有等价的子命令。
 
 == TEXT 语法参考
 
-一个有效的 _TEXT_ 可以只包含 *伪代码* 如 `$A = $arch` ，但是添加一些多余的 *行号* 可能可以辅助你手写 _TEXT_ 。 *行号* 从1开始，并且永远是十进制的。
+IMPORTANT: _4.0 版本_ 提高了词法分析器代码的可读性，伴随着大幅修改的语法。前缀为 `#` 的行现在是注释了。同时 _行号_ 被替换为 _标签_，现在词法分析器根据标签定义来决定跳转到哪里，而不是根据 _TEXT_ 文件中的行号。
+
+这里有正确的 _TEXT_ 格式，以类 EBNF 语法描述：https://github.com/dbgbgtf1/Ceccomp/issues/17#issuecomment-3610531705。 没兴趣了解 EBNF？请继续阅读以下的例子。
 
 其余未描述到的BPF操作都被内核禁止了。
 
-=== 可选的其他字段
+=== 注释与标签
 
-`ceccomp disasm` 展示了很多东西，但对于 asm 来说大部分是可选的。
+`ceccomp disasm` 展示了很多东西，但对于 asm 来说有些是可选的。
 
-    Line  CODE  JT   JF      K
-    ---------------------------------
-    0001: 0x06 0x00 0x00 0x7fff0000 return ALLOW
-    ---------------------------------
+    #Label  CODE  JT   JF      K
+    #---------------------------------
+     L0001: 0x06 0x00 0x00 0x7fff0000 return ALLOW
+    #---------------------------------
 
-以上例子中，只用 `return ALLOW` 这条 *伪代码* 是需要的。
+
+任何在 `#` 之后的文本将被 asm 丢弃，就像一些脚本语言一样。
+
+标签声明是一个从行首开始并以 `:` 结尾的标识符，例如 `L0001`。标识符是一个以字母为首，中间只包含字母、数字和下划线 `_` 的字符串。标签只在它是 `goto` 的目标时才是必要的，由 disasm 添加的多余的标签知识为了可读性。例如在 `if ($A == 0) goto somewhere` 中，`somewhere` 是一个标签并且必须在这行伪代码后声明。
 
 NOTE: `ceccomp disasm` 和 `seccomp-tools disasm` 的输出之间有很多细微的差别， 以下是一个典型的输出示例。同时有些伪代码是不同的，所以不要盲目将 seccomp-tools 的输出管道给 ceccomp。
 
@@ -227,15 +247,13 @@ NOTE: `ceccomp disasm` 和 `seccomp-tools disasm` 的输出之间有很多细微
     $A = $scmp_data_len
     $X = $scmp_data_len
 
-临时内存是32位的，要想访问它们，你可以使用十六进制或者十进制的索引。 `A` 和 `X` 都是可赋值的。给 `A` 或 `X` 赋值为立即数接受任意格式的数字， 只要你使用 "0x" 或者 "0b" 等前缀正确表达数字是几进制的。
+临时内存是32位的，要想访问它们，你可以使用十六进制或者十进制的索引。 `A` 和 `X` 都是可赋值的。给 `A` 或 `X` 赋值为立即数接受以 `0x` 开头的十六进制数字和一般的十进制数字。
 
     $X = $mem[0]
     $A = $mem[0xf]
     $A = $mem[15] # both hex and dec index are OK
     $A = 0
     $X = 0x3b
-    $A = 0b111
-    $X = 0777
 
 你还可以将 `X` 赋值给 `A` 或者反过来。将 `X` 或 `A` 赋值给临时内存当然可以。
 
@@ -270,22 +288,22 @@ NOTE: `ceccomp disasm` 和 `seccomp-tools disasm` 的输出之间有很多细微
 
 无条件跳转：
 
-    goto 3
+    goto L3
 
 当...跳转：
 
-    if ($A == execve) goto 3
-    if ($A != 1234) goto 4
-    if ($A & $X) goto 5
-    if !($A & 7) goto 6
-    if ($A <= $X) goto 7
+    if ($A == execve) goto L3
+    if ($A != 1234) goto L4
+    if ($A & $X) goto L5
+    if !($A & 7) goto L6
+    if ($A <= $X) goto L7
 
 当条件为真时跳转到...，条件为假时跳转到...：
     
-    if ($A > $X) goto 3, else goto 4
-    if ($A >= 4567) goto 5, else goto 6
+    if ($A > $X) goto L3, else goto L4
+    if ($A >= 4567) goto L5, else goto L6
 
-只有在做条件判断时，你才能将数字替换为系统调用号。在以上的例子中， `0x3b` 被 `execve` 替换。所有系统调用名将会以你设置的架构解析为系统调用号。 如果你希望解析外部架构（不等于你设置的架构）的系统调用名， 请在前面附加架构名和一个点。例如，你设置的架构是 x86_64，并且你正在写 _aarch64_ 架构的规则，请这样写：
+*只有* 在做条件判断时，你才能将数字替换为系统调用号或架构名。在以上的例子中， `0x3b` 被 `execve` 替换。所有系统调用名将会以你设置的架构解析为系统调用号。 如果你希望解析外部架构（不等于你设置的架构）的系统调用名， 请在前面附加架构名和一个点。例如，你设置的架构是 x86_64，并且你正在写 _aarch64_ 架构的规则，请这样写：
 
     if ($A == aarch64.read) goto 5
 
@@ -299,6 +317,7 @@ NOTE: `ceccomp disasm` 和 `seccomp-tools disasm` 的输出之间有很多细微
 
 或者返回一个立即数，多余的字段放在 `()` 里。 `TRACE` 、 `TRAP` 和 `ERRNO` 接受一个额外的字段，如果没有 `()` ，它们将被视为 `行为(0)` 。
 
+    return 0x13371337
     return KILL
     return KILL_PROCESS
     return TRAP(123)
@@ -307,6 +326,16 @@ NOTE: `ceccomp disasm` 和 `seccomp-tools disasm` 的输出之间有很多细微
     return TRACE(3)
     return LOG
     return NOTIFY
+
+=== 简短的例子
+
+下面的 _TEXT_ 对与 asm 来说是正确的，这段 _TEXT_ 阻止了 amd64 的 `execve` 和 `execveat` 系统调用：
+
+    $A = $syscall_nr
+    if ($A == execve) goto forbid
+    if ($A == execveat) goto forbid
+    return ALLOW
+    forbid: return KILL
 
 == ceccomp 示例
 

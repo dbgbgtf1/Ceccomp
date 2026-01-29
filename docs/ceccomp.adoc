@@ -276,7 +276,7 @@ refactored lexer for better human readability. The wrapper now prefixed by
 depends on label declaration to decide where to jump, instead of lineno in
 _TEXT_ file.
 
-A valid _TEXT_ format is described in EBNF-like declaration documented here:
+A valid _TEXT_ format is described in EBNF-like declaration here:
 https://github.com/dbgbgtf1/Ceccomp/issues/17#issuecomment-3610531705.
 If you have no interest to know what EBNF is, please keep reading for
 examples.
@@ -337,7 +337,7 @@ A special attribute is `sizeof(struct seccomp_data)`, that can be assigned to
 
 Temporary memory is 32-bit, to access them, you could use hex or dec as index.
 Both `A` and `X` is assignable. Assigning immediate values to `A` or `X` accepts
-hexadecimal numbers prefixed by `0x` and normal decimal numbers.
+hexadecimal numbers prefixed by `0x` and common decimal numbers.
 
     $X = $mem[0]
     $A = $mem[0xf]
