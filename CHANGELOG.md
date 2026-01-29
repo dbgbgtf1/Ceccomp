@@ -3,8 +3,9 @@ Items marked with :star: is the major change why we release a new version.
 
 <!-- When referencing issues and PRs, add #num at the end of line for issues -->
 <!-- and !num at the end of line for PRs. If the issue or PR is external, -->
-<!-- write user/repo#num or user/repo!num to reference. Then run scripts/complete-url.py -->
-<!-- to format raw ref to URL. -->
+<!-- write user/repo#num or user/repo!num to reference. If PR is made by some one else, -->
+<!-- write @some*user !num to reference user and PR at the same time. The order can not be -->
+<!-- reversed. Then run scripts/complete-url.py to format raw ref to URL. -->
 
 ## 4.0 (INCOMING)
 * **BREAKING** :star: :fire: **We aggressively refactored our code and the asm grammar is a bit different from v3. Please refer to documentation for new grammar.** :fire:
@@ -12,6 +13,7 @@ Items marked with :star: is the major change why we release a new version.
 * :star: Remove `-mno-omit-leaf-frame-pointer` flag if not supported by cc
 * :star: Fix asm and disasm endianness problems :link: [#22]
 * :star: Handle '>=' '>' '<=' '<' correctly :link: [#25]
+* :star: Find python by `env` for compatibility in `configure` :heart: [@tesuji] :link: [!19]
 * Print messages in dynamic tests
 * Add `-q` for trace to suppress `[INFO]` output
 * Reject text that are error ones for kernel :link: [#17]
@@ -22,6 +24,8 @@ Items marked with :star: is the major change why we release a new version.
 [#25]: https://github.com/dbgbgtf1/Ceccomp/issues/25
 [#23]: https://github.com/dbgbgtf1/Ceccomp/issues/23
 [#17]: https://github.com/dbgbgtf1/Ceccomp/issues/17
+[@tesuji]: https://github.com/tesuji
+[!19]: https://github.com/dbgbgtf1/Ceccomp/pulls/19
 ## 3.5
 * **BREAKING** :star: Now `trace` and `probe` no more accepts `-a`; arch is automatically retrieved via ptrace
 * :star: Add `i686` arch support
