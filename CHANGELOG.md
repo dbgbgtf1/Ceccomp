@@ -7,7 +7,7 @@ Items marked with :star: is the major change why we release a new version.
 <!-- to format raw ref to URL. -->
 
 ## 4.0 (INCOMING)
-* :star: **BREAKING** :fire: **We aggressively refactored our code and the asm grammar is a bit different from v3. Please refer to documentation for new grammar.** :fire:
+* **BREAKING** :star: :fire: **We aggressively refactored our code and the asm grammar is a bit different from v3. Please refer to documentation for new grammar.** :fire:
 * :star: Add seize subfunction in trace pid :link: [#23]
 * :star: Remove `-mno-omit-leaf-frame-pointer` flag if not supported by cc
 * :star: Fix asm and disasm endianness problems :link: [#22]
