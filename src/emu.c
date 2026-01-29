@@ -32,6 +32,7 @@ static uint32_t high_pc = 0;
 static uint32_t low_args[6] = { 0 };
 static uint32_t high_args[6] = { 0 };
 
+static uint32_t scmp_data_len = sizeof (seccomp_data);
 #define BASE_vars(value) ((value) - A)
 static uint32_t *vars[] = {
   [BASE_vars (A)] = &A_reg,
@@ -43,6 +44,7 @@ static uint32_t *vars[] = {
   [BASE_vars (ATTR_HIGHPC)] = &high_pc,
   [BASE_vars (ATTR_LOWARG)] = low_args,
   [BASE_vars (ATTR_HIGHARG)] = high_args,
+  [BASE_vars (ATTR_LEN)] = &scmp_data_len,
 };
 
 #define DO_OPERATE(operator) (*left operator (*right))
