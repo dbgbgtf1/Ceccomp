@@ -8,6 +8,8 @@ DEFAULT_REPO = 'dbgbgtf1/Ceccomp'
 
 # match 3 raw ref case：#123, !456, user/repo#789, user/repo!456
 pattern = re.compile(r'(?:\s+)((?:[\w.-]+/[\w.-]+)?[#!]\d+)$')
+# match '@username '
+user_pat = re.compile(r'@([a-zA-Z0-9_-]+) ')
 
 
 def convert(token: str) -> str:
@@ -58,6 +60,17 @@ def main():
             has_old_ref = False
         elif line.startswith('['):
             has_old_ref = True
+
+        # look for @user in line, NOT AT LINE END!
+        mu = user_pat.search(line)
+        if mu:
+            user = mu.group(1)
+            url = f'https://github.com/{user}'
+            refs[f'@{user}'] = url
+            line = line.replace(mu.group(0), f':heart: [@{user}] ')
+            if is_check:
+                print(f'[line {lineno}] found: {user}')
+                has_match = True
 
         m = pattern.search(line)
         if m:
