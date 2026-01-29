@@ -55,7 +55,6 @@ if (( CURRENT == 2 )) {
             ;;
         (trace)
             _arguments -C \
-                $arch_compstr \
                 $color_compstr \
                 '(-p --pid)'{-p,--pid}'[Attach to which process to extract its filters]:PID:->getpid' \
                 '(-q --quiet)'{-q,--quiet}'[Print warning and error messages only]' \
@@ -77,7 +76,6 @@ if (( CURRENT == 2 )) {
             ;;
         (probe)
             _arguments -C \
-                $arch_compstr \
                 $color_compstr \
                 $output_compstr \
                 '(-q --quiet)'{-q,--quiet}'[Print warning and error messages only]' \
