@@ -15,7 +15,7 @@ ceccomp - A tool to analyze seccomp filters
 == SYNOPSIS
 
     usage: ceccomp <asm|disasm|emu|trace|probe|version|help> [FILE] [-q|--quiet]
-                   [-f|--format FMT] [-a|--arch ARCH] [-p|--pid PID]
+                   [-f|--format FMT] [-a|--arch ARCH] [-p|--pid PID] [-s|--seize]
                    [-o|--output FILE] [-c|--color WHEN] ...
 
 == CONCEPT
@@ -60,6 +60,10 @@ the actual syscall number behind the name (for example, on x86_64, you could wri
 `"execve"` instead of `59` like the basic example above). Your system arch will be
 taken if not set via `uname`. The default value on your system is {ARCH}.
 
+NOTE: Since _version 4.0_, endianness is considered. If target endianness *ARCH* is
+different from machine endianness, the filters will be reversed (CODE and K) before
+outputting.
+
 FMT::
 Determines how `ceccomp` produces binary-format bpf code. Can be _hexfmt_,
 _hexline_ or _raw_. You could find sample output in <<EXAMPLES>> section.
@@ -69,6 +73,9 @@ TEXT::
 Take a optional filename to determine which file containing _TEXT_ will
 be assembled. Will read from _stdin_ if not set.
 
+IMPORTANT: The assembly syntax was changed greatly since _version 4.0_,
+please checkout grammar reference below!
+
 Please check out <<TEXT GRAMMAR REFERENCE>> section to see how to write a rule by
 hand. Some examples will be displayed in <<EXAMPLES>> section.
 
@@ -76,7 +83,8 @@ hand. Some examples will be displayed in <<EXAMPLES>> section.
 |Command|Difference
 
 |`seccomp-tools asm`
-|Use its own grammar to assemble, a bit script like
+|Use its own grammar to assemble, a bit script like; can assemble invalid _TEXT_
+which will be rejected by kernel
 
 |`ceccomp asm`
 |You can just take `disasm` output to `asm`, no new grammar is needed to learn;
@@ -99,6 +107,10 @@ Set to any architecture libseccomp supports. Will be used to determine
 how filtered syscall number in _RAW_ filter is translated to syscall name (for example,
 on x86_64, the number `0x3b` is translated to `execve` if is comparing syscall_nr, see
 the basic example above). The default value on your system is {ARCH}.
+
+NOTE: Since _version 4.0_, endianness is considered. If target endianness *ARCH* is
+different from machine endianness, the filters will be reversed (CODE and K) before
+decoding.
 
 NOTE: ceccomp will try to resolve syscall number under an arch ONLY IF that at that line,
 arch can be determined. On foreign arch (not equal to the arch you set), the foreign arch
@@ -147,6 +159,10 @@ TEXT::
 Take a optional filename to determine which file containing _TEXT_ rule will
 be tested. Will read from _stdin_ if not set.
 
+-q, --quiet::
+Only print the eval result of the filter. For example, if last statement emulated
+is `return KILL`, then `KILL` is printed.
+
 |===
 |Command|Difference
 
@@ -160,14 +176,15 @@ possible
 
 === trace - TRACE FILTER IN RUNTIME
 
-    ceccomp trace [-c WHEN] [-o FILE] PROGRAM [program-args]
-                  [-c WHEN] -p PID
+    ceccomp trace [-c WHEN] [-q] [-o FILE] PROGRAM [program-args]
+                  [-c WHEN] [-q] -p PID [-s]
 
 The first line captures filters *PROGRAM* loads in runtime by tracing it;
-the second line extract seccomp filters from *PID*; once fetched filters,
-print them in _TEXT_. You can only choose one of the two formats above.
-Use this if running the program is the simplest way to fetch bpf filters
-or a program with seccomp filters installed is waiting for input.
+the second line extract seccomp filters from *PID*, or trace *PID* to capture
+subsequent seccomp filters; once fetched filters, print them in _TEXT_.
+You can only choose one of the two formats above. Use this if running the
+program is the simplest way to fetch bpf filters or a program with seccomp
+filters installed is waiting for input.
 
 WHEN::
 Argument description can be found in <<asm - ASSEMBLE>> section. `trace` may print
@@ -186,14 +203,25 @@ arguments just like running shell command `exec PROGRAM program-args`.
 PID::
 Set to the pid you want to inspect. *PID* is conflict with *PROGRAM*;
 you could either run a program dynamically or examine a pid in one command.
+Without `-s` flag, trace pid will try to extract seccomp filter in *PID* via
+`ptrace(PTRACE_SECCOMP_GET_FILTER)`, which may not be available in some systems.
 
-NOTE: To extract filters from *PID*, `CAP_SYS_ADMIN` is needed and
-`CAP_SYS_PTRACE` may also be needed, the easiest way to acquire them is
-calling `ceccomp` with `sudo`.
+-s, --seize::
+*ONLY AVAILABLE FOR TRACE PID MODE.* Set this flag will override trace pid
+behavior to attach to *PID* and keep tracing for seccomp filter loading like
+trace prog mode. _This flag was introduced in version 4.0._
+
+-q, --quiet::
+Set to suppress the extra *[INFO]* prints when detect process forking, exiting or
+seccomp filter loading. _This flag was introduced in version 4.0._
+
+NOTE: To extract filters from *PID*, `CAP_SYS_ADMIN` is needed (without `-s` flag)
+and `CAP_SYS_PTRACE` may also be needed, the easiest way to acquire
+them is calling `ceccomp` with `sudo`.
 
 NOTE: Since _version 3.1_, multiple process tracing is introduced, and when tracee
 forking/resolving/exiting, an extra INFO message is printed. You can discard
-it by running command like `ceccomp trace -o $(tty) PROG 2>/dev/null`.
+it by running command like `ceccomp trace -q PROG 2>/dev/null`.
 
 |===
 |Command|Difference
@@ -205,12 +233,13 @@ in `sh -c`
 
 |`ceccomp trace`
 |All filters are output to a single file; never kill *PROGRAM*; *PROGRAM* is
-launched directly, so `./` is not needed; explicitly print when forking
+launched directly, so `./` is not needed; explicitly print when forking;
+able to attach to pid for dynamic seccomp filter capturing
 |===
 
 === probe - TEST COMMON SYSCALLS INSTANTLY
 
-    ceccomp probe [-c WHEN] [-o FILE] PROGRAM [program-args]
+    ceccomp probe [-c WHEN] [-o FILE] [-q] PROGRAM [program-args]
 
 Run *PROGRAM* with *program-args* to captures *FIRST* seccomp filter, and then
 kill all children. Use it when a quick check against a program is needed,
@@ -241,23 +270,37 @@ NOTE: `seccomp-tools` don't have this subcommand.
 
 == TEXT GRAMMAR REFERENCE
 
-A valid _TEXT_ could only contain *statement* like `$A = $arch`, but adding
-an extra *lineno* may help you much. *lineno* starts from 1, and always
-bases 10.
+IMPORTANT: The grammar changed greatly since _version 4.0_ as we
+refactored lexer for better human readability. The wrapper now prefixed by
+`#` as it's a comment now. And _line_ is replaced by _label_, so now lexer
+depends on label declaration to decide where to jump, instead of lineno in
+_TEXT_ file.
+
+A valid _TEXT_ format is described in EBNF-like declaration documented here:
+https://github.com/dbgbgtf1/Ceccomp/issues/17#issuecomment-3610531705.
+If you have no interest to know what EBNF is, please keep reading for
+examples.
 
 BPF ops which are not described below are banned by kernel.
 
-=== Optional Wrapper
+=== Comment and Label
 
-`ceccomp disasm` displays a lot of things, but most of them are optional
+`ceccomp disasm` displays a lot of things, but some of them are optional
 for asm.
 
-    Line  CODE  JT   JF      K
-    ---------------------------------
-    0001: 0x06 0x00 0x00 0x7fff0000 return ALLOW
-    ---------------------------------
+    #Label  CODE  JT   JF      K
+    #---------------------------------
+     L0001: 0x06 0x00 0x00 0x7fff0000 return ALLOW
+    #---------------------------------
 
-Only `return ALLOW`, the *statement* is needed.
+Any text after `#` will be discarded by asm like some script languages.
+
+Label declaration is an identifier at the beginning of line and postfixed
+by `:` like `L0001`. An identifier is a string starts with alpha and contains with
+only alphanumeric characters and underscore `_`. Label is only necessary if
+it's the destination of `goto`, these redundant labels added by disasm are for
+readability. E.g. in `if ($A == 0) goto somewhere`, `somewhere` is a label and
+must be declared after the statement.
 
 NOTE: There are some slight difference between `ceccomp disasm` and
 `seccomp-tools disasm`, down below is a general example. And some
@@ -294,15 +337,13 @@ A special attribute is `sizeof(struct seccomp_data)`, that can be assigned to
 
 Temporary memory is 32-bit, to access them, you could use hex or dec as index.
 Both `A` and `X` is assignable. Assigning immediate values to `A` or `X` accepts
-any format of number if you imply the correct base by "0x" or "0b".
+hexadecimal numbers prefixed by `0x` and normal decimal numbers.
 
     $X = $mem[0]
     $A = $mem[0xf]
     $A = $mem[15] # both hex and dec index are OK
     $A = 0
     $X = 0x3b
-    $A = 0b111
-    $X = 0777
 
 You could also assign `X` to `A` or in the reverse order. Assign `X` or `A` to
 temporary memory is definitely okay.
@@ -338,23 +379,23 @@ And there is a way to negativate `A`.
 
 Unconditional jump:
 
-    goto 3
+    goto L3
 
 Jump if:
 
-    if ($A == execve) goto 3
-    if ($A != 1234) goto 4
-    if ($A & $X) goto 5
-    if !($A & 7) goto 6
-    if ($A <= $X) goto 7
+    if ($A == execve) goto L3
+    if ($A != 1234) goto L4
+    if ($A & $X) goto L5
+    if !($A & 7) goto L6
+    if ($A <= $X) goto L7
 
 If true jump to ... if false jump to...:
     
-    if ($A > $X) goto 3, else goto 4
-    if ($A >= 4567) goto 5, else goto 6
+    if ($A > $X) goto L3, else goto L4
+    if ($A >= 4567) goto L5, else goto L6
 
-ONLY in conditions, you CAN replace number with syscall name. In example
-above, `0x3b` is replaced by `execve`. All the syscall name will be
+ONLY in conditions, you CAN replace number with syscall name or arch name.
+In example above, `0x3b` is replaced by `execve`. All the syscall name will be
 resolved to syscall number under your selected arch. If you want to resolve
 a syscall name in foreign arch (not equal to your selected arch), please
 prepend a arch and dot. For example, your arch is x86_64, and you are writing
@@ -375,6 +416,7 @@ Or return a immediate value, with extra field in `()`. Actions including
 `TRACE`, `TRAP` and `ERRNO` accept an extra field, without `()`, they are
 treated as `action(0)`:
 
+    return 0x13371337
     return KILL
     return KILL_PROCESS
     return TRAP(123)
@@ -383,6 +425,17 @@ treated as `action(0)`:
     return TRACE(3)
     return LOG
     return NOTIFY
+
+=== Short Example
+
+The following _TEXT_ is valid for asm, which blocks `execve` and `execveat`
+for amd64 syscalls:
+
+    $A = $syscall_nr
+    if ($A == execve) goto forbid
+    if ($A == execveat) goto forbid
+    return ALLOW
+    forbid: return KILL
 
 == EXAMPLES
 
