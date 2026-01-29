@@ -9,10 +9,40 @@
 #include "utils/reverse_endian.h"
 #include "utils/str_pile.h"
 #include "utils/vector.h"
+#include <assert.h>
+#include <errno.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
+#include <unistd.h>
 
 filter g_filters[1024];
+
+static uint32_t
+read_filters (filter *filters, FILE *from)
+{
+  uint32_t todo = sizeof (filter) * (1024 + 1);
+  uint8_t *ptr = (uint8_t *)filters;
+  int fd = fileno (from);
+  assert (fd != -1);
+  while (todo)
+    {
+      long rc = read (fd, ptr, todo);
+      if (rc == -1)
+        error ("read: %s", strerror (errno));
+      if (rc == 0)
+        break;
+      ptr += rc;
+      todo -= rc;
+    }
+  if (!todo)
+    error ("%s", M_TOO_LARGE_INPUT);
+  uint32_t leftover = (size_t)ptr & 7;
+  if (leftover)
+    warn (M_INPUT_HAS_LEFTOVER, leftover);
+  return (ptr - (uint8_t *)filters) >> 3;
+}
 
 void
 print_prog (uint32_t scmp_arch, fprog *prog, FILE *output_fp)
@@ -53,7 +83,7 @@ disasm (FILE *fp, uint32_t scmp_arch)
 {
   fprog prog;
   prog.filter = g_filters;
-  prog.len = fread (g_filters, sizeof (filter), 1024, fp);
+  prog.len = read_filters (g_filters, fp);
   if (prog.len == 0)
     {
       warn ("%s", M_NO_FILTER);

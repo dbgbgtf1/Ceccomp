@@ -17,6 +17,11 @@
 // disasm
 #define M_DISASM_TERMINATED _ ("Disasm terminated")
 #define M_NO_FILTER _ ("The input is empty")
+#define M_TOO_LARGE_INPUT                                                     \
+  _ ("The input is larger than 1024 filters! Perhaps inputting a wrong "      \
+     "file?")
+#define M_INPUT_HAS_LEFTOVER                                                  \
+  _ ("%d byte(s) at the end of input could not fit into a filter")
 
 // trace
 #define M_PEEKDATA_FAILED_ADR _ ("Peekdata failed at %p")
