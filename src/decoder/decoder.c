@@ -185,7 +185,7 @@ return_line (filter f, statement_t *statement)
   statement->type = RETURN_LINE;
   return_line_t *return_line = &statement->return_line;
 
-  if (BPF_RVAL (BPF_A) == BPF_A)
+  if (BPF_RVAL (f.code) == BPF_A)
     return_line->ret_obj.type = A;
   else
     {
