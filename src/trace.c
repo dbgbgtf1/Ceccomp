@@ -192,7 +192,7 @@ handle_syscall (pid_t pid, FILE *output_fp, bool quiet, bool oneshot)
   else if (seccomp_mode == SECCOMP_SET_MODE_FILTER)
     mode_filter (&info, pid, &prog, output_fp);
 
-  if (!oneshot || seccomp_mode == LOAD_FAIL)
+  if (!oneshot || seccomp_mode == LOAD_FAIL || seccomp_mode == LOAD_ELSE)
     return false;
 
   return true;
