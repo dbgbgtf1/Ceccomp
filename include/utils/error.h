@@ -16,6 +16,7 @@
 
 // disasm
 #define M_DISASM_TERMINATED _ ("Disasm terminated")
+#define M_NO_FILTER _ ("The input is empty")
 
 // trace
 #define M_PEEKDATA_FAILED_ADR _ ("Peekdata failed at %p")

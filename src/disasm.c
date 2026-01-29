@@ -4,6 +4,8 @@
 #include "lexical/parser.h"
 #include "main.h"
 #include "resolver/render.h"
+#include "utils/error.h"
+#include "utils/logger.h"
 #include "utils/reverse_endian.h"
 #include "utils/str_pile.h"
 #include "utils/vector.h"
@@ -52,6 +54,11 @@ disasm (FILE *fp, uint32_t scmp_arch)
   fprog prog;
   prog.filter = g_filters;
   prog.len = fread (g_filters, sizeof (filter), 1024, fp);
+  if (prog.len == 0)
+    {
+      warn ("%s", M_NO_FILTER);
+      return;
+    }
 
   print_prog (scmp_arch, &prog, stdout);
 }
