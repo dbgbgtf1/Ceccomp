@@ -7,18 +7,21 @@ Items marked with :star: is the major change why we release a new version.
 <!-- to format raw ref to URL. -->
 
 ## 4.0 (INCOMING)
-* **BREAKING**
-Replace ` Line  CODE  JT   JF      K` with ` Label  CODE  JT   JF      K`.
-Replace disasm output ` 0001: 0x20 0x00 0x00 0x00000004 $A = $arch` with ` L0001: 0x20 0x00 0x00 0x00000004 $A = $arch`. The good news we add support for label, we can use `goto Label_Allow`, also something like `Label_Allow:` in the start of a line as Label Decalarion.
+* :star: **BREAKING** :fire: **We aggressively refactored our code and the asm grammar is a bit different from v3. Please refer to documentation for new grammar.** :fire:
 * :star: Add seize subfunction in trace pid :link: [#23]
 * :star: Remove `-mno-omit-leaf-frame-pointer` flag if not supported by cc
 * :star: Fix asm and disasm endianness problems :link: [#22]
 * :star: Handle '>=' '>' '<=' '<' correctly :link: [#25]
 * Print messages in dynamic tests
+* Add `-q` for trace to suppress `[INFO]` output
+* Reject text that are error ones for kernel :link: [#17]
+* Migrate to po4a for documentation translation
+* Print info when trace found failed seccomp syscall
 
 [#22]: https://github.com/dbgbgtf1/Ceccomp/issues/22
 [#25]: https://github.com/dbgbgtf1/Ceccomp/issues/25
 [#23]: https://github.com/dbgbgtf1/Ceccomp/issues/23
+[#17]: https://github.com/dbgbgtf1/Ceccomp/issues/17
 ## 3.5
 * **BREAKING** :star: Now `trace` and `probe` no more accepts `-a`; arch is automatically retrieved via ptrace
 * :star: Add `i686` arch support
