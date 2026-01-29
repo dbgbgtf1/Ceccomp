@@ -113,7 +113,10 @@ report_error (filter f, err_idx idx, bool fatal, const char *err_msg)
   SPRINTF_CAT ("%s\nCODE:0x%04x JT:0x%02x JF:0x%02x K:0x%08x\n", err_msg,
                f.code, f.jt, f.jf, f.k);
   if (idx == NONE)
-    memset (print, '~', err_len[NONE]);
+    {
+      memset (print, '~', err_len[NONE]);
+      print[err_len[idx]] = '\0';
+    }
   else
     {
       memset (print, ' ', err_len[idx]);
