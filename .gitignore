@@ -1,4 +1,5 @@
 build/
+__pycache__
 compile_commands.json
 a.out
 Test
