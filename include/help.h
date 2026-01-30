@@ -52,7 +52,7 @@
      "-s, --seize                      Follow process to trace load-filter "  \
      "operation\n"                                                            \
                                                                               \
-     "-c, --color                      When to print in color, default as "   \
+     "-c, --color (auto|always|never)  When to print in color, default as "   \
      "auto\n"                                                                 \
                                                                               \
      "syscall_nr                       System call number or name (e.g. "     \
