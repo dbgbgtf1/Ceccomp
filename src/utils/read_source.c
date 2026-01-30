@@ -1,3 +1,4 @@
+#include <stddef.h>
 #define _GNU_SOURCE
 #include "utils/read_source.h"
 #include "utils/error.h"
@@ -172,7 +173,7 @@ init_source (FILE *read_fp)
 
   const char *found0;
   if ((found0 = memchr (source, '\0', current)))
-    error (M_FOUND_SUS_ZERO, found0 - source);
+    error (M_FOUND_SUS_ZERO, (unsigned long)(found0 - source));
 
   if (current % GROW_LEN == 0 || current % GROW_LEN > GROW_LEN - 0x20)
     increase_map (); // scanner expect a trailing \n, which may increase map

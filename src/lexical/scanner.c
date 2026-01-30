@@ -264,9 +264,9 @@ scan_token (token_t *token)
     {
       char *end;
       errno = 0;
-      uint32_t num = strtol (scanner.token_start, &end, 0);
+      uint32_t num = strtoul (scanner.token_start, &end, 0);
       if (errno)
-        error ("strtol: %s", strerror (errno));
+        error ("strtoul: %s", strerror (errno));
       scanner.current_char = end;
       INIT_TOKEN_DATA (NUMBER, num);
     }
