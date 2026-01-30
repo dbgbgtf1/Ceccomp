@@ -15,7 +15,7 @@ hash_hkey (hkey_t key)
 #if __SIZEOF_POINTER__ == 8
   return a5hash (key.start, key.len, 0);
 #else
-  return a5hash32 (key->start, key->len, 0);
+  return a5hash32 (key.start, key.len, 0);
 #endif
 }
 
