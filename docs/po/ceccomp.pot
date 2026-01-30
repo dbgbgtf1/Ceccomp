@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-01-30 00:56+0800\n"
+"POT-Creation-Date: 2026-01-30 22:13+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -650,7 +650,7 @@ msgstr ""
 #. type: Plain text
 #: ceccomp.adoc:304
 msgid ""
-"Label declaration is an identifier at the beginning of line and postfixed by "
+"Label declaration is an identifier at the beginning of line and suffixed by "
 "`:` like `L0001`. An identifier is a string starts with alpha and contains "
 "with only alphanumeric characters and underscore `_`. Label is only "
 "necessary if it's the destination of `goto`, these redundant labels added by "
