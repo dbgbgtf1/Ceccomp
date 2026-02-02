@@ -2,7 +2,6 @@ import pytest
 from shared_vars import *
 from subprocess import PIPE, DEVNULL
 import signal
-import time
 
 def is_not_cap_sys_admin() -> str | None:
     try:
@@ -44,12 +43,13 @@ def is_pid_killed(pid: int) -> bool:
 
 
 ##### TEST CASES #####
-def test_probe():
+def test_probe(errns: SimpleNamespace):
     piper, pipew = os.pipe()
     os.set_inheritable(pipew, True)
     argv = [CECCOMP, 'probe', *COMMON_OPTS, '-o', f'/proc/self/fd/{pipew}', TEST, '1']
     _, stdout, stderr = run_process(argv, False, pipew)
     os.close(pipew)
+    errns.stderr = stderr
 
     expect_file = TEST_DIR / 'dyn_log' / 'probe.log'
     with expect_file.open() as f:
@@ -61,12 +61,13 @@ def test_probe():
     assert is_pid_killed(pid)
 
 
-def test_trace():
+def test_trace(errns: SimpleNamespace):
     piper, pipew = os.pipe()
     os.set_inheritable(pipew, True)
     argv = [CECCOMP, 'trace', *COMMON_OPTS, '-o', f'/proc/self/fd/{pipew}', TEST, '0']
     _, _, stderr = run_process(argv, False, pipew)
     os.close(pipew)
+    errns.stderr = stderr
 
     expect_file = TEST_DIR / 'dyn_log' / 'trace.log'
     with expect_file.open() as f:
@@ -76,7 +77,7 @@ def test_trace():
     assert 'WARN' in stderr
 
 
-def test_seize():
+def test_seize(errns: SimpleNamespace):
     tp = subprocess.Popen([TEST, '2'], stdin=DEVNULL, stdout=PIPE, stderr=DEVNULL, text=True)
     pid = int(tp.stdout.readline().split('=')[1])
 
@@ -89,7 +90,7 @@ def test_seize():
 
     cp.terminate()
     stdout, stderr = cp.communicate()
-    stderr = pre_line + stderr
+    errns.stderr = pre_line + stderr
 
     pid_exist = True
     try:
@@ -104,7 +105,7 @@ def test_seize():
     with expect_file.open() as f:
         assert stdout == f.read()
 
-def test_trace_pid():
+def test_trace_pid(errns: SimpleNamespace):
     if msg := is_not_cap_sys_admin():
         pytest.skip(msg)
 
@@ -113,6 +114,7 @@ def test_trace_pid():
 
     argv = [CECCOMP, 'trace', *COMMON_OPTS, '-p', str(pid)]
     _, stdout, stderr = run_process(argv, False)
+    errns.stderr = stderr
 
     os.kill(pid, signal.SIGCONT)
 

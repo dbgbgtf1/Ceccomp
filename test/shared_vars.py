@@ -2,6 +2,7 @@ from pathlib import Path
 import subprocess
 import os
 from pytest import skip
+from types import SimpleNamespace
 
 PROJ_DIR = Path(__file__).parent.parent
 TEST_DIR = PROJ_DIR / 'test'
