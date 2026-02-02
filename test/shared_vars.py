@@ -8,6 +8,7 @@ TEST_DIR = PROJ_DIR / 'test'
 TXT_DIR = TEST_DIR / 'text'
 BPF_DIR = TEST_DIR / 'bpf'
 EMU_DIR = TEST_DIR / 'emu_result'
+BE_DIR  = TEST_DIR / 'big_endian_cases'
 CECCOMP = str(PROJ_DIR / 'build' / 'ceccomp')
 FILENAMES = sorted([p.stem for p in TXT_DIR.iterdir()])
 

@@ -19,3 +19,13 @@ def test_emu(filename: str, suffix: str):
     with expect_file.open('r') as expect:
         assert stdout == expect.read()
     assert not stderr
+
+def test_s390x_emu():
+    input_file = BE_DIR / 's390x.text'
+    expect_file = BE_DIR / 's390x.text.mmap'
+    _, stdout, stderr = run_process(
+        [CECCOMP, 'emu', str(input_file), 'mmap', '-a', 's390x'], False,
+    )
+    with expect_file.open() as expect:
+        assert stdout == expect.read()
+    assert not stderr

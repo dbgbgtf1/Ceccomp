@@ -1,0 +1,6 @@
+$A = $arch
+if ($A != s390x) goto allow
+$A = $syscall_nr
+if ($A == mlock) goto forbid
+allow: return ALLOW
+#... 2 line(s) skipped
