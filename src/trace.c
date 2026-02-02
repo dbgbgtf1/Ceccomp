@@ -363,8 +363,12 @@ error_seize (pid_t pid, int err)
 static void
 pid_seize (int pid, bool quiet)
 {
+  signal (SIGINT, exit_on_sig);
+  signal (SIGTERM, exit_on_sig);
+
   if (ptrace (PTRACE_ATTACH, pid, NULL, NULL) == -1)
     error ("%s", strerror (errno));
+  info (M_ATTACHING_ON, pid);
   parent (pid, stdout, 0, quiet, false);
 }
 

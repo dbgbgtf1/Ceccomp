@@ -123,6 +123,8 @@ main (int argc, char *argv[])
   setbuf (stdin, NULL);
   setbuf (stdout, NULL);
   setbuf (stderr, NULL);
+#else
+  setvbuf (stderr, NULL, _IOLBF, BUFSIZ);
 #endif
 
   init_args (&args);
