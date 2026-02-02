@@ -112,8 +112,9 @@ def test_trace_pid(errns: SimpleNamespace):
     tp = subprocess.Popen([TEST, '3'], stdin=DEVNULL, stdout=PIPE, stderr=DEVNULL, text=True)
     pid = int(tp.stdout.readline().split('=')[1])
 
-    argv = [CECCOMP, 'trace', *COMMON_OPTS, '-p', str(pid)]
-    _, stdout, stderr = run_process(argv, False)
+    _, stdout, stderr = run_process(
+        [CECCOMP, 'trace', *COMMON_OPTS, '-p', str(pid)],
+    )
     errns.stderr = stderr
 
     os.kill(pid, signal.SIGCONT)

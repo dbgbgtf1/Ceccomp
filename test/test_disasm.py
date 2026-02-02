@@ -7,7 +7,7 @@ def test_disasm(filename: str, errns: SimpleNamespace):
     input_file = BPF_DIR / f'{filename}.bpf'
     expect_file = TXT_DIR / filename
     _, stdout, stderr = run_process(
-        [CECCOMP, 'disasm', *COMMON_OPTS, str(input_file)], False,
+        [CECCOMP, 'disasm', *COMMON_OPTS, str(input_file)],
     )
     errns.stderr = stderr
 
@@ -18,7 +18,7 @@ def test_s390x_disasm(errns: SimpleNamespace):
     input_file = BE_DIR / 's390x.bpf'
     expect_file = BE_DIR / 's390x.disasm'
     _, stdout, stderr = run_process(
-        [CECCOMP, 'disasm', str(input_file), '-a', 's390x'], False,
+        [CECCOMP, 'disasm', str(input_file), '-a', 's390x'],
     )
     errns.stderr = stderr
 

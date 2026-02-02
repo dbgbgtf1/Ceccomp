@@ -14,7 +14,7 @@ def test_emu(filename: str, suffix: str, errns: SimpleNamespace):
     expect_file = EMU_DIR / f'{filename}.{suffix}'
     emu_args = [suffix, '1', '2', '3', '4', '5', '6']
     _, stdout, stderr = run_process(
-        [CECCOMP, 'emu', *COMMON_OPTS, str(input_file), *emu_args], False,
+        [CECCOMP, 'emu', *COMMON_OPTS, str(input_file), *emu_args],
     )
     errns.stderr = stderr
 
@@ -25,7 +25,7 @@ def test_s390x_emu(errns: SimpleNamespace):
     input_file = BE_DIR / 's390x.text'
     expect_file = BE_DIR / 's390x.text.mmap'
     _, stdout, stderr = run_process(
-        [CECCOMP, 'emu', str(input_file), 'mmap', '-a', 's390x'], False,
+        [CECCOMP, 'emu', str(input_file), 'mmap', '-a', 's390x'],
     )
     errns.stderr = stderr
 

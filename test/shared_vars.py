@@ -16,7 +16,7 @@ FILENAMES = sorted([p.stem for p in TXT_DIR.iterdir()])
 COMMON_OPTS = ['-c', 'always', '-a', 'x86_64']
 
 def run_process(
-    argv: list[str], is_binary: bool, extra_fd: int | None=None,
+    argv: list[str], is_binary: bool=False, extra_fd: int | None=None,
 ) -> tuple[int, str | bytes, str | bytes]:
     if extra_fd is None:
         result = subprocess.run(argv, timeout=3, capture_output=True,

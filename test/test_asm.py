@@ -18,7 +18,7 @@ def test_s390x_asm(errns: SimpleNamespace):
     input_file = BE_DIR / 's390x.text'
     expect_file = BE_DIR / 's390x.hexfmt'
     _, stdout, stderr = run_process(
-        [CECCOMP, 'asm', '-f', 'hexfmt', str(input_file), '-a', 's390x'], False,
+        [CECCOMP, 'asm', '-f', 'hexfmt', str(input_file), '-a', 's390x'],
     )
     errns.stderr = stderr
 
