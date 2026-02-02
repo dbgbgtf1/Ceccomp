@@ -24,6 +24,7 @@ enum test_case
   TEST_TRACE = 0,
   TEST_PROBE = 1,
   TEST_SEIZE = 2,
+  TEST_TRACE_PID = 3,
 };
 
 static void
@@ -56,7 +57,11 @@ load_filter (bool tofail)
 int
 main (int argc, char **argv)
 {
+  setvbuf (stdout, NULL, _IOLBF, 0x100);
   int choice = argc < 2 ? 0 : atoi (argv[1]);
+
+  struct sigaction sa = { 0 };
+  sa.sa_handler = dont_handle;
 
   switch (choice)
     {
@@ -66,8 +71,6 @@ main (int argc, char **argv)
     case TEST_SEIZE:
       prctl (PR_SET_PTRACER, PR_SET_PTRACER_ANY);
       pid_t pid = getpid ();
-      struct sigaction sa = { 0 };
-      sa.sa_handler = dont_handle;
       sigaction (SIGCONT, &sa, NULL);
       printf ("pid=%d\n", pid);
 
@@ -75,12 +78,12 @@ main (int argc, char **argv)
       pid = fork ();
       if (pid)
         {
-          printf ("child=%d\n", pid);
           waitpid (pid, NULL, 0);
           exit (0);
         }
       // child
       load_filter (false);
+      printf ("child=%d\n", getpid ());
       pause ();
       break;
     case TEST_PROBE:
@@ -105,6 +108,11 @@ main (int argc, char **argv)
           sleep (100);
         }
       break;
+    case TEST_TRACE_PID:
+      sigaction (SIGCONT, &sa, NULL);
+      load_filter (false);
+      printf ("pid=%d\n", getpid ());
+      pause ();
     default:
       load_filter (true);
       break;
