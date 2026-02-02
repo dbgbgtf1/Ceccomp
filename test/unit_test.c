@@ -3,11 +3,13 @@
 #include <linux/audit.h>
 #include <linux/bpf_common.h>
 #include <linux/filter.h>
+#include <linux/prctl.h>
 #include <linux/seccomp.h>
 #include <signal.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <sys/prctl.h>
 #include <sys/syscall.h>
@@ -17,6 +19,19 @@
 
 #define ARRAY_SIZE(arr) (sizeof (arr) / sizeof (arr[0]))
 
+enum test_case
+{
+  TEST_TRACE = 0,
+  TEST_PROBE = 1,
+  TEST_SEIZE = 2,
+};
+
+static void
+dont_handle (int sig)
+{
+  (void)sig;
+}
+
 static const filter filters[] = {
   BPF_STMT (BPF_LD | BPF_W | BPF_ABS, (offsetof (seccomp_data, nr))),
   BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, SYS_execve, 1, 0),
@@ -25,7 +40,7 @@ static const filter filters[] = {
 };
 
 static void
-load_filter (void)
+load_filter (bool tofail)
 {
   prctl (PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
   struct sock_fprog prog
@@ -34,26 +49,65 @@ load_filter (void)
   syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, NULL, &prog);
 
   // test failed loading
-  syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, NULL, NULL);
+  if (tofail)
+    syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, NULL, NULL);
 }
 
 int
-main (void)
+main (int argc, char **argv)
 {
-  pid_t pid = fork ();
-  if (pid != 0)
-    {
-      wait (NULL);
-      exit (0);
-    }
-  else
-    {
-      load_filter ();
+  int choice = argc < 2 ? 0 : atoi (argv[1]);
 
+  switch (choice)
+    {
+    case TEST_TRACE:
+      load_filter (true);
+      break;
+    case TEST_SEIZE:
+      prctl (PR_SET_PTRACER, PR_SET_PTRACER_ANY);
+      pid_t pid = getpid ();
+      struct sigaction sa = { 0 };
+      sa.sa_handler = dont_handle;
+      sigaction (SIGCONT, &sa, NULL);
+      printf ("pid=%d\n", pid);
+
+      pause (); // waiting SIGCONT
+      pid = fork ();
+      if (pid)
+        {
+          printf ("child=%d\n", pid);
+          waitpid (pid, NULL, 0);
+          exit (0);
+        }
+      // child
+      load_filter (false);
+      pause ();
+      break;
+    case TEST_PROBE:
       pid = fork ();
       if (pid != 0)
-        exit (0);
-      signal (SIGINT, SIG_IGN);
-      sleep (100);
+        {
+          wait (NULL);
+          exit (0);
+        }
+      else
+        {
+          pid = fork ();
+          if (pid != 0)
+            exit (0);
+          // grandchild process
+          pid = getpid ();
+          printf ("pid=%d\n", pid);
+
+          load_filter (false);
+
+          signal (SIGINT, SIG_IGN);
+          sleep (100);
+        }
+      break;
+    default:
+      load_filter (true);
+      break;
     }
+  return 0;
 }
