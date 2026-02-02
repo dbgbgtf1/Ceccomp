@@ -1,0 +1,121 @@
+import pytest
+from shared_vars import *
+from subprocess import PIPE, DEVNULL
+import signal
+import time
+
+def is_not_cap_sys_admin() -> str | None:
+    try:
+        with open('/proc/self/status') as f:
+            for line in f:
+                if line.startswith('CapEff:'):
+                    capeff = int(line.split()[1], 16)
+                    break
+            else:
+                return 'Capability can not be found in status'
+    except OSError:
+        return 'Can not query /proc to know capability'
+
+    if bool(capeff & (1 << 21)): # CAP_SYS_ADMIN = 21
+        return None
+    return 'Lack of CAP_SYS_ADMIN capability'
+
+TEST = str(PROJ_DIR / 'build' / 'test')
+assert run_process(['make', '-C', str(PROJ_DIR), 'test'], False)[0] == 0
+
+# -a x86_64 option in COMMON_OPTS will be ignored in trace/probe
+
+def is_pid_killed(pid: int) -> bool:
+    """
+    Race condition: perhaps kernel killed process but ceccomp hasn't exit,
+    so test is zombie and not being collected. Test this case
+    """
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        return True
+    try:
+        with open(f'/proc/{pid}/stat') as f:
+            state = f.read().split(' ', 4)[2]
+    except:
+        return True
+    else:
+        return state == 'Z'
+
+
+##### TEST CASES #####
+def test_probe():
+    piper, pipew = os.pipe()
+    os.set_inheritable(pipew, True)
+    argv = [CECCOMP, 'probe', *COMMON_OPTS, '-o', f'/proc/self/fd/{pipew}', TEST, '1']
+    _, stdout, stderr = run_process(argv, False, pipew)
+    os.close(pipew)
+
+    expect_file = TEST_DIR / 'dyn_log' / 'probe.log'
+    with expect_file.open() as f:
+        expect = f.read()
+    with os.fdopen(piper) as f:
+        assert f.read() == expect
+
+    pid = int(stdout.split('=')[1])
+    assert is_pid_killed(pid)
+
+
+def test_trace():
+    piper, pipew = os.pipe()
+    os.set_inheritable(pipew, True)
+    argv = [CECCOMP, 'trace', *COMMON_OPTS, '-o', f'/proc/self/fd/{pipew}', TEST, '0']
+    _, _, stderr = run_process(argv, False, pipew)
+    os.close(pipew)
+
+    expect_file = TEST_DIR / 'dyn_log' / 'trace.log'
+    with expect_file.open() as f:
+        expect = f.read()
+    with os.fdopen(piper) as f:
+        assert f.read() == expect
+    assert 'WARN' in stderr
+
+
+def test_seize():
+    tp = subprocess.Popen([TEST, '2'], stdin=DEVNULL, stdout=PIPE, stderr=DEVNULL, text=True)
+    pid = int(tp.stdout.readline().split('=')[1])
+
+    argv = [CECCOMP, 'trace', *COMMON_OPTS, '-p', str(pid), '-s']
+    cp = subprocess.Popen(argv, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, text=True)
+    pre_line = cp.stderr.readline()
+
+    os.kill(pid, signal.SIGCONT)
+    pid = int(tp.stdout.readline().split('=')[1]) # child pid
+
+    cp.terminate()
+    stdout, stderr = cp.communicate()
+    stderr = pre_line + stderr
+
+    pid_exist = True
+    try:
+        os.kill(pid, 0)
+    except ProcessLookupError:
+        pid_exist = False
+    else:
+        os.kill(pid, signal.SIGCONT)
+    assert pid_exist is True
+
+    expect_file = TEST_DIR / 'dyn_log' / 'trace.log'
+    with expect_file.open() as f:
+        assert stdout == f.read()
+
+def test_trace_pid():
+    if msg := is_not_cap_sys_admin():
+        pytest.skip(msg)
+
+    tp = subprocess.Popen([TEST, '3'], stdin=DEVNULL, stdout=PIPE, stderr=DEVNULL, text=True)
+    pid = int(tp.stdout.readline().split('=')[1])
+
+    argv = [CECCOMP, 'trace', *COMMON_OPTS, '-p', str(pid)]
+    _, stdout, stderr = run_process(argv, False)
+
+    os.kill(pid, signal.SIGCONT)
+
+    expect_file = TEST_DIR / 'dyn_log' / 'trace.log'
+    with expect_file.open() as f:
+        assert stdout == f.read()

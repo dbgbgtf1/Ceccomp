@@ -14,9 +14,14 @@ FILENAMES = sorted([p.stem for p in TXT_DIR.iterdir()])
 COMMON_OPTS = ['-c', 'always', '-a', 'x86_64']
 
 def run_process(
-    argv: list[str], is_binary: bool,
+    argv: list[str], is_binary: bool, extra_fd: int | None=None,
 ) -> tuple[int, str | bytes, str | bytes]:
-    result = subprocess.run( argv, timeout=3, capture_output=True, text=not is_binary)
+    if extra_fd is None:
+        result = subprocess.run(argv, timeout=3, capture_output=True,
+                                text=not is_binary)
+    else:
+        result = subprocess.run(argv, timeout=3, capture_output=True,
+                                text=not is_binary, pass_fds=(extra_fd, ))
     return result.returncode, result.stdout, result.stderr
 
 _, _verstr, _ = run_process(['pkg-config', '--modversion', 'libseccomp'], False)
