@@ -29,13 +29,6 @@
 #define LOAD_FAIL 2
 #define LOAD_ELSE 3
 
-static void
-mode_strict (void)
-{
-  printf (RED ("%s\n"), _ ("STRICT MODE DETECTED!"));
-  printf (RED ("%s\n"), _ ("Only read, write, _exit, sigreturn available!"));
-}
-
 static uint64_t seccomp_nr;
 static uint64_t prctl_nr;
 static uint32_t saved_arch = -1;
@@ -185,7 +178,7 @@ handle_syscall (pid_t pid, FILE *output_fp, bool quiet, bool oneshot)
         info (M_PARSE_PID_BPF, pid);
     }
   if (seccomp_mode == SECCOMP_SET_MODE_STRICT)
-    mode_strict ();
+    warn (M_FOUND_STRICT_MODE, pid);
   else if (seccomp_mode == SECCOMP_SET_MODE_FILTER)
     mode_filter (&info, pid, &prog, output_fp);
 
@@ -279,7 +272,7 @@ einval_get_filter (pid_t pid)
            M_GET_FILTER_UNSUPPORTED_OR_NO_FILTER);
   if (mode == STATUS_STRICT_MODE)
     {
-      mode_strict ();
+      warn (M_FOUND_STRICT_MODE, pid);
       exit (0);
     }
   else if (mode == STATUS_FILTER_MODE)

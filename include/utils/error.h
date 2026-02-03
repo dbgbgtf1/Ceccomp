@@ -37,6 +37,9 @@
 #define M_NO_FILTER_FOUND _ ("No seccomp filters found in pid %d\n")
 #define M_TARGET_TRACED_BY                                                    \
   _ ("Target process is being traced by %d pid process")
+#define M_FOUND_STRICT_MODE                                                   \
+  _ ("Process %d loaded strict seccomp mode, which only allows read, "        \
+     "write, exit_group and sigreturn!")
 // no translation due to terms
 #define ACTION_GET_FILTER "ptrace get seccomp filters"
 #define ACTION_PTRACE_SEIZE "ptrace seizing"
