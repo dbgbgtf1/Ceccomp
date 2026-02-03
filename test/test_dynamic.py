@@ -41,6 +41,14 @@ def is_pid_killed(pid: int) -> bool:
     else:
         return state == 'Z'
 
+def filter_execve_k(text: str) -> str:
+    if len(text) != 391:
+        return text
+    try:
+        int(text[174:184], 16)
+    except ValueError:
+        return text
+    return text[:174] + ' MAY VARY ' + text[184:]
 
 ##### TEST CASES #####
 def test_probe(errns: SimpleNamespace):
@@ -73,7 +81,7 @@ def test_trace(errns: SimpleNamespace):
     with expect_file.open() as f:
         expect = f.read()
     with os.fdopen(piper) as f:
-        assert f.read() == expect
+        assert filter_execve_k(f.read()) == filter_execve_k(expect)
     assert 'WARN' in stderr
 
 
@@ -103,7 +111,7 @@ def test_seize(errns: SimpleNamespace):
 
     expect_file = TEST_DIR / 'dyn_log' / 'trace.log'
     with expect_file.open() as f:
-        assert stdout == f.read()
+        assert filter_execve_k(stdout) == filter_execve_k(f.read())
 
 def test_trace_pid(errns: SimpleNamespace):
     if msg := is_not_cap_sys_admin():
@@ -121,4 +129,4 @@ def test_trace_pid(errns: SimpleNamespace):
 
     expect_file = TEST_DIR / 'dyn_log' / 'trace.log'
     with expect_file.open() as f:
-        assert stdout == f.read()
+        assert filter_execve_k(stdout) == filter_execve_k(f.read())
