@@ -26,6 +26,14 @@ fail_fast_strtoull (const char *restrict num, const char *restrict error_msg)
 static FILE *
 fail_fast_fopen (const char *restrict filename, const char *restrict mode)
 {
+  if (!strcmp (filename, "-"))
+    {
+      if (*mode == 'r')
+        return stdin;
+      else
+        return stdout;
+    }
+
   FILE *fp = fopen (filename, mode);
   if (fp == NULL)
     error ("%s", strerror (errno));

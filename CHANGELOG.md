@@ -19,6 +19,7 @@ Items marked with :star: is the major change why we release a new version.
 * Reject text that are error ones for kernel :link: [#17]
 * Migrate to po4a for documentation translation
 * Print info when trace found failed seccomp syscall
+* Support `-` to refer to stdin or stdout
 
 [#22]: https://github.com/dbgbgtf1/Ceccomp/issues/22
 [#25]: https://github.com/dbgbgtf1/Ceccomp/issues/25
