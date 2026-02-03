@@ -25,11 +25,11 @@ static const char *to_test_list[]
         "mmap", "mprotect", "sendfile", "ptrace", "fork" };
 
 static uint32_t
-init_text (FILE **text, char *argv[], bool quiet)
+fetch_text_from_trace (FILE **text, char *argv[], bool quiet)
 {
   *text = tmpfile ();
   if (*text == NULL)
-    error ("open: %s", strerror (errno));
+    error (M_REQUEST_TMPFILE_FAILED, strerror (errno));
   uint32_t scmp_arch = program_trace (argv, *text, quiet, true);
   fflush (*text);
   fseek (*text, 0, SEEK_SET);
@@ -54,7 +54,7 @@ probe (char *argv[], FILE *output_fp, bool quiet)
   emu_arg_t emu_arg;
   uint32_t scmp_arch;
 
-  scmp_arch = init_text (&text, argv, quiet);
+  scmp_arch = fetch_text_from_trace (&text, argv, quiet);
   init_emu_arg (&emu_arg, text, scmp_arch);
 
   vector_t text_v;

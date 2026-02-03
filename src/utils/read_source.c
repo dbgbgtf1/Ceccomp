@@ -164,7 +164,7 @@ init_source (FILE *read_fp)
       increase_map ();
       read_len = read (fd, source + current, GROW_LEN);
       if (read_len == (uint32_t)-1)
-        error ("read: %s", strerror (errno));
+        error (M_READ_FAIL, strerror (errno));
       current += read_len;
       if (current > MAX_FILE_LEN)
         error ("%s", M_FILE_TOO_LARGE);

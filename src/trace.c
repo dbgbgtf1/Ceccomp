@@ -128,7 +128,7 @@ child (char *argv[])
 
   int err = execv (argv[0], argv);
   if (err)
-    error ("%s: %s, %s\n", M_EXECV_ERR, argv[0], strerror (errno));
+    error ("%s %s: %s", M_EXECV_ERR, argv[0], strerror (errno));
   exit (0);
 }
 
@@ -311,7 +311,7 @@ error_get_filter (pid_t pid, int err)
       warn ("%s", M_NOT_AN_CBPF);
       return true;
     default:
-      error ("trace: %s", strerror (err));
+      error (M_UNKNOWN_GETFILTER_ERR, strerror (err));
     }
 }
 
@@ -345,8 +345,10 @@ error_seize (pid_t pid, int err)
     {
     case EPERM:
       eperm_seize (pid);
+    case ESRCH:
+      error ("%s", M_SEIZE_NONEXIST_PROC);
     default:
-      error ("trace: %s", strerror (err));
+      error (M_UNKNOWN_SEIZE_ERR, strerror (err));
     }
 }
 
@@ -357,7 +359,7 @@ pid_seize (int pid, bool quiet)
   signal (SIGTERM, exit_on_sig);
 
   if (ptrace (PTRACE_ATTACH, pid, NULL, NULL) == -1)
-    error ("%s", strerror (errno));
+    error_seize (pid, errno);
   info (M_ATTACHING_ON, pid);
   parent (pid, stdout, 0, quiet, false);
 }

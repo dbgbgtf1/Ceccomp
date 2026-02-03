@@ -30,7 +30,7 @@ read_filters (filter *filters, FILE *from)
     {
       long rc = read (fd, ptr, todo);
       if (rc == -1)
-        error ("read: %s", strerror (errno));
+        error (M_READ_FAIL, strerror (errno));
       if (rc == 0)
         break;
       ptr += rc;

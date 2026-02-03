@@ -36,7 +36,7 @@ fail_fast_fopen (const char *restrict filename, const char *restrict mode)
 
   FILE *fp = fopen (filename, mode);
   if (fp == NULL)
-    error ("%s", strerror (errno));
+    error (M_UNABLE_OPEN_FILE, filename, strerror (errno));
   return fp;
 }
 
