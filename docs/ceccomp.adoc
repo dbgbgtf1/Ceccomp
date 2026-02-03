@@ -71,7 +71,7 @@ The default value is _hexline_.
 
 TEXT::
 Take a optional filename to determine which file containing _TEXT_ will
-be assembled. Will read from _stdin_ if not set.
+be assembled. Will read from _stdin_ if not set. `-` is treated as _stdin_.
 
 IMPORTANT: The assembly syntax was changed greatly since _version 4.0_,
 please checkout grammar reference below!
@@ -107,6 +107,10 @@ Set to any architecture libseccomp supports. Will be used to determine
 how filtered syscall number in _RAW_ filter is translated to syscall name (for example,
 on x86_64, the number `0x3b` is translated to `execve` if is comparing syscall_nr, see
 the basic example above). The default value on your system is {ARCH}.
+
+RAW::
+A binary file with raw BPF codes. Takes _stdin_ as input if not set. Treat `-` as _stdin_.
+The file is arch-revelent, so it may not be portable on different archs.
 
 NOTE: Since _version 4.0_, endianness is considered. If target endianness *ARCH* is
 different from machine endianness, the filters will be reversed (CODE and K) before
@@ -158,7 +162,7 @@ Argument description can be found in <<asm - ASSEMBLE>> section.
 TEXT::
 Take a filename to determine which file containing _TEXT_ rule will be tested.
 Note that filename CAN NOT be ignored as ceccomp can not determine if a
-positional argument is syscall or filename.
+positional argument is syscall or filename. Use `-` to refer to _stdin_.
 
 -q, --quiet::
 Only print the eval result of the filter. For example, if last statement emulated
@@ -195,7 +199,7 @@ FILE::
 May be useful when *PROGRAM* produces quite a lot output in _stderr_.
 `ceccomp` allow user to close _stdin_ and _stdout_ to limit *PROGRAM*
 input and output, so `ceccomp` use _stderr_ to print messages when running *PROGRAM*,
-set *FILE* if you want to see _TEXT_ in some other file.
+set *FILE* if you want to see _TEXT_ in some other file. Treat `-` as _stdout_.
 
 PROGRAM::
 Set to the program you want to run, and *program-args* are its
