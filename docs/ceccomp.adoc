@@ -348,13 +348,15 @@ A special attribute is `sizeof(struct seccomp_data)`, that can be assigned to
 
 Temporary memory is 32-bit, to access them, you could use hex or dec as index.
 Both `A` and `X` is assignable. Assigning immediate values to `A` or `X` accepts
-hexadecimal numbers prefixed by `0x` and common decimal numbers.
+any format of number if you imply the correct base by "0x" or "0b".
 
     $X = $mem[0]
     $A = $mem[0xf]
     $A = $mem[15] # both hex and dec index are OK
     $A = 0
     $X = 0x3b
+    $A = 0b1111
+    $A = 0333
 
 You could also assign `X` to `A` or in the reverse order. Assign `X` or `A` to
 temporary memory is definitely okay.

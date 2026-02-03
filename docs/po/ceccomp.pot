@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-02-03 21:34+0800\n"
+"POT-Creation-Date: 2026-02-03 23:13+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -766,11 +766,12 @@ msgstr ""
 msgid ""
 "Temporary memory is 32-bit, to access them, you could use hex or dec as "
 "index.  Both `A` and `X` is assignable. Assigning immediate values to `A` or "
-"`X` accepts hexadecimal numbers prefixed by `0x` and common decimal numbers."
+"`X` accepts any format of number if you imply the correct base by \"0x\" or "
+"\"0b\"."
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:358
+#: ceccomp.adoc:360
 #, no-wrap
 msgid ""
 "    $X = $mem[0]\n"
@@ -778,17 +779,19 @@ msgid ""
 "    $A = $mem[15] # both hex and dec index are OK\n"
 "    $A = 0\n"
 "    $X = 0x3b\n"
+"    $A = 0b1111\n"
+"    $A = 0333\n"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:361
+#: ceccomp.adoc:363
 msgid ""
 "You could also assign `X` to `A` or in the reverse order. Assign `X` or `A` "
 "to temporary memory is definitely okay."
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:366
+#: ceccomp.adoc:368
 #, no-wrap
 msgid ""
 "    $A = $X\n"
@@ -798,18 +801,18 @@ msgid ""
 msgstr ""
 
 #. type: Title ===
-#: ceccomp.adoc:367
+#: ceccomp.adoc:369
 #, no-wrap
 msgid "Arithmetic Operations"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:370
+#: ceccomp.adoc:372
 msgid "Various operations can be applied to `A`."
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:377
+#: ceccomp.adoc:379
 #, no-wrap
 msgid ""
 "    $A += 30\n"
@@ -821,12 +824,12 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:379
+#: ceccomp.adoc:381
 msgid "The right value can be `X`."
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:384
+#: ceccomp.adoc:386
 #, no-wrap
 msgid ""
 "    $A &= $X\n"
@@ -836,40 +839,40 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:386
+#: ceccomp.adoc:388
 msgid "And there is a way to negativate `A`."
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:388
+#: ceccomp.adoc:390
 #, no-wrap
 msgid "    $A = -$A\n"
 msgstr ""
 
 #. type: Title ===
-#: ceccomp.adoc:389
+#: ceccomp.adoc:391
 #, no-wrap
 msgid "Jump Downwards If ..."
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:392
+#: ceccomp.adoc:394
 msgid "Unconditional jump:"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:394
+#: ceccomp.adoc:396
 #, no-wrap
 msgid "    goto L3\n"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:396
+#: ceccomp.adoc:398
 msgid "Jump if:"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:402
+#: ceccomp.adoc:404
 #, no-wrap
 msgid ""
 "    if ($A == execve) goto L3\n"
@@ -880,12 +883,12 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:404
+#: ceccomp.adoc:406
 msgid "If true jump to ... if false jump to...:"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:407
+#: ceccomp.adoc:409
 #, no-wrap
 msgid ""
 "    if ($A > $X) goto L3, else goto L4\n"
@@ -893,7 +896,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:414
+#: ceccomp.adoc:416
 msgid ""
 "ONLY in conditions, you CAN replace number with syscall name or arch name.  "
 "In example above, `0x3b` is replaced by `execve`. All the syscall name will "
@@ -904,37 +907,37 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:416
+#: ceccomp.adoc:418
 #, no-wrap
 msgid "    if ($A == aarch64.read) goto 5\n"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:419
+#: ceccomp.adoc:421
 msgid ""
 "Note that if you manually set arch to _aarch64_ with `-a aarch64`, you can "
 "omit `aarch64.` in statement."
 msgstr ""
 
 #. type: Title ===
-#: ceccomp.adoc:420
+#: ceccomp.adoc:422
 #, no-wrap
 msgid "Return Code"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:423
+#: ceccomp.adoc:425
 msgid "Return value of register `A`:"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:425
+#: ceccomp.adoc:427
 #, no-wrap
 msgid "    return $A\n"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:429
+#: ceccomp.adoc:431
 msgid ""
 "Or return a immediate value, with extra field in `()`. Actions including "
 "`TRACE`, `TRAP` and `ERRNO` accept an extra field, without `()`, they are "
@@ -942,7 +945,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:439
+#: ceccomp.adoc:441
 #, no-wrap
 msgid ""
 "    return 0x13371337\n"
@@ -957,20 +960,20 @@ msgid ""
 msgstr ""
 
 #. type: Title ===
-#: ceccomp.adoc:440
+#: ceccomp.adoc:442
 #, no-wrap
 msgid "Short Example"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:444
+#: ceccomp.adoc:446
 msgid ""
 "The following _TEXT_ is valid for asm, which blocks `execve` and `execveat` "
 "for amd64 syscalls:"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:450
+#: ceccomp.adoc:452
 #, no-wrap
 msgid ""
 "    $A = $syscall_nr\n"
@@ -981,38 +984,38 @@ msgid ""
 msgstr ""
 
 #. type: Title ==
-#: ceccomp.adoc:451
+#: ceccomp.adoc:453
 #, no-wrap
 msgid "RESTRICTIONS"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:454
+#: ceccomp.adoc:456
 msgid "Ceccomp asm put some restrictions on _TEXT_ for better performance."
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:456
+#: ceccomp.adoc:458
 msgid "`'\\0'` must not be found in _TEXT_ since it's a text file."
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:457
+#: ceccomp.adoc:459
 msgid "A line must be shorter than 384 *bytes*."
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:458
+#: ceccomp.adoc:460
 msgid "A _TEXT_ file must have less than 4096 lines."
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:459
+#: ceccomp.adoc:461
 msgid "A _TEXT_ file must be smaller than 1 MiB."
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:462
+#: ceccomp.adoc:464
 msgid ""
 "And for both asm and disasm, effective statements (that can be encoded or "
 "decoded into BPF) must be less or equal than 1024, this is enforced by "
@@ -1020,143 +1023,143 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:465
+#: ceccomp.adoc:467
 msgid ""
 "A fun fact about ceccomp asm: any basic ANSI color in _TEXT_ file, e.g., "
 "`\\x1b[31m`, will be discarded when processing."
 msgstr ""
 
 #. type: Title ==
-#: ceccomp.adoc:466
+#: ceccomp.adoc:468
 #, no-wrap
 msgid "EXAMPLES"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:471
+#: ceccomp.adoc:473
 msgid ""
 "Manpage can not display images, so please check out html version of this "
 "page to see examples."
 msgstr ""
 
 #. type: Title ===
-#: ceccomp.adoc:474
+#: ceccomp.adoc:476
 #, no-wrap
 msgid "asm example"
 msgstr ""
 
 #. type: Target for macro image
-#: ceccomp.adoc:475
+#: ceccomp.adoc:477
 #, no-wrap
 msgid "asm.png"
 msgstr ""
 
 #. type: Title ===
-#: ceccomp.adoc:476
+#: ceccomp.adoc:478
 #, no-wrap
 msgid "disasm example"
 msgstr ""
 
 #. type: Target for macro image
-#: ceccomp.adoc:477
+#: ceccomp.adoc:479
 #, no-wrap
 msgid "disasm.png"
 msgstr ""
 
 #. type: Title ===
-#: ceccomp.adoc:478
+#: ceccomp.adoc:480
 #, no-wrap
 msgid "emu example"
 msgstr ""
 
 #. type: Target for macro image
-#: ceccomp.adoc:479
+#: ceccomp.adoc:481
 #, no-wrap
 msgid "emu.png"
 msgstr ""
 
 #. type: Target for macro image
-#: ceccomp.adoc:480
+#: ceccomp.adoc:482
 #, no-wrap
 msgid "emu_quiet.png"
 msgstr ""
 
 #. type: Title ===
-#: ceccomp.adoc:481
+#: ceccomp.adoc:483
 #, no-wrap
 msgid "trace example"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:483
+#: ceccomp.adoc:485
 msgid "Running program:"
 msgstr ""
 
 #. type: Target for macro image
-#: ceccomp.adoc:484
+#: ceccomp.adoc:486
 #, no-wrap
 msgid "trace.png"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:487
+#: ceccomp.adoc:489
 msgid "If set `-o FILE`:"
 msgstr ""
 
 #. type: Target for macro image
-#: ceccomp.adoc:488
+#: ceccomp.adoc:490
 #, no-wrap
 msgid "output_trick.png"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:491
+#: ceccomp.adoc:493
 msgid "Pid mode:"
 msgstr ""
 
 #. type: Target for macro image
-#: ceccomp.adoc:492
+#: ceccomp.adoc:494
 #, no-wrap
 msgid "trace_pid.png"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:495
+#: ceccomp.adoc:497
 msgid "Completion for pid mode is available under zsh:"
 msgstr ""
 
 #. type: Target for macro image
-#: ceccomp.adoc:496
+#: ceccomp.adoc:498
 #, no-wrap
 msgid "trace_completion.png"
 msgstr ""
 
 #. type: Title ===
-#: ceccomp.adoc:498
+#: ceccomp.adoc:500
 #, no-wrap
 msgid "probe example"
 msgstr ""
 
 #. type: Target for macro image
-#: ceccomp.adoc:499
+#: ceccomp.adoc:501
 #, no-wrap
 msgid "probe.png"
 msgstr ""
 
 #. type: Title ==
-#: ceccomp.adoc:502
+#: ceccomp.adoc:504
 #, no-wrap
 msgid "REPO"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:506
+#: ceccomp.adoc:508
 msgid ""
 "Visit https://github.com/dbgbgtf1/Ceccomp to find the code.  Pull Requests "
 "and Issues are welcome!"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:507
+#: ceccomp.adoc:509
 msgid "Copyright (C) 2025-present, distributed under GPLv3 or later."
 msgstr ""
