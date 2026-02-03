@@ -74,8 +74,8 @@ error_line (void)
 }
 #undef SPRINTF_CAT
 
-#define IS_ARG_OUT_RANGE(obj) is_out_range (obj, 0x5)
-#define IS_MEM_OUT_RANGE(obj) is_out_range (obj, 0x15)
+#define IS_ARG_OUT_RANGE(obj) is_out_range (obj, 5)
+#define IS_MEM_OUT_RANGE(obj) is_out_range (obj, 15)
 
 static bool
 is_out_range (obj_t *obj, uint32_t max_idx)
