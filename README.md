@@ -66,7 +66,7 @@ and `procps` (required by `pgrep` and `pkill`).
 
 # CheatSheet
 
-<img width="1185" height="649" alt="image" src="https://github.com/user-attachments/assets/7868a8ed-e6a9-42fa-a2f1-5955be358013" />
+<img width="2202" height="1061" alt="image" src="https://github.com/user-attachments/assets/6fc41721-89a0-4750-aa3f-219c0edf82d9" />
 
 # I need You
 
