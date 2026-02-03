@@ -65,7 +65,7 @@ ld_ldx_line (filter f, statement_t *statement)
       statement->line_start = SCMP_DATA_LEN_STR;
       statement->comment = 0;
       statement->line_len = LITERAL_STRLEN (SCMP_DATA_LEN_STR);
-      static_assert (sizeof (seccomp_data) == 0x40);
+      static_assert (sizeof (seccomp_data) == 0x40, "struct seccomp_data should be 0x40 bytes large");
       return;
     default:
       assert (!"Unknown BPF_MODE for ld or ldx");
