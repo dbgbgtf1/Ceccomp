@@ -5,10 +5,7 @@
 #include "utils/error.h"
 #include "utils/logger.h"
 #include "utils/proc_status.h"
-#include <asm-generic/errno-base.h>
-#include <asm-generic/errno.h>
 #include <assert.h>
-#include <complex.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/audit.h>

@@ -4,7 +4,7 @@
 #ifndef I18N_H
 #define I18N_H
 
-#include <bits/types/locale_t.h>
+#include <locale.h>
 extern locale_t lc_c;
 #ifdef LOCALEDIR
 #include <libintl.h>
