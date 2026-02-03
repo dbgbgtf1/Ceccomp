@@ -98,7 +98,7 @@ NOTE: 当且仅当在某一行的架构可以被确定时，ceccomp 才会尝试
 
 === emu - 模拟
 
-    ceccomp emu [-c WHEN] [-a ARCH] [-q] [TEXT] SYSCALL_NAME/SYSCALL_NR [ARGS[0] ARGS[1] ... ARGS[5] PC]
+    ceccomp emu [-c WHEN] [-a ARCH] [-q] TEXT SYSCALL_NAME/SYSCALL_NR [ARGS[0] ARGS[1] ... ARGS[5] PC]
 
 按照 _TEXT_ 中描述的规则，模拟从 `PC` 调用 `syscall(SYSCALL_NR, ARGS[0], ARGS[1], ..., ARGS[5])` 的结果。适用于在不实际运行程序或不想手动检查规则时，查看触发系统调用的结果。 这个子命令适合用来自动检测一个过滤器。
 
@@ -115,7 +115,7 @@ ARCH::
 参数描述可以在 <<asm - 汇编>> 一节中找到。
 
 TEXT::
-一个可选的文件名，其中存放了需要被测试的 _TEXT_ 规则。不设置则从 _标准输入_ 中读取。
+一个文件名，其中存放了需要被测试的 _TEXT_ 规则。注意文件名 不能 被忽略，因为 ceccomp 无法判断一个位置参数是系统调用号还是文件名。
 
 -q, --quiet::
 只打印过滤器的模拟结果。例如，最后一行模拟的伪代码是 `return KILL`，那么将会打印 `KILL`。
@@ -217,7 +217,11 @@ IMPORTANT: _4.0 版本_ 提高了词法分析器代码的可读性，伴随着�
 
 任何在 `#` 之后的文本将被 asm 丢弃，就像一些脚本语言一样。
 
-标签声明是一个从行首开始并以 `:` 结尾的标识符，例如 `L0001`。标识符是一个以字母为首，中间只包含字母、数字和下划线 `_` 的字符串。标签只在它是 `goto` 的目标时才是必要的，由 disasm 添加的多余的标签知识为了可读性。例如在 `if ($A == 0) goto somewhere` 中，`somewhere` 是一个标签并且必须在这行伪代码后声明。
+允许空行。
+
+标签声明是一个从行首开始并以 `:` 结尾的标识符，例如 `L0001`。标识符是一个以字母为首，中间只包含字母、数字和下划线 `_` 的字符串。标签只在它是 `goto` 的目标时才是必要的，由 disasm 添加的多余的标签知识为了可读性。例如在 `if ($A == 0) goto somewhere` 中，`somewhere` 是一个标签并且必须在这行伪代码后声明。标签声明可以单独占据一行，也可以放置在伪代码的前面。
+
+由 disasm 生成的 `CODE`、`JT`、`JF` 和 `K` 值会被 asm 丢弃，asm 之解析 `K` 之后的有效伪代码。
 
 NOTE: `ceccomp disasm` 和 `seccomp-tools disasm` 的输出之间有很多细微的差别， 以下是一个典型的输出示例。同时有些伪代码是不同的，所以不要盲目将 seccomp-tools 的输出管道给 ceccomp。
 
@@ -336,6 +340,19 @@ NOTE: `ceccomp disasm` 和 `seccomp-tools disasm` 的输出之间有很多细微
     if ($A == execveat) goto forbid
     return ALLOW
     forbid: return KILL
+
+== 限制
+
+为了更好的性能，Ceccomp asm 对 _TEXT_ 有一些限制。
+
+1. 由于 _TEXT_ 是个文本文件，`'\0'` 不能出现在 _TEXT_ 中。
+2. 一行必须短于 384 *字节*。
+3. 一个 _TEXT_ 文件必须短于 4096 行。
+4. 一个 _TEXT_ 文家必须小于 1 MiB。
+
+并且对于 asm 和 disasm 来说，有效的伪代码（能被编码或解码为 BPF 的）必须少于等于 1024 条，这是内核规定的。
+
+一个关于 ceccomp asm 有趣的知识：任何在 _TEXT_ 文件中基本的 ANSI 颜色，例如 `\x1b[31m`，会在处理时被丢弃。
 
 == ceccomp 示例
 
