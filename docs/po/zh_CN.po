@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: ceccomp docs\n"
-"POT-Creation-Date: 2026-02-03 23:13+0800\n"
-"PO-Revision-Date: 2026-02-03 23:16+0800\n"
+"POT-Creation-Date: 2026-02-04 16:51+0800\n"
+"PO-Revision-Date: 2026-02-04 16:51+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: RocketDev\n"
 "Language: zh_CN\n"
@@ -1307,8 +1307,8 @@ msgstr "asm 示例"
 #. type: Target for macro image
 #: ceccomp.adoc:477
 #, no-wrap
-msgid "asm.png"
-msgstr "asm.png"
+msgid "asm.webp"
+msgstr "asm.webp"
 
 #. type: Title ===
 #: ceccomp.adoc:478
@@ -1319,8 +1319,8 @@ msgstr "disasm 示例"
 #. type: Target for macro image
 #: ceccomp.adoc:479
 #, no-wrap
-msgid "disasm.png"
-msgstr "disasm.png"
+msgid "disasm.webp"
+msgstr "disasm.webp"
 
 #. type: Title ===
 #: ceccomp.adoc:480
@@ -1331,85 +1331,90 @@ msgstr "emu 示例"
 #. type: Target for macro image
 #: ceccomp.adoc:481
 #, no-wrap
-msgid "emu.png"
-msgstr "emu.png"
-
-#. type: Target for macro image
-#: ceccomp.adoc:482
-#, no-wrap
-msgid "emu_quiet.png"
-msgstr "emu_quiet.png"
+msgid "emu.webp"
+msgstr "emu.webp"
 
 #. type: Title ===
-#: ceccomp.adoc:483
+#: ceccomp.adoc:482
 #, no-wrap
 msgid "trace example"
 msgstr "trace 示例"
 
 #. type: Plain text
-#: ceccomp.adoc:485
+#: ceccomp.adoc:484
 msgid "Running program:"
 msgstr "运行程序："
 
 #. type: Target for macro image
-#: ceccomp.adoc:486
+#: ceccomp.adoc:485
 #, no-wrap
-msgid "trace.png"
-msgstr "trace.png"
+msgid "trace.webp"
+msgstr "trace.webp"
 
 #. type: Plain text
-#: ceccomp.adoc:489
+#: ceccomp.adoc:488
 msgid "If set `-o FILE`:"
 msgstr "如果设置了 `-o FILE` ："
 
 #. type: Target for macro image
-#: ceccomp.adoc:490
+#: ceccomp.adoc:489
 #, no-wrap
-msgid "output_trick.png"
-msgstr "output_trick.png"
+msgid "output_trick.webp"
+msgstr "output_trick.webp"
 
 #. type: Plain text
-#: ceccomp.adoc:493
-msgid "Pid mode:"
-msgstr "PID模式："
+#: ceccomp.adoc:492
+msgid "Trace pid mode:"
+msgstr "PID 模式："
 
 #. type: Target for macro image
-#: ceccomp.adoc:494
+#: ceccomp.adoc:493
 #, no-wrap
-msgid "trace_pid.png"
-msgstr "trace_pid.png"
+msgid "trace_pid.webp"
+msgstr "trace_pid.webp"
 
 #. type: Plain text
+#: ceccomp.adoc:496
+msgid "Seize pid mode:"
+msgstr "跟踪 PID 模式："
+
+#. type: Target for macro image
 #: ceccomp.adoc:497
+#, no-wrap
+msgid "trace_seize.webp"
+msgstr "trace_seize.webp"
+
+#. type: Plain text
+#: ceccomp.adoc:500
 msgid "Completion for pid mode is available under zsh:"
 msgstr "zsh下PID模式可以使用补全："
 
 #. type: Target for macro image
-#: ceccomp.adoc:498
+#: ceccomp.adoc:501
 #, no-wrap
-msgid "trace_completion.png"
-msgstr "trace_completion.png"
+msgid "trace_completion.webp"
+msgstr "trace_completion.webp"
 
 #. type: Title ===
-#: ceccomp.adoc:500
+#: ceccomp.adoc:503
 #, no-wrap
 msgid "probe example"
 msgstr "probe 示例"
 
 #. type: Target for macro image
-#: ceccomp.adoc:501
+#: ceccomp.adoc:504
 #, no-wrap
-msgid "probe.png"
-msgstr "probe.png"
+msgid "probe.webp"
+msgstr "probe.webp"
 
 #. type: Title ==
-#: ceccomp.adoc:504
+#: ceccomp.adoc:507
 #, no-wrap
 msgid "REPO"
 msgstr "仓库"
 
 #. type: Plain text
-#: ceccomp.adoc:508
+#: ceccomp.adoc:511
 msgid ""
 "Visit https://github.com/dbgbgtf1/Ceccomp to find the code.  Pull Requests "
 "and Issues are welcome!"
@@ -1418,9 +1423,13 @@ msgstr ""
 "欢迎提交 Pull Requests 和 Issues ！"
 
 #. type: Plain text
-#: ceccomp.adoc:509
+#: ceccomp.adoc:512
 msgid "Copyright (C) 2025-present, distributed under GPLv3 or later."
 msgstr "Copyright (C) 2025-现在，基于 GPLv3 或更新版本分发。"
+
+#, no-wrap
+#~ msgid "emu_quiet.png"
+#~ msgstr "emu_quiet.png"
 
 #~ msgid ""
 #~ "A valid _TEXT_ could only contain *statement* like `$A = $arch`, but "

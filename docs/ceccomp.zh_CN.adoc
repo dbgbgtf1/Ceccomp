@@ -367,31 +367,34 @@ endif::[]
 
 ifndef::backend-manpage[]
 === asm 示例
-image::asm.png[]
+image::asm.webp[]
 === disasm 示例
-image::disasm.png[]
+image::disasm.webp[]
 === emu 示例
-image::emu.png[]
-image::emu_quiet.png[]
+image::emu.webp[]
 === trace 示例
 运行程序：
 
-image::trace.png[]
+image::trace.webp[]
 
 如果设置了 `-o FILE` ：
 
-image::output_trick.png[]
+image::output_trick.webp[]
 
-PID模式：
+PID 模式：
 
-image::trace_pid.png[]
+image::trace_pid.webp[]
+
+跟踪 PID 模式：
+
+image::trace_seize.webp[]
 
 zsh下PID模式可以使用补全：
 
-image::trace_completion.png[]
+image::trace_completion.webp[]
 
 === probe 示例
-image::probe.png[]
+image::probe.webp[]
 endif::[]
 
 == 仓库

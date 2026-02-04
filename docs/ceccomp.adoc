@@ -474,31 +474,34 @@ endif::[]
 
 ifndef::backend-manpage[]
 === asm example
-image::asm.png[]
+image::asm.webp[]
 === disasm example
-image::disasm.png[]
+image::disasm.webp[]
 === emu example
-image::emu.png[]
-image::emu_quiet.png[]
+image::emu.webp[]
 === trace example
 Running program:
 
-image::trace.png[]
+image::trace.webp[]
 
 If set `-o FILE`:
 
-image::output_trick.png[]
+image::output_trick.webp[]
 
-Pid mode:
+Trace pid mode:
 
-image::trace_pid.png[]
+image::trace_pid.webp[]
+
+Seize pid mode:
+
+image::trace_seize.webp[]
 
 Completion for pid mode is available under zsh:
 
-image::trace_completion.png[]
+image::trace_completion.webp[]
 
 === probe example
-image::probe.png[]
+image::probe.webp[]
 endif::[]
 
 == REPO

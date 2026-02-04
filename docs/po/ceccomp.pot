@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-02-03 23:13+0800\n"
+"POT-Creation-Date: 2026-02-04 16:51+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1051,7 +1051,7 @@ msgstr ""
 #. type: Target for macro image
 #: ceccomp.adoc:477
 #, no-wrap
-msgid "asm.png"
+msgid "asm.webp"
 msgstr ""
 
 #. type: Title ===
@@ -1063,7 +1063,7 @@ msgstr ""
 #. type: Target for macro image
 #: ceccomp.adoc:479
 #, no-wrap
-msgid "disasm.png"
+msgid "disasm.webp"
 msgstr ""
 
 #. type: Title ===
@@ -1075,91 +1075,96 @@ msgstr ""
 #. type: Target for macro image
 #: ceccomp.adoc:481
 #, no-wrap
-msgid "emu.png"
-msgstr ""
-
-#. type: Target for macro image
-#: ceccomp.adoc:482
-#, no-wrap
-msgid "emu_quiet.png"
+msgid "emu.webp"
 msgstr ""
 
 #. type: Title ===
-#: ceccomp.adoc:483
+#: ceccomp.adoc:482
 #, no-wrap
 msgid "trace example"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:485
+#: ceccomp.adoc:484
 msgid "Running program:"
 msgstr ""
 
 #. type: Target for macro image
-#: ceccomp.adoc:486
+#: ceccomp.adoc:485
 #, no-wrap
-msgid "trace.png"
+msgid "trace.webp"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:489
+#: ceccomp.adoc:488
 msgid "If set `-o FILE`:"
 msgstr ""
 
 #. type: Target for macro image
-#: ceccomp.adoc:490
+#: ceccomp.adoc:489
 #, no-wrap
-msgid "output_trick.png"
+msgid "output_trick.webp"
 msgstr ""
 
 #. type: Plain text
+#: ceccomp.adoc:492
+msgid "Trace pid mode:"
+msgstr ""
+
+#. type: Target for macro image
 #: ceccomp.adoc:493
-msgid "Pid mode:"
-msgstr ""
-
-#. type: Target for macro image
-#: ceccomp.adoc:494
 #, no-wrap
-msgid "trace_pid.png"
+msgid "trace_pid.webp"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:497
-msgid "Completion for pid mode is available under zsh:"
+#: ceccomp.adoc:496
+msgid "Seize pid mode:"
 msgstr ""
 
 #. type: Target for macro image
-#: ceccomp.adoc:498
+#: ceccomp.adoc:497
 #, no-wrap
-msgid "trace_completion.png"
+msgid "trace_seize.webp"
 msgstr ""
 
-#. type: Title ===
+#. type: Plain text
 #: ceccomp.adoc:500
-#, no-wrap
-msgid "probe example"
+msgid "Completion for pid mode is available under zsh:"
 msgstr ""
 
 #. type: Target for macro image
 #: ceccomp.adoc:501
 #, no-wrap
-msgid "probe.png"
+msgid "trace_completion.webp"
+msgstr ""
+
+#. type: Title ===
+#: ceccomp.adoc:503
+#, no-wrap
+msgid "probe example"
+msgstr ""
+
+#. type: Target for macro image
+#: ceccomp.adoc:504
+#, no-wrap
+msgid "probe.webp"
 msgstr ""
 
 #. type: Title ==
-#: ceccomp.adoc:504
+#: ceccomp.adoc:507
 #, no-wrap
 msgid "REPO"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:508
+#: ceccomp.adoc:511
 msgid ""
 "Visit https://github.com/dbgbgtf1/Ceccomp to find the code.  Pull Requests "
 "and Issues are welcome!"
 msgstr ""
 
 #. type: Plain text
-#: ceccomp.adoc:509
+#: ceccomp.adoc:512
 msgid "Copyright (C) 2025-present, distributed under GPLv3 or later."
 msgstr ""
