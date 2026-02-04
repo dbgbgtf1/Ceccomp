@@ -60,8 +60,7 @@ DOC_DIR := docs
 IMG_DIR := images
 SRC_IMG_DIR := $(DOC_DIR)/$(IMG_DIR)
 BUILD_IMG_DIR := $(BUILD_DIR)/$(IMG_DIR)
-IMG_SRCS := $(shell find $(SRC_IMG_DIR) -name "*.png")
-IMG_OBJS := $(patsubst $(SRC_IMG_DIR)/%.png,$(BUILD_IMG_DIR)/%.png,$(IMG_SRCS))
+IMG_SRCS := $(shell find $(SRC_IMG_DIR) -name "*.webp")
 {{DOC_ENDIF}}
 
 CECCOMP_MAIN := $(BUILD_DIR)/ceccomp.c.o
@@ -128,7 +127,7 @@ doc: doc_html doc_man
 doc_man: $(MAN_OBJ) $(MAN_CHN)
 	$Q$(call ECHO_NOPROG,$(GREEN)BUILT,man doc$(RESET))
 
-doc_html: $(IMG_SRCS) $(HTML_OBJ) $(HTML_CHN)
+doc_html: $(HTML_OBJ) $(HTML_CHN)
 	$Q$(call ECHO_NOPROG,$(GREEN)BUILT,html doc$(RESET))
 
 $(MAN_OBJ): $(DOC_DIR)/ceccomp.adoc | $(BUILD_DIR) $(MARK)
