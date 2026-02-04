@@ -94,6 +94,7 @@
 // parser
 #define M_UNEXPECT_TOKEN _ ("Unexpected token")
 #define M_DUPLICATED_LABEL _ ("Found duplicated label declaration")
+#define M_NUMBER_OVERFLOW _ ("Input number exceeds 32-bit range")
 
 #define M_EXPECT_OPERATOR _ ("Expect operator")
 #define M_EXPECT_RIGHT_VAR _ ("Expect rvalue")

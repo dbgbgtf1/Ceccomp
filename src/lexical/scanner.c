@@ -5,6 +5,7 @@
 #include "utils/arch_trans.h"
 #include "utils/logger.h"
 #include "utils/read_source.h"
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
@@ -260,15 +261,25 @@ scan_token (token_t *token)
     }
 
   // NUMBER
-  if (isxdigit_l (peek (0), lc_c))
+  if (isdigit_l (peek (0), lc_c))
     {
       char *end;
-      errno = 0;
-      uint32_t num = strtoul (scanner.token_start, &end, 0);
-      if (errno)
-        error ("strtoul: %s", strerror (errno));
+      unsigned long num = strtoul (scanner.token_start, &end, 0);
+      if (scanner.token_start == end)
+        goto unknown;
+#if __SIZEOF_POINTER__ == 8
+      static_assert (sizeof (unsigned long) == 8,
+                     "64-bit machine has 32-bit long?");
+      if ((uint32_t)num != num)
+        INIT_TOKEN_ADV1 (OVERFLOW_NUMBER);
+#else
+      static_assert (sizeof (unsigned long) == 4,
+                     "long is not 32-bit on 32-bit machine?");
+      if (num == ULONG_MAX && errno == ERANGE)
+        INIT_TOKEN_ADV1 (OVERFLOW_NUMBER);
+#endif
       scanner.current_char = end;
-      INIT_TOKEN_DATA (NUMBER, num);
+      INIT_TOKEN_DATA (NUMBER, (uint32_t)num);
     }
 
 unknown:

@@ -46,7 +46,7 @@ const string_t token_pairs[] = {
   [NUMBER] = DEFTK ("number"), [IDENTIFIER] = DEFTK ("identifier"),
   [UNKNOWN] = DEFTK ("unknown"), [COMMENT] = DEFTK ("#"),
   [EOL] = DEFTK ("line_end"), [TOKEN_EOF] = DEFTK ("eof"),
-  [LABEL_DECL] = DEFTK ("label_decl"),
+  [LABEL_DECL] = DEFTK ("label_decl"), [OVERFLOW_NUMBER] = DEFTK("ERANGE"),
   // label_decl ::= IDENTIFIER + DEFTK(":")
 };
 // clang-format on

@@ -1,5 +1,6 @@
 #include "lexical/parser.h"
 #include "lexical/scanner.h"
+#include "lexical/token.h"
 #include "main.h"
 #include "utils/arch_trans.h"
 #include "utils/error.h"
@@ -25,6 +26,8 @@ static parse_t parse = { .text_nr = 0, .code_nr = 0 };
 static statement_t *local;
 static uint32_t local_arch;
 static jmp_buf g_env;
+
+static void error_at (token_t token, const char *err_msg);
 
 static void
 advance (void)
@@ -57,6 +60,16 @@ match (token_type expected)
 }
 
 static bool
+match_number (void)
+{
+  if (LIKELY (peek (NUMBER)))
+    return advance (), true;
+  if (peek (OVERFLOW_NUMBER))
+    error_at (parse.next, M_NUMBER_OVERFLOW);
+  return false;
+}
+
+static bool
 match_from_to (token_type expected_start, token_type expected_end)
 {
   if (!peek_from_to (expected_start, expected_end))
@@ -86,7 +99,7 @@ paren_num (void)
 {
   if (!match (LEFT_PAREN))
     return 0;
-  if (!match (NUMBER))
+  if (!match_number ())
     error_at (parse.next, M_EXPECT_NUMBER);
   if (!match (RIGHT_PAREN))
     error_at (parse.next, M_EXPECT_PAREN);
@@ -99,7 +112,7 @@ bracket_num (void)
 {
   if (!match (LEFT_BRACKET))
     error_at (parse.next, M_EXPECT_BRACKET);
-  if (!match (NUMBER))
+  if (!match_number ())
     error_at (parse.next, M_EXPECT_NUMBER);
   if (!match (RIGHT_BRACKET))
     error_at (parse.next, M_EXPECT_BRACKET);
@@ -133,7 +146,7 @@ ret_obj (void)
       obj->type = parse.current.type;
       obj->data = paren_num ();
     }
-  else if (match (NUMBER))
+  else if (match_number ())
     {
       obj->type = NUMBER;
       obj->data = parse.current.data;
@@ -192,7 +205,7 @@ compare_obj (obj_t *obj)
 
   obj->type = NUMBER;
 
-  if (match (NUMBER))
+  if (match_number ())
     {
       obj->data = parse.current.data;
       return;
@@ -321,7 +334,7 @@ right (obj_t *obj)
       obj->type = parse.current.type;
       obj->data = bracket_num ();
     }
-  else if (match (NUMBER))
+  else if (match_number ())
     {
       obj->type = parse.current.type;
       obj->data = parse.current.data;
@@ -402,7 +415,7 @@ label_decl (string_t *label_decl)
 
   // ignore our disasm useless output
   uint32_t count = 0;
-  while (match (NUMBER) && count < 4)
+  while (match_number () && count < 4)
     count++;
 }
 
