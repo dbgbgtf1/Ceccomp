@@ -404,6 +404,6 @@ pid_trace (int pid, bool seize, bool quiet)
     }
 
   if (prog_idx == 0)
-    printf (M_NO_FILTER_FOUND, pid);
+    info (M_NO_FILTER_FOUND, pid);
   ptrace (PTRACE_DETACH, pid, 0, 0);
 }

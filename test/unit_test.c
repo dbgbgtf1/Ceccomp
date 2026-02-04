@@ -113,6 +113,7 @@ main (int argc, char **argv)
       load_filter (false);
       printf ("pid=%d\n", getpid ());
       pause ();
+      break;
     default:
       load_filter (true);
       break;
