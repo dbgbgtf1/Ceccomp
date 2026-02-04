@@ -8,10 +8,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ceccomp 4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 22:33+0800\n"
-"PO-Revision-Date: 2026-02-04 22:34+0800\n"
+"POT-Creation-Date: 2026-02-05 01:22+0800\n"
+"PO-Revision-Date: 2026-02-05 01:22+0800\n"
 "Last-Translator: RocketDev <ma2014119@outlook.com>\n"
-"Language-Team: Chinese <kde-i18n-doc@kde.org>\n"
+"Language-Team: Chinese <ma2014119@outlook.com>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -313,151 +313,155 @@ msgstr "意料之外的 token"
 msgid "Found duplicated label declaration"
 msgstr "发现重复的标签声明"
 
-#: ../include/utils/error.h:98
+#: ../include/utils/error.h:97
+msgid "Input number exceeds 32-bit range"
+msgstr "输入的数字超过了 32 位的范围"
+
+#: ../include/utils/error.h:99
 msgid "Expect operator"
 msgstr "期待一个操作符"
 
-#: ../include/utils/error.h:99
+#: ../include/utils/error.h:100
 msgid "Expect rvalue"
 msgstr "期待一个右值"
 
-#: ../include/utils/error.h:100
+#: ../include/utils/error.h:101
 msgid "Expect return value"
 msgstr "期待一个 return 值"
 
-#: ../include/utils/error.h:102
+#: ../include/utils/error.h:103
 msgid "Expect number"
 msgstr "期待一个数字"
 
-#: ../include/utils/error.h:103
+#: ../include/utils/error.h:104
 msgid "Expect parenthesis"
 msgstr "期待一个小括号"
 
-#: ../include/utils/error.h:104
+#: ../include/utils/error.h:105
 msgid "Expect bracket"
 msgstr "期待一个中括号"
 
-#: ../include/utils/error.h:105
+#: ../include/utils/error.h:106
 msgid "Expect comparator"
 msgstr "期待一个比较符"
 
-#: ../include/utils/error.h:106
+#: ../include/utils/error.h:107
 msgid "Expect label"
 msgstr "期待一个标签"
 
-#: ../include/utils/error.h:107
+#: ../include/utils/error.h:108
 msgid "Expect syscall"
 msgstr "期待一个系统调用"
 
-#: ../include/utils/error.h:108
+#: ../include/utils/error.h:109
 msgid "Expect architecture"
 msgstr "期待一个架构"
 
-#: ../include/utils/error.h:111
+#: ../include/utils/error.h:112
 msgid "Expect 'goto'"
 msgstr "期待一个 'goto'"
 
-#: ../include/utils/error.h:112
+#: ../include/utils/error.h:113
 msgid "Expect '$A'"
 msgstr "期待一个 '$A'"
 
-#: ../include/utils/error.h:113
+#: ../include/utils/error.h:114
 msgid "Expect 'else'"
 msgstr "期待一个 'else'"
 
-#: ../include/utils/error.h:116
+#: ../include/utils/error.h:117
 msgid "Rvalue should be '$A'"
 msgstr "右值应该为 '$A'"
 
-#: ../include/utils/error.h:117
+#: ../include/utils/error.h:118
 msgid "Rvalue can not be '$A'"
 msgstr "右值不能为 '$A'"
 
-#: ../include/utils/error.h:118
+#: ../include/utils/error.h:119
 msgid "Rvalue can not be '$X'"
 msgstr "右值不能为 '$X'"
 
-#: ../include/utils/error.h:120
+#: ../include/utils/error.h:121
 msgid "Rvalue should be '$A' or '$X'"
 msgstr "右值应该为 '$A' 或 '$X'"
 
-#: ../include/utils/error.h:121
+#: ../include/utils/error.h:122
 msgid "Rvalue should be '$X' or number"
 msgstr "右值应该为 '$X' 或数字"
 
-#: ../include/utils/error.h:122
+#: ../include/utils/error.h:123
 msgid "Operator should be '='"
 msgstr "操作符应该为 '='"
 
-#: ../include/utils/error.h:123
+#: ../include/utils/error.h:124
 msgid "Lvalue should be '$A'"
 msgstr "左值应该为 '$A'"
 
-#: ../include/utils/error.h:124
+#: ../include/utils/error.h:125
 msgid "seccomp_data load offset must be 4-byte aligned"
 msgstr "seccomp_data 加载偏移必须对齐到 4 字节"
 
-#: ../include/utils/error.h:126
+#: ../include/utils/error.h:127
 msgid "Args index out of range (0-5)"
 msgstr "访问 args 索引超出范围 (0-5)"
 
-#: ../include/utils/error.h:127
+#: ../include/utils/error.h:128
 msgid "Mem index out of range (0-15)"
 msgstr "访问 mem 索引超出范围 (0-5)"
 
-#: ../include/utils/error.h:128
+#: ../include/utils/error.h:129
 msgid "Accessing uninitialized mem"
 msgstr "尝试访问未初始化的 mem"
 
-#: ../include/utils/error.h:129
+#: ../include/utils/error.h:130
 msgid "Dividing by zero"
 msgstr "除以零"
 
-#: ../include/utils/error.h:130
+#: ../include/utils/error.h:131
 msgid "Left or right shifting more than 32 bits"
 msgstr "左移或右移超过 32 位"
 
-#: ../include/utils/error.h:132
+#: ../include/utils/error.h:133
 msgid "Data carried by return motion exceeds 0xffff"
 msgstr "return 动作携带的 data 超过了 0xffff"
 
-#: ../include/utils/error.h:133
+#: ../include/utils/error.h:134
 msgid "JT is larger than 0xff"
 msgstr "JT 大于了 0xff"
 
-#: ../include/utils/error.h:134
+#: ../include/utils/error.h:135
 msgid "JT must be positive"
 msgstr "JT 必须是正数"
 
-#: ../include/utils/error.h:135
+#: ../include/utils/error.h:136
 msgid "JF is larger than 0xff"
 msgstr "JF 大于了 0xff"
 
-#: ../include/utils/error.h:136
+#: ../include/utils/error.h:137
 msgid "JF must be positive"
 msgstr "JF 必须是正数"
 
-#: ../include/utils/error.h:137
+#: ../include/utils/error.h:138
 msgid "JT out of filters"
 msgstr "JT 超出 BPF 长度"
 
-#: ../include/utils/error.h:138
+#: ../include/utils/error.h:139
 msgid "JF out of filters"
 msgstr "JF 超出 BPF 长度"
 
-#: ../include/utils/error.h:139
+#: ../include/utils/error.h:140
 msgid "JA out of filters"
 msgstr "跳转结果超出 BPF 长度"
 
-#: ../include/utils/error.h:141
+#: ../include/utils/error.h:142
 msgid "BPF filters must end with return"
 msgstr "BPF 过滤器必须以 return 结尾"
 
-#: ../include/utils/error.h:142
+#: ../include/utils/error.h:143
 msgid "The input does not contain any valid statement"
 msgstr "输入不包含任何有效的伪代码"
 
-#: ../include/utils/error.h:144
+#: ../include/utils/error.h:145
 msgid "Invalid or unknown operation"
 msgstr "无效或未知的操作符"
 
