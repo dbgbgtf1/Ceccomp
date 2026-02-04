@@ -3,10 +3,13 @@
 #include "lexical/parser.h"
 #include "lexical/token.h"
 #include "main.h"
+#include "resolver/resolver.h"
 #include "utils/vector.h"
 #include <assert.h>
 #include <linux/bpf_common.h>
 #include <linux/filter.h>
+#include <linux/seccomp.h>
+#include <seccomp.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -65,7 +68,8 @@ ld_ldx_line (filter f, statement_t *statement)
       statement->line_start = SCMP_DATA_LEN_STR;
       statement->comment = 0;
       statement->line_len = LITERAL_STRLEN (SCMP_DATA_LEN_STR);
-      static_assert (sizeof (seccomp_data) == 0x40, "struct seccomp_data should be 0x40 bytes large");
+      static_assert (sizeof (seccomp_data) == 0x40,
+                     "struct seccomp_data should be 0x40 bytes large");
       return;
     default:
       assert (!"Unknown BPF_MODE for ld or ldx");
@@ -179,6 +183,44 @@ jump_line (filter f, statement_t *statement)
              &jump_line->if_bang);
 }
 
+token_type
+decode_return_k (obj_t *ret_obj, uint32_t k)
+{
+  token_type tk;
+  switch (k & SECCOMP_RET_ACTION_FULL)
+    {
+    case SCMP_ACT_KILL_PROCESS:
+      tk = KILL_PROC;
+      break;
+    case SCMP_ACT_KILL:
+      tk = KILL;
+      break;
+    case SCMP_ACT_ALLOW:
+      tk = ALLOW;
+      break;
+    case SCMP_ACT_LOG:
+      tk = LOG;
+      break;
+    case SCMP_ACT_TRACE (0):
+      ret_obj->data = k & SECCOMP_RET_DATA;
+      tk = TRACE;
+      break;
+    case _SCMP_ACT_TRAP (0):
+      ret_obj->data = k & SECCOMP_RET_DATA;
+      tk = TRAP;
+      break;
+    case SCMP_ACT_ERRNO (0):
+      ret_obj->data = k & SECCOMP_RET_DATA;
+      tk = ERRNO;
+      break;
+    default:
+      ret_obj->data = k;
+      tk = NUMBER;
+    }
+  ret_obj->type = tk;
+  return tk == NUMBER ? KILL_PROC : tk;
+}
+
 static void
 return_line (filter f, statement_t *statement)
 {
@@ -188,10 +230,7 @@ return_line (filter f, statement_t *statement)
   if (BPF_RVAL (f.code) == BPF_A)
     return_line->ret_obj.type = A;
   else
-    {
-      return_line->ret_obj.type = NUMBER;
-      return_line->ret_obj.data = f.k;
-    }
+    decode_return_k (&return_line->ret_obj, f.k);
 }
 
 static void

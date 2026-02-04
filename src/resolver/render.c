@@ -177,39 +177,9 @@ jump_line (jump_line_t *jump_line)
     try_resolve_sysnr (cmpobj);
 }
 
-static token_type
-ret_data (uint32_t data)
-{
-  switch (data & 0xffff0000)
-    {
-    case SCMP_ACT_KILL_PROCESS:
-      return KILL_PROC;
-    case SCMP_ACT_KILL:
-      return KILL;
-    case SCMP_ACT_ALLOW:
-      return ALLOW;
-    case SCMP_ACT_LOG:
-      return LOG;
-    case SCMP_ACT_TRACE (0):
-      return TRACE;
-    case _SCMP_ACT_TRAP (0):
-      return TRAP;
-    case SCMP_ACT_ERRNO (0):
-      return ERRNO;
-    default:
-      return NUMBER;
-    }
-}
 
-static void
-return_line (return_line_t *return_line)
-{
-  obj_t *ret = &return_line->ret_obj;
-  if (ret->type == NUMBER)
-    ret->type = ret_data (ret->data);
-  if (ret->type != NUMBER) // we need to keep data if "return 0x12345678"
-    ret->data &= 0xffff;
-}
+
+
 
 static void
 render_statement (statement_t *statement)
@@ -227,7 +197,6 @@ render_statement (statement_t *statement)
       jump_line (&local->jump_line);
       break;
     case RETURN_LINE:
-      return_line (&local->return_line);
       break;
     case EMPTY_LINE:
     case EOF_LINE:

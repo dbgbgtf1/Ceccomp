@@ -1,4 +1,5 @@
 #include "emu.h"
+#include "decoder/decoder.h"
 #include "decoder/formatter.h"
 #include "lexical/parser.h"
 #include "lexical/scanner.h"
@@ -152,6 +153,45 @@ jump_line (jump_line_t *jump_line)
   return (cond_true ? jt : jf);
 }
 
+/**
+ * Process return line if return $A or return NUMBER. Sets real_ret to
+ * resolved plain result like KILL; returns a valid string if statement
+ * need to add a comment.
+ */
+static string_t
+return_line (return_line_t *line, obj_t *real_ret)
+{
+  static char formatted_val[0x28];
+  obj_t *ret_obj = &line->ret_obj;
+  *real_ret = (obj_t){ .type = UNKNOWN };
+  int sz;
+  const string_t *tkstr;
+
+  // append addtional return value comment for
+  // return $A and return NUMBER
+  if (ret_obj->type == A)
+    {
+      real_ret->type = decode_return_k (real_ret, A_reg);
+      tkstr = token_pairs + real_ret->type;
+      sz = snprintf (formatted_val, 0x28, "# A = %#x, %.*s", A_reg, tkstr->len,
+                     tkstr->start);
+    }
+  else if (ret_obj->type == NUMBER)
+    {
+      real_ret->type = decode_return_k (real_ret, ret_obj->data);
+      tkstr = token_pairs + real_ret->type;
+      sz = snprintf (formatted_val, 0x28, "# %.*s", tkstr->len, tkstr->start);
+    }
+  else
+    return (string_t){ 0 };
+
+  register token_type tk = real_ret->type;
+  if (tk == TRACE || tk == TRAP || tk == ERRNO)
+    sz += snprintf (formatted_val + sz, 0x28 - sz, "(%u)", real_ret->data);
+  assert (sz);
+  return (string_t){ .start = formatted_val, .len = sz };
+}
+
 static uint32_t
 code_nr_to_text_nr (vector_t *text_v, vector_t *code_ptr_v, statement_t *cur,
                     label_t *jmp)
@@ -231,32 +271,45 @@ emulator (vector_t *text_v, vector_t *code_ptr_v, bool quiet)
           continue;
         }
 
-      emulate_printer (statement, false, quiet);
       exec_idx++;
 
       switch (statement->type)
         {
         case ASSIGN_LINE:
           assign_line (&statement->assign_line);
-          continue;
+          break;
         case JUMP_LINE:
           jmp = jump_line (&statement->jump_line);
           exec_idx = code_nr_to_text_nr (text_v, code_ptr_v, statement, jmp);
-          continue;
-        case RETURN_LINE:
           break;
+        case RETURN_LINE:
+          obj_t real_ret;
+          string_t ret_str = return_line (&statement->return_line, &real_ret);
+          if (ret_str.start)
+            {
+              if (quiet)
+                statement->return_line.ret_obj = real_ret;
+              else
+                {
+                  statement->line_start = (char *)ret_str.start;
+                  statement->comment = 0;
+                  statement->line_len = ret_str.len;
+                }
+            }
+          goto out;
         case EMPTY_LINE:
-          continue;
+          break;
         case EOF_LINE:
         case ERROR_LINE:
           assert (!"Emulating EOF/ERROR line??");
         }
-
-      break;
+      emulate_printer (statement, false, quiet);
     }
 
+out:
   assert (statement);
   assert (statement->type == RETURN_LINE);
+  emulate_printer (statement, false, quiet);
   return statement;
 }
 
