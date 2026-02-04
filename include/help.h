@@ -47,7 +47,7 @@
      "ceccomp output and tracee program output, default as stderr\n"          \
                                                                               \
      "-q, --quiet                      Print emulate result only "            \
-     "or ignore the process info message in trace and probe\n"                \
+     "or suppress the process info message in trace and probe\n"              \
                                                                               \
      "-s, --seize                      Follow process to trace load-filter "  \
      "operation\n"                                                            \

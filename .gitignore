@@ -20,3 +20,4 @@ py-temp/ceccomp/ceccomp
 test_prog
 text
 gdb_scripts
+*.mo

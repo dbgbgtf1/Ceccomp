@@ -36,7 +36,7 @@
 #define M_PROCFS_NOT_ACCESSIBLE _ ("Procfs not accessible, unable to perform")
 #define M_NOT_AN_CBPF _ ("Found unresolvable non-classic BPF, skipping")
 #define M_SEIZING_KERNEL_THREAD _ ("Kernel thread can not be seized")
-#define M_NO_FILTER_FOUND _ ("No seccomp filters found in process %d\n")
+#define M_NO_FILTER_FOUND _ ("No seccomp filters found in process %d")
 #define M_TARGET_TRACED_BY                                                    \
   _ ("Target process is already being traced by process %d")
 #define M_FOUND_STRICT_MODE                                                   \
@@ -120,12 +120,12 @@
 #define M_RIGHT_SHOULD_BE_A_OR_X _ ("Rvalue should be '$A' or '$X'")
 #define M_RIGHT_SHOULD_BE_X_OR_NUM _ ("Rvalue should be '$X' or number")
 #define M_OPERATOR_SHOULD_BE_EQUAL _ ("Operator should be '='")
-#define M_LEFT_SHOULD_BE_A _ ("Lvalue should be A")
+#define M_LEFT_SHOULD_BE_A _ ("Lvalue should be '$A'")
 #define M_INVALID_ATTR_LOAD _ ("Invalid attribute loading")
 
 #define M_ARGS_IDX_OUT_OF_RANGE _ ("Args index out of range (0-5)")
 #define M_MEM_IDX_OUT_OF_RANGE _ ("Mem index out of range (0-15)")
-#define M_UNINITIALIZED_MEM _ ("Accessing uninitialized memory")
+#define M_UNINITIALIZED_MEM _ ("Accessing uninitialized mem")
 #define M_ALU_DIV_BY_ZERO _ ("Dividing by zero")
 #define M_ALU_SH_OUT_OF_RANGE _ ("Left or right shifting more than 32 bits")
 
@@ -135,7 +135,7 @@
 #define M_JF_TOO_FAR _ ("JF is larger than 0xff")
 #define M_JF_MUST_BE_POSITIVE _ ("JF must be positive")
 #define M_JT_INVALID_TAG _ ("JT to a invalid tag out of filters")
-#define M_JF_INVALID_TAG _ ("Jf to a invalid tag out of filters")
+#define M_JF_INVALID_TAG _ ("JF to a invalid tag out of filters")
 
 #define M_MUST_END_WITH_RET _ ("BPF filters must end with return")
 #define M_NO_VALID_CODE _ ("The input does not contain any valid statement")
