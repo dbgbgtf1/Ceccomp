@@ -100,7 +100,8 @@ uint32_t err_len[] = {
 
 #define SPRINTF_CAT(...) print += sprintf (print, __VA_ARGS__)
 static void
-report_error (filter f, err_idx idx, bool fatal, const char *err_msg)
+report_error (filter f, uint32_t filter_idx, err_idx idx, bool fatal,
+              const char *err_msg)
 {
   if (fatal)
     fatal_count++;
@@ -110,8 +111,9 @@ report_error (filter f, err_idx idx, bool fatal, const char *err_msg)
   char buf[0x400];
   char *print = buf;
 
-  SPRINTF_CAT ("%s\nCODE:0x%04x JT:0x%02x JF:0x%02x K:0x%08x\n", err_msg,
-               f.code, f.jt, f.jf, f.k);
+  SPRINTF_CAT ("#%d: %s\n", filter_idx, err_msg);
+  SPRINTF_CAT ("CODE:0x%04x JT:0x%02x JF:0x%02x K:0x%08x\n", f.code, f.jt,
+               f.jf, f.k);
   if (idx == NONE)
     {
       memset (print, '~', err_len[NONE]);
@@ -126,6 +128,14 @@ report_error (filter f, err_idx idx, bool fatal, const char *err_msg)
   warn ("%s", buf);
 }
 
+#define REPORT(err_idx, fatal, err_msg)                                       \
+  do                                                                          \
+    {                                                                         \
+      report_error (f, pc + 1, err_idx, fatal, err_msg);                      \
+      return;                                                                 \
+    }                                                                         \
+  while (0);
+
 #define FATAL true
 // return true means stop check
 static void
@@ -136,14 +146,14 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
   uint32_t k = f.k;
 
   if (code >= ARRAY_SIZE (codes) || !codes[code])
-    return report_error (f, NONE, FATAL, M_INVALID_OPERATION);
+    REPORT (NONE, FATAL, M_INVALID_OPERATION);
 
   switch (code)
     {
     case BPF_LD | BPF_W | BPF_ABS:
       f.code = BPF_LDX | BPF_W | BPF_ABS;
       if (k >= sizeof (struct seccomp_data) || k & 3)
-        report_error (f, K_ERR, FATAL, M_INVALID_ATTR_LOAD);
+        REPORT (K_ERR, FATAL, M_INVALID_ATTR_LOAD);
       return;
     case BPF_LD | BPF_W | BPF_LEN:
       f.code = BPF_LD | BPF_IMM;
@@ -155,29 +165,29 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
       return;
     case BPF_ALU | BPF_DIV | BPF_K:
       if (f.k == 0)
-        report_error (f, K_ERR, !FATAL, M_ALU_DIV_BY_ZERO);
+        REPORT(K_ERR, !FATAL, M_ALU_DIV_BY_ZERO);
       return;
     case BPF_ALU | BPF_LSH | BPF_K:
     case BPF_ALU | BPF_RSH | BPF_K:
       if (f.k >= 32)
-        report_error (f, K_ERR, !FATAL, M_ALU_SH_OUT_OF_RANGE);
+        REPORT(K_ERR, !FATAL, M_ALU_SH_OUT_OF_RANGE);
       return;
     case BPF_LD | BPF_MEM:
     case BPF_LDX | BPF_MEM:
       if (f.k >= BPF_MEMWORDS)
-        report_error (f, K_ERR, !FATAL, M_MEM_IDX_OUT_OF_RANGE);
+        REPORT(K_ERR, !FATAL, M_MEM_IDX_OUT_OF_RANGE);
       if (!(mem_valid & (1 << fptr[pc].k)))
-        report_error (f, NONE, !FATAL, M_UNINITIALIZED_MEM);
+        REPORT(NONE, !FATAL, M_UNINITIALIZED_MEM);
       return;
     case BPF_ST:
     case BPF_STX:
       if (f.k >= BPF_MEMWORDS)
-        return report_error (f, K_ERR, !FATAL, M_MEM_IDX_OUT_OF_RANGE);
+        REPORT(K_ERR, !FATAL, M_MEM_IDX_OUT_OF_RANGE);
       mem_valid |= (1 << fptr[pc].k);
       return;
     case BPF_JMP | BPF_JA:
       if (f.k >= (uint32_t)(flen - pc - 1))
-        return report_error (f, K_ERR, !FATAL, M_JT_TOO_FAR);
+        REPORT(K_ERR, !FATAL, M_JA_OUT_OF_FILTERS);
       masks[pc + 1 + fptr[pc].k] &= mem_valid;
       mem_valid = ~0;
       return;
@@ -190,9 +200,9 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
     case BPF_JMP | BPF_JSET | BPF_K:
     case BPF_JMP | BPF_JSET | BPF_X:
       if (pc + f.jt + 1 >= flen)
-        return report_error (f, JT_ERR, !FATAL, M_JT_TOO_FAR);
+        REPORT(JT_ERR, !FATAL, M_JT_INVALID_TAG);
       if (pc + f.jf + 1 >= flen)
-        return report_error (f, JF_ERR, !FATAL, M_JF_TOO_FAR);
+        REPORT(JF_ERR, !FATAL, M_JF_INVALID_TAG);
       masks[pc + 1 + fptr[pc].jt] &= mem_valid;
       masks[pc + 1 + fptr[pc].jf] &= mem_valid;
       mem_valid = ~0;
@@ -220,7 +230,7 @@ check_prog (fprog *prog)
   uint16_t last_code = last.code;
   if ((last_code != (BPF_RET | BPF_A)) && (last_code != (BPF_RET | BPF_K)))
     {
-      report_error (last, NONE, !FATAL, M_MUST_END_WITH_RET);
+      report_error (last, prog->len, NONE, !FATAL, M_MUST_END_WITH_RET);
       goto complete;
     }
 
