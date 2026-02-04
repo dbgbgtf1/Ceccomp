@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 17:45+0800\n"
+"POT-Creation-Date: 2026-02-04 22:33+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -361,7 +361,7 @@ msgid "Lvalue should be '$A'"
 msgstr ""
 
 #: ../include/utils/error.h:124
-msgid "Invalid attribute loading"
+msgid "seccomp_data load offset must be 4-byte aligned"
 msgstr ""
 
 #: ../include/utils/error.h:126
@@ -405,21 +405,25 @@ msgid "JF must be positive"
 msgstr ""
 
 #: ../include/utils/error.h:137
-msgid "JT to a invalid tag out of filters"
+msgid "JT out of filters"
 msgstr ""
 
 #: ../include/utils/error.h:138
-msgid "JF to a invalid tag out of filters"
+msgid "JF out of filters"
 msgstr ""
 
-#: ../include/utils/error.h:140
-msgid "BPF filters must end with return"
+#: ../include/utils/error.h:139
+msgid "JA out of filters"
 msgstr ""
 
 #: ../include/utils/error.h:141
+msgid "BPF filters must end with return"
+msgstr ""
+
+#: ../include/utils/error.h:142
 msgid "The input does not contain any valid statement"
 msgstr ""
 
-#: ../include/utils/error.h:143
+#: ../include/utils/error.h:144
 msgid "Invalid or unknown operation"
 msgstr ""

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ceccomp 4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-04 17:45+0800\n"
-"PO-Revision-Date: 2026-02-04 17:47+0800\n"
+"POT-Creation-Date: 2026-02-04 22:33+0800\n"
+"PO-Revision-Date: 2026-02-04 22:34+0800\n"
 "Last-Translator: RocketDev <ma2014119@outlook.com>\n"
 "Language-Team: Chinese <kde-i18n-doc@kde.org>\n"
 "Language: zh_CN\n"
@@ -394,8 +394,8 @@ msgid "Lvalue should be '$A'"
 msgstr "左值应该为 '$A'"
 
 #: ../include/utils/error.h:124
-msgid "Invalid attribute loading"
-msgstr "无效的属性加载"
+msgid "seccomp_data load offset must be 4-byte aligned"
+msgstr "seccomp_data 加载偏移必须对齐到 4 字节"
 
 #: ../include/utils/error.h:126
 msgid "Args index out of range (0-5)"
@@ -438,24 +438,37 @@ msgid "JF must be positive"
 msgstr "JF 必须是正数"
 
 #: ../include/utils/error.h:137
-msgid "JT to a invalid tag out of filters"
-msgstr "JT 到了一个超出过滤器的标签"
+msgid "JT out of filters"
+msgstr "JT 超出 BPF 长度"
 
 #: ../include/utils/error.h:138
-msgid "JF to a invalid tag out of filters"
-msgstr "JF 到了一个超出过滤器的标签"
+msgid "JF out of filters"
+msgstr "JF 超出 BPF 长度"
 
-#: ../include/utils/error.h:140
+#: ../include/utils/error.h:139
+msgid "JA out of filters"
+msgstr "跳转结果超出 BPF 长度"
+
+#: ../include/utils/error.h:141
 msgid "BPF filters must end with return"
 msgstr "BPF 过滤器必须以 return 结尾"
 
-#: ../include/utils/error.h:141
+#: ../include/utils/error.h:142
 msgid "The input does not contain any valid statement"
 msgstr "输入不包含任何有效的伪代码"
 
-#: ../include/utils/error.h:143
+#: ../include/utils/error.h:144
 msgid "Invalid or unknown operation"
 msgstr "无效或未知的操作符"
+
+#~ msgid "Invalid attribute loading"
+#~ msgstr "无效的属性加载"
+
+#~ msgid "JT to a invalid tag out of filters"
+#~ msgstr "JT 到了一个超出过滤器的标签"
+
+#~ msgid "JF to a invalid tag out of filters"
+#~ msgstr "JF 到了一个超出过滤器的标签"
 
 #~ msgid "Jf to a invalid tag out of filters"
 #~ msgstr "JF 到了一个超出过滤器的标签"
@@ -563,9 +576,6 @@ msgstr "无效或未知的操作符"
 
 #~ msgid "Jt and jf both 0"
 #~ msgstr "jt 和 jf 都是 0"
-
-#~ msgid "Jmp out of bpf len"
-#~ msgstr "jmp 超出 BPF 长度"
 
 #~ msgid ""
 #~ "The above code has errors, please check the warnings for specific details"
