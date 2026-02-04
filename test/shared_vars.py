@@ -17,13 +17,14 @@ COMMON_OPTS = ['-c', 'always', '-a', 'x86_64']
 
 def run_process(
     argv: list[str], is_binary: bool=False, extra_fd: int | None=None,
+    stdin: str | bytes | None=None,
 ) -> tuple[int, str | bytes, str | bytes]:
     if extra_fd is None:
         result = subprocess.run(argv, timeout=3, capture_output=True,
-                                text=not is_binary)
+                                text=not is_binary, input=stdin)
     else:
         result = subprocess.run(argv, timeout=3, capture_output=True,
-                                text=not is_binary, pass_fds=(extra_fd, ))
+                                text=not is_binary, pass_fds=(extra_fd, ), input=stdin)
     return result.returncode, result.stdout, result.stderr
 
 _, _verstr, _ = run_process(['pkg-config', '--modversion', 'libseccomp'], False)

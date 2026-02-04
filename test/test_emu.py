@@ -31,3 +31,35 @@ def test_s390x_emu(errns: SimpleNamespace):
 
     with expect_file.open() as expect:
         assert stdout == expect.read()
+
+def test_return_A(errns: SimpleNamespace):
+    input_str = '$A = 0x50005\nreturn $A\n'
+    _, stdout, stderr = run_process(
+        [CECCOMP, 'emu', '-', '1', '-q'], stdin=input_str,
+    )
+    errns.stderr = stderr
+    assert stdout == 'ERRNO(5)\n'
+
+def test_return_A_long(errns: SimpleNamespace):
+    input_str = 'return $A\n'
+    _, stdout, stderr = run_process(
+        [CECCOMP, 'emu', '-', '1'], stdin=input_str,
+    )
+    errns.stderr = stderr
+    assert stdout == 'return $A # A = 0, KILL\n'
+
+def test_return_number(errns: SimpleNamespace):
+    input_str = 'return 0x13371337\n'
+    _, stdout, stderr = run_process(
+        [CECCOMP, 'emu', '-', '1', '-q'], stdin=input_str,
+    )
+    errns.stderr = stderr
+    assert stdout == 'KILL_PROCESS\n'
+
+def test_return_number_long(errns: SimpleNamespace):
+    input_str = 'return 0x7ff01000\n'
+    _, stdout, stderr = run_process(
+        [CECCOMP, 'emu', '-', '1'], stdin=input_str,
+    )
+    errns.stderr = stderr
+    assert stdout == 'return 0x7ff01000 # TRACE(4096)\n'
