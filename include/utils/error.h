@@ -43,8 +43,8 @@
   _ ("Process %d loaded strict seccomp mode, which only allows read, "        \
      "write, exit_group and sigreturn!")
 #define M_UNKNOWN_GETFILTER_ERR _ ("Unknown error when get filter: %s")
-#define M_UNKNOWN_SEIZE_ERR _ ("Unknown error when seize process: %s")
-#define M_SEIZE_NONEXIST_PROC _ ("The process to seize is not exist")
+#define M_UNKNOWN_SEIZE_ERR _ ("Unknown error when seizing process: %s")
+#define M_SEIZE_NONEXIST_PROC _ ("The process to seize does not exist")
 // no translation due to terms
 #define ACTION_GET_FILTER "ptrace get seccomp filters"
 #define ACTION_PTRACE_SEIZE "ptrace seizing"
@@ -64,8 +64,8 @@
 #define M_GET_FILTER_UNSUPPORTED                                              \
   _ ("PTRACE_GET_SECCOMP_FILTER is not supported on your system")
 #define M_CECCOMP_IN_SECCOMP                                                  \
-  _ ("Ceccomp is in seccomp mode, fetch seccomp filters of other process is " \
-     "not permitted")
+  _ ("Ceccomp is in seccomp mode, fetching seccomp filters of other process " \
+     "is not permitted")
 #define M_GET_FILTER_UNSUPPORTED_OR_NO_FILTER                                 \
   _ ("perhaps PTRACE_GET_SECCOMP_FILTER is not supported or no seccomp "      \
      "filter in target process")
