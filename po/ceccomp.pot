@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-05 01:22+0800\n"
+"POT-Creation-Date: 2026-02-06 01:54+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -89,345 +89,355 @@ msgstr ""
 msgid "Found errors when assembling"
 msgstr ""
 
-#: ../include/utils/error.h:20
-msgid "Found fatal errors when disassembling"
+#: ../include/utils/error.h:18
+msgid "Input file has more than 1024 statements!"
 msgstr ""
 
 #: ../include/utils/error.h:21
+msgid "Found fatal errors when disassembling"
+msgstr ""
+
+#: ../include/utils/error.h:22
 msgid "The input is empty"
 msgstr ""
 
-#: ../include/utils/error.h:23
+#: ../include/utils/error.h:24
 msgid "The input is larger than 1024 filters! Perhaps inputting a wrong file?"
 msgstr ""
 
-#: ../include/utils/error.h:26
+#: ../include/utils/error.h:27
 #, c-format
 msgid "%d byte(s) at the end of input could not fit into a filter"
 msgstr ""
 
-#: ../include/utils/error.h:29
+#: ../include/utils/error.h:30
 #, c-format
 msgid "Attaching to process %d"
 msgstr ""
 
-#: ../include/utils/error.h:30
+#: ../include/utils/error.h:31
 #, c-format
 msgid "Peekdata failed at %p"
 msgstr ""
 
-#: ../include/utils/error.h:31
-msgid "Failed to execute new program"
-msgstr ""
-
 #: ../include/utils/error.h:32
-#, c-format
-msgid "Process %d spawned a new pid %d"
+msgid "Failed to execute new program"
 msgstr ""
 
 #: ../include/utils/error.h:33
 #, c-format
-msgid "Process %d exited"
+msgid "Process %d spawned a new pid %d"
 msgstr ""
 
 #: ../include/utils/error.h:34
 #, c-format
-msgid "Parsing seccomp filter loaded in process %d"
+msgid "Process %d exited"
 msgstr ""
 
 #: ../include/utils/error.h:35
 #, c-format
-msgid "Process %d failed to load seccomp filter"
+msgid "Parsing seccomp filter loaded in process %d"
 msgstr ""
 
 #: ../include/utils/error.h:36
-msgid "Procfs not accessible, unable to perform"
+#, c-format
+msgid "Process %d failed to load seccomp filter"
 msgstr ""
 
 #: ../include/utils/error.h:37
-msgid "Found unresolvable non-classic BPF, skipping"
+msgid "Procfs not accessible, unable to perform"
 msgstr ""
 
 #: ../include/utils/error.h:38
-msgid "Kernel thread can not be seized"
+msgid "Found unresolvable non-classic BPF, skipping"
 msgstr ""
 
 #: ../include/utils/error.h:39
+msgid "Kernel thread can not be seized"
+msgstr ""
+
+#: ../include/utils/error.h:40
 #, c-format
 msgid "No seccomp filters found in process %d"
 msgstr ""
 
-#: ../include/utils/error.h:41
+#: ../include/utils/error.h:42
 #, c-format
 msgid "Target process is already being traced by process %d"
 msgstr ""
 
-#: ../include/utils/error.h:43
+#: ../include/utils/error.h:44
 #, c-format
 msgid ""
 "Process %d loaded strict seccomp mode, which only allows read, write, "
 "exit_group and sigreturn!"
 msgstr ""
 
-#: ../include/utils/error.h:45
+#: ../include/utils/error.h:46
 #, c-format
 msgid "Unknown error when get filter: %s"
 msgstr ""
 
-#: ../include/utils/error.h:46
+#: ../include/utils/error.h:47
 #, c-format
 msgid "Unknown error when seizing process: %s"
 msgstr ""
 
-#: ../include/utils/error.h:47
+#: ../include/utils/error.h:48
 msgid "The process to seize does not exist"
 msgstr ""
 
-#: ../include/utils/error.h:53
+#: ../include/utils/error.h:54
 msgid "perhaps seizing kthread or lacking CAP_SYS_PTRACE"
 msgstr ""
 
-#: ../include/utils/error.h:55
+#: ../include/utils/error.h:56
 msgid "Run with CAP_SYS_ADMIN capability to fetch seccomp filters"
 msgstr ""
 
-#: ../include/utils/error.h:57
+#: ../include/utils/error.h:58
 msgid "Run with CAP_SYS_PTRACE capability to seize a foreign process"
 msgstr ""
 
-#: ../include/utils/error.h:59
+#: ../include/utils/error.h:60
 msgid "32-bit tracer can not ptrace 64-bit tracee"
 msgstr ""
 
-#: ../include/utils/error.h:61
+#: ../include/utils/error.h:62
 #, c-format
 msgid "libseccomp does not support the tracee's arch (%#x)"
 msgstr ""
 
-#: ../include/utils/error.h:63
+#: ../include/utils/error.h:64
 msgid "perhaps lacking CAP_SYS_ADMIN or ceccomp is in seccomp mode"
 msgstr ""
 
-#: ../include/utils/error.h:65
+#: ../include/utils/error.h:66
 msgid "PTRACE_GET_SECCOMP_FILTER is not supported on your system"
 msgstr ""
 
-#: ../include/utils/error.h:67
+#: ../include/utils/error.h:68
 msgid ""
 "Ceccomp is in seccomp mode, fetching seccomp filters of other process is not "
 "permitted"
 msgstr ""
 
-#: ../include/utils/error.h:70
+#: ../include/utils/error.h:71
 msgid ""
 "perhaps PTRACE_GET_SECCOMP_FILTER is not supported or no seccomp filter in "
 "target process"
 msgstr ""
 
-#: ../include/utils/error.h:74
+#: ../include/utils/error.h:75
 msgid "Invalid color mode"
 msgstr ""
 
-#: ../include/utils/error.h:75
+#: ../include/utils/error.h:76
 msgid "Invalid format mode"
 msgstr ""
 
-#: ../include/utils/error.h:76
+#: ../include/utils/error.h:77
 msgid "Invalid number"
 msgstr ""
 
-#: ../include/utils/error.h:77
+#: ../include/utils/error.h:78
 #, c-format
 msgid "Unable to open file %s: %s"
 msgstr ""
 
-#: ../include/utils/error.h:80
+#: ../include/utils/error.h:81
 #, c-format
 msgid "Reading input failed: %s"
 msgstr ""
 
-#: ../include/utils/error.h:82
+#: ../include/utils/error.h:83
 #, c-format
 msgid "Found '\\0' at file offset %lu, perhaps it's not a text file?"
 msgstr ""
 
-#: ../include/utils/error.h:84
+#: ../include/utils/error.h:85
 msgid "No line break in source file, perhaps it's not a text file?"
 msgstr ""
 
-#: ../include/utils/error.h:86
+#: ../include/utils/error.h:87
 #, c-format
 msgid "Line %u has more than %u bytes, perhaps the input is not a text file?"
 msgstr ""
 
-#: ../include/utils/error.h:87
+#: ../include/utils/error.h:88
 msgid "The input file is greater than 1 MiB!"
 msgstr ""
 
-#: ../include/utils/error.h:89
+#: ../include/utils/error.h:90
 msgid "Found more than 4096 lines of text, perhaps it's not for ceccomp?"
 msgstr ""
 
-#: ../include/utils/error.h:92
+#: ../include/utils/error.h:93
 msgid "Can not find label declaration"
 msgstr ""
 
-#: ../include/utils/error.h:95
+#: ../include/utils/error.h:96
 msgid "Unexpected token"
 msgstr ""
 
-#: ../include/utils/error.h:96
+#: ../include/utils/error.h:97
 msgid "Found duplicated label declaration"
 msgstr ""
 
-#: ../include/utils/error.h:97
+#: ../include/utils/error.h:98
 msgid "Input number exceeds 32-bit range"
 msgstr ""
 
-#: ../include/utils/error.h:99
+#: ../include/utils/error.h:100
 msgid "Expect operator"
 msgstr ""
 
-#: ../include/utils/error.h:100
+#: ../include/utils/error.h:101
 msgid "Expect rvalue"
 msgstr ""
 
-#: ../include/utils/error.h:101
+#: ../include/utils/error.h:102
 msgid "Expect return value"
 msgstr ""
 
-#: ../include/utils/error.h:103
+#: ../include/utils/error.h:104
 msgid "Expect number"
 msgstr ""
 
-#: ../include/utils/error.h:104
+#: ../include/utils/error.h:105
 msgid "Expect parenthesis"
 msgstr ""
 
-#: ../include/utils/error.h:105
+#: ../include/utils/error.h:106
 msgid "Expect bracket"
 msgstr ""
 
-#: ../include/utils/error.h:106
+#: ../include/utils/error.h:107
 msgid "Expect comparator"
 msgstr ""
 
-#: ../include/utils/error.h:107
+#: ../include/utils/error.h:108
 msgid "Expect label"
 msgstr ""
 
-#: ../include/utils/error.h:108
-msgid "Expect syscall"
-msgstr ""
-
 #: ../include/utils/error.h:109
-msgid "Expect architecture"
+msgid "Expect valid syscall name"
 msgstr ""
 
-#: ../include/utils/error.h:112
+#: ../include/utils/error.h:111
+msgid ""
+"Architecture token does not match any libseccomp arch, perhaps system "
+"libseccomp is too old"
+msgstr ""
+
+#: ../include/utils/error.h:115
 msgid "Expect 'goto'"
 msgstr ""
 
-#: ../include/utils/error.h:113
+#: ../include/utils/error.h:116
 msgid "Expect '$A'"
 msgstr ""
 
-#: ../include/utils/error.h:114
+#: ../include/utils/error.h:117
 msgid "Expect 'else'"
 msgstr ""
 
-#: ../include/utils/error.h:117
+#: ../include/utils/error.h:120
 msgid "Rvalue should be '$A'"
 msgstr ""
 
-#: ../include/utils/error.h:118
+#: ../include/utils/error.h:121
 msgid "Rvalue can not be '$A'"
 msgstr ""
 
-#: ../include/utils/error.h:119
+#: ../include/utils/error.h:122
 msgid "Rvalue can not be '$X'"
 msgstr ""
 
-#: ../include/utils/error.h:121
+#: ../include/utils/error.h:124
 msgid "Rvalue should be '$A' or '$X'"
 msgstr ""
 
-#: ../include/utils/error.h:122
+#: ../include/utils/error.h:125
 msgid "Rvalue should be '$X' or number"
 msgstr ""
 
-#: ../include/utils/error.h:123
+#: ../include/utils/error.h:126
 msgid "Operator should be '='"
 msgstr ""
 
-#: ../include/utils/error.h:124
+#: ../include/utils/error.h:127
 msgid "Lvalue should be '$A'"
 msgstr ""
 
-#: ../include/utils/error.h:125
+#: ../include/utils/error.h:129
 msgid "seccomp_data load offset must be 4-byte aligned"
 msgstr ""
 
-#: ../include/utils/error.h:127
-msgid "Args index out of range (0-5)"
-msgstr ""
-
-#: ../include/utils/error.h:128
-msgid "Mem index out of range (0-15)"
-msgstr ""
-
-#: ../include/utils/error.h:129
-msgid "Accessing uninitialized mem"
-msgstr ""
-
-#: ../include/utils/error.h:130
-msgid "Dividing by zero"
-msgstr ""
-
 #: ../include/utils/error.h:131
-msgid "Left or right shifting more than 32 bits"
+msgid "seccomp_data load offset greater than the struct"
 msgstr ""
 
 #: ../include/utils/error.h:133
-msgid "Data carried by return motion exceeds 0xffff"
+msgid "Args index out of range (0-5)"
 msgstr ""
 
 #: ../include/utils/error.h:134
-msgid "JT is larger than 0xff"
+msgid "Mem index out of range (0-15)"
 msgstr ""
 
 #: ../include/utils/error.h:135
-msgid "JT must be positive"
+msgid "Accessing uninitialized mem"
 msgstr ""
 
 #: ../include/utils/error.h:136
-msgid "JF is larger than 0xff"
+msgid "Dividing by zero"
 msgstr ""
 
 #: ../include/utils/error.h:137
-msgid "JF must be positive"
-msgstr ""
-
-#: ../include/utils/error.h:138
-msgid "JT out of filters"
+msgid "Left or right shifting more than 32 bits"
 msgstr ""
 
 #: ../include/utils/error.h:139
-msgid "JF out of filters"
+msgid "Data carried by return motion exceeds 0xffff"
 msgstr ""
 
 #: ../include/utils/error.h:140
-msgid "JA out of filters"
+msgid "JT is larger than 0xff"
+msgstr ""
+
+#: ../include/utils/error.h:141
+msgid "JT must be positive"
 msgstr ""
 
 #: ../include/utils/error.h:142
-msgid "BPF filters must end with return"
+msgid "JF is larger than 0xff"
 msgstr ""
 
 #: ../include/utils/error.h:143
-msgid "The input does not contain any valid statement"
+msgid "JF must be positive"
+msgstr ""
+
+#: ../include/utils/error.h:144
+msgid "JT out of filters"
 msgstr ""
 
 #: ../include/utils/error.h:145
+msgid "JF out of filters"
+msgstr ""
+
+#: ../include/utils/error.h:146
+msgid "JA out of filters"
+msgstr ""
+
+#: ../include/utils/error.h:148
+msgid "BPF filters must end with return"
+msgstr ""
+
+#: ../include/utils/error.h:149
+msgid "The input does not contain any valid statement"
+msgstr ""
+
+#: ../include/utils/error.h:151
 msgid "Invalid or unknown operation"
 msgstr ""
