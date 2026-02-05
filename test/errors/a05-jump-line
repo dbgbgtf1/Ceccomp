@@ -1,0 +1,337 @@
+Test jump line related errors
+STDIN
+goto far
+goto outside
+goto 333
+
+reverse:
+if ($A == 0) goto end
+if !($A == 0) goto end
+if !!($A == 0) goto end
+if $A
+if ($X)
+if ($A - 0)
+if ($A & $X) goto end
+if ($A != noidea) goto end
+if ($A == i386) goto end
+if ($A == ?)
+if ($A == i386.) goto end
+if ($A == 0) $A
+if ($A == 0) goto end,
+if ($A == 0) goto end, else
+
+if ($A == 0) goto reverse
+if ($A == 0) goto end, else goto reverse
+if ($A == 0) goto far
+if ($A != 0) goto end, else goto outside
+
+end:
+return ERRNO(1)
+return ERRNO(2)
+return ERRNO(3)
+return ERRNO(4)
+return ERRNO(5)
+return ERRNO(6)
+return ERRNO(7)
+return ERRNO(8)
+return ERRNO(9)
+return ERRNO(10)
+return ERRNO(11)
+return ERRNO(12)
+return ERRNO(13)
+return ERRNO(14)
+return ERRNO(15)
+return ERRNO(16)
+return ERRNO(17)
+return ERRNO(18)
+return ERRNO(19)
+return ERRNO(20)
+return ERRNO(21)
+return ERRNO(22)
+return ERRNO(23)
+return ERRNO(24)
+return ERRNO(25)
+return ERRNO(26)
+return ERRNO(27)
+return ERRNO(28)
+return ERRNO(29)
+return ERRNO(30)
+return ERRNO(31)
+return ERRNO(32)
+return ERRNO(33)
+return ERRNO(34)
+return ERRNO(35)
+return ERRNO(36)
+return ERRNO(37)
+return ERRNO(38)
+return ERRNO(39)
+return ERRNO(40)
+return ERRNO(41)
+return ERRNO(42)
+return ERRNO(43)
+return ERRNO(44)
+return ERRNO(45)
+return ERRNO(46)
+return ERRNO(47)
+return ERRNO(48)
+return ERRNO(49)
+return ERRNO(50)
+return ERRNO(51)
+return ERRNO(52)
+return ERRNO(53)
+return ERRNO(54)
+return ERRNO(55)
+return ERRNO(56)
+return ERRNO(57)
+return ERRNO(58)
+return ERRNO(59)
+return ERRNO(60)
+return ERRNO(61)
+return ERRNO(62)
+return ERRNO(63)
+return ERRNO(64)
+return ERRNO(65)
+return ERRNO(66)
+return ERRNO(67)
+return ERRNO(68)
+return ERRNO(69)
+return ERRNO(70)
+return ERRNO(71)
+return ERRNO(72)
+return ERRNO(73)
+return ERRNO(74)
+return ERRNO(75)
+return ERRNO(76)
+return ERRNO(77)
+return ERRNO(78)
+return ERRNO(79)
+return ERRNO(80)
+return ERRNO(81)
+return ERRNO(82)
+return ERRNO(83)
+return ERRNO(84)
+return ERRNO(85)
+return ERRNO(86)
+return ERRNO(87)
+return ERRNO(88)
+return ERRNO(89)
+return ERRNO(90)
+return ERRNO(91)
+return ERRNO(92)
+return ERRNO(93)
+return ERRNO(94)
+return ERRNO(95)
+return ERRNO(96)
+return ERRNO(97)
+return ERRNO(98)
+return ERRNO(99)
+return ERRNO(100)
+return ERRNO(101)
+return ERRNO(102)
+return ERRNO(103)
+return ERRNO(104)
+return ERRNO(105)
+return ERRNO(106)
+return ERRNO(107)
+return ERRNO(108)
+return ERRNO(109)
+return ERRNO(110)
+return ERRNO(111)
+return ERRNO(112)
+return ERRNO(113)
+return ERRNO(114)
+return ERRNO(115)
+return ERRNO(116)
+return ERRNO(117)
+return ERRNO(118)
+return ERRNO(119)
+return ERRNO(120)
+return ERRNO(121)
+return ERRNO(122)
+return ERRNO(123)
+return ERRNO(124)
+return ERRNO(125)
+return ERRNO(126)
+return ERRNO(127)
+return ERRNO(128)
+return ERRNO(129)
+return ERRNO(130)
+return ERRNO(131)
+return ERRNO(132)
+return ERRNO(133)
+return ERRNO(134)
+return ERRNO(135)
+return ERRNO(136)
+return ERRNO(137)
+return ERRNO(138)
+return ERRNO(139)
+return ERRNO(140)
+return ERRNO(141)
+return ERRNO(142)
+return ERRNO(143)
+return ERRNO(144)
+return ERRNO(145)
+return ERRNO(146)
+return ERRNO(147)
+return ERRNO(148)
+return ERRNO(149)
+return ERRNO(150)
+return ERRNO(151)
+return ERRNO(152)
+return ERRNO(153)
+return ERRNO(154)
+return ERRNO(155)
+return ERRNO(156)
+return ERRNO(157)
+return ERRNO(158)
+return ERRNO(159)
+return ERRNO(160)
+return ERRNO(161)
+return ERRNO(162)
+return ERRNO(163)
+return ERRNO(164)
+return ERRNO(165)
+return ERRNO(166)
+return ERRNO(167)
+return ERRNO(168)
+return ERRNO(169)
+return ERRNO(170)
+return ERRNO(171)
+return ERRNO(172)
+return ERRNO(173)
+return ERRNO(174)
+return ERRNO(175)
+return ERRNO(176)
+return ERRNO(177)
+return ERRNO(178)
+return ERRNO(179)
+return ERRNO(180)
+return ERRNO(181)
+return ERRNO(182)
+return ERRNO(183)
+return ERRNO(184)
+return ERRNO(185)
+return ERRNO(186)
+return ERRNO(187)
+return ERRNO(188)
+return ERRNO(189)
+return ERRNO(190)
+return ERRNO(191)
+return ERRNO(192)
+return ERRNO(193)
+return ERRNO(194)
+return ERRNO(195)
+return ERRNO(196)
+return ERRNO(197)
+return ERRNO(198)
+return ERRNO(199)
+return ERRNO(200)
+return ERRNO(201)
+return ERRNO(202)
+return ERRNO(203)
+return ERRNO(204)
+return ERRNO(205)
+return ERRNO(206)
+return ERRNO(207)
+return ERRNO(208)
+return ERRNO(209)
+return ERRNO(210)
+return ERRNO(211)
+return ERRNO(212)
+return ERRNO(213)
+return ERRNO(214)
+return ERRNO(215)
+return ERRNO(216)
+return ERRNO(217)
+return ERRNO(218)
+return ERRNO(219)
+return ERRNO(220)
+return ERRNO(221)
+return ERRNO(222)
+return ERRNO(223)
+return ERRNO(224)
+return ERRNO(225)
+return ERRNO(226)
+return ERRNO(227)
+return ERRNO(228)
+return ERRNO(229)
+return ERRNO(230)
+return ERRNO(231)
+return ERRNO(232)
+return ERRNO(233)
+return ERRNO(234)
+return ERRNO(235)
+return ERRNO(236)
+return ERRNO(237)
+return ERRNO(238)
+return ERRNO(239)
+return ERRNO(240)
+return ERRNO(241)
+return ERRNO(242)
+return ERRNO(243)
+return ERRNO(244)
+return ERRNO(245)
+return ERRNO(246)
+return ERRNO(247)
+return ERRNO(248)
+return ERRNO(249)
+return ERRNO(250)
+return ERRNO(251)
+return ERRNO(252)
+return ERRNO(253)
+return ERRNO(254)
+return ERRNO(255)
+return ERRNO(256)
+
+far:return KILL
+outside:
+STDERR
+[WARN]: 2:-: JA out of filters
+goto outside
+~~~~~~~~~~~~
+[WARN]: 3:6: Expect label
+goto 333
+     ^
+[WARN]: 8:5: Expect parenthesis
+if !!($A == 0) goto end
+    ^
+[WARN]: 9:4: Expect parenthesis
+if $A
+   ^
+[WARN]: 10:5: Expect '$A'
+if ($X)
+    ^
+[WARN]: 11:8: Expect comparator
+if ($A - 0)
+       ^
+[WARN]: 13:11: Expect valid syscall name
+if ($A != noidea) goto end
+          ^
+[WARN]: 15:11: Unexpected token
+if ($A == ?)
+          ^
+[WARN]: 16:16: Expect valid syscall name
+if ($A == i386.) goto end
+               ^
+[WARN]: 17:14: Expect 'goto'
+if ($A == 0) $A
+             ^
+[WARN]: 18:23: Expect 'else'
+if ($A == 0) goto end,
+                      ^
+[WARN]: 19:28: Expect 'goto'
+if ($A == 0) goto end, else
+                           ^
+[WARN]: 21:-: JT must be positive
+if ($A == 0) goto reverse
+~~~~~~~~~~~~~~~~~~~~~~~~~
+[WARN]: 22:-: JF must be positive
+if ($A == 0) goto end, else goto reverse
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[WARN]: 23:-: JT is larger than 0xff
+if ($A == 0) goto far
+~~~~~~~~~~~~~~~~~~~~~
+[WARN]: 24:-: JF is larger than 0xff
+if ($A != 0) goto end, else goto outside
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[ERROR]: Found errors when assembling

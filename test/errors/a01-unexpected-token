@@ -1,0 +1,13 @@
+Test unexpected token and number overflow
+STDIN
+$K = 0
+$X = 0xffffffffff
+return ALLOW
+STDERR
+[WARN]: 1:1: Unexpected token
+$K = 0
+^
+[WARN]: 2:6: Input number exceeds 32-bit range
+$X = 0xffffffffff
+     ^
+[ERROR]: Found errors when assembling

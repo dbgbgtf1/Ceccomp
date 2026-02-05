@@ -1,0 +1,117 @@
+Test assign line related errors
+STDIN
+$A = 0
+$A = $X
+$A = $mem[0]
+$A = $mem[16]
+$A = $scmp_data_len
+$A = $arch
+$A = $low_args[
+$A = $high_args[5
+$A = $high_args[0x10]
+
+$X = 0
+$X = $A
+$X = $mem[
+$X = $mem[1]
+$X = $mem[16]
+$X = $scmp_data_len
+$X = $syscall_nr
+$X -= 0
+$X = -$X
+
+$mem = $A
+$mem[4] = 0
+$mem[5] = $A
+$mem[6] = $X
+$mem[0] = $mem[0]
+$A = $mem[5]
+$mem[7] = $syscall_nr
+$mem[5] -= 0
+
+$A
+$A - 0
+$A = $A + 0
+$A = $A
+$X = $X
+$A -= 0
+$A =- 0
+$A =- $A
+$A = -$X
+$A += $mem[4]
+$A *= $X
+return $A
+STDERR
+[WARN]: 3:-: Accessing uninitialized mem
+$A = $mem[0]
+~~~~~~~~~~~~
+[WARN]: 4:-: Mem index out of range (0-15)
+$A = $mem[16]
+~~~~~~~~~~~~~
+[WARN]: 7:16: Expect number
+$A = $low_args[
+               ^
+[WARN]: 8:18: Expect bracket
+$A = $high_args[5
+                 ^
+[WARN]: 9:-: Args index out of range (0-5)
+$A = $high_args[0x10]
+~~~~~~~~~~~~~~~~~~~~~
+[WARN]: 13:11: Expect number
+$X = $mem[
+          ^
+[WARN]: 14:-: Accessing uninitialized mem
+$X = $mem[1]
+~~~~~~~~~~~~
+[WARN]: 15:-: Mem index out of range (0-15)
+$X = $mem[16]
+~~~~~~~~~~~~~
+[WARN]: 17:-: Lvalue should be '$A'
+$X = $syscall_nr
+~~~~~~~~~~~~~~~~
+[WARN]: 18:-: Operator should be '='
+$X -= 0
+~~~~~~~
+[WARN]: 19:-: Operator should be '='
+$X = -$X
+~~~~~~~~
+[WARN]: 21:6: Expect bracket
+$mem = $A
+     ^
+[WARN]: 22:-: Rvalue should be '$A' or '$X'
+$mem[4] = 0
+~~~~~~~~~~~
+[WARN]: 25:-: Rvalue should be '$A' or '$X'
+$mem[0] = $mem[0]
+~~~~~~~~~~~~~~~~~
+[WARN]: 27:-: Rvalue should be '$A' or '$X'
+$mem[7] = $syscall_nr
+~~~~~~~~~~~~~~~~~~~~~
+[WARN]: 28:-: Operator should be '='
+$mem[5] -= 0
+~~~~~~~~~~~~
+[WARN]: 30:3: Expect operator
+$A
+  ^
+[WARN]: 31:4: Expect operator
+$A - 0
+   ^
+[WARN]: 32:9: Unexpected token
+$A = $A + 0
+        ^
+[WARN]: 33:-: Rvalue can not be '$A'
+$A = $A
+~~~~~~~
+[WARN]: 34:-: Rvalue can not be '$X'
+$X = $X
+~~~~~~~
+[WARN]: 36:-: Rvalue should be '$A'
+$A =- 0
+~~~~~~~
+[WARN]: 38:-: Rvalue should be '$A'
+$A = -$X
+~~~~~~~~
+[WARN]: 39:-: Rvalue should be '$X' or number
+$A += $mem[4]
+~~~~~~~~~~~~~
+[ERROR]: Found errors when assembling

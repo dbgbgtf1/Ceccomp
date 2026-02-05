@@ -1,0 +1,15 @@
+Test JT and JF out of filters
+STDIN
+if ($A > 0) goto outside
+if ($A <= 0) goto end, else goto outside
+end:
+return ALLOW
+outside:
+STDERR
+[WARN]: 1:-: JT out of filters
+if ($A > 0) goto outside
+~~~~~~~~~~~~~~~~~~~~~~~~
+[WARN]: 2:-: JF out of filters
+if ($A <= 0) goto end, else goto outside
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[ERROR]: Found errors when assembling

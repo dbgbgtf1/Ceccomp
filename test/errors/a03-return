@@ -1,0 +1,29 @@
+Test return related errors
+STDIN
+return ERRN
+return ERRNO
+return ERRNO(
+return ERRNO(2
+return KILL(1)
+return
+return TRACE(10000000)
+STDERR
+[WARN]: 1:8: Expect return value
+return ERRN
+       ^
+[WARN]: 3:14: Expect number
+return ERRNO(
+             ^
+[WARN]: 4:15: Expect parenthesis
+return ERRNO(2
+              ^
+[WARN]: 5:12: Unexpected token
+return KILL(1)
+           ^
+[WARN]: 6:7: Expect return value
+return
+      ^
+[WARN]: 7:-: Data carried by return motion exceeds 0xffff
+return TRACE(10000000)
+~~~~~~~~~~~~~~~~~~~~~~
+[ERROR]: Found errors when assembling

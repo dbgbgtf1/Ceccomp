@@ -24,3 +24,41 @@ def test_s390x_disasm(errns: SimpleNamespace):
 
     with expect_file.open() as expect:
         assert stdout == expect.read()
+
+def test_large_file():
+    _, _, stderr = run_process(
+        [CECCOMP, 'disasm', '/dev/zero'],
+    )
+    assert stderr == '[ERROR]: The input is larger than 1024 filters! Perhaps inputting a wrong file?\n'
+
+def test_empty_file():
+    _, stdout, stderr = run_process(
+        [CECCOMP, 'disasm', '-'], stdin='1234',
+    )
+    errmsg = \
+'''[WARN]: 4 byte(s) at the end of input could not fit into a filter
+[WARN]: The input is empty
+'''
+    assert stderr == errmsg and not stdout
+
+ERROR_IDS = sorted([p.stem[1:] for p in (TEST_DIR / 'errors').glob('b*')])
+
+@pytest.mark.parametrize('errorid', ERROR_IDS)
+def test_error_cases(errorid: str):
+    chunk_file = TEST_DIR / 'errors' / f'b{errorid}'
+    with chunk_file.open() as f:
+        blob = f.read()
+    in_idx = blob.find('STDIN')
+    out_idx = blob.find('STDOUT')
+    err_idx = blob.find('STDERR')
+    assert in_idx != -1 and err_idx != -1
+
+    stdin = bytes.fromhex(blob[in_idx + 6 : err_idx])
+    _, stdout, stderr = run_process(
+        [CECCOMP, 'disasm', '-', '-a', 'x86_64'], stdin=stdin, is_binary=True,
+    )
+    if out_idx == -1:
+        assert stderr.decode() == blob[err_idx + 7:]
+    else:
+        assert stderr.decode() == blob[err_idx + 7 : out_idx]
+        assert stdout.decode() == blob[out_idx + 7:]

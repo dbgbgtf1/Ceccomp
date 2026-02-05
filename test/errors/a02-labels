@@ -1,0 +1,14 @@
+Test duplicated labels and labels that are not found
+STDIN
+L1:
+if ($A == 0) goto L2
+L1:
+return ALLOW
+STDERR
+[WARN]: 2:-: Can not find label declaration
+if ($A == 0) goto L2
+~~~~~~~~~~~~~~~~~~~~
+[WARN]: 3:1: Found duplicated label declaration
+L1:
+^
+[ERROR]: Found errors when assembling

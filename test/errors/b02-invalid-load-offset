@@ -1,0 +1,13 @@
+Test invalid load offset with normal operations
+STDIN
+20 00 00 00 05 00 00 00
+20 00 00 00 40 00 00 00
+06 00 00 00 00 00 ff 7f
+STDERR
+[WARN]: #1: seccomp_data load offset must be 4-byte aligned
+CODE:0x0021 JT:0x00 JF:0x00 K:0x00000005
+                            ^
+[WARN]: #2: seccomp_data load offset greater than the struct
+CODE:0x0021 JT:0x00 JF:0x00 K:0x00000040
+                            ^
+[ERROR]: Found fatal errors when disassembling
