@@ -3,11 +3,9 @@
 #include "lexical/token.h"
 #include "main.h"
 #include "utils/arch_trans.h"
-#include "utils/logger.h"
 #include "utils/read_source.h"
 #include <assert.h>
 #include <ctype.h>
-#include <errno.h>
 #include <limits.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -108,14 +106,6 @@ reset_to_nextline (token_t *token)
   scanner.line_nr++;
 }
 
-static void
-skip_spaces (void)
-{
-  // spaces
-  while (isspace_l (peek (0), lc_c) && peek (0) != '\n')
-    advance (1);
-}
-
 void
 init_scanner (char *start)
 {
@@ -132,7 +122,8 @@ scan_token (token_t *token)
     INIT_TOKEN (TOKEN_EOF);
 
   // skip spaces
-  skip_spaces ();
+  while (isspace_l (peek (0), lc_c) && peek (0) != '\n')
+    advance (1);
 
   // sync
   scanner.token_start = scanner.current_char;

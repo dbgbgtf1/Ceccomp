@@ -147,6 +147,8 @@ ld_line (assign_line_t *assign_line)
 
   if (assign_line->right_var.type == X)
     f.code |= BPF_MISC | BPF_TXA;
+  else if (assign_line->right_var.type == ATTR_LEN)
+    f.code |= BPF_LD | BPF_LEN;
   else if (assign_line->right_var.type == NUMBER)
     {
       f.code |= BPF_LD | BPF_IMM;
@@ -156,10 +158,6 @@ ld_line (assign_line_t *assign_line)
     {
       f.code |= BPF_LD | BPF_MEM;
       f.k = assign_line->right_var.data;
-    }
-  else if (assign_line->right_var.type == ATTR_LEN)
-    {
-      f.code |= BPF_LD | BPF_LEN;
     }
   else
     {

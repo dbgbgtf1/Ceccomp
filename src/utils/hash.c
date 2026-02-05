@@ -1,6 +1,4 @@
 #include "utils/hash.h"
-#include "utils/error.h"
-#include "utils/logger.h"
 #include <assert.h>
 #include <stdbool.h>
 #include <stddef.h>

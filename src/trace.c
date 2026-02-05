@@ -1,7 +1,6 @@
 #include "trace.h"
 #include "disasm.h"
 #include "main.h"
-#include "utils/color.h"
 #include "utils/error.h"
 #include "utils/logger.h"
 #include "utils/proc_status.h"

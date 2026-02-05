@@ -283,6 +283,8 @@ emulator (vector_t *text_v, vector_t *code_ptr_v, bool quiet)
           exec_idx = code_nr_to_text_nr (text_v, code_ptr_v, statement, jmp);
           break;
         case RETURN_LINE:
+            // make compiler happy
+            ;
           obj_t real_ret;
           string_t ret_str = return_line (&statement->return_line, &real_ret);
           if (ret_str.start)

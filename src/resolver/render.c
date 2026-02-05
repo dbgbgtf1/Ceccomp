@@ -2,7 +2,6 @@
 #include "lexical/parser.h"
 #include "lexical/token.h"
 #include "main.h"
-#include "resolver/resolver.h"
 #include "utils/arch_trans.h"
 #include "utils/str_pile.h"
 #include "utils/vector.h"
@@ -176,10 +175,6 @@ jump_line (jump_line_t *jump_line)
   else if (list[pc].A_stat == SYSNR)
     try_resolve_sysnr (cmpobj);
 }
-
-
-
-
 
 static void
 render_statement (statement_t *statement)

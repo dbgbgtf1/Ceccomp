@@ -1,4 +1,3 @@
-#include <stddef.h>
 #define _GNU_SOURCE
 #include "utils/read_source.h"
 #include "utils/error.h"
@@ -7,6 +6,7 @@
 #include <errno.h>
 #include <linux/prctl.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
