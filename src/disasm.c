@@ -17,7 +17,7 @@
 #include <string.h>
 #include <unistd.h>
 
-filter g_filters[1024];
+filter g_filters[1025];
 
 static uint32_t
 read_filters (filter *filters, FILE *from)
