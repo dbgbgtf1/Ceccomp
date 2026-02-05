@@ -191,25 +191,21 @@ set_jt_jf (label_t *label, uint32_t code_nr)
 }
 
 static void
-ja_line (jump_line_t *jump_line)
-{
-  uint32_t jt = find_key (&jump_line->jt.key);
-  if (jt == (uint16_t)-1)
-    REPORT_ERROR (M_CANNOT_FIND_LABEL);
-  set_jt_jf (&jump_line->jt, jt);
-
-  masks[jt] &= mem_valid;
-  mem_valid = ~0;
-}
-
-static void
 jump_line (void)
 {
   jump_line_t *jump_line = &local->jump_line;
 
   if (!jump_line->if_condition)
     {
-      ja_line (jump_line);
+      uint32_t jt = find_key (&jump_line->jt.key);
+      if (jt == (uint16_t)-1)
+        REPORT_ERROR (M_CANNOT_FIND_LABEL);
+      if (jt > bpf_len)
+        REPORT_ERROR (M_JA_OUT_OF_FILTERS);
+      set_jt_jf (&jump_line->jt, jt);
+
+      masks[jt] &= mem_valid;
+      mem_valid = ~0;
       return;
     }
 
