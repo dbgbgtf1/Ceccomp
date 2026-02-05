@@ -22,9 +22,7 @@ def is_not_cap_sys_admin() -> str | None:
 TEST = str(PROJ_DIR / 'build' / 'test')
 assert run_process(['make', '-C', str(PROJ_DIR), 'test'], False)[0] == 0
 
-# -a x86_64 option in COMMON_OPTS will be ignored in trace/probe
-
-def is_pid_killed(pid: int) -> bool:
+def pid_state(pid: int) -> str | None:
     """
     Race condition: perhaps kernel killed process but ceccomp hasn't exit,
     so test is zombie and not being collected. Test this case
@@ -32,14 +30,14 @@ def is_pid_killed(pid: int) -> bool:
     try:
         os.kill(pid, 0)
     except ProcessLookupError:
-        return True
+        return None
     try:
         with open(f'/proc/{pid}/stat') as f:
             state = f.read().split(' ', 4)[2]
     except:
-        return True
+        return None
     else:
-        return state == 'Z'
+        return None if state == 'Z' else state
 
 def filter_execve_k(text: str) -> str:
     if len(text) != 391:
@@ -49,6 +47,8 @@ def filter_execve_k(text: str) -> str:
     except ValueError:
         return text
     return text[:174] + ' MAY VARY ' + text[184:]
+
+# -a x86_64 option in COMMON_OPTS will be ignored in trace/probe
 
 ##### TEST CASES #####
 def test_probe(errns: SimpleNamespace):
@@ -66,7 +66,7 @@ def test_probe(errns: SimpleNamespace):
         assert f.read() == expect
 
     pid = int(stdout.split('=')[1])
-    assert is_pid_killed(pid)
+    assert pid_state(pid) is None
 
 
 def test_trace(errns: SimpleNamespace):
