@@ -15,8 +15,7 @@
 
 // asm
 #define M_ASM_TERMINATED _ ("Found errors when assembling")
-#define M_STATEMENT_OVERFLOW                                                  \
-  _ ("Input file has more than 1024 statements!")
+#define M_STATEMENT_OVERFLOW _ ("Input file has more than 1024 statements!")
 
 // disasm
 #define M_DISASM_TERMINATED _ ("Found fatal errors when disassembling")
@@ -107,8 +106,10 @@
 #define M_EXPECT_BRACKET _ ("Expect bracket")
 #define M_EXPECT_COMPARTOR _ ("Expect comparator")
 #define M_EXPECT_LABEL _ ("Expect label")
-#define M_EXPECT_SYSCALL _ ("Expect syscall")
-#define M_EXPECT_ARCH _ ("Expect architecture")
+#define M_EXPECT_SYSCALL _ ("Expect valid syscall name")
+#define M_EXPECT_ARCH                                                         \
+  _ ("Architecture token does not match any libseccomp arch, perhaps system " \
+     "libseccomp is too old")
 // EXPECT_SYSCALL also use in resolver
 
 #define M_EXPECT_GOTO _ ("Expect 'goto'")

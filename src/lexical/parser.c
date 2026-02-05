@@ -137,8 +137,10 @@ eof_line (void)
 }
 
 static void
-ret_obj (void)
+return_line (void)
 {
+  local->type = RETURN_LINE;
+
   obj_t *obj = &local->return_line.ret_obj;
   obj->literal.start = parse.next.token_start;
 
@@ -160,14 +162,6 @@ ret_obj (void)
   obj->literal.len = parse.current.token_start + parse.current.token_len
                      - obj->literal.start;
   // some obj consume more than one token like TRACE(0xf)
-}
-
-static void
-return_line (void)
-{
-  local->type = RETURN_LINE;
-
-  ret_obj ();
 }
 
 static void
@@ -227,7 +221,8 @@ compare_obj (obj_t *obj)
   if (!match (DOT))
     {
       obj->data = internal_arch_to_scmp_arch (parse.current.type);
-      if (obj->data == (uint32_t)-1)
+      if (UNLIKELY (obj->data == (uint32_t)-1))
+        // libseccomp does not support input arch??
         error_at (parse.current, M_EXPECT_ARCH);
       return;
     }
@@ -237,7 +232,8 @@ compare_obj (obj_t *obj)
     error_at (parse.next, M_EXPECT_SYSCALL);
 
   uint32_t scmp_arch = internal_arch_to_scmp_arch (parse.previous.type);
-  if (scmp_arch == (uint32_t)-1)
+  if (UNLIKELY (scmp_arch == (uint32_t)-1))
+    // libseccomp does not support input arch??
     error_at (parse.previous, M_EXPECT_ARCH);
   obj->data = resolve_name_arch (scmp_arch, &parse.next);
   if (obj->data == (uint32_t)-1)
