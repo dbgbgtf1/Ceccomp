@@ -264,6 +264,7 @@ scan_token (token_t *token)
       if ((uint32_t)num != num)
         INIT_TOKEN_ADV1 (OVERFLOW_NUMBER);
 #else
+#include <errno.h>
       static_assert (sizeof (unsigned long) == 4,
                      "long is not 32-bit on 32-bit machine?");
       if (num == ULONG_MAX && errno == ERANGE)
