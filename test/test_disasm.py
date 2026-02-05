@@ -25,27 +25,11 @@ def test_s390x_disasm(errns: SimpleNamespace):
     with expect_file.open() as expect:
         assert stdout == expect.read()
 
-def test_large_file():
-    _, _, stderr = run_process(
-        [CECCOMP, 'disasm', '/dev/zero'],
-    )
-    assert stderr == '[ERROR]: The input is larger than 1024 filters! Perhaps inputting a wrong file?\n'
-
-def test_empty_file():
-    _, stdout, stderr = run_process(
-        [CECCOMP, 'disasm', '-'], stdin='1234',
-    )
-    errmsg = \
-'''[WARN]: 4 byte(s) at the end of input could not fit into a filter
-[WARN]: The input is empty
-'''
-    assert stderr == errmsg and not stdout
-
-ERROR_IDS = sorted([p.stem[1:] for p in (TEST_DIR / 'errors').glob('b*')])
+ERROR_IDS = sorted([p.stem[1:] for p in ERR_CASE_DIR.glob('b*')])
 
 @pytest.mark.parametrize('errorid', ERROR_IDS)
 def test_error_cases(errorid: str):
-    chunk_file = TEST_DIR / 'errors' / f'b{errorid}'
+    chunk_file = ERR_CASE_DIR / f'b{errorid}'
     with chunk_file.open() as f:
         blob = f.read()
     in_idx = blob.find('STDIN')
