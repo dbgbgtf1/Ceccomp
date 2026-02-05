@@ -16,7 +16,7 @@
 // asm
 #define M_ASM_TERMINATED _ ("Found errors when assembling")
 #define M_STATEMENT_OVERFLOW                                                  \
-  _ ("Input file has more than 1024 statements, truncating")
+  _ ("Input file has more than 1024 statements!")
 
 // disasm
 #define M_DISASM_TERMINATED _ ("Found fatal errors when disassembling")

@@ -379,11 +379,7 @@ expression (void)
   else if (peek (TOKEN_EOF))
     eof_line ();
   else if (UNLIKELY (parse.code_nr > 1024))
-    {
-      warn ("%s", M_STATEMENT_OVERFLOW);
-      eof_line ();
-      return;
-    }
+    error ("%s", M_STATEMENT_OVERFLOW);
   else if (match (RETURN))
     return_line ();
   else if (match (IF))
