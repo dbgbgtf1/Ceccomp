@@ -88,7 +88,7 @@ typedef struct
   uint16_t text_nr;
   uint16_t code_nr;
   char *line_start;
-  uint16_t comment;
+  int16_t comment;
   uint16_t line_len;
 
   union

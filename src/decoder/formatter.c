@@ -190,7 +190,7 @@ return_line (statement_t *statement)
 static void
 print_comment (statement_t *statement)
 {
-  if (statement->comment == (uint16_t)-1)
+  if (statement->comment == -1)
     return;
 
   char *comment_start = statement->line_start + statement->comment;

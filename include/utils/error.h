@@ -15,6 +15,8 @@
 
 // asm
 #define M_ASM_TERMINATED _ ("Found errors when assembling")
+#define M_STATEMENT_OVERFLOW                                                  \
+  _ ("Input file has more than 1024 statements, truncating")
 
 // disasm
 #define M_DISASM_TERMINATED _ ("Found fatal errors when disassembling")
@@ -122,7 +124,10 @@
 #define M_RIGHT_SHOULD_BE_X_OR_NUM _ ("Rvalue should be '$X' or number")
 #define M_OPERATOR_SHOULD_BE_EQUAL _ ("Operator should be '='")
 #define M_LEFT_SHOULD_BE_A _ ("Lvalue should be '$A'")
-#define M_INVALID_ATTR_LOAD _ ("seccomp_data load offset must be 4-byte aligned")
+#define M_INVALID_ATTR_LOAD                                                   \
+  _ ("seccomp_data load offset must be 4-byte aligned")
+#define M_ATTR_OFFSET_OVERFLOW                                                \
+  _ ("seccomp_data load offset greater than the struct")
 
 #define M_ARGS_IDX_OUT_OF_RANGE _ ("Args index out of range (0-5)")
 #define M_MEM_IDX_OUT_OF_RANGE _ ("Mem index out of range (0-15)")

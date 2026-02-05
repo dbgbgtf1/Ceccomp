@@ -5,6 +5,7 @@
 #include "utils/arch_trans.h"
 #include "utils/error.h"
 #include "utils/hash.h"
+#include "utils/logger.h"
 #include "utils/vector.h"
 #include <seccomp.h>
 #include <setjmp.h>
@@ -377,6 +378,12 @@ expression (void)
     empty_line ();
   else if (peek (TOKEN_EOF))
     eof_line ();
+  else if (UNLIKELY (parse.code_nr > 1024))
+    {
+      warn ("%s", M_STATEMENT_OVERFLOW);
+      eof_line ();
+      return;
+    }
   else if (match (RETURN))
     return_line ();
   else if (match (IF))
