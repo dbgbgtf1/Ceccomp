@@ -2,6 +2,7 @@ import pytest
 from shared_vars import *
 from subprocess import PIPE, DEVNULL
 import signal
+import time
 
 def is_not_cap_sys_admin() -> str | None:
     try:
@@ -66,6 +67,9 @@ def test_probe(errns: SimpleNamespace):
         assert f.read() == expect
 
     pid = int(stdout.split('=')[1])
+    end = time.time() + 1
+    while pid_state(pid) and time.time() < end:
+        time.sleep(0.0625)
     assert pid_state(pid) is None
 
 
