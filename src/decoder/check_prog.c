@@ -134,7 +134,7 @@ report_error (filter f, uint32_t filter_idx, err_idx idx, bool fatal,
       report_error (f, pc + 1, err_idx, fatal, err_msg);                      \
       return;                                                                 \
     }                                                                         \
-  while (0);
+  while (0)
 
 #define FATAL true
 // return true means stop check
@@ -152,7 +152,9 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
     {
     case BPF_LD | BPF_W | BPF_ABS:
       f.code = BPF_LDX | BPF_W | BPF_ABS;
-      if (k >= sizeof (struct seccomp_data) || k & 3)
+      if (k >= sizeof (struct seccomp_data))
+        REPORT (K_ERR, FATAL, M_ATTR_OFFSET_OVERFLOW);
+      else if (k & 3)
         REPORT (K_ERR, FATAL, M_INVALID_ATTR_LOAD);
       return;
     case BPF_LD | BPF_W | BPF_LEN:
@@ -165,29 +167,29 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
       return;
     case BPF_ALU | BPF_DIV | BPF_K:
       if (f.k == 0)
-        REPORT(K_ERR, !FATAL, M_ALU_DIV_BY_ZERO);
+        REPORT (K_ERR, !FATAL, M_ALU_DIV_BY_ZERO);
       return;
     case BPF_ALU | BPF_LSH | BPF_K:
     case BPF_ALU | BPF_RSH | BPF_K:
       if (f.k >= 32)
-        REPORT(K_ERR, !FATAL, M_ALU_SH_OUT_OF_RANGE);
+        REPORT (K_ERR, !FATAL, M_ALU_SH_OUT_OF_RANGE);
       return;
     case BPF_LD | BPF_MEM:
     case BPF_LDX | BPF_MEM:
       if (f.k >= BPF_MEMWORDS)
-        REPORT(K_ERR, !FATAL, M_MEM_IDX_OUT_OF_RANGE);
+        REPORT (K_ERR, !FATAL, M_MEM_IDX_OUT_OF_RANGE);
       if (!(mem_valid & (1 << fptr[pc].k)))
-        REPORT(NONE, !FATAL, M_UNINITIALIZED_MEM);
+        REPORT (K_ERR, !FATAL, M_UNINITIALIZED_MEM);
       return;
     case BPF_ST:
     case BPF_STX:
       if (f.k >= BPF_MEMWORDS)
-        REPORT(K_ERR, !FATAL, M_MEM_IDX_OUT_OF_RANGE);
+        REPORT (K_ERR, !FATAL, M_MEM_IDX_OUT_OF_RANGE);
       mem_valid |= (1 << fptr[pc].k);
       return;
     case BPF_JMP | BPF_JA:
       if (f.k >= (uint32_t)(flen - pc - 1))
-        REPORT(K_ERR, !FATAL, M_JA_OUT_OF_FILTERS);
+        REPORT (K_ERR, !FATAL, M_JA_OUT_OF_FILTERS);
       masks[pc + 1 + fptr[pc].k] &= mem_valid;
       mem_valid = ~0;
       return;
@@ -200,9 +202,9 @@ check_filter (filter *fptr, uint32_t pc, uint32_t flen)
     case BPF_JMP | BPF_JSET | BPF_K:
     case BPF_JMP | BPF_JSET | BPF_X:
       if (pc + f.jt + 1 >= flen)
-        REPORT(JT_ERR, !FATAL, M_JT_INVALID_TAG);
+        REPORT (JT_ERR, !FATAL, M_JT_INVALID_TAG);
       if (pc + f.jf + 1 >= flen)
-        REPORT(JF_ERR, !FATAL, M_JF_INVALID_TAG);
+        REPORT (JF_ERR, !FATAL, M_JF_INVALID_TAG);
       masks[pc + 1 + fptr[pc].jt] &= mem_valid;
       masks[pc + 1 + fptr[pc].jf] &= mem_valid;
       mem_valid = ~0;
