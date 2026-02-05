@@ -14,10 +14,11 @@ Items marked with :star: is the major change why we release a new version.
 * :star: Fix asm and disasm endianness problems :link: [#22]
 * :star: Handle '>=' '>' '<=' '<' correctly :link: [#25]
 * :star: Find python by `env` for compatibility in `configure` :heart: [@tesuji] :link: [!19]
+* :star: Migrate to pytest for testing
+* :star: Migrate to po4a for documentation translation
 * Print messages in dynamic tests
 * Add `-q` for trace to suppress `[INFO]` output
 * Reject text that are error ones for kernel :link: [#17]
-* Migrate to po4a for documentation translation
 * Print info when trace found failed seccomp syscall
 * Support `-` to refer to stdin or stdout
 * Allow returning numbers or `$A`

@@ -55,14 +55,11 @@ A tool to analyze seccomp filters like `seccomp-tools`, written in C
 
 # Run Test
 
-Run configure and make, then invoke `scripts/check.sh` from repo root. We expect the script could pass all checks.
-If you find some checks failed, please submit an issue to report your case.
+Run configure and make, then invoke `pytest test` from repo root. Trace pid case will be skipped if no
+CAP_SYS_ADMIN. If you find some checks failed, please submit an issue to report your case.
 
-`check.sh` stops if any error occurs by default, you can override this behavior by adding a `--tolerant` flag,
-which allows `check.sh` to run through the whole test.
-
-To run the test, you need 3 extra packages: `pkgconf` (required by `pkg-config`), `diffutils` (required by `diff`)
-and `procps` (required by `pgrep` and `pkill`).
+To run the test, you need 2 extra packages: `pkgconf` (required by `pkg-config`) and `python-pytest`
+(required by `pytest`).
 
 # CheatSheet
 
