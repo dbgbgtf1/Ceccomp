@@ -85,8 +85,7 @@ To run the test, you need 2 extra packages: `pkgconf` (required by `pkg-config`)
 - [Verstable](https://github.com/JacksonAllan/Verstable): High-performance hash table implementation in C
 - [a5hash](https://github.com/avaneev/a5hash): High-performance hash implementation for short strings in C
 
-Any Issue or PR are welcome! :heart: Please read [CONTRIBUTIING.md](CONTRIBUTIING.md)
-to know details.
+Any Issue or PR are welcome! :heart: Please read [CONTRIBUTING.md](CONTRIBUTING.md) learn the details.
 
 ## License
 
