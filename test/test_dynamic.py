@@ -3,6 +3,7 @@ from shared_vars import *
 from subprocess import PIPE, DEVNULL
 import signal
 import time
+import select
 
 def is_not_cap_sys_admin() -> str | None:
     try:
@@ -98,7 +99,19 @@ def test_seize(errns: SimpleNamespace):
     pre_line = cp.stderr.readline()
 
     os.kill(pid, signal.SIGCONT)
-    pid = int(tp.stdout.readline().split('=')[1]) # child pid
+
+    rl, _, _ = select.select([tp.stdout], [], [], 0.5)
+    if rl:
+        pid = int(rl[0].readline().split('=')[1]) # child pid
+    else:
+        with open(f'/proc/{tp.pid}/wchan') as f:
+            t_kfunc = f.read()
+        with open(f'/proc/{cp.pid}/wchan') as f:
+            c_kfunc = f.read()
+        errns.stderr = f'TEST in {t_kfunc}\nCECCOMP in {c_kfunc}'
+        tp.terminate()
+        cp.terminate()
+        assert False, 'Found signal race condition? Pls report to upstream'
 
     cp.terminate()
     stdout, stderr = cp.communicate()

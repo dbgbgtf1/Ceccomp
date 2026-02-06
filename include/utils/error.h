@@ -27,7 +27,7 @@
   _ ("%d byte(s) at the end of input could not fit into a filter")
 
 // trace
-#define M_ATTACHING_ON _ ("Attaching to process %d")
+#define M_START_TRACING _ ("Start tracing process %d")
 #define M_PEEKDATA_FAILED_ADR _ ("Peekdata failed at %p")
 #define M_EXECV_ERR _ ("Failed to execute new program")
 #define M_PROCESS_FORK _ ("Process %d spawned a new pid %d")

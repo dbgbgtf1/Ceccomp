@@ -195,6 +195,10 @@ parent (pid_t child_pid, FILE *output_fp, uint32_t extra_ptrace_flags,
 
   waitpid (child_pid, &status, 0);
   // child is stopped after PTRACE_TRACEME
+  if (!quiet)
+    // write info when we truly start tracing so that
+    // script can continue interacting correctly
+    info (M_START_TRACING, child_pid);
 
   // clang-format off
   ptrace (PTRACE_SETOPTIONS, child_pid, 0,
@@ -359,7 +363,6 @@ pid_seize (int pid, bool quiet)
 
   if (ptrace (PTRACE_ATTACH, pid, NULL, NULL) == -1)
     error_seize (pid, errno);
-  info (M_ATTACHING_ON, pid);
   parent (pid, stdout, 0, quiet, false);
 }
 
