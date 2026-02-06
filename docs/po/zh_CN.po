@@ -1426,23 +1426,3 @@ msgstr ""
 #: ceccomp.adoc:512
 msgid "Copyright (C) 2025-present, distributed under GPLv3 or later."
 msgstr "Copyright (C) 2025-现在，基于 GPLv3 或更新版本分发。"
-
-#, no-wrap
-#~ msgid "emu_quiet.png"
-#~ msgstr "emu_quiet.png"
-
-#~ msgid ""
-#~ "A valid _TEXT_ could only contain *statement* like `$A = $arch`, but "
-#~ "adding an extra *lineno* may help you much. *lineno* starts from 1, and "
-#~ "always bases 10."
-#~ msgstr ""
-#~ "一个有效的 _TEXT_ 可以只包含 *伪代码* 如 `$A = $arch` ，但是添加一些多余"
-#~ "的\n"
-#~ "*行号* 可能可以辅助你手写 _TEXT_ 。 *行号* 从1开始，并且永远是十进制的。"
-
-#, no-wrap
-#~ msgid "Optional Wrapper"
-#~ msgstr "可选的其他字段"
-
-#~ msgid "Only `return ALLOW`, the *statement* is needed."
-#~ msgstr "以上例子中，只用 `return ALLOW` 这条 *伪代码* 是需要的。"

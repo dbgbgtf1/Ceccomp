@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ceccomp 4.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-06 01:54+0800\n"
-"PO-Revision-Date: 2026-02-06 01:56+0800\n"
+"POT-Creation-Date: 2026-02-06 20:03+0800\n"
+"PO-Revision-Date: 2026-02-06 20:04+0800\n"
 "Last-Translator: RocketDev <ma2014119@outlook.com>\n"
 "Language-Team: Chinese <ma2014119@outlook.com>\n"
 "Language: zh_CN\n"
@@ -141,8 +141,8 @@ msgstr "输入末尾的 %d 个字节无法放入一个过滤器中"
 
 #: ../include/utils/error.h:30
 #, c-format
-msgid "Attaching to process %d"
-msgstr "正在附加到进程 %d"
+msgid "Start tracing process %d"
+msgstr "开始追踪进程 %d"
 
 #: ../include/utils/error.h:31
 #, c-format
@@ -476,136 +476,3 @@ msgstr "输入不包含任何有效的伪代码"
 #: ../include/utils/error.h:151
 msgid "Invalid or unknown operation"
 msgstr "无效或未知的操作符"
-
-#~ msgid "Expect architecture"
-#~ msgstr "期待一个架构"
-
-#~ msgid "Invalid attribute loading"
-#~ msgstr "无效的属性加载"
-
-#~ msgid "JT to a invalid tag out of filters"
-#~ msgstr "JT 到了一个超出过滤器的标签"
-
-#~ msgid "JF to a invalid tag out of filters"
-#~ msgstr "JF 到了一个超出过滤器的标签"
-
-#~ msgid "Jf to a invalid tag out of filters"
-#~ msgstr "JF 到了一个超出过滤器的标签"
-
-#~ msgid "Lvalue should be A"
-#~ msgstr "左值应该为 "
-
-#~ msgid "execv failed executing"
-#~ msgstr "无法执行 execv"
-
-#~ msgid "Non-cbpf found, can't resolve, but continue"
-#~ msgstr "发现了无法解析的 non-cbpf，继续"
-
-#~ msgid "Alu lsh or rsh out of range"
-#~ msgstr "ALU 左移或右移超出范围"
-
-#~ msgid "STRICT MODE DETECTED!"
-#~ msgstr "检测到 严格模式 ！"
-
-#~ msgid "Only read, write, _exit, sigreturn available!"
-#~ msgstr "只能使用 read, write, _exit, sigreturn 系统调用！"
-
-#~ msgid "Invalid arch"
-#~ msgstr "无效的架构"
-
-#~ msgid "Invalid syscall args"
-#~ msgstr "无效的系统调用参数"
-
-#~ msgid "Invalid instruction pointer"
-#~ msgstr "无效的 instruction pointer"
-
-#~ msgid "Invalid pid"
-#~ msgstr "无效的 pid"
-
-#, c-format
-#~ msgid ""
-#~ "Your system arch (%s) does not match any arch supported by libseccomp, "
-#~ "please set an arch by -a manually"
-#~ msgstr ""
-#~ "您的系统架构 (%s) 没有匹配到任何受 libseccomp 支持的架构。请使用 -a 手动设"
-#~ "置架构"
-
-#~ msgid "Invalid operator"
-#~ msgstr "无效的运算符"
-
-#~ msgid "Impossible cmp sym enum"
-#~ msgstr "不可能的 cmp enum"
-
-#~ msgid "Impossible alu sym enum"
-#~ msgstr "不可能的 alu enum"
-
-#~ msgid "Invalid right value"
-#~ msgstr "无效的右值"
-
-#~ msgid "Invalid left valiable"
-#~ msgstr "无效的左变量"
-
-#~ msgid "Invalid idx of $mem"
-#~ msgstr "无效的 mem 索引"
-
-#~ msgid "Invalid mem statement"
-#~ msgstr "无效的 mem 表达式"
-
-#~ msgid "Invalid if line"
-#~ msgstr "无效的 if 语句"
-
-#~ msgid "Invalid return line"
-#~ msgstr "无效的 return 语句"
-
-#~ msgid "Missing parentheses in return data, example: ERRNO(2)"
-#~ msgstr "return 数值缺少括号，示例： ERRNO(2)"
-
-#~ msgid "Invalid return data"
-#~ msgstr "无效的 return 数值"
-
-#~ msgid "Use parentheses to wrap condition, example: (condition)"
-#~ msgstr "使用括号来包括条件判断，示例： (条件判断)"
-
-#~ msgid "Use 'goto' after (condition)"
-#~ msgstr "在 (条件判断) 后使用 'goto'"
-
-#~ msgid "Line number to go after 'goto'"
-#~ msgstr "在 'goto' 后缺少行号"
-
-#~ msgid "Line number to go after ',else goto'"
-#~ msgstr "在 ',else goto' 后缺少行号"
-
-#~ msgid "Invalid line number after goto"
-#~ msgstr "在 'goto' 后的行号无效"
-
-#~ msgid "Jmp line number less than pc"
-#~ msgstr "jmp 的行号小于 PC"
-
-#~ msgid "Invalid asm code"
-#~ msgstr "无效的 asm code"
-
-#~ msgid "Line length shall not exceeds 0x400"
-#~ msgstr "一行的长度不应超过 0x400"
-
-#~ msgid "Invalid offset of seccomp_data"
-#~ msgstr "seccomp data 的偏移无效"
-
-#~ msgid "Store mem before ld or ldx"
-#~ msgstr "在 ld 或 ldx 之前先 store mem"
-
-#~ msgid "Jt and jf both 0"
-#~ msgstr "jt 和 jf 都是 0"
-
-#~ msgid ""
-#~ "The above code has errors, please check the warnings for specific details"
-#~ msgstr "如上的代码出现错误，请从警告获取更多细节"
-
-#~ msgid "tracee syscall should be exiting here"
-#~ msgstr "tracee 系统调用在此处应该退出"
-
-#, c-format
-#~ msgid "No such process with pid %d in the system"
-#~ msgstr "不存在 pid 为 %d 的进程"
-
-#~ msgid "Error cause unknown, due to the followings"
-#~ msgstr "发生未知的错误，由于如下的原因"
