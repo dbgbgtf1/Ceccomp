@@ -1,6 +1,6 @@
 #!/bin/bash
 
-macros=($(grep -P '(?<=^#define )[A-Z0-9_]+' -ohr include | sort | uniq))
+macros=($(grep -P '(?<=^#define )[A-Z0-9_]+' -ohr include --exclude-dir=lib/ | sort | uniq))
 echo "Collected ${#macros[@]} macros from include"
 
 not_found=()
@@ -19,7 +19,7 @@ fi
 
 unused=()
 for macro in "${not_found[@]}"; do
-    cnt=$(grep -E "\b$macro\b" -ohr include 2>/dev/null | wc -l)
+    cnt=$(grep -E "\b$macro\b" -ohr include --exclude-dir=lib/ 2>/dev/null | wc -l)
     if [ $cnt -eq 1 ]; then
         unused+=("$macro")
     fi
@@ -33,6 +33,6 @@ fi
 
 echo "Found ${#unused[@]} macros unused!"
 for macro in "${unused[@]}"; do
-    grep -E "\b$macro\b" -nr include --color=auto
+    grep -E "\b$macro\b" -nr include --exclude-dir=lib/ --color=auto
 done
 exit 1
