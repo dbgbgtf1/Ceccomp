@@ -2,11 +2,23 @@
 
 A tool to analyze seccomp filters like `seccomp-tools`, written in C
 
-# Doc
+## Features
+
+- :gear: Robust assembler and disassembler
+- :blue_book: Complete documentation
+- :1234: Various architecture support powered by libseccomp
+- :globe_with_meridians: Multi-language support
+- :feather: Minimum build depencies for core binary
+- :paintbrush: Enhanced syntax highlighting
+- :100: Informational error messages
+- :shell: Powerful Zshell completion
+- :no_entry_sign: Pure C without LLM-generated garbage
+
+## Doc & Screenshots
 
 [English Version](docs/ceccomp.adoc) | [中文文档](docs/ceccomp.zh_CN.adoc)
 
-# Install
+## Install
 
 - Arch Linux users:
 
@@ -53,7 +65,7 @@ A tool to analyze seccomp filters like `seccomp-tools`, written in C
     make
     ```
 
-# Run Test
+## Run Test
 
 Run configure and make, then invoke `pytest test` from repo root. Trace pid case will be skipped if no
 CAP_SYS_ADMIN. If you find some checks failed, please submit an issue to report your case.
@@ -61,15 +73,11 @@ CAP_SYS_ADMIN. If you find some checks failed, please submit an issue to report 
 To run the test, you need 2 extra packages: `pkgconf` (required by `pkg-config`) and `python-pytest`
 (required by `pytest`).
 
-# CheatSheet
+## CheatSheet
 
 <img width="2202" height="1061" alt="image" src="https://github.com/user-attachments/assets/6fc41721-89a0-4750-aa3f-219c0edf82d9" />
 
-# I need You
-
-Any Issue or Pr are welcome!
-
-# Credits
+## Credits
 
 - [seccomp-tools](https://github.com/david942j/seccomp-tools): The tool in Ruby inspires us to write ceccomp
 - [Bootswatch](https://bootswatch.com/slate/): Provides awesome css for html doc under MIT
@@ -77,6 +85,9 @@ Any Issue or Pr are welcome!
 - [Verstable](https://github.com/JacksonAllan/Verstable): High-performance hash table implementation in C
 - [a5hash](https://github.com/avaneev/a5hash): High-performance hash implementation for short strings in C
 
-# License
+Any Issue or PR are welcome! :heart: Please read [CONTRIBUTIING.md](CONTRIBUTIING.md)
+to know details.
+
+## License
 
 Copyright (C) 2025-present, ceccomp contributors, distributed under GNU General Public License v3.0 or Later
