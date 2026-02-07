@@ -22,6 +22,7 @@ Items marked with :star: is the major change why we release a new version.
 * Print info when trace found failed seccomp syscall
 * Support `-` to refer to stdin or stdout
 * Allow returning numbers or `$A`
+* Fixed a typo in README :heart: [@k4lizen] :link: [!28]
 
 [#22]: https://github.com/dbgbgtf1/Ceccomp/issues/22
 [#25]: https://github.com/dbgbgtf1/Ceccomp/issues/25
@@ -29,6 +30,8 @@ Items marked with :star: is the major change why we release a new version.
 [#17]: https://github.com/dbgbgtf1/Ceccomp/issues/17
 [@tesuji]: https://github.com/tesuji
 [!19]: https://github.com/dbgbgtf1/Ceccomp/pulls/19
+[@k4lizen]: https://github.com/k4lizen
+[!28]: https://github.com/dbgbgtf1/Ceccomp/pulls/28
 ## 3.5
 * **BREAKING** :star: Now `trace` and `probe` no more accepts `-a`; arch is automatically retrieved via ptrace
 * :star: Add `i686` arch support
