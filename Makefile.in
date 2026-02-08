@@ -274,6 +274,6 @@ clean:
 	$Q$(call ECHO_NOPROG,RM,$(BUILD_DIR))
 	$Qrm -rf $(BUILD_DIR)
 	$Q$(call ECHO_NOPROG,RM,$(CONFIG_HEADER))
-	$Qrm $(CONFIG_HEADER)
+	$Qrm -f $(CONFIG_HEADER)
 
 endif
