@@ -38,6 +38,8 @@ def test_error_cases(errorid: str):
 
     stdin = blob[in_idx + 6 : err_idx]
     _, _, stderr = run_process(
+        # error case for asm will not print to stdout,
+        # so no need to specify arch
         [CECCOMP, 'asm', '-'], stdin=stdin,
     )
     assert stderr == blob[err_idx + 7:]

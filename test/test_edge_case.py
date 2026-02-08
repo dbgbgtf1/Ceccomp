@@ -66,7 +66,7 @@ def test_asm_comparators(errns: SimpleNamespace):
 
     stdin = blob[in_idx + 6 : out_idx]
     _, stdout, stderr = run_process(
-        [CECCOMP, 'asm', '-', '-f', 'hexfmt'], stdin=stdin,
+        [CECCOMP, 'asm', '-', '-a', 'x86_64', '-f', 'hexfmt'], stdin=stdin,
     )
     errns.stderr = stderr
     assert stdout == blob[out_idx + 7:]
