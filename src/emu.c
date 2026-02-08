@@ -196,7 +196,7 @@ static uint32_t
 code_nr_to_text_nr (vector_t *text_v, vector_t *code_ptr_v, statement_t *cur,
                     label_t *jmp)
 {
-  if (jmp->code_nr == 0) // if ... goto xxx; false case -> jmp.code_nr is NULL
+  if (jmp->key.len == 0) // if ... goto xxx; false case -> jmp.code_nr is NULL
     return cur->text_nr + 1;
   statement_t **ptr = get_vector (code_ptr_v, cur->code_nr + jmp->code_nr + 1);
   uint32_t text_nr = (*ptr)->text_nr;
