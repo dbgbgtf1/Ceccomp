@@ -7,7 +7,8 @@ Items marked with :star: is the major change why we release a new version.
 <!-- write @some*user !num to reference user and PR at the same time. The order can not be -->
 <!-- reversed. Then run scripts/complete-url.py to format raw ref to URL. -->
 
-## 4.0 (INCOMING)
+## 4.1 (INCOMING)
+## 4.0
 * **BREAKING** :star: :fire: **We aggressively refactored our code and the asm grammar is a bit different from v3. Please refer to documentation for new grammar.** :fire:
 * :star: Add seize subfunction in trace pid :link: [#23]
 * :star: Remove `-mno-omit-leaf-frame-pointer` flag if not supported by cc
