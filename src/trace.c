@@ -33,12 +33,12 @@ static uint64_t prctl_nr;
 static uint32_t saved_arch = -1;
 
 static uint64_t
-check_scmp_mode (syscall_info info, int pid, fprog *prog)
+check_scmp_mode (syscall_info *info, int pid)
 {
   uint64_t seccomp_mode = LOAD_ELSE;
-  uint64_t nr = info.entry.nr;
-  uint64_t arg0 = info.entry.args[0];
-  uint64_t arg1 = info.entry.args[1];
+  uint64_t nr = info->entry.nr;
+  uint64_t arg0 = info->entry.args[0];
+  uint64_t arg1 = info->entry.args[1];
 
   if (nr == seccomp_nr
       && (arg0 == SECCOMP_SET_MODE_FILTER || arg0 == SECCOMP_MODE_STRICT))
@@ -59,17 +59,14 @@ check_scmp_mode (syscall_info info, int pid, fprog *prog)
   // prctl (PR_SET_SECCOMP, seccomp_mode, &prog);
   // seccomp (seccomp_mode, 0, &prog);
 
-  prog->len = ptrace (PTRACE_PEEKDATA, pid,
-                      info.entry.args[2] + offsetof (fprog, len), 0);
-  // also get filter len, maybe we need to dump it if the seccomp succeed
-
+  syscall_info exit_info;
   ptrace (PTRACE_SYSCALL, pid, 0, 0);
   waitpid (pid, NULL, 0);
-  ptrace (PTRACE_GET_SYSCALL_INFO, pid, sizeof (syscall_info), &info);
+  ptrace (PTRACE_GET_SYSCALL_INFO, pid, sizeof (syscall_info), &exit_info);
 
-  assert (info.op == PTRACE_SYSCALL_INFO_EXIT);
+  assert (exit_info.op == PTRACE_SYSCALL_INFO_EXIT);
 
-  if (info.exit.is_error)
+  if (exit_info.exit.is_error)
     seccomp_mode = LOAD_FAIL;
   // seccomp set failed, nothing happened
 
@@ -116,6 +113,8 @@ static void
 mode_filter (syscall_info *info, int pid, fprog *prog, FILE *output_fp)
 {
   prog->filter = g_filters;
+  prog->len = ptrace (PTRACE_PEEKDATA, pid,
+                      info->entry.args[2] + offsetof (fprog, len), 0);
   dump_filter (info, pid, prog);
   print_prog (info->arch, prog, output_fp);
 }
@@ -167,7 +166,7 @@ handle_syscall (pid_t pid, FILE *output_fp, bool quiet, bool oneshot)
         error (M_TRACEE_ARCH_NOT_SUPPORTED, saved_arch);
     }
 
-  seccomp_mode = check_scmp_mode (info, pid, &prog);
+  seccomp_mode = check_scmp_mode (&info, pid);
 
   if (!quiet)
     {
