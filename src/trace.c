@@ -113,8 +113,9 @@ static void
 mode_filter (syscall_info *info, int pid, fprog *prog, FILE *output_fp)
 {
   prog->filter = g_filters;
-  prog->len = ptrace (PTRACE_PEEKDATA, pid,
-                      info->entry.args[2] + offsetof (fprog, len), 0);
+  uint64_t len = peek_data_check (pid, (void *)info->entry.args[2]);
+  memcpy (&prog->len, &len, sizeof (prog->len));
+
   dump_filter (info, pid, prog);
   print_prog (info->arch, prog, output_fp);
 }
