@@ -172,14 +172,14 @@ return_line (return_line_t *line, obj_t *real_ret)
   if (ret_obj->type == A)
     {
       real_ret->type = decode_return_k (real_ret, A_reg);
-      tkstr = token_pairs + real_ret->type;
+      tkstr = &token_pairs[real_ret->type];
       sz = snprintf (formatted_val, 0x28, "# A = %#x, %.*s", A_reg, tkstr->len,
                      tkstr->start);
     }
   else if (ret_obj->type == NUMBER)
     {
       real_ret->type = decode_return_k (real_ret, ret_obj->data);
-      tkstr = token_pairs + real_ret->type;
+      tkstr = &token_pairs[real_ret->type];
       sz = snprintf (formatted_val, 0x28, "# %.*s", tkstr->len, tkstr->start);
     }
   else
