@@ -59,7 +59,8 @@ check_scmp_mode (syscall_info info, int pid, fprog *prog)
   // prctl (PR_SET_SECCOMP, seccomp_mode, &prog);
   // seccomp (seccomp_mode, 0, &prog);
 
-  prog->len = ptrace (PTRACE_PEEKDATA, pid, info.entry.args[2], 0);
+  prog->len = ptrace (PTRACE_PEEKDATA, pid,
+                      info.entry.args[2] + offsetof (fprog, len), 0);
   // also get filter len, maybe we need to dump it if the seccomp succeed
 
   ptrace (PTRACE_SYSCALL, pid, 0, 0);
