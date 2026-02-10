@@ -94,15 +94,17 @@ dump_filter (syscall_info *info, int pid, fprog *prog)
   bool is_local_64 = (sizeof (void *) == 8);
   bool is_target_64 = info->arch & __AUDIT_ARCH_64BIT;
 
-  if (is_local_64 && !is_target_64)
+  if (UNLIKELY (is_local_64 && !is_target_64))
     offset /= 2;
-  else if (!is_local_64 && is_target_64)
+  else if (UNLIKELY (!is_local_64 && is_target_64))
     error ("%s", M_CANNOT_WORK_FROM_32_TO_64);
 
-  size_t filter_adr
-      = peek_data_check (pid, (size_t *)((size_t)args2 + offset));
-  if (is_local_64 && !is_target_64)
-    filter_adr &= 0xffffffff;
+  size_t word = peek_data_check (pid, (size_t *)((size_t)args2 + offset));
+  size_t *filter_adr = NULL;
+  if (UNLIKELY (is_local_64 && !is_target_64))
+    memcpy (&filter_adr, &word, 4);
+  else
+    filter_adr = (size_t *)word;
 
   // use size_t so that it can work in both 64 and 32 bits
   for (int i = 0; i * sizeof (size_t) < prog->len * sizeof (filter); i++)
@@ -113,8 +115,9 @@ static void
 mode_filter (syscall_info *info, int pid, fprog *prog, FILE *output_fp)
 {
   prog->filter = g_filters;
-  uint64_t len = peek_data_check (pid, (void *)info->entry.args[2]);
-  memcpy (&prog->len, &len, sizeof (prog->len));
+  size_t word = peek_data_check (pid, (void *)info->entry.args[2]);
+  // kernel ensure prog->len is not 0
+  memcpy (&prog->len, &word, sizeof (prog->len));
 
   dump_filter (info, pid, prog);
   print_prog (info->arch, prog, output_fp);
