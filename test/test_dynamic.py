@@ -53,6 +53,7 @@ def filter_execve_k(text: str) -> str:
 # -a x86_64 option in COMMON_OPTS will be ignored in trace/probe
 
 ##### TEST CASES #####
+@pytest.mark.xfail(XFAIL_DYNAMIC, reason=XFAIL_REASON)
 def test_probe(errns: SimpleNamespace):
     piper, pipew = os.pipe()
     os.set_inheritable(pipew, True)
@@ -74,6 +75,7 @@ def test_probe(errns: SimpleNamespace):
     assert pid_state(pid) is None
 
 
+@pytest.mark.xfail(XFAIL_DYNAMIC, reason=XFAIL_REASON)
 def test_trace(errns: SimpleNamespace):
     piper, pipew = os.pipe()
     os.set_inheritable(pipew, True)
@@ -90,6 +92,7 @@ def test_trace(errns: SimpleNamespace):
     assert 'WARN' in stderr
 
 
+@pytest.mark.xfail(XFAIL_DYNAMIC, reason=XFAIL_REASON)
 def test_seize(errns: SimpleNamespace):
     tp = subprocess.Popen([TEST, '2'], stdin=DEVNULL, stdout=PIPE, stderr=DEVNULL, text=True)
     pid = int(tp.stdout.readline().split('=')[1])
@@ -130,6 +133,7 @@ def test_seize(errns: SimpleNamespace):
     with expect_file.open() as f:
         assert filter_execve_k(stdout) == filter_execve_k(f.read())
 
+@pytest.mark.xfail(XFAIL_DYNAMIC, reason=XFAIL_REASON)
 def test_trace_pid(errns: SimpleNamespace):
     if msg := is_not_cap_sys_admin():
         pytest.skip(msg)

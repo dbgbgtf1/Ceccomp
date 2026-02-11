@@ -3,6 +3,7 @@ import subprocess
 import os
 from pytest import skip
 from types import SimpleNamespace
+import platform
 
 PROJ_DIR = Path(__file__).parent.parent
 TEST_DIR = PROJ_DIR / 'test'
@@ -40,3 +41,13 @@ def filter2text(filters: bytes) -> str:
     return '\n'.join(filters[i:i + 8].hex(' ') for i in range(0, length, 8))
 
 os.environ['LC_ALL'] = 'C'
+
+TIER_1_ARCH = [ # tested
+    'x86_64', 'i386', 'i686', 'riscv64', 'loongarch64', 'aarch64',
+    'ppc', 'ppc64le', 's390x', 'arm',
+]
+TIER_2_ARCH = [ # untested, but listed in libseccomp
+    'x32', 'parisc', 'parisc64', 'mips', 'm68k', 's390', 'ppc64',
+]
+XFAIL_DYNAMIC = platform.machine() not in TIER_1_ARCH
+XFAIL_REASON = 'Dynamic test may fail on this unsupported platform'
