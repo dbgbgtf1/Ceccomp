@@ -115,7 +115,7 @@ static void
 mode_filter (syscall_info *info, int pid, fprog *prog, FILE *output_fp)
 {
   prog->filter = g_filters;
-  size_t word = peek_data_check (pid, (void *)info->entry.args[2]);
+  size_t word = peek_data_check (pid, (size_t *)(size_t)info->entry.args[2]);
   // kernel ensure prog->len is not 0
   memcpy (&prog->len, &word, sizeof (prog->len));
 
