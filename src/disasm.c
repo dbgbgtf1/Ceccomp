@@ -38,7 +38,7 @@ read_filters (filter *filters, FILE *from)
     }
   if (!todo)
     error ("%s", M_TOO_LARGE_INPUT);
-  uint32_t leftover = (size_t)ptr & 7;
+  uint32_t leftover = ((size_t)ptr - (size_t)filters) & 7;
   if (leftover)
     warn (M_INPUT_HAS_LEFTOVER, leftover);
   return (ptr - (uint8_t *)filters) >> 3;
