@@ -5,6 +5,7 @@ import subprocess
 import os
 import sys
 import shutil
+import platform
 from collections.abc import Callable
 from dataclasses import dataclass
 
@@ -337,7 +338,7 @@ def new_task(func: Callable) -> Callable:
 # blue:    not work and have to take fallback choice
 # magenta: unexpected or no fallback choice
 @new_task
-def check_platform(_: str):
+def check_platform(_: Makefile):
     pcheck('system platform')
     if sys.platform == 'linux':
         print(TXT_GREEN('linux'))
@@ -346,6 +347,27 @@ def check_platform(_: str):
     else:
         print(TXT_MAGENTA(sys.platform))
         error(f'Ceccomp only support Linux!')
+
+TIER_1_ARCH = [ # tested
+    'x86_64', 'i386', 'i686', 'riscv64', 'loongarch64', 'aarch64',
+    'ppc', 'ppc64le', 's390x', 'arm',
+]
+TIER_2_ARCH = [ # untested, but listed in libseccomp
+    'x32', 'parisc', 'parisc64', 'mips', 'm68k', 's390', 'ppc64',
+]
+@new_task
+def check_architecture(_: Makefile):
+    pcheck('current architecture')
+    bits = platform.architecture()[0]
+    arch = platform.machine()
+    mach = f'{bits}, {arch}'
+    if arch in TIER_1_ARCH:
+        print(TXT_GREEN(mach))
+    elif arch in TIER_2_ARCH:
+        print(TXT_CYAN(mach))
+    else:
+        print(TXT_BLUE(mach))
+        warn('Current architecture is not supported by libseccomp')
 
 @new_task
 def check_flock(makefile: Makefile):
