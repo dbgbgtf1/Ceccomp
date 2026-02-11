@@ -99,7 +99,11 @@ dump_filter (syscall_info *info, int pid, fprog *prog)
   else if (UNLIKELY (!is_local_64 && is_target_64))
     error ("%s", M_CANNOT_WORK_FROM_32_TO_64);
 
-  size_t word = peek_data_check (pid, (size_t *)((size_t)args2 + offset));
+  size_t word = peek_data_check (pid, (size_t *)(size_t)info->entry.args[2]);
+  // kernel ensure prog->len is not 0
+  memcpy (&prog->len, &word, sizeof (prog->len));
+
+  word = peek_data_check (pid, (size_t *)((size_t)args2 + offset));
   size_t *filter_adr = NULL;
   if (UNLIKELY (is_local_64 && !is_target_64))
     memcpy (&filter_adr, &word, 4);
@@ -115,9 +119,6 @@ static void
 mode_filter (syscall_info *info, int pid, fprog *prog, FILE *output_fp)
 {
   prog->filter = g_filters;
-  size_t word = peek_data_check (pid, (size_t *)(size_t)info->entry.args[2]);
-  // kernel ensure prog->len is not 0
-  memcpy (&prog->len, &word, sizeof (prog->len));
 
   dump_filter (info, pid, prog);
   print_prog (info->arch, prog, output_fp);
