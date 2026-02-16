@@ -22,9 +22,8 @@ A tool to analyze seccomp filters like `seccomp-tools`, written in C
 
 - Arch Linux users:
 
-    Install via AUR, build `ceccomp` package ⇒ [![AUR package](https://repology.org/badge/version-for-repo/aur/ceccomp.svg)](https://repology.org/project/ceccomp/versions)
-
-    Or install via `archlinuxcn` repo if you have it set in you `pacman.conf`.
+    ceccomp is available in official extra repo now:
+    [![Arch](https://repology.org/badge/version-for-repo/arch/ceccomp.svg?header=Arch%20Linux%20extra)](https://repology.org/project/ceccomp/versions)
 
 - Debian, Ubuntu or Kali users:
 
