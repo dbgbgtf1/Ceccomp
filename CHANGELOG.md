@@ -8,9 +8,11 @@ Items marked with :star: is the major change why we release a new version.
 <!-- reversed. Then run scripts/complete-url.py to format raw ref to URL. -->
 
 ## 4.1 (INCOMING)
-* :star: Fix big endian machine tracing failure
+* :star: Fix big endian machine tracing failure :link: [#29]
 * Correct disasm leftover calculation
 * Increase timeout in test for slow vm
+
+[#29]: https://github.com/dbgbgtf1/Ceccomp/issues/29
 ## 4.0
 * **BREAKING** :star: :fire: **We aggressively refactored our code and the asm grammar is a bit different from v3. Please refer to documentation for new grammar.** :fire:
 * :star: Add seize subfunction in trace pid :link: [#23]
