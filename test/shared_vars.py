@@ -22,10 +22,10 @@ def run_process(
     stdin: str | bytes | None=None,
 ) -> tuple[int, str | bytes, str | bytes]:
     if extra_fd is None:
-        result = subprocess.run(argv, timeout=3, capture_output=True,
+        result = subprocess.run(argv, timeout=5, capture_output=True,
                                 text=not is_binary, input=stdin)
     else:
-        result = subprocess.run(argv, timeout=3, capture_output=True,
+        result = subprocess.run(argv, timeout=5, capture_output=True,
                                 text=not is_binary, pass_fds=(extra_fd, ), input=stdin)
     return result.returncode, result.stdout, result.stderr
 

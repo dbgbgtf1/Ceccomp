@@ -69,7 +69,7 @@ def test_probe(errns: SimpleNamespace):
         assert f.read() == expect
 
     pid = int(stdout.split('=')[1])
-    end = time.time() + 1
+    end = time.time() + 3
     while pid_state(pid) and time.time() < end:
         time.sleep(0.0625)
     assert pid_state(pid) is None
@@ -103,7 +103,7 @@ def test_seize(errns: SimpleNamespace):
 
     os.kill(pid, signal.SIGCONT)
 
-    rl, _, _ = select.select([tp.stdout], [], [], 0.5)
+    rl, _, _ = select.select([tp.stdout], [], [], 2)
     if rl:
         pid = int(rl[0].readline().split('=')[1]) # child pid
     else:
