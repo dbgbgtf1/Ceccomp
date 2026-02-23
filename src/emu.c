@@ -308,7 +308,6 @@ emulator (vector_t *text_v, vector_t *code_ptr_v, bool quiet)
 out:
   assert (statement);
   assert (statement->type == RETURN_LINE);
-  emulate_printer (statement, false, quiet);
   return statement;
 }
 
@@ -346,14 +345,18 @@ emulate_v (vector_t *text_v, vector_t *code_ptr_v, emu_arg_t *emu_arg,
 
   statement_t *ret = emulator (text_v, code_ptr_v, emu_arg->quiet);
   uint32_t line_left = text_v->count - 1 - ret->text_nr;
-  if (!emu_arg->quiet && line_left)
-    print_as_comment (output_fp, "... %d line(s) skipped", line_left);
 
   if (!emu_arg->quiet)
-    return;
-
-  extern_obj_printer (output_fp, &ret->return_line.ret_obj);
-  fputc ('\n', output_fp);
+    {
+      emulate_printer (ret, false, emu_arg->quiet);
+      if (line_left)
+        print_as_comment (output_fp, "... %d line(s) skipped", line_left);
+    }
+  else
+    {
+      extern_obj_printer (output_fp, &ret->return_line.ret_obj);
+      fputc ('\n', output_fp);
+    }
 }
 
 void
