@@ -158,12 +158,13 @@ jump_line (jump_line_t *jump_line)
  * resolved plain result like KILL; returns a valid string if statement
  * need to add a comment.
  */
-static string_t
-return_line (return_line_t *line, obj_t *real_ret)
+static void
+return_line (statement_t *statement, bool quiet)
 {
   static char formatted_val[0x28];
-  obj_t *ret_obj = &line->ret_obj;
-  *real_ret = (obj_t){ .type = UNKNOWN };
+
+  obj_t *ret_obj = &statement->return_line.ret_obj;
+  obj_t real_ret = (obj_t){ .type = UNKNOWN };
   int sz;
   const string_t *tkstr;
 
@@ -171,25 +172,35 @@ return_line (return_line_t *line, obj_t *real_ret)
   // return $A and return NUMBER
   if (ret_obj->type == A)
     {
-      real_ret->type = decode_return_k (real_ret, A_reg);
-      tkstr = &token_pairs[real_ret->type];
+      real_ret.type = decode_return_k (&real_ret, A_reg);
+      tkstr = &token_pairs[real_ret.type];
       sz = snprintf (formatted_val, 0x28, "# A = %#x, %.*s", A_reg, tkstr->len,
                      tkstr->start);
     }
   else if (ret_obj->type == NUMBER)
     {
-      real_ret->type = decode_return_k (real_ret, ret_obj->data);
-      tkstr = &token_pairs[real_ret->type];
+      real_ret.type = decode_return_k (&real_ret, ret_obj->data);
+      tkstr = &token_pairs[real_ret.type];
       sz = snprintf (formatted_val, 0x28, "# %.*s", tkstr->len, tkstr->start);
     }
+  // do nothing if ret_obj has KILL/ALLOW/TRACE type
   else
-    return (string_t){ 0 };
+    return;
 
-  register token_type tk = real_ret->type;
+  register token_type tk = real_ret.type;
   if (tk == TRACE || tk == TRAP || tk == ERRNO)
-    sz += snprintf (formatted_val + sz, 0x28 - sz, "(%u)", real_ret->data);
+    sz += snprintf (formatted_val + sz, 0x28 - sz, "(%u)", real_ret.data);
   assert (sz);
-  return (string_t){ .start = formatted_val, .len = sz };
+
+  if (quiet)
+    statement->return_line.ret_obj = real_ret;
+  else
+    {
+      statement->line_start = formatted_val;
+      statement->line_len = sz;
+      statement->comment = 0;
+    }
+  return;
 }
 
 static uint32_t
@@ -283,21 +294,7 @@ emulator (vector_t *text_v, vector_t *code_ptr_v, bool quiet)
           exec_idx = code_nr_to_text_nr (text_v, code_ptr_v, statement, jmp);
           break;
         case RETURN_LINE:
-            // make compiler happy
-            ;
-          obj_t real_ret;
-          string_t ret_str = return_line (&statement->return_line, &real_ret);
-          if (ret_str.start)
-            {
-              if (quiet)
-                statement->return_line.ret_obj = real_ret;
-              else
-                {
-                  statement->line_start = (char *)ret_str.start;
-                  statement->comment = 0;
-                  statement->line_len = ret_str.len;
-                }
-            }
+          return_line (statement, quiet);
           goto out;
         case EMPTY_LINE:
           break;
