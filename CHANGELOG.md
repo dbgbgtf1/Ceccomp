@@ -8,6 +8,7 @@ Items marked with :star: is the major change why we release a new version.
 <!-- reversed. Then run scripts/complete-url.py to format raw ref to URL. -->
 
 ## 4.1 (INCOMING)
+* :star: Fix asm handle STX incorrectly
 * :star: Fix big endian machine tracing failure :link: [#29]
 * Correct disasm leftover calculation
 * Increase timeout in test for slow vm

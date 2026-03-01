@@ -85,3 +85,18 @@ def test_disasm_comparators(errns: SimpleNamespace):
     )
     errns.stderr = stderr
     assert stdout.decode() == blob[out_idx + 7:]
+
+def test_asm_stx(errns: SimpleNamespace):
+    chunk_file = ERR_CASE_DIR / 'e03-asm-stx'
+    with chunk_file.open() as f:
+        blob = f.read()
+    in_idx = blob.find('STDIN')
+    out_idx = blob.find('STDOUT')
+    assert in_idx != -1 and out_idx != -1
+
+    stdin = blob[in_idx + 6 : out_idx]
+    _, stdout, stderr = run_process(
+        [CECCOMP, 'asm', '-', '-a', 'x86_64', '-f', 'hexfmt'], stdin=stdin,
+    )
+    errns.stderr = stderr
+    assert stdout == blob[out_idx + 7:]

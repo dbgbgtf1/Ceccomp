@@ -93,7 +93,7 @@ st_stx_line (assign_line_t *assign_line)
   f.k = assign_line->left_var.data;
   if (assign_line->right_var.type == A)
     f.code |= BPF_ST;
-  else if (assign_line->right_var.type == A)
+  else if (assign_line->right_var.type == X)
     f.code |= BPF_STX;
   return f;
 }
