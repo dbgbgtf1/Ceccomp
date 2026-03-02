@@ -33,7 +33,7 @@ report_error (const char *error_msg)
   char buf[0x400];
   char *print = buf;
 
-  SPRINTF_CAT ("%d:-: %s\n", local->text_nr, error_msg);
+  SPRINTF_CAT ("%hu:-: %s\n", local->text_nr, error_msg);
   // During the resolution phase, errors do not have a clear starting point
   // errors in this stage indicate a semantic error in an entire line of code.
   SPRINTF_CAT ("%.*s\n", local->line_len, local->line_start);
@@ -61,7 +61,7 @@ error_line (void)
   error_line_t *error_line = &local->error_line;
 
   uint16_t err_len = error_line->error_start - local->line_start;
-  SPRINTF_CAT ("%d:%d: %s\n", local->text_nr, err_len + 1,
+  SPRINTF_CAT ("%hu:%hu: %s\n", local->text_nr, err_len + 1,
                error_line->error_msg);
   SPRINTF_CAT ("%.*s\n", local->line_len, local->line_start);
   // line_len shouldn't include a '\n'

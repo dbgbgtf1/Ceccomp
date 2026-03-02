@@ -24,7 +24,7 @@
   _ ("The input is larger than 1024 filters! Perhaps inputting a wrong "      \
      "file?")
 #define M_INPUT_HAS_LEFTOVER                                                  \
-  _ ("%d byte(s) at the end of input could not fit into a filter")
+  _ ("%u byte(s) at the end of input could not fit into a filter")
 
 // trace
 #define M_START_TRACING _ ("Start tracing process %d")

@@ -350,7 +350,7 @@ emulate_v (vector_t *text_v, vector_t *code_ptr_v, emu_arg_t *emu_arg,
     {
       emulate_printer (ret, false, emu_arg->quiet);
       if (line_left)
-        print_as_comment (output_fp, "... %d line(s) skipped", line_left);
+        print_as_comment (output_fp, "... %u line(s) skipped", line_left);
     }
   else
     {

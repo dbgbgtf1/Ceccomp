@@ -36,7 +36,7 @@ static void
 print_dec_bracket (obj_t *tk)
 {
   fwrite (token_pairs[tk->type].start, 1, token_pairs[tk->type].len, fp);
-  fprintf (fp, "[%d]", tk->data);
+  fprintf (fp, "[%u]", tk->data);
 }
 
 static void
@@ -50,7 +50,7 @@ static void
 print_paren (obj_t *tk)
 {
   fwrite (token_pairs[tk->type].start, 1, token_pairs[tk->type].len, fp);
-  fprintf (fp, "(%d)", tk->data);
+  fprintf (fp, "(%u)", tk->data);
 }
 
 static const obj_print_t obj_print[] = {

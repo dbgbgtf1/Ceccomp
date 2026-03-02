@@ -111,7 +111,7 @@ report_error (filter f, uint32_t filter_idx, err_idx idx, bool fatal,
   char buf[0x400];
   char *print = buf;
 
-  SPRINTF_CAT ("#%d: %s\n", filter_idx, err_msg);
+  SPRINTF_CAT ("#%u: %s\n", filter_idx, err_msg);
   SPRINTF_CAT ("CODE:0x%04x JT:0x%02x JF:0x%02x K:0x%08x\n", f.code, f.jt,
                f.jf, f.k);
   if (idx == NONE)
