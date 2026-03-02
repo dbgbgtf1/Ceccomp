@@ -51,25 +51,25 @@ static uint32_t *vars[] = {
 #define DO_OPERATE(operator) (*left operator (*right))
 
 static void
-assign_line (assign_line_t *assign_line)
+assign_line (assign_line_t *line)
 {
-  token_type left_type = assign_line->left_var.type;
+  token_type left_type = line->left_var.type;
   uint32_t *left = vars[BASE_vars (left_type)];
 
-  token_type right_type = assign_line->right_var.type;
+  token_type right_type = line->right_var.type;
   uint32_t *right;
   if (right_type == NUMBER)
-    right = &assign_line->right_var.data;
+    right = &line->right_var.data;
   else
     right = vars[BASE_vars (right_type)];
 
   if (right_type == ATTR_LOWARG || right_type == ATTR_HIGHARG
       || right_type == MEM)
-    right += assign_line->right_var.data;
+    right += line->right_var.data;
   else if (left_type == MEM)
-    left += assign_line->left_var.data;
+    left += line->left_var.data;
 
-  switch (assign_line->operator)
+  switch (line->operator)
     {
     case ADD_TO:
       DO_OPERATE (+=);
@@ -112,25 +112,25 @@ assign_line (assign_line_t *assign_line)
 #define DO_COMPARE(comparator) (bool)(A_reg comparator right)
 
 static label_t *
-jump_line (jump_line_t *jump_line)
+jump_line (jump_line_t *line)
 {
-  label_t *jt = &jump_line->jt;
-  label_t *jf = &jump_line->jf;
+  label_t *jt = &line->jt;
+  label_t *jf = &line->jf;
 
-  if (!jump_line->if_condition)
+  if (!line->if_condition)
     return jt;
 
   bool cond_true = false;
-  if (jump_line->if_bang)
+  if (line->if_bang)
     cond_true = true;
 
   uint32_t right = 0;
-  if (jump_line->cmpobj.type == X)
+  if (line->cmpobj.type == X)
     right = X_reg;
   else
-    right = jump_line->cmpobj.data;
+    right = line->cmpobj.data;
 
-  switch (jump_line->comparator)
+  switch (line->comparator)
     {
     case EQUAL_EQUAL:
       cond_true ^= DO_COMPARE (==);
