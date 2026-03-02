@@ -10,7 +10,6 @@
 #include <linux/seccomp.h>
 #include <sys/types.h>
 #include <sys/user.h>
-#include "help.h"
 // clang-format on
 
 typedef struct sock_fprog fprog;

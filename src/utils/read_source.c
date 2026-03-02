@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <linux/prctl.h>
+#include <linux/bpf_common.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -115,7 +116,7 @@ process_source (void)
       line_start = line_break + 1;
     }
 
-  if (line_nr >= 4096)
+  if (line_nr >= BPF_MAXINSNS)
     error ("%s", M_LINES_TOO_MANY);
   if (top == line_start)
     return line_nr;

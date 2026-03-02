@@ -4,6 +4,7 @@
 #include "emu.h"
 #include "probe.h"
 #include "trace.h"
+#include "help.h"
 #include "utils/arch_trans.h"
 #include "utils/color.h"
 #include "utils/parse_args.h"

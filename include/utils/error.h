@@ -15,13 +15,13 @@
 
 // asm
 #define M_ASM_TERMINATED _ ("Found errors when assembling")
-#define M_STATEMENT_OVERFLOW _ ("Input file has more than 1024 statements!")
+#define M_STATEMENT_OVERFLOW _ ("Input file has more than 4096 statements!")
 
 // disasm
 #define M_DISASM_TERMINATED _ ("Found fatal errors when disassembling")
 #define M_NO_FILTER _ ("The input is empty")
 #define M_TOO_LARGE_INPUT                                                     \
-  _ ("The input is larger than 1024 filters! Perhaps inputting a wrong "      \
+  _ ("The input is larger than 4096 filters! Perhaps inputting a wrong "      \
      "file?")
 #define M_INPUT_HAS_LEFTOVER                                                  \
   _ ("%u byte(s) at the end of input could not fit into a filter")

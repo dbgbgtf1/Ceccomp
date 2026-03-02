@@ -18,12 +18,12 @@
 #include <string.h>
 #include <unistd.h>
 
-filter g_filters[1025];
+filter g_filters[BPF_MAXINSNS + 1];
 
 static uint32_t
 read_filters (filter *filters, FILE *from)
 {
-  uint32_t todo = sizeof (filter) * (1024 + 1);
+  uint32_t todo = sizeof (filter) * (BPF_MAXINSNS + 1);
   uint8_t *ptr = (uint8_t *)filters;
   int fd = fileno (from);
   assert (fd != -1);

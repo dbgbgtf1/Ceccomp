@@ -374,7 +374,7 @@ expression (void)
     empty_line ();
   else if (peek (TOKEN_EOF))
     eof_line ();
-  else if (UNLIKELY (parse.code_nr > 1024))
+  else if (UNLIKELY (parse.code_nr > BPF_MAXINSNS))
     error ("%s", M_STATEMENT_OVERFLOW);
   else if (match (RETURN))
     return_line ();
