@@ -53,13 +53,17 @@ static uint32_t *vars[] = {
 static void
 assign_line (assign_line_t *assign_line)
 {
-  uint32_t *left = vars[BASE_vars (assign_line->left_var.type)];
+  token_type left_type = assign_line->left_var.type;
+  uint32_t *left = vars[BASE_vars (left_type)];
 
   token_type right_type = assign_line->right_var.type;
   uint32_t *right = vars[BASE_vars (right_type)];
-  if (right_type == ATTR_LOWARG || right_type == ATTR_HIGHARG)
+  if (right_type == ATTR_LOWARG || right_type == ATTR_HIGHARG
+      || right_type == MEM)
     right += assign_line->right_var.data;
-  if (right_type == NUMBER)
+  else if (left_type == MEM)
+    left += assign_line->left_var.data;
+  else if (right_type == NUMBER)
     right = &assign_line->right_var.data;
 
   switch (assign_line->operator)
