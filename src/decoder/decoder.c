@@ -281,11 +281,11 @@ decode_filter (filter f, statement_t *statement)
 }
 
 bool
-decode_filters (fprog *prog, vector_t *v)
+decode_filters (fprog *prog, vector_t *v, bool trustful)
 {
   // make sure all filter are valid
   // give warning about fatal and normal errors
-  bool error = check_prog (prog);
+  bool error = trustful ? false : check_prog (prog);
 
   statement_t statement;
   push_vector (v, &statement);

@@ -11,6 +11,7 @@
 #include "utils/vector.h"
 #include <assert.h>
 #include <errno.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -45,7 +46,7 @@ read_filters (filter *filters, FILE *from)
 }
 
 void
-print_prog (uint32_t scmp_arch, fprog *prog, FILE *output_fp)
+print_prog (uint32_t scmp_arch, fprog *prog, FILE *output_fp, bool trustful)
 {
   if (need_reverse_endian (scmp_arch))
     for (uint32_t i = 0; i < prog->len; i++)
@@ -59,7 +60,7 @@ print_prog (uint32_t scmp_arch, fprog *prog, FILE *output_fp)
   init_vector (&v, sizeof (statement_t), prog->len + 1);
   // check_prog in decode_filters might decect some errors
   // render might mem overflow, so skip render
-  if (!decode_filters (prog, &v))
+  if (!decode_filters (prog, &v, trustful))
     render (&v, scmp_arch);
   print_as_comment (output_fp, "Label  CODE  JT   JF      K");
   print_as_comment (output_fp, "---------------------------------");
@@ -91,5 +92,5 @@ disasm (FILE *fp, uint32_t scmp_arch)
       return;
     }
 
-  print_prog (scmp_arch, &prog, stdout);
+  print_prog (scmp_arch, &prog, stdout, false);
 }
