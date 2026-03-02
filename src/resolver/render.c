@@ -81,7 +81,7 @@ assign_line (assign_line_t *assign_line, stat_ctx_t *ctx)
   else if (left->type == X)
     left_stat = &ctx->X_stat;
   else if (left->type == MEM)
-    left_stat = &ctx->mem_stat[right->data];
+    left_stat = &ctx->mem_stat[left->data];
   else
     assert (!"Unknown left value type");
 
