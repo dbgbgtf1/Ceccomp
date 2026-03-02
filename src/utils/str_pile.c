@@ -18,7 +18,7 @@ init_pile (size_t init_size)
   size_t aligned = (init_size + 0xfff) & ~0xfff;
   str_pile = mmap (NULL, aligned, PROT_READ | PROT_WRITE,
                    MAP_ANON | MAP_PRIVATE, -1, 0);
-  if (!str_pile)
+  if (str_pile == MAP_FAILED)
     return false;
 #ifdef PR_SET_VMA
   prctl (PR_SET_VMA, PR_SET_VMA_ANON_NAME, str_pile, aligned, "str pile");

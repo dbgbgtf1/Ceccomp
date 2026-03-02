@@ -54,7 +54,8 @@ print_prog (uint32_t scmp_arch, fprog *prog, FILE *output_fp)
   vector_t v;
 
   // str pile for syscall names
-  init_pile (prog->len * 40 /* statistical choice */);
+  assert (prog->len);
+  assert (init_pile (prog->len * 40 /* statistical choice */));
   init_vector (&v, sizeof (statement_t), prog->len + 1);
   // check_prog in decode_filters might decect some errors
   // render might mem overflow, so skip render
