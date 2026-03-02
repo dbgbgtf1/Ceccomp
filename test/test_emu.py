@@ -46,7 +46,7 @@ def test_return_A_long(errns: SimpleNamespace):
         [CECCOMP, 'emu', '-', '1'], stdin=input_str,
     )
     errns.stderr = stderr
-    assert stdout == 'return $A # A = 0, KILL\n'
+    assert stdout == 'return $A # $A = 0, KILL\n'
 
 def test_return_number(errns: SimpleNamespace):
     input_str = 'return 0x13371337\n'

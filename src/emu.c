@@ -181,7 +181,7 @@ return_line (statement_t *statement, bool quiet)
     {
       real_ret.type = decode_return_k (&real_ret, A_reg);
       tkstr = &token_pairs[real_ret.type];
-      sz = snprintf (formatted_val, 0x28, "# A = %#x, %.*s", A_reg, tkstr->len,
+      sz = snprintf (formatted_val, 0x28, "# $A = %#x, %.*s", A_reg, tkstr->len,
                      tkstr->start);
     }
   else if (ret_obj->type == NUMBER)
