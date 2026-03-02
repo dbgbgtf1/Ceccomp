@@ -56,47 +56,72 @@ def test_disasm_large_file():
     )
     assert stderr == '[ERROR]: The input is larger than 1024 filters! Perhaps inputting a wrong file?\n'
 
+def extract_stdin_stdout(blob: str) -> tuple[str, str]:
+    in_idx = blob.find('STDIN')
+    out_idx = blob.find('STDOUT')
+    assert in_idx != -1 and out_idx != -1
+    stdin = blob[in_idx + 6 : out_idx]
+    stdout = blob[out_idx + 7:]
+    return stdin, stdout
+
 def test_asm_comparators(errns: SimpleNamespace):
     chunk_file = ERR_CASE_DIR / 'e01-asm-comparators'
     with chunk_file.open() as f:
         blob = f.read()
-    in_idx = blob.find('STDIN')
-    out_idx = blob.find('STDOUT')
-    assert in_idx != -1 and out_idx != -1
+    stdin, stdout = extract_stdin_stdout(blob)
 
-    stdin = blob[in_idx + 6 : out_idx]
-    _, stdout, stderr = run_process(
+    _, real_out, stderr = run_process(
         [CECCOMP, 'asm', '-', '-a', 'x86_64', '-f', 'hexfmt'], stdin=stdin,
     )
     errns.stderr = stderr
-    assert stdout == blob[out_idx + 7:]
+    assert real_out == stdout
 
 def test_disasm_comparators(errns: SimpleNamespace):
     chunk_file = ERR_CASE_DIR / 'e02-disasm-comparators'
     with chunk_file.open() as f:
         blob = f.read()
-    in_idx = blob.find('STDIN')
-    out_idx = blob.find('STDOUT')
-    assert in_idx != -1 and out_idx != -1
+    stdin, stdout = extract_stdin_stdout(blob)
 
-    stdin = bytes.fromhex(blob[in_idx + 6 : out_idx])
-    _, stdout, stderr = run_process(
+    stdin = bytes.fromhex(stdin)
+    _, real_out, stderr = run_process(
         [CECCOMP, 'disasm', '-', '-a', 'x86_64'], stdin=stdin, is_binary=True,
     )
     errns.stderr = stderr
-    assert stdout.decode() == blob[out_idx + 7:]
+    assert real_out.decode() == stdout
 
 def test_asm_stx(errns: SimpleNamespace):
     chunk_file = ERR_CASE_DIR / 'e03-asm-stx'
     with chunk_file.open() as f:
         blob = f.read()
-    in_idx = blob.find('STDIN')
-    out_idx = blob.find('STDOUT')
-    assert in_idx != -1 and out_idx != -1
+    stdin, stdout = extract_stdin_stdout(blob)
 
-    stdin = blob[in_idx + 6 : out_idx]
-    _, stdout, stderr = run_process(
+    _, real_out, stderr = run_process(
         [CECCOMP, 'asm', '-', '-a', 'x86_64', '-f', 'hexfmt'], stdin=stdin,
     )
     errns.stderr = stderr
-    assert stdout == blob[out_idx + 7:]
+    assert real_out == stdout
+
+def test_emu_mem_idx(errns: SimpleNamespace):
+    chunk_file = ERR_CASE_DIR / 'e04-mem-idx-access'
+    with chunk_file.open() as f:
+        blob = f.read()
+    stdin, stdout = extract_stdin_stdout(blob)
+
+    _, real_out, stderr = run_process(
+        [CECCOMP, 'emu', '-', '-a', 'x86_64', '1'], stdin=stdin,
+    )
+    errns.stderr = stderr
+    assert real_out == stdout
+
+def test_disasm_mem_spread(errns: SimpleNamespace):
+    chunk_file = ERR_CASE_DIR / 'e05-mem-idx-spread'
+    with chunk_file.open() as f:
+        blob = f.read()
+    stdin, stdout = extract_stdin_stdout(blob)
+
+    stdin = bytes.fromhex(stdin)
+    _, real_out, stderr = run_process(
+        [CECCOMP, 'disasm', '-', '-a', 'x86_64'], stdin=stdin, is_binary=True,
+    )
+    errns.stderr = stderr
+    assert real_out.decode() == stdout

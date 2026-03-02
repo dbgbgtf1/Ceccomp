@@ -1,0 +1,15 @@
+Test if emu emulate $mem[idx] correctly
+STDIN
+$A = 0x500
+$mem[1] = $A
+$A = 0x501
+$mem[0] = $A
+$A = $mem[1]
+return $A
+STDOUT
+$A = 0x500
+$mem[0x1] = $A
+$A = 0x501
+$mem[0x0] = $A
+$A = $mem[0x1]
+return $A # $A = 0x500, KILL
