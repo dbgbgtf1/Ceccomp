@@ -10,6 +10,11 @@ Items marked with :star: is the major change why we release a new version.
 ## 4.1 (INCOMING)
 * :star: Fix asm handle STX incorrectly
 * :star: Fix big endian machine tracing failure :link: [#29]
+* :star: Fix emulate not accessing `$mem[idx]`
+* :star: Fix disasm render using rval status to track lval mem status
+* Fix too loose cli number parsing
+* Add more hints when unexpectedly disasming
+* Skip `check_prog` if disasming filters from kernel
 * Correct disasm leftover calculation
 * Increase timeout in test for slow vm
 
