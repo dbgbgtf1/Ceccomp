@@ -39,22 +39,22 @@ def test_asm_empty_file():
 
 def test_asm_4096_statements(errns: SimpleNamespace):
     exit_code, _, stderr = run_process(
-        [CECCOMP, 'asm', '-'], stdin='return ALLOW\n\n' * 1024,
+        [CECCOMP, 'asm', '-'], stdin='return ALLOW\n\n' * 4096,
     )
     errns.stderr = stderr
     assert exit_code == 0
 
 def test_asm_4097_statements():
     _, _, stderr = run_process(
-        [CECCOMP, 'asm', '-'], stdin='return ALLOW\n' * 1025,
+        [CECCOMP, 'asm', '-'], stdin='return ALLOW\n' * 4097,
     )
-    assert stderr == '[ERROR]: Input file has more than 1024 statements!\n'
+    assert stderr == '[ERROR]: Input file has more than 4096 statements!\n'
 
 def test_disasm_large_file():
     _, _, stderr = run_process(
         [CECCOMP, 'disasm', '/dev/zero'],
     )
-    assert stderr == '[ERROR]: The input is larger than 1024 filters! Perhaps inputting a wrong file?\n'
+    assert stderr == '[ERROR]: The input is larger than 4096 filters! Perhaps inputting a wrong file?\n'
 
 def extract_stdin_stdout(blob: str) -> tuple[str, str]:
     in_idx = blob.find('STDIN')

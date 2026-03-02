@@ -355,7 +355,7 @@ NOTE: `ceccomp disasm` 和 `seccomp-tools disasm` 的输出之间有很多细微
 3. 一个 _TEXT_ 文件必须短于 4096 行。
 4. 一个 _TEXT_ 文家必须小于 1 MiB。
 
-并且对于 asm 和 disasm 来说，有效的伪代码（能被编码或解码为 BPF 的）必须少于等于 1024 条，这是内核规定的。
+并且对于 asm 和 disasm 来说，有效的伪代码（能被编码或解码为 BPF 的）必须少于等于 4096 条，这是内核规定的。
 
 一个关于 ceccomp asm 有趣的知识：任何在 _TEXT_ 文件中基本的 ANSI 颜色，例如 `\x1b[31m`，会在处理时被丢弃。
 

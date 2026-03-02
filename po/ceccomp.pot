@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-02-06 20:03+0800\n"
+"POT-Creation-Date: 2026-03-02 22:02+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,53 +16,6 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
-
-#: ../include/config.h:11
-#, c-format
-msgid ""
-"ceccomp %s\n"
-"Tag at %s\n"
-"Build by %s\n"
-msgstr ""
-
-#: ../include/help.h:5
-msgid "Usage: ceccomp <subcommand> <args> <options>\n"
-msgstr ""
-
-#: ../include/help.h:25
-msgid ""
-"asm      -- Assemble bpf text to raw bytes\n"
-"disasm   -- Disassemble raw bytes to bpf text\n"
-"emu      -- Emulate bpf program with given syscall and bpf text\n"
-"help     -- Display ceccomp help information\n"
-"probe    -- Trace the program for the first filter and emulate common "
-"syscalls\n"
-"trace    -- Run program or trace pid, extract bpf filter and then print to "
-"text\n"
-"version  -- Display ceccomp version\n"
-msgstr ""
-
-#: ../include/help.h:36
-msgid ""
-"Options:\n"
-"-a, --arch (x86_64|aarch64|...)  Which architecture to resolve syscall_nr, "
-"read or write bytestream by the byteorder of arch, default as your arch\n"
-"-f, --fmt (hexline|hexfmt|raw)   Output format, default as hexline\n"
-"-p, --pid system_process_id      Extract bpf filters from process and print "
-"with bpf text form; CAP_SYS_ADMIN is needed to work\n"
-"-o, --output file                Print to file to avoid mixing ceccomp "
-"output and tracee program output, default as stderr\n"
-"-q, --quiet                      Print emulate result only or suppress the "
-"process info message in trace and probe\n"
-"-s, --seize                      Follow process to trace load-filter "
-"operation\n"
-"-c, --color (auto|always|never)  When to print in color, default as auto\n"
-"syscall_nr                       System call number or name (e.g. 0|read)\n"
-"args[0-5], ip                    args and ip (instruction pointer) used for "
-"emulation, default as 0\n"
-"raw, text                        File with BPF RAW or BPF TEXT, see docs for "
-"detail, default as stdin\n"
-msgstr ""
 
 #: ../include/utils/error.h:7
 msgid "Found errors when assembling BPF from trace"
@@ -90,7 +43,7 @@ msgid "Found errors when assembling"
 msgstr ""
 
 #: ../include/utils/error.h:18
-msgid "Input file has more than 1024 statements!"
+msgid "Input file has more than 4096 statements!"
 msgstr ""
 
 #: ../include/utils/error.h:21
@@ -102,12 +55,12 @@ msgid "The input is empty"
 msgstr ""
 
 #: ../include/utils/error.h:24
-msgid "The input is larger than 1024 filters! Perhaps inputting a wrong file?"
+msgid "The input is larger than 4096 filters! Perhaps inputting a wrong file?"
 msgstr ""
 
 #: ../include/utils/error.h:27
 #, c-format
-msgid "%d byte(s) at the end of input could not fit into a filter"
+msgid "%u byte(s) at the end of input could not fit into a filter"
 msgstr ""
 
 #: ../include/utils/error.h:30
@@ -440,4 +393,51 @@ msgstr ""
 
 #: ../include/utils/error.h:151
 msgid "Invalid or unknown operation"
+msgstr ""
+
+#: ../include/config.h:11
+#, c-format
+msgid ""
+"ceccomp %s\n"
+"Tag at %s\n"
+"Build by %s\n"
+msgstr ""
+
+#: ../include/help.h:5
+msgid "Usage: ceccomp <subcommand> <args> <options>\n"
+msgstr ""
+
+#: ../include/help.h:25
+msgid ""
+"asm      -- Assemble bpf text to raw bytes\n"
+"disasm   -- Disassemble raw bytes to bpf text\n"
+"emu      -- Emulate bpf program with given syscall and bpf text\n"
+"help     -- Display ceccomp help information\n"
+"probe    -- Trace the program for the first filter and emulate common "
+"syscalls\n"
+"trace    -- Run program or trace pid, extract bpf filter and then print to "
+"text\n"
+"version  -- Display ceccomp version\n"
+msgstr ""
+
+#: ../include/help.h:36
+msgid ""
+"Options:\n"
+"-a, --arch (x86_64|aarch64|...)  Which architecture to resolve syscall_nr, "
+"read or write bytestream by the byteorder of arch, default as your arch\n"
+"-f, --fmt (hexline|hexfmt|raw)   Output format, default as hexline\n"
+"-p, --pid system_process_id      Extract bpf filters from process and print "
+"with bpf text form; CAP_SYS_ADMIN is needed to work\n"
+"-o, --output file                Print to file to avoid mixing ceccomp "
+"output and tracee program output, default as stderr\n"
+"-q, --quiet                      Print emulate result only or suppress the "
+"process info message in trace and probe\n"
+"-s, --seize                      Follow process to trace load-filter "
+"operation\n"
+"-c, --color (auto|always|never)  When to print in color, default as auto\n"
+"syscall_nr                       System call number or name (e.g. 0|read)\n"
+"args[0-5], ip                    args and ip (instruction pointer) used for "
+"emulation, default as 0\n"
+"raw, text                        File with BPF RAW or BPF TEXT, see docs for "
+"detail, default as stdin\n"
 msgstr ""

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: ceccomp docs\n"
-"POT-Creation-Date: 2026-02-04 16:51+0800\n"
+"POT-Creation-Date: 2026-03-02 21:49+0800\n"
 "PO-Revision-Date: 2026-02-04 16:51+0800\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: RocketDev\n"
@@ -1270,11 +1270,11 @@ msgstr "一个 _TEXT_ 文家必须小于 1 MiB。"
 #: ceccomp.adoc:464
 msgid ""
 "And for both asm and disasm, effective statements (that can be encoded or "
-"decoded into BPF) must be less or equal than 1024, this is enforced by "
+"decoded into BPF) must be less or equal than 4096, this is enforced by "
 "kernel."
 msgstr ""
 "并且对于 asm 和 disasm 来说，有效的伪代码（能被编码或解码为 BPF 的）必须少于"
-"等于 1024 条，这是内核规定的。"
+"等于 4096 条，这是内核规定的。"
 
 #. type: Plain text
 #: ceccomp.adoc:467
