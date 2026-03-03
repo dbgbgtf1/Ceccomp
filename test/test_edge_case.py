@@ -21,9 +21,9 @@ def test_asm_long_line():
 
 def test_asm_many_lines():
     _, _, stderr = run_process(
-        [CECCOMP, 'asm', '-'], stdin='\n' * 0x2000,
+        [CECCOMP, 'asm', '-'], stdin='\n' * 0x4001,
     )
-    assert stderr == "[ERROR]: Found more than 4096 lines of text, perhaps it's not for ceccomp?\n"
+    assert stderr == "[ERROR]: Found more than 16384 lines of text, perhaps it's not for ceccomp?\n"
 
 def test_asm_0_file():
     _, _, stderr = run_process(

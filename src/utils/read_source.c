@@ -17,7 +17,7 @@
 
 #define GROW_LEN 0x4000
 #define MAX_LINE_LEN 0x180
-#define MAX_FILE_LEN 0x100000 // 1MiB
+#define MAX_FILE_LEN 0x400000 // 4MiB
 
 typedef enum
 {
@@ -116,7 +116,7 @@ process_source (void)
       line_start = line_break + 1;
     }
 
-  if (line_nr >= BPF_MAXINSNS)
+  if (line_nr >= 4 * BPF_MAXINSNS)
     error ("%s", M_LINES_TOO_MANY);
   if (top == line_start)
     return line_nr;

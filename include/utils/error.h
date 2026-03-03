@@ -85,9 +85,9 @@
   _ ("No line break in source file, perhaps it's not a text file?")
 #define M_FOUND_SUS_LINE                                                      \
   _ ("Line %u has more than %u bytes, perhaps the input is not a text file?")
-#define M_FILE_TOO_LARGE _ ("The input file is greater than 1 MiB!")
+#define M_FILE_TOO_LARGE _ ("The input file is greater than 4 MiB!")
 #define M_LINES_TOO_MANY                                                      \
-  _ ("Found more than 4096 lines of text, perhaps it's not for ceccomp?")
+  _ ("Found more than 16384 lines of text, perhaps it's not for ceccomp?")
 
 // hash
 #define M_CANNOT_FIND_LABEL _ ("Can not find label declaration")
