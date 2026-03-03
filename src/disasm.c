@@ -11,14 +11,42 @@
 #include "utils/vector.h"
 #include <assert.h>
 #include <errno.h>
+#include <linux/bpf_common.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/mman.h>
+#include <sys/prctl.h>
 #include <unistd.h>
 
-filter g_filters[BPF_MAXINSNS + 1];
+filter *g_filters;
+static uint32_t g_sz;
+
+bool
+init_global_filters (void)
+{
+  if (g_filters)
+    return true;
+  g_sz = (sizeof (filter) * (BPF_MAXINSNS + 1) + 0xfff) & ~0xfff;
+  void *map = mmap (NULL, g_sz, PROT_READ | PROT_WRITE, MAP_ANON | MAP_PRIVATE,
+                    -1, 0);
+  if (map == MAP_FAILED)
+    return false;
+#ifdef PR_SET_VMA
+  prctl (PR_SET_VMA, PR_SET_VMA_ANON_NAME, map, g_sz, "global filters");
+#endif
+  g_filters = map;
+  return true;
+}
+
+__attribute__ ((destructor)) static void
+free_global_filters (void)
+{
+  if (g_filters)
+    munmap (g_filters, g_sz);
+}
 
 static uint32_t
 read_filters (filter *filters, FILE *from)
@@ -84,6 +112,7 @@ void
 disasm (FILE *fp, uint32_t scmp_arch)
 {
   fprog prog;
+  assert (init_global_filters ());
   prog.filter = g_filters;
   prog.len = read_filters (g_filters, fp);
   if (prog.len == 0)

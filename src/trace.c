@@ -118,6 +118,8 @@ dump_filter (syscall_info *info, int pid, fprog *prog)
 static void
 mode_filter (syscall_info *info, int pid, fprog *prog, FILE *output_fp)
 {
+  if (UNLIKELY (!g_filters))
+    assert (init_global_filters ());
   prog->filter = g_filters;
 
   dump_filter (info, pid, prog);
@@ -375,6 +377,7 @@ void
 pid_trace (int pid, bool seize, bool quiet)
 {
   fprog prog;
+  assert (init_global_filters ());
   prog.filter = g_filters;
   int prog_idx = 0;
 
