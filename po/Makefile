@@ -4,8 +4,8 @@ ECHO_NOPROG = printf "    $(1)\t$(2)\n"
 
 INC_DIR := ../include
 SRC_DIR := ../src
-INC_SRCS := $(shell find $(INC_DIR) -name '*.h')
-C_SRCS := $(shell find $(SRC_DIR) -name '*.c' -or -name '*.s')
+INC_SRCS := $(shell find $(INC_DIR) -name '*.h' | LC_ALL=C sort)
+C_SRCS := $(shell find $(SRC_DIR) -name '*.c' -or -name '*.s' | LC_ALL=C sort)
 
 SOURCES_LIST := SOURCES.txt
 POT_FILE := ceccomp.pot
