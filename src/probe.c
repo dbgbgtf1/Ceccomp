@@ -11,6 +11,7 @@
 #include "utils/read_source.h"
 #include "utils/vector.h"
 #include <fcntl.h>
+#include <linux/bpf_common.h>
 #include <seccomp.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -66,7 +67,8 @@ probe (char *argv[], FILE *output_fp, bool quiet)
   init_table ();
 
   init_vector (&text_v, sizeof (statement_t), lines);
-  init_vector (&code_ptr_v, sizeof (statement_t *), MIN (lines, 1025));
+  init_vector (&code_ptr_v, sizeof (statement_t *),
+               MIN (lines, BPF_MAXINSNS + 1));
   parser (&text_v, &code_ptr_v);
   if (resolver (&code_ptr_v))
     error ("%s", M_PROBE_TERMINATED);

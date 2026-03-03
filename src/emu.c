@@ -13,6 +13,7 @@
 #include "utils/read_source.h"
 #include "utils/vector.h"
 #include <assert.h>
+#include <linux/bpf_common.h>
 #include <linux/filter.h>
 #include <seccomp.h>
 #include <stdbool.h>
@@ -181,8 +182,8 @@ return_line (statement_t *statement, bool quiet)
     {
       real_ret.type = decode_return_k (&real_ret, A_reg);
       tkstr = &token_pairs[real_ret.type];
-      sz = snprintf (formatted_val, 0x28, "# $A = %#x, %.*s", A_reg, tkstr->len,
-                     tkstr->start);
+      sz = snprintf (formatted_val, 0x28, "# $A = %#x, %.*s", A_reg,
+                     tkstr->len, tkstr->start);
     }
   else if (ret_obj->type == NUMBER)
     {
@@ -377,7 +378,8 @@ emulate (emu_arg_t *emu_arg)
   vector_t text_v;
   vector_t code_ptr_v;
   init_vector (&text_v, sizeof (statement_t), lines);
-  init_vector (&code_ptr_v, sizeof (statement_t *), MIN (lines, 1025));
+  init_vector (&code_ptr_v, sizeof (statement_t *),
+               MIN (lines, BPF_MAXINSNS + 1));
   parser (&text_v, &code_ptr_v);
   if (resolver (&code_ptr_v))
     error ("%s", M_EMU_TERMINATED);
