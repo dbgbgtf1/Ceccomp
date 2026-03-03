@@ -456,8 +456,8 @@ Ceccomp asm put some restrictions on _TEXT_ for better performance.
 
 1. `'\0'` must not be found in _TEXT_ since it's a text file.
 2. A line must be shorter than 384 *bytes*.
-3. A _TEXT_ file must have less than 4096 lines.
-4. A _TEXT_ file must be smaller than 1 MiB.
+3. A _TEXT_ file must have less than 16384 lines.
+4. A _TEXT_ file must be smaller than 4 MiB.
 
 And for both asm and disasm, effective statements (that can be encoded or decoded
 into BPF) must be less or equal than 4096, this is enforced by kernel.

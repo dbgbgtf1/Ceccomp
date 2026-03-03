@@ -6,9 +6,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: ceccomp docs\n"
-"POT-Creation-Date: 2026-03-02 21:49+0800\n"
-"PO-Revision-Date: 2026-02-04 16:51+0800\n"
-"Last-Translator: Automatically generated\n"
+"POT-Creation-Date: 2026-03-03 15:44+0800\n"
+"PO-Revision-Date: 2026-03-03 15:44+0800\n"
+"Last-Translator: RocketDev <ma2014119@outlook.com>\n"
 "Language-Team: RocketDev\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
@@ -1258,13 +1258,13 @@ msgstr "一行必须短于 384 *字节*。"
 
 #. type: Plain text
 #: ceccomp.adoc:460
-msgid "A _TEXT_ file must have less than 4096 lines."
-msgstr "一个 _TEXT_ 文件必须短于 4096 行。"
+msgid "A _TEXT_ file must have less than 16384 lines."
+msgstr "一个 _TEXT_ 文件必须短于 16384 行。"
 
 #. type: Plain text
 #: ceccomp.adoc:461
-msgid "A _TEXT_ file must be smaller than 1 MiB."
-msgstr "一个 _TEXT_ 文家必须小于 1 MiB。"
+msgid "A _TEXT_ file must be smaller than 4 MiB."
+msgstr "一个 _TEXT_ 文件必须小于 4 MiB。"
 
 #. type: Plain text
 #: ceccomp.adoc:464

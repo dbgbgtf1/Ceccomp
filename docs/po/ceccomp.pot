@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-03-02 21:49+0800\n"
+"POT-Creation-Date: 2026-03-03 15:44+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1006,12 +1006,12 @@ msgstr ""
 
 #. type: Plain text
 #: ceccomp.adoc:460
-msgid "A _TEXT_ file must have less than 4096 lines."
+msgid "A _TEXT_ file must have less than 16384 lines."
 msgstr ""
 
 #. type: Plain text
 #: ceccomp.adoc:461
-msgid "A _TEXT_ file must be smaller than 1 MiB."
+msgid "A _TEXT_ file must be smaller than 4 MiB."
 msgstr ""
 
 #. type: Plain text
