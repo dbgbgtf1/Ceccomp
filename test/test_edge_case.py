@@ -5,7 +5,7 @@ def test_asm_large_file():
     _, _, stderr = run_process(
         [CECCOMP, 'asm', '/dev/zero'],
     )
-    assert stderr == '[ERROR]: The input file is greater than 1 MiB!\n'
+    assert stderr == '[ERROR]: The input file is greater than 4 MiB!\n'
 
 def test_asm_no_lf():
     _, _, stderr = run_process(
