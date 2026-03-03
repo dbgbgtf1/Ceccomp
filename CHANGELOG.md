@@ -12,6 +12,8 @@ Items marked with :star: is the major change why we release a new version.
 * :star: Fix big endian machine tracing failure :link: [#29]
 * :star: Fix emulate not accessing `$mem[idx]`
 * :star: Fix disasm render using rval status to track lval mem status
+* :star: Fix BPF instruction limit to 4096 :link: [#30]
+* Allocate global filters lazily
 * Fix too loose cli number parsing
 * Add more hints when unexpectedly disasming
 * Skip `check_prog` if disasming filters from kernel
@@ -19,6 +21,7 @@ Items marked with :star: is the major change why we release a new version.
 * Increase timeout in test for slow vm
 
 [#29]: https://github.com/dbgbgtf1/Ceccomp/issues/29
+[#30]: https://github.com/dbgbgtf1/Ceccomp/issues/30
 ## 4.0
 * **BREAKING** :star: :fire: **We aggressively refactored our code and the asm grammar is a bit different from v3. Please refer to documentation for new grammar.** :fire:
 * :star: Add seize subfunction in trace pid :link: [#23]
