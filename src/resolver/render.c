@@ -148,24 +148,24 @@ jump_line (jump_line_t *jump_line)
     }
 
   uint32_t pc = local->code_nr;
-  uint8_t jt = pc + jump_line->jt.code_nr + 1;
-  uint8_t jf = pc + jump_line->jf.code_nr + 1;
+  uint32_t abs_jt = pc + jump_line->jt.code_nr + 1;
+  uint32_t abs_jf = pc + jump_line->jf.code_nr + 1;
   token_type cmp_op = jump_line->comparator;
   uint32_t cmp_data = jump_line->cmpobj.data;
-  set_ctx (jt, pc, !FORCE);
-  set_ctx (jf, pc, !FORCE);
+  set_ctx (abs_jt, pc, !FORCE);
+  set_ctx (abs_jf, pc, !FORCE);
 
   // It's hard and unnessary to handle other comparators
   // So just set_arch when comparator is EQUAL_EQUAL
   if (list[pc].A_stat != ARCH)
     {
-      set_arch (jt, list[pc].arch);
-      set_arch (jf, list[pc].arch);
+      set_arch (abs_jt, list[pc].arch);
+      set_arch (abs_jf, list[pc].arch);
     }
   else if (cmp_op == EQUAL_EQUAL || cmp_op == BANG_EQUAL)
     {
-      set_arch ((cmp_op == EQUAL_EQUAL) ? jt : jf, cmp_data);
-      set_arch ((cmp_op == EQUAL_EQUAL) ? jf : jt, MIXED);
+      set_arch ((cmp_op == EQUAL_EQUAL) ? abs_jt : abs_jf, cmp_data);
+      set_arch ((cmp_op == EQUAL_EQUAL) ? abs_jf : abs_jt, MIXED);
     }
 
   obj_t *cmpobj = &jump_line->cmpobj;
