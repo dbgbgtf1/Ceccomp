@@ -31,6 +31,7 @@ fetch_text_from_trace (FILE **text, char *argv[], bool quiet)
   *text = tmpfile ();
   if (*text == NULL)
     error (M_REQUEST_TMPFILE_FAILED, strerror (errno));
+  fcntl (fileno (*text), F_SETFD, FD_CLOEXEC);
   uint32_t scmp_arch = program_trace (argv, *text, quiet, true);
   fflush (*text);
   fseek (*text, 0, SEEK_SET);
