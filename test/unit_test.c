@@ -1,5 +1,4 @@
 // this is for separately function testing
-#include "main.h"
 #include <linux/audit.h>
 #include <linux/bpf_common.h>
 #include <linux/filter.h>
@@ -33,8 +32,8 @@ dont_handle (int sig)
   (void)sig;
 }
 
-static const filter filters[] = {
-  BPF_STMT (BPF_LD | BPF_W | BPF_ABS, (offsetof (seccomp_data, nr))),
+static const struct sock_filter filters[] = {
+  BPF_STMT (BPF_LD | BPF_W | BPF_ABS, (offsetof (struct seccomp_data, nr))),
   BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, SYS_execve, 1, 0),
   BPF_STMT (BPF_RET | BPF_K, SECCOMP_RET_ALLOW),
   BPF_STMT (BPF_RET | BPF_K, SECCOMP_RET_ERRNO | 1),
@@ -44,8 +43,8 @@ static void
 load_filter (bool tofail)
 {
   prctl (PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
-  struct sock_fprog prog
-      = { .len = ARRAY_SIZE (filters), .filter = (filter *)filters };
+  struct sock_fprog prog = { .len = ARRAY_SIZE (filters),
+                             .filter = (struct sock_filter *)filters };
 
   syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, NULL, &prog);
 
