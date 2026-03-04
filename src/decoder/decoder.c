@@ -201,6 +201,9 @@ decode_return_k (obj_t *ret_obj, uint32_t k)
     case SCMP_ACT_LOG:
       tk = LOG;
       break;
+    case SCMP_ACT_NOTIFY:
+      tk = NOTIFY;
+      break;
     case SCMP_ACT_TRACE (0):
       ret_obj->data = k & SECCOMP_RET_DATA;
       tk = TRACE;

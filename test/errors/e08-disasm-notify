@@ -1,0 +1,10 @@
+Test if disasm is able to decode NOTIFY
+CLI
+disasm - -a x86_64
+STDIN
+06 00 00 00 00 00 c0 7f
+STDOUT
+#Label  CODE  JT   JF      K
+#---------------------------------
+ L0001: 0x06 0x00 0x00 0x7fc00000 return NOTIFY
+#---------------------------------
