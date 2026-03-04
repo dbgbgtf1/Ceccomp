@@ -1,0 +1,11 @@
+Test unexpected negative JA
+STDIN
+back:
+$A = 0
+goto back
+return ALLOW
+STDERR
+[WARN]: 3:-: JA must be positive
+goto back
+~~~~~~~~~
+[ERROR]: Found errors when assembling

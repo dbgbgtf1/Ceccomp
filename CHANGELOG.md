@@ -13,6 +13,9 @@ Items marked with :star: is the major change why we release a new version.
 * :star: Fix emulate not accessing `$mem[idx]`
 * :star: Fix disasm render using rval status to track lval mem status
 * :star: Fix BPF instruction limit to 4096 :link: [#30]
+* :star: Fix asm allow negative JA
+* :star: Fix emulate `A /= X, X = 0` crash
+* :star: Fix disasm symbol tracking only works on 256 lines
 * Allocate global filters lazily
 * Fix too loose cli number parsing
 * Add more hints when unexpectedly disasming
