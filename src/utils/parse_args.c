@@ -4,6 +4,7 @@
 #include "utils/logger.h"
 #include <argp.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -37,6 +38,7 @@ fail_fast_fopen (const char *restrict filename, const char *restrict mode)
   FILE *fp = fopen (filename, mode);
   if (fp == NULL)
     error (M_UNABLE_OPEN_FILE, filename, strerror (errno));
+  fcntl (fileno (fp), F_SETFD, FD_CLOEXEC);
   return fp;
 }
 
