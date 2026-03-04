@@ -82,7 +82,10 @@ assign_line (assign_line_t *line)
       DO_OPERATE (*=);
       break;
     case DIVIDE_TO:
-      DO_OPERATE (/=);
+      if (*right != 0)
+        DO_OPERATE (/=);
+      else
+        *left = 0;
       break;
     case LSH_TO:
       DO_OPERATE (<<=);
