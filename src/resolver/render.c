@@ -17,7 +17,7 @@
 static statement_t *local;
 static uint32_t default_arch;
 
-typedef enum
+typedef enum __attribute__ ((packed))
 {
   NONE = 0,  // 0b00
   ARCH = 1,  // 0b01
@@ -27,9 +27,9 @@ typedef enum
 
 typedef struct
 {
-  uint8_t A_stat;
-  uint8_t X_stat;
-  uint8_t mem_stat[BPF_MEMWORDS];
+  stat_t A_stat;
+  stat_t X_stat;
+  stat_t mem_stat[BPF_MEMWORDS];
   uint32_t arch;
 } stat_ctx_t;
 
@@ -38,7 +38,7 @@ static stat_ctx_t *list;
 #define FORCE true
 
 static void
-set_stat (uint8_t *dest, uint8_t src, bool force)
+set_stat (stat_t *dest, stat_t src, bool force)
 {
   if (force || *dest == NONE)
     *dest = src;
@@ -73,8 +73,8 @@ assign_line (assign_line_t *assign_line, stat_ctx_t *ctx)
   token_type op = assign_line->operator;
   obj_t *right = &assign_line->right_var;
 
-  uint8_t *left_stat;
-  uint8_t right_stat;
+  stat_t *left_stat;
+  stat_t right_stat;
 
   if (left->type == A)
     left_stat = &ctx->A_stat;
