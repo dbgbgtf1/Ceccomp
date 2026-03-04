@@ -144,6 +144,7 @@
 #define M_JT_INVALID_TAG _ ("JT out of filters")
 #define M_JF_INVALID_TAG _ ("JF out of filters")
 #define M_JA_OUT_OF_FILTERS _ ("JA out of filters")
+#define M_JA_MUST_BE_POSITIVE _ ("JA must be positive")
 
 #define M_MUST_END_WITH_RET _ ("BPF filters must end with return")
 #define M_NO_VALID_CODE _ ("The input does not contain any valid statement")

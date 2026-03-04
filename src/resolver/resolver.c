@@ -200,9 +200,12 @@ jump_line (void)
       uint32_t jt = find_key (&jump_line->jt.key);
       if (jt == (uint16_t)-1)
         REPORT_ERROR (M_CANNOT_FIND_LABEL);
-      if (jt > bpf_len)
+      else if (jt > bpf_len)
         REPORT_ERROR (M_JA_OUT_OF_FILTERS);
       set_jt_jf (&jump_line->jt, jt);
+
+      if ((int16_t)jump_line->jt.code_nr < 0)
+        REPORT_ERROR (M_JA_MUST_BE_POSITIVE);
 
       masks[jt] &= mem_valid;
       mem_valid = ~0;
