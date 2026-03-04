@@ -1,4 +1,6 @@
 Test comparators in disasm
+CLI
+disasm - -a x86_64
 STDIN
 15 00 10 00 00 00 00 00
 15 00 0f 10 00 00 00 00

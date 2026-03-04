@@ -1,4 +1,6 @@
 Test if emu emulate $mem[idx] correctly
+CLI
+emu - 1
 STDIN
 $A = 0x500
 $mem[1] = $A

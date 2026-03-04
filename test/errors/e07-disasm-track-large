@@ -1,4 +1,6 @@
 Test if disasm is able to track more than 256 lines
+CLI
+disasm - -a x86_64
 STDIN
 20 00 00 00 00 00 00 00
 01 00 00 00 00 00 00 00

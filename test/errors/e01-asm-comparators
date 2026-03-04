@@ -1,4 +1,6 @@
 Test comparators in asm
+CLI
+asm - -a x86_64 -f hexfmt
 STDIN
 if ($A == 0) goto end
 if ($A == 0) goto end, else goto kill

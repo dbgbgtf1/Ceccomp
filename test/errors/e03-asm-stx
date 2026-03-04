@@ -1,4 +1,6 @@
 Test if $mem[0] = $X works
+CLI
+asm - -a x86_64 -f hexfmt
 STDIN
 $mem[0] = $X
 return 0
