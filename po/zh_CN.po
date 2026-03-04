@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ceccomp 4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-03 15:43+0800\n"
-"PO-Revision-Date: 2026-03-03 15:43+0800\n"
+"POT-Creation-Date: 2026-03-04 22:19+0800\n"
+"PO-Revision-Date: 2026-03-04 22:20+0800\n"
 "Last-Translator: RocketDev <ma2014119@outlook.com>\n"
 "Language-Team: Chinese <ma2014119@outlook.com>\n"
 "Language: zh_CN\n"
@@ -465,14 +465,18 @@ msgstr "JF 超出 BPF 长度"
 msgid "JA out of filters"
 msgstr "跳转结果超出 BPF 长度"
 
-#: ../include/utils/error.h:148
+#: ../include/utils/error.h:147
+msgid "JA must be positive"
+msgstr "JA 必须是正数"
+
+#: ../include/utils/error.h:149
 msgid "BPF filters must end with return"
 msgstr "BPF 过滤器必须以 return 结尾"
 
-#: ../include/utils/error.h:149
+#: ../include/utils/error.h:150
 msgid "The input does not contain any valid statement"
 msgstr "输入不包含任何有效的伪代码"
 
-#: ../include/utils/error.h:151
+#: ../include/utils/error.h:152
 msgid "Invalid or unknown operation"
 msgstr "无效或未知的操作符"

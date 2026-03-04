@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-03 15:43+0800\n"
+"POT-Creation-Date: 2026-03-04 22:19+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -430,14 +430,18 @@ msgstr ""
 msgid "JA out of filters"
 msgstr ""
 
-#: ../include/utils/error.h:148
-msgid "BPF filters must end with return"
+#: ../include/utils/error.h:147
+msgid "JA must be positive"
 msgstr ""
 
 #: ../include/utils/error.h:149
+msgid "BPF filters must end with return"
+msgstr ""
+
+#: ../include/utils/error.h:150
 msgid "The input does not contain any valid statement"
 msgstr ""
 
-#: ../include/utils/error.h:151
+#: ../include/utils/error.h:152
 msgid "Invalid or unknown operation"
 msgstr ""

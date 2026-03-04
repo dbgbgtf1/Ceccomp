@@ -16,6 +16,8 @@ Items marked with :star: is the major change why we release a new version.
 * :star: Fix asm allow negative JA
 * :star: Fix emulate `A /= X, X = 0` crash
 * :star: Fix disasm symbol tracking only works on 256 lines
+* :star: Fix disasm not decoding NOTIFY
+* Fix leaked fd when using trace with specified output file
 * Allocate global filters lazily
 * Fix too loose cli number parsing
 * Add more hints when unexpectedly disasming
