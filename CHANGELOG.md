@@ -25,6 +25,8 @@ Items marked with :star: is the major change why we release a new version.
 * Correct disasm leftover calculation
 * Increase timeout in test for slow vm
 
+Special credit for codex, which help us hunting lots of bugs.
+
 [#29]: https://github.com/dbgbgtf1/Ceccomp/issues/29
 [#30]: https://github.com/dbgbgtf1/Ceccomp/issues/30
 ## 4.0
