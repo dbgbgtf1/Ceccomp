@@ -7,7 +7,8 @@ Items marked with :star: is the major change why we release a new version.
 <!-- write @some*user !num to reference user and PR at the same time. The order can not be -->
 <!-- reversed. Then run scripts/complete-url.py to format raw ref to URL. -->
 
-## 4.1 (INCOMING)
+## 4.2 (INCOMING)
+## 4.1
 * :star: Fix asm handle STX incorrectly
 * :star: Fix big endian machine tracing failure :link: [#29]
 * :star: Fix emulate not accessing `$mem[idx]`
@@ -24,8 +25,9 @@ Items marked with :star: is the major change why we release a new version.
 * Skip `check_prog` if disasming filters from kernel
 * Correct disasm leftover calculation
 * Increase timeout in test for slow vm
+* Add missing `$` in emu comment for `return $A`
 
-Special credit for codex, which help us hunting lots of bugs.
+Special credit for codex, which helps us hunt lots of bugs.
 
 [#29]: https://github.com/dbgbgtf1/Ceccomp/issues/29
 [#30]: https://github.com/dbgbgtf1/Ceccomp/issues/30
