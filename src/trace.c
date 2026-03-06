@@ -41,7 +41,7 @@ check_scmp_mode (syscall_info *info, int pid)
   uint64_t arg1 = info->entry.args[1];
 
   if (nr == seccomp_nr
-      && (arg0 == SECCOMP_SET_MODE_FILTER || arg0 == SECCOMP_MODE_STRICT))
+      && (arg0 == SECCOMP_SET_MODE_FILTER || arg0 == SECCOMP_SET_MODE_STRICT))
     seccomp_mode = arg0;
   else if (nr == prctl_nr && arg0 == PR_SET_SECCOMP)
     {
