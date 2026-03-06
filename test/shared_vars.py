@@ -44,7 +44,7 @@ os.environ['LC_ALL'] = 'C'
 
 TIER_1_ARCH = [ # tested
     'x86_64', 'i386', 'i686', 'riscv64', 'loongarch64', 'aarch64',
-    'ppc', 'ppc64le', 's390x', 'arm',
+    'ppc', 'ppc64le', 's390x', 'arm', 'armv8l',
 ]
 TIER_2_ARCH = [ # untested, but listed in libseccomp
     'x32', 'parisc', 'parisc64', 'mips', 'm68k', 's390', 'ppc64',
