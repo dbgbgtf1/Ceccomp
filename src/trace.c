@@ -66,7 +66,7 @@ check_scmp_mode (syscall_info *info, int pid)
 
   assert (exit_info.op == PTRACE_SYSCALL_INFO_EXIT);
 
-  if (exit_info.exit.is_error)
+  if (exit_info.exit.rval)
     seccomp_mode = LOAD_FAIL;
   // seccomp set failed, nothing happened
 
