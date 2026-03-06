@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ceccomp 4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-03-04 22:19+0800\n"
-"PO-Revision-Date: 2026-03-04 22:20+0800\n"
+"POT-Creation-Date: 2026-03-06 18:56+0800\n"
+"PO-Revision-Date: 2026-03-06 18:57+0800\n"
 "Last-Translator: RocketDev <ma2014119@outlook.com>\n"
 "Language-Team: Chinese <ma2014119@outlook.com>\n"
 "Language: zh_CN\n"
@@ -170,32 +170,36 @@ msgstr "正在解析进程 %d 加载的 seccomp 过滤器"
 
 #: ../include/utils/error.h:36
 #, c-format
-msgid "Process %d failed to load seccomp filter"
-msgstr "进程 %d 加载 seccomp 过滤器失败"
+msgid "Process %d failed to load seccomp filter: %s"
+msgstr "进程 %d 加载 seccomp 过滤器失败：%s"
 
 #: ../include/utils/error.h:37
+msgid "Unknown reason"
+msgstr "未知的原因"
+
+#: ../include/utils/error.h:38
 msgid "Procfs not accessible, unable to perform"
 msgstr "Procfs 无法访问，无法执行"
 
-#: ../include/utils/error.h:38
+#: ../include/utils/error.h:39
 msgid "Found unresolvable non-classic BPF, skipping"
 msgstr "发现无法解析的非经典 BPF，跳过"
 
-#: ../include/utils/error.h:39
+#: ../include/utils/error.h:40
 msgid "Kernel thread can not be seized"
 msgstr "内核线程不能被附加"
 
-#: ../include/utils/error.h:40
+#: ../include/utils/error.h:41
 #, c-format
 msgid "No seccomp filters found in process %d"
 msgstr "在进程 %d 中没有找到 seccomp 过滤器"
 
-#: ../include/utils/error.h:42
+#: ../include/utils/error.h:43
 #, c-format
 msgid "Target process is already being traced by process %d"
 msgstr "目标进程已经被进程 %d 追踪"
 
-#: ../include/utils/error.h:44
+#: ../include/utils/error.h:45
 #, c-format
 msgid ""
 "Process %d loaded strict seccomp mode, which only allows read, write, "
@@ -204,56 +208,56 @@ msgstr ""
 "进程 %d 加载了严格 seccomp 模式，只有 read, write, exit_group 和 sigreturn 被"
 "允许！"
 
-#: ../include/utils/error.h:46
+#: ../include/utils/error.h:47
 #, c-format
 msgid "Unknown error when get filter: %s"
 msgstr "在 get filter 时发生未知错误：%s"
 
-#: ../include/utils/error.h:47
+#: ../include/utils/error.h:48
 #, c-format
 msgid "Unknown error when seizing process: %s"
 msgstr "在附加到进程时发生未知错误：%s"
 
-#: ../include/utils/error.h:48
+#: ../include/utils/error.h:49
 msgid "The process to seize does not exist"
 msgstr "要附加的进程不存在"
 
-#: ../include/utils/error.h:54
+#: ../include/utils/error.h:55
 msgid "perhaps seizing kthread or lacking CAP_SYS_PTRACE"
 msgstr "可能正在附加到内核线程或缺少 CAP_SYS_PTRACE 权能"
 
-#: ../include/utils/error.h:56
+#: ../include/utils/error.h:57
 msgid "Run with CAP_SYS_ADMIN capability to fetch seccomp filters"
 msgstr "以 CAP_SYS_ADMIN 权能运行来获取 seccomp 过滤器"
 
-#: ../include/utils/error.h:58
+#: ../include/utils/error.h:59
 msgid "Run with CAP_SYS_PTRACE capability to seize a foreign process"
 msgstr "以 CAP_SYS_PTRACE 权能运行来附加到一个外部进程"
 
-#: ../include/utils/error.h:60
+#: ../include/utils/error.h:61
 msgid "32-bit tracer can not ptrace 64-bit tracee"
 msgstr "32 位 tracer 无法 ptrace 64 位 tracee"
 
-#: ../include/utils/error.h:62
+#: ../include/utils/error.h:63
 #, c-format
 msgid "libseccomp does not support the tracee's arch (%#x)"
 msgstr "libseccomp 不支持 tracee 的架构 (%#x)"
 
-#: ../include/utils/error.h:64
+#: ../include/utils/error.h:65
 msgid "perhaps lacking CAP_SYS_ADMIN or ceccomp is in seccomp mode"
 msgstr "可能缺少 CAP_SYS_ADMIN 权能或 ceccomp 处于 seccomp 模式"
 
-#: ../include/utils/error.h:66
+#: ../include/utils/error.h:67
 msgid "PTRACE_GET_SECCOMP_FILTER is not supported on your system"
 msgstr "PTRACE_SECCOMP_GET_FILTER 在您的系统上不支持"
 
-#: ../include/utils/error.h:68
+#: ../include/utils/error.h:69
 msgid ""
 "Ceccomp is in seccomp mode, fetching seccomp filters of other process is not "
 "permitted"
 msgstr "Ceccomp 处在 seccomp 模式，不允许获取其他进程的 seccomp 过滤器"
 
-#: ../include/utils/error.h:71
+#: ../include/utils/error.h:72
 msgid ""
 "perhaps PTRACE_GET_SECCOMP_FILTER is not supported or no seccomp filter in "
 "target process"
@@ -261,103 +265,103 @@ msgstr ""
 "可能 PTRACE_SECCOMP_GET_FILTER 在您的系统上不支持或目标进程没有 seccomp 过滤"
 "器"
 
-#: ../include/utils/error.h:75
+#: ../include/utils/error.h:76
 msgid "Invalid color mode"
 msgstr "无效的颜色模式"
 
-#: ../include/utils/error.h:76
+#: ../include/utils/error.h:77
 msgid "Invalid format mode"
 msgstr "无效的 asm 格式参数"
 
-#: ../include/utils/error.h:77
+#: ../include/utils/error.h:78
 msgid "Invalid number"
 msgstr "无效的数字"
 
-#: ../include/utils/error.h:78
+#: ../include/utils/error.h:79
 #, c-format
 msgid "Unable to open file %s: %s"
 msgstr "无法打开文件 %s: %s"
 
-#: ../include/utils/error.h:81
+#: ../include/utils/error.h:82
 #, c-format
 msgid "Reading input failed: %s"
 msgstr "读取输入失败：%s"
 
-#: ../include/utils/error.h:83
+#: ../include/utils/error.h:84
 #, c-format
 msgid "Found '\\0' at file offset %lu, perhaps it's not a text file?"
 msgstr "在文件偏移 %lu 处发现 '\\0'，可能不是一个文本文件？"
 
-#: ../include/utils/error.h:85
+#: ../include/utils/error.h:86
 msgid "No line break in source file, perhaps it's not a text file?"
 msgstr "没有在源文件中找到换行符，可能不是一个文本文件？"
 
-#: ../include/utils/error.h:87
+#: ../include/utils/error.h:88
 #, c-format
 msgid "Line %u has more than %u bytes, perhaps the input is not a text file?"
 msgstr "第 %u 行上有超过 %u 个字节，可能输入不是一个文本文件？"
 
-#: ../include/utils/error.h:88
+#: ../include/utils/error.h:89
 msgid "The input file is greater than 4 MiB!"
 msgstr "输入的文件超过了 4 MiB！"
 
-#: ../include/utils/error.h:90
+#: ../include/utils/error.h:91
 msgid "Found more than 16384 lines of text, perhaps it's not for ceccomp?"
 msgstr "文件中包含超过 16384 行，可能它不是给 ceccomp 用的？"
 
-#: ../include/utils/error.h:93
+#: ../include/utils/error.h:94
 msgid "Can not find label declaration"
 msgstr "无法找到标签声明"
 
-#: ../include/utils/error.h:96
+#: ../include/utils/error.h:97
 msgid "Unexpected token"
 msgstr "意料之外的 token"
 
-#: ../include/utils/error.h:97
+#: ../include/utils/error.h:98
 msgid "Found duplicated label declaration"
 msgstr "发现重复的标签声明"
 
-#: ../include/utils/error.h:98
+#: ../include/utils/error.h:99
 msgid "Input number exceeds 32-bit range"
 msgstr "输入的数字超过了 32 位的范围"
 
-#: ../include/utils/error.h:100
+#: ../include/utils/error.h:101
 msgid "Expect operator"
 msgstr "期待一个操作符"
 
-#: ../include/utils/error.h:101
+#: ../include/utils/error.h:102
 msgid "Expect rvalue"
 msgstr "期待一个右值"
 
-#: ../include/utils/error.h:102
+#: ../include/utils/error.h:103
 msgid "Expect return value"
 msgstr "期待一个 return 值"
 
-#: ../include/utils/error.h:104
+#: ../include/utils/error.h:105
 msgid "Expect number"
 msgstr "期待一个数字"
 
-#: ../include/utils/error.h:105
+#: ../include/utils/error.h:106
 msgid "Expect parenthesis"
 msgstr "期待一个小括号"
 
-#: ../include/utils/error.h:106
+#: ../include/utils/error.h:107
 msgid "Expect bracket"
 msgstr "期待一个中括号"
 
-#: ../include/utils/error.h:107
+#: ../include/utils/error.h:108
 msgid "Expect comparator"
 msgstr "期待一个比较符"
 
-#: ../include/utils/error.h:108
+#: ../include/utils/error.h:109
 msgid "Expect label"
 msgstr "期待一个标签"
 
-#: ../include/utils/error.h:109
+#: ../include/utils/error.h:110
 msgid "Expect valid syscall name"
 msgstr "期待一个系统调用名称"
 
-#: ../include/utils/error.h:111
+#: ../include/utils/error.h:112
 msgid ""
 "Architecture token does not match any libseccomp arch, perhaps system "
 "libseccomp is too old"
@@ -365,118 +369,118 @@ msgstr ""
 "架构 token 没有匹配到任何 libseccomp 支持的架构，可能是因为系统 libseccomp 太"
 "老了"
 
-#: ../include/utils/error.h:115
+#: ../include/utils/error.h:116
 msgid "Expect 'goto'"
 msgstr "期待一个 'goto'"
 
-#: ../include/utils/error.h:116
+#: ../include/utils/error.h:117
 msgid "Expect '$A'"
 msgstr "期待一个 '$A'"
 
-#: ../include/utils/error.h:117
+#: ../include/utils/error.h:118
 msgid "Expect 'else'"
 msgstr "期待一个 'else'"
 
-#: ../include/utils/error.h:120
+#: ../include/utils/error.h:121
 msgid "Rvalue should be '$A'"
 msgstr "右值应该为 '$A'"
 
-#: ../include/utils/error.h:121
+#: ../include/utils/error.h:122
 msgid "Rvalue can not be '$A'"
 msgstr "右值不能为 '$A'"
 
-#: ../include/utils/error.h:122
+#: ../include/utils/error.h:123
 msgid "Rvalue can not be '$X'"
 msgstr "右值不能为 '$X'"
 
-#: ../include/utils/error.h:124
+#: ../include/utils/error.h:125
 msgid "Rvalue should be '$A' or '$X'"
 msgstr "右值应该为 '$A' 或 '$X'"
 
-#: ../include/utils/error.h:125
+#: ../include/utils/error.h:126
 msgid "Rvalue should be '$X' or number"
 msgstr "右值应该为 '$X' 或数字"
 
-#: ../include/utils/error.h:126
+#: ../include/utils/error.h:127
 msgid "Operator should be '='"
 msgstr "操作符应该为 '='"
 
-#: ../include/utils/error.h:127
+#: ../include/utils/error.h:128
 msgid "Lvalue should be '$A'"
 msgstr "左值应该为 '$A'"
 
-#: ../include/utils/error.h:129
+#: ../include/utils/error.h:130
 msgid "seccomp_data load offset must be 4-byte aligned"
 msgstr "seccomp_data 加载偏移必须对齐到 4 字节"
 
-#: ../include/utils/error.h:131
+#: ../include/utils/error.h:132
 msgid "seccomp_data load offset greater than the struct"
 msgstr "seccomp_data 加载偏移超过了结构体本身的大小"
 
-#: ../include/utils/error.h:133
+#: ../include/utils/error.h:134
 msgid "Args index out of range (0-5)"
 msgstr "访问 args 索引超出范围 (0-5)"
 
-#: ../include/utils/error.h:134
+#: ../include/utils/error.h:135
 msgid "Mem index out of range (0-15)"
 msgstr "访问 mem 索引超出范围 (0-5)"
 
-#: ../include/utils/error.h:135
+#: ../include/utils/error.h:136
 msgid "Accessing uninitialized mem"
 msgstr "尝试访问未初始化的 mem"
 
-#: ../include/utils/error.h:136
+#: ../include/utils/error.h:137
 msgid "Dividing by zero"
 msgstr "除以零"
 
-#: ../include/utils/error.h:137
+#: ../include/utils/error.h:138
 msgid "Left or right shifting more than 32 bits"
 msgstr "左移或右移超过 32 位"
 
-#: ../include/utils/error.h:139
+#: ../include/utils/error.h:140
 msgid "Data carried by return motion exceeds 0xffff"
 msgstr "return 动作携带的 data 超过了 0xffff"
 
-#: ../include/utils/error.h:140
+#: ../include/utils/error.h:141
 msgid "JT is larger than 0xff"
 msgstr "JT 大于了 0xff"
 
-#: ../include/utils/error.h:141
+#: ../include/utils/error.h:142
 msgid "JT must be positive"
 msgstr "JT 必须是正数"
 
-#: ../include/utils/error.h:142
+#: ../include/utils/error.h:143
 msgid "JF is larger than 0xff"
 msgstr "JF 大于了 0xff"
 
-#: ../include/utils/error.h:143
+#: ../include/utils/error.h:144
 msgid "JF must be positive"
 msgstr "JF 必须是正数"
 
-#: ../include/utils/error.h:144
+#: ../include/utils/error.h:145
 msgid "JT out of filters"
 msgstr "JT 超出 BPF 长度"
 
-#: ../include/utils/error.h:145
+#: ../include/utils/error.h:146
 msgid "JF out of filters"
 msgstr "JF 超出 BPF 长度"
 
-#: ../include/utils/error.h:146
+#: ../include/utils/error.h:147
 msgid "JA out of filters"
 msgstr "跳转结果超出 BPF 长度"
 
-#: ../include/utils/error.h:147
+#: ../include/utils/error.h:148
 msgid "JA must be positive"
 msgstr "JA 必须是正数"
 
-#: ../include/utils/error.h:149
+#: ../include/utils/error.h:150
 msgid "BPF filters must end with return"
 msgstr "BPF 过滤器必须以 return 结尾"
 
-#: ../include/utils/error.h:150
+#: ../include/utils/error.h:151
 msgid "The input does not contain any valid statement"
 msgstr "输入不包含任何有效的伪代码"
 
-#: ../include/utils/error.h:152
+#: ../include/utils/error.h:153
 msgid "Invalid or unknown operation"
 msgstr "无效或未知的操作符"

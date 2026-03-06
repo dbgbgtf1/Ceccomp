@@ -33,8 +33,7 @@
 #define M_PROCESS_FORK _ ("Process %d spawned a new pid %d")
 #define M_PROCESS_EXIT _ ("Process %d exited")
 #define M_PARSE_PID_BPF _ ("Parsing seccomp filter loaded in process %d")
-#define M_PID_BPF_LOAD_FAIL                                                   \
-  _ ("Process %d failed to load seccomp filter due to %s")
+#define M_PID_BPF_LOAD_FAIL _ ("Process %d failed to load seccomp filter: %s")
 #define M_BPF_FAIL_UNKNOWN _ ("Unknown reason")
 #define M_PROCFS_NOT_ACCESSIBLE _ ("Procfs not accessible, unable to perform")
 #define M_NOT_AN_CBPF _ ("Found unresolvable non-classic BPF, skipping")

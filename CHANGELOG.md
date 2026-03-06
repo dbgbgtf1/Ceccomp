@@ -8,6 +8,8 @@ Items marked with :star: is the major change why we release a new version.
 <!-- reversed. Then run scripts/complete-url.py to format raw ref to URL. -->
 
 ## 4.2 (INCOMING)
+* :star: Fix seccomp argument comparison in trace since v2.8
+* Print reason when failed to load in trace
 ## 4.1
 * :star: Fix asm handle STX incorrectly
 * :star: Fix big endian machine tracing failure :link: [#29]
