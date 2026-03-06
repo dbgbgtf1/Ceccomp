@@ -32,10 +32,10 @@ static uint64_t seccomp_nr;
 static uint64_t prctl_nr;
 static uint32_t saved_arch = -1;
 
-static uint64_t
+static long
 check_scmp_mode (syscall_info *info, int pid)
 {
-  uint64_t seccomp_mode = LOAD_ELSE;
+  long seccomp_mode = LOAD_ELSE;
   uint64_t nr = info->entry.nr;
   uint64_t arg0 = info->entry.args[0];
   uint64_t arg1 = info->entry.args[1];
@@ -54,7 +54,7 @@ check_scmp_mode (syscall_info *info, int pid)
       seccomp_mode = arg1;
     }
   else
-    return seccomp_mode;
+    return LOAD_ELSE;
   // get seccomp_mode
   // prctl (PR_SET_SECCOMP, seccomp_mode, &prog);
   // seccomp (seccomp_mode, 0, &prog);
@@ -66,8 +66,9 @@ check_scmp_mode (syscall_info *info, int pid)
 
   assert (exit_info.op == PTRACE_SYSCALL_INFO_EXIT);
 
-  if (exit_info.exit.rval)
-    seccomp_mode = LOAD_FAIL;
+  long rval = exit_info.exit.rval;
+  if (rval)
+    seccomp_mode = rval > 0 ? LOAD_FAIL : rval;
   // seccomp set failed, nothing happened
 
   return seccomp_mode;
@@ -157,7 +158,7 @@ handle_syscall (pid_t pid, FILE *output_fp, bool quiet, bool oneshot)
 {
   syscall_info info;
   fprog prog;
-  uint32_t seccomp_mode;
+  long seccomp_mode;
 
   ptrace (PTRACE_GET_SYSCALL_INFO, pid, sizeof (info), &info);
   if (info.op != PTRACE_SYSCALL_INFO_ENTRY)
@@ -178,7 +179,9 @@ handle_syscall (pid_t pid, FILE *output_fp, bool quiet, bool oneshot)
   if (!quiet)
     {
       if (seccomp_mode == LOAD_FAIL)
-        warn (M_PID_BPF_LOAD_FAIL, pid);
+        warn (M_PID_BPF_LOAD_FAIL, pid, M_BPF_FAIL_UNKNOWN);
+      else if (seccomp_mode < 0) // kernel return error code
+        warn (M_PID_BPF_LOAD_FAIL, pid, strerror (-seccomp_mode));
       else if (seccomp_mode == SECCOMP_SET_MODE_FILTER
                || seccomp_mode == SECCOMP_SET_MODE_STRICT)
         info (M_PARSE_PID_BPF, pid);
@@ -188,7 +191,8 @@ handle_syscall (pid_t pid, FILE *output_fp, bool quiet, bool oneshot)
   else if (seccomp_mode == SECCOMP_SET_MODE_FILTER)
     mode_filter (&info, pid, &prog, output_fp);
 
-  if (!oneshot || seccomp_mode == LOAD_FAIL || seccomp_mode == LOAD_ELSE)
+  if (!oneshot || seccomp_mode == LOAD_FAIL || seccomp_mode == LOAD_ELSE
+      || seccomp_mode < 0)
     return false;
 
   return true;
