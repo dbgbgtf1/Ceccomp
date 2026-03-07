@@ -15,6 +15,7 @@
 #define WARN LOG_YELLOW ("[WARN]: ")
 #define ERR LOG_RED ("[ERROR]: ")
 
+#ifdef DEBUG
 void
 debug_print (const char *caller_func, const char *fmt, ...)
 {
@@ -22,17 +23,14 @@ debug_print (const char *caller_func, const char *fmt, ...)
   va_start (args, fmt);
   fprintf (stderr, DEBUG_PREFIX);
 
-#ifdef DEBUG
   fprintf (stderr, "in %s: ", caller_func);
-#else
-  (void)caller_func;
-#endif
 
   vfprintf (stderr, fmt, args);
   putc ('\n', stderr);
   va_end (args);
   fflush (stderr);
 }
+#endif
 
 void
 info_print (const char *caller_func, const char *fmt, ...)
