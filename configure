@@ -71,7 +71,8 @@ Copyright (C) 2025-present, distributed under GPLv3 or later
     config_grp.add_argument('--without-doc', action='store_true', help='Do not install documentation')
     config_grp.add_argument('--without-i18n', action='store_true', help='Do not generate locale mo files')
     config_grp.add_argument('--devmode', action='store_true', help='Allow you to compile against any commit (only work in git mode)')
-    config_grp.add_argument('--packager', type=str, metavar='BY', default='manual', help='Who build the package (default: manual)')
+    config_grp.add_argument('--packager', type=str, metavar='BY', default=None,
+                            help='Who build the package (default: manual or OS name if setting prefix to /usr)')
     config_grp.add_argument('--disable-option-checking', action='store_true', help='Whether to throw an error when unknown options found')
     config_grp.add_argument('--build', type=str, metavar='TARGET',
         help='Which target to build against, optional. For instance, x86_64-linux-gnu')
@@ -80,8 +81,8 @@ Copyright (C) 2025-present, distributed under GPLv3 or later
     # argp is dynamically tested
 
     make_grp = parser.add_argument_group('Make-time options (can be overridden by make cli) [make var]')
-    make_grp.add_argument('--prefix', type=str, metavar='PREFIX', default='/usr',
-        help='Installation prefix (default: /usr) [PREFIX]')
+    make_grp.add_argument('--prefix', type=str, metavar='PREFIX', default='/usr/local',
+        help='Installation prefix (default: /usr/local) [PREFIX]')
     make_grp.add_argument('--bindir', type=str, metavar='DIR',
         help='User executables directory (default: PREFIX/bin) [BIN_DIR]')
     make_grp.add_argument('--zshfpath', type=str, metavar='DIR',
@@ -122,7 +123,7 @@ class BuildOptions:
     doc: bool
     i18n: bool
     devmode: bool
-    builder: str
+    builder: str | None
     check_option: bool
     target: str
     sys_includedir: str
@@ -135,6 +136,8 @@ class BuildOptions:
 
     unknown_options: list[str]
 
+    has_set_packager: bool = False
+    is_official_package: bool = False
     git_install: bool = True
 
     def __post_init__(self):
@@ -208,6 +211,18 @@ class BuildOptions:
                 for opt in self.unknown_options:
                     print(TXT_GRAY(f'Ignoring unknown option {opt}'))
                 warn(f'Discarding {len(self.unknown_options)} unknown options!')
+
+        self.is_official_package = self.prefix == '/usr'
+        self.has_set_packager = self.builder is not None
+        try:
+            if not self.has_set_packager:
+                if self.is_official_package:
+                    self.builder = platform.freedesktop_os_release()['NAME']
+                else:
+                    self.builder = 'manual'
+        except (OSError, KeyError):
+            self.builder = 'manual'
+
 
 args, unknown = parse_args()
 buildopts = BuildOptions(
@@ -623,11 +638,20 @@ def check_version(makefile: Makefile):
 
 @new_task
 def check_builder_name(makefile: Makefile):
-    pcheck('if builder name is valid')
-    if '/' in buildopts.builder:
-        error(f'Found \'/\' in builder name {buildopts.builder}, which is not allowed.')
+    pcheck('builder name')
+    if '^' in buildopts.builder:
+        print(TXT_MAGENTA(buildopts.builder))
+        error(f"Found '^' in builder name {buildopts.builder}, which is not allowed.")
+    if not buildopts.builder.strip():
+        print(TXT_MAGENTA('(empty)'))
+        error(f'Empty builder name is not accepted.')
     makefile.inject('BUILDER', buildopts.builder)
-    print(TXT_GREEN('yes'))
+    if buildopts.has_set_packager:
+        print(TXT_CYAN(buildopts.builder))
+    elif buildopts.is_official_package and buildopts.builder != 'manual':
+        print(TXT_GREEN(buildopts.builder))
+    else:
+        print(TXT_BLUE(buildopts.builder))
 
 @new_task
 def check_omit_leaf_frame_pointer_flag(makefile: Makefile):

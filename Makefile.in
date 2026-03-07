@@ -232,7 +232,7 @@ uninstall:
 CONFIG_HEADER := $(INC_DIR)/config.h
 $(CONFIG_HEADER): Makefile | $(MARK)
 	$Q$(call ECHO,SED,$@)
-	$Qsed 's/@@VERSION@@/$(VERSION)/;s/@@TAG_TIME@@/$(TAG_TIME)/;s/@@BUILDER@@/{{BUILDER}}/;{{LOCALE_SED}}' \
+	$Qsed 's/@@VERSION@@/$(VERSION)/;s/@@TAG_TIME@@/$(TAG_TIME)/;s^@@BUILDER@@^{{BUILDER}}^;{{LOCALE_SED}}' \
 		$(CONFIG_HEADER).in > $(CONFIG_HEADER)
 
 ceccomp: $(BUILD_DIR)/ceccomp
