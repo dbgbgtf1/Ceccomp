@@ -49,5 +49,6 @@ TIER_1_ARCH = [ # tested
 TIER_2_ARCH = [ # untested, but listed in libseccomp
     'x32', 'parisc', 'parisc64', 'mips', 'm68k', 's390', 'ppc64',
 ]
-XFAIL_DYNAMIC = platform.machine() not in TIER_1_ARCH
+XFAIL_DYNAMIC = platform.machine() not in TIER_1_ARCH \
+    or (platform.machine() == 'x86_64' and platform.architecture()[0] == '32bit')
 XFAIL_REASON = 'Dynamic test may fail on this unsupported platform'
