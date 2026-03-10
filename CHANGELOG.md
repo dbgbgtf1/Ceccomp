@@ -10,6 +10,7 @@ Items marked with :star: is the major change why we release a new version.
 ## 4.2 (INCOMING)
 * **BREAKING** :star: Default installation path is set to `/usr/local` like normal programs
 * :star: Fix seccomp argument comparison in trace since v2.8
+* :star: Allow `zig cc` and other compilers that has multiple arguments in `configure`
 * Packager is set to `NAME` from `/etc/os-release` if prefix is `/usr` and packager is not set
 * Print reason when failed to load in trace
 ## 4.1

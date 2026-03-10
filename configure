@@ -129,7 +129,7 @@ class BuildOptions:
     sys_includedir: str
     sys_libdir: str
 
-    cc: str | None
+    cc: list[str] | None
     asciidoc: str | None
     cflags: str
     ldflags: str
@@ -172,8 +172,10 @@ class BuildOptions:
             """enumerate available command in system"""
             var = getattr(self, env)
             if var is not None:
-                if shutil.which(var) is None:
+                if isinstance(var, str) and shutil.which(var) is None:
                     error(f'{var} provided by environment {env.upper()} is not runnable!')
+                elif isinstance(var, list) and shutil.which(var[0]) is None:
+                    error(f'{var[0]} provided by environment {env.upper()} is not runnable!')
                 else:
                     return var
             # no such environment variable
@@ -182,14 +184,24 @@ class BuildOptions:
                     return candidate
             return None
 
+        self.cc = self.cc.strip().split() if self.cc else None
+
         # the None value will be processed in check
         if self.target:
             self.cc = check_cmd('cc', f'{self.target}-cc', f'{self.target}-gcc', f'{self.target}-clang')
             if not self.cc:
-                warn(f'No C compiler with prefix {self.target} found')
-                self.cc = check_cmd('cc', 'cc', 'gcc', 'clang')
+                warn(f'No C compiler with prefix {self.target} found, append it in CC')
+                self.cc = check_cmd('cc', 'clang', 'gcc', 'cc')
+            # clang and zig cc adds target to back
+            if not (isinstance(self.cc, str) and self.target in self.cc):
+                if isinstance(self.cc, str):
+                    self.cc = [self.cc, '-target', self.target]
+                elif isinstance(self.cc, list): # could be None
+                    self.cc.extend(['-target', self.target])
         else: # cc may be passed from environ, so we shall not merge the logic
             self.cc = check_cmd('cc', 'cc', 'gcc', 'clang')
+        if isinstance(self.cc, str):
+            self.cc = [self.cc]
         self.asciidoc = check_cmd('asciidoc', 'asciidoctor')
         if self.cflags is None:
             self.cflags = ''
@@ -445,9 +457,9 @@ def check_cc(makefile: Makefile):
     if buildopts.cc is None:
         print(TXT_MAGENTA('no cc found'))
         error('C compiler command not found in system!')
-    code, _, stderr = run_command([buildopts.cc, '-x', 'c', '-', '-o', '/dev/null'], standard_c)
+    code, _, stderr = run_command([*buildopts.cc, '-x', 'c', '-', '-o', '/dev/null'], standard_c)
     if code:
-        print(TXT_MAGENTA(buildopts.cc))
+        print(TXT_MAGENTA(' '.join(buildopts.cc)))
         if code == -1:
             error(f'C compiler is not working: {stderr}')
         if code == -2:
@@ -455,8 +467,8 @@ def check_cc(makefile: Makefile):
         print(f'Compiler returned non-zero returncode with message:\n{stderr}', end='')
         error(f'C compiler can not compile minimum C unit')
     # code == 0
-    makefile.inject('CC', buildopts.cc)
-    print(TXT_GREEN(buildopts.cc))
+    makefile.inject('CC', ' '.join(buildopts.cc))
+    print(TXT_GREEN(' '.join(buildopts.cc)))
 
 
 linux_headers = '''
@@ -472,7 +484,7 @@ int main() {
 @new_task
 def check_linux_headers(_: Makefile):
     pcheck('Linux-related headers')
-    code, _, stderr = run_command([buildopts.cc, '-x', 'c', '-', '-o', '/dev/null'], linux_headers, push_sys_dir=True)
+    code, _, stderr = run_command([*buildopts.cc, '-x', 'c', '-', '-o', '/dev/null'], linux_headers, push_sys_dir=True)
     if code:
         print(TXT_MAGENTA('no'))
         if code == -1:
@@ -495,7 +507,7 @@ int main() {
 @new_task
 def check_libseccomp(_: Makefile):
     pcheck('libseccomp')
-    code, _, stderr = run_command([buildopts.cc, '-x', 'c', '-', '-lseccomp', '-o', '/dev/null'], libseccomp, push_sys_dir=True)
+    code, _, stderr = run_command([*buildopts.cc, '-x', 'c', '-', '-lseccomp', '-o', '/dev/null'], libseccomp, push_sys_dir=True)
     if code:
         print(TXT_MAGENTA('no'))
         if code == -1:
@@ -516,7 +528,7 @@ int main(int argc, char **argv) {
 @new_task
 def check_argp(makefile: Makefile):
     pcheck('argp parser')
-    code, _, stderr = run_command([buildopts.cc, '-x', 'c', '-', '-o', '/dev/null'], argp, push_sys_dir=True)
+    code, _, stderr = run_command([*buildopts.cc, '-x', 'c', '-', '-o', '/dev/null'], argp, push_sys_dir=True)
     if code:
         if code == -1:
             print(TXT_MAGENTA('no'))
@@ -526,7 +538,7 @@ def check_argp(makefile: Makefile):
             error(f'Unexpected error: {stderr}')
         # code > 0
         # some system need external argp package, so we try to link
-        code, _, stderr = run_command([buildopts.cc, '-x', 'c', '-', '-largp', '-o', '/dev/null'], argp)
+        code, _, stderr = run_command([*buildopts.cc, '-x', 'c', '-', '-largp', '-o', '/dev/null'], argp)
         if code:
             print(TXT_MAGENTA('no'))
             if code == -1:
@@ -656,7 +668,7 @@ def check_builder_name(makefile: Makefile):
 @new_task
 def check_omit_leaf_frame_pointer_flag(makefile: Makefile):
     pcheck('if compiler support -mno-omit-leaf-frame-pointer')
-    code, _, _ = run_command([buildopts.cc, '-x', 'c', '-Werror', '-',
+    code, _, _ = run_command([*buildopts.cc, '-x', 'c', '-Werror', '-',
                                    '-mno-omit-leaf-frame-pointer', '-o', '/dev/null'],
                                    standard_c, push_sys_dir=True)
     if code:
