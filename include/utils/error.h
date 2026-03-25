@@ -50,6 +50,9 @@
 // no translation due to terms
 #define ACTION_GET_FILTER "ptrace get seccomp filters"
 #define ACTION_PTRACE_SEIZE "ptrace seizing"
+#define M_TRACE_UNDER_ATTACK                                                  \
+  _ ("Unexpected race condition detected when reading seccomp filters, "      \
+     "please consider use eBPF-based trace in next version")
 
 #define M_CAP_SYS_PTRACE_OR_KTHREAD                                           \
   _ ("perhaps seizing kthread or lacking CAP_SYS_PTRACE")

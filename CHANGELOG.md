@@ -13,6 +13,9 @@ Items marked with :star: is the major change why we release a new version.
 * :star: Allow `zig cc` and other compilers that has multiple arguments in `configure`
 * Packager is set to `NAME` from `/etc/os-release` if prefix is `/usr` and packager is not set
 * Print reason when failed to load in trace
+* Fix potential buffer overflow via TOCTOU :link: [#31]
+
+[#31]: https://github.com/dbgbgtf1/Ceccomp/issues/31
 ## 4.1
 * :star: Fix asm handle STX incorrectly
 * :star: Fix big endian machine tracing failure :link: [#29]

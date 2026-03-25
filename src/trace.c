@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/audit.h>
+#include <linux/bpf_common.h>
 #include <linux/ptrace.h>
 #include <linux/seccomp.h>
 #include <seccomp.h>
@@ -103,6 +104,9 @@ dump_filter (syscall_info *info, int pid, fprog *prog)
   size_t word = peek_data_check (pid, (size_t *)(size_t)info->entry.args[2]);
   // kernel ensure prog->len is not 0
   memcpy (&prog->len, &word, sizeof (prog->len));
+
+  if (UNLIKELY (prog->len == 0 || prog->len > BPF_MAXINSNS))
+    error ("%s", M_TRACE_UNDER_ATTACK);
 
   word = peek_data_check (pid, (size_t *)((size_t)args2 + offset));
   size_t *filter_adr = NULL;
