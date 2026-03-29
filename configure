@@ -604,9 +604,10 @@ def check_version(makefile: Makefile):
                 if code:
                     print(TXT_MAGENTA('checkout failed'))
                     print(stderr, end='' if stderr[-1] == '\n' else '\n')
-                    error('Can not checkout the latest tag')
+                    error('Could not checkout the latest tag. Do you need to `git stash` changes?')
                 print(TXT_CYAN(tag))
-                warn('Checked out to new tag, please rerun me to build stable version of ceccomp!')
+                warn('Checked out to new tag, please rerun me to build stable version of ceccomp! '
+                     '(or use --devmode to build on an arbitrary commit)')
                 sys.exit(0)
 
         else: # devmode is True
