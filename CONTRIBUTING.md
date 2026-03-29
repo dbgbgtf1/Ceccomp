@@ -22,3 +22,9 @@ Run `clang-format` to format your code. The config is under repo root and should
 by `clang-format` automatically.
 
 Once your pull request is merged, you know that your code is licensed under GPL v3 or later.
+
+## Rebuild objects after modifying headers
+
+There is no convenient way to maintain a dependency file to reveal which C file depends
+on which headers, so if you update header file, please manually rebuild related objects,
+or simply run `make -B` to rebuild all to apply changes in header.
