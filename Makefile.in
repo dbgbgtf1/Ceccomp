@@ -127,19 +127,19 @@ doc_man: $(MAN_OBJ) $(MAN_CHN)
 doc_html: $(HTML_OBJ) $(HTML_CHN)
 	$Q$(call ECHO_NOPROG,$(GREEN)BUILT,html doc$(RESET))
 
-$(MAN_OBJ): $(DOC_DIR)/ceccomp.adoc | $(BUILD_DIR) $(MARK)
+$(MAN_OBJ): $(DOC_DIR)/ceccomp.adoc Makefile | $(BUILD_DIR) $(MARK)
 	$Q$(call ECHO,ADOC,$@)
 	$Q$(ASCIIDOC) -b manpage $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
 
-$(MAN_CHN): $(DOC_DIR)/ceccomp.zh_CN.adoc | $(BUILD_DIR) $(MARK)
+$(MAN_CHN): $(DOC_DIR)/ceccomp.zh_CN.adoc Makefile | $(BUILD_DIR) $(MARK)
 	$Q$(call ECHO,ADOC,$@)
 	$Q$(ASCIIDOC) -b manpage $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
 
-$(HTML_OBJ): $(DOC_DIR)/ceccomp.adoc | $(BUILD_DIR) $(MARK)
+$(HTML_OBJ): $(DOC_DIR)/ceccomp.adoc Makefile | $(BUILD_DIR) $(MARK)
 	$Q$(call ECHO,ADOC,$@)
 	$Q$(ASCIIDOC) -b html5 $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
 
-$(HTML_CHN): $(DOC_DIR)/ceccomp.zh_CN.adoc | $(BUILD_DIR) $(MARK)
+$(HTML_CHN): $(DOC_DIR)/ceccomp.zh_CN.adoc Makefile | $(BUILD_DIR) $(MARK)
 	$Q$(call ECHO,ADOC,$@)
 	$Q$(ASCIIDOC) -b html5 $< -a VERSION=$(VERSION) -a ARCH=$(ARCH) -a TAG_TIME=$(TAG_TIME) -o $@
 
