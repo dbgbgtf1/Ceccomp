@@ -27,8 +27,7 @@
      "emu          -- Emulate bpf program with given syscall and bpf text\n"  \
      "help         -- Display ceccomp help information\n"                     \
      "probe        -- Trace the program for the first filter and emulate "    \
-     "common "                                                                \
-     "syscalls\n"                                                             \
+     "common syscalls\n"                                                      \
      "trace (dump) -- Run program or trace pid, extract bpf filter and then " \
      "print to text\n"                                                        \
      "version      -- Display ceccomp version\n")

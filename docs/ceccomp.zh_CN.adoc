@@ -162,6 +162,8 @@ NOTE: 要想从 *PID* 中提取过滤器，你需要 `CAP_SYS_ADMIN` （没有 `
 
 NOTE: 从 _3.1 版本_ 开始引入了多进程支持，并且当被调试进程 fork/resolve/exit 时，将会打印一条额外的 INFO 信息。你可以使用像 `ceccomp trace -q PROG 2>/dev/null` 这样的命令丢弃它。
 
+NOTE: 从 _4.2 版本_ 开始 `dump` 子命令作为 `trace` 的别名被加入，用以保持和 `seccomp-tools` 的兼容性。
+
 |===
 |命令|差别
 
@@ -169,7 +171,7 @@ NOTE: 从 _3.1 版本_ 开始引入了多进程支持，并且当被调试进程
 |可以设置输出格式；每一个过滤器可以输出到不同的文件；当 *PROGRAM*
 加载了 *LIMIT* 个过滤器后就杀死程序；将 *PROGRAM* 包装在 `sh -c` 中运行
 
-|`ceccomp trace`
+|`ceccomp trace` 或 `ceccomp dump`
 |所有过滤器被输出到同一个文件；永远不会杀死 *PROGRAM* ； *PROGRAM* 是直接被执行的，
 所以不需要 `./` ；当 fork 时，显式打印事件；能够附加调试器到 pid 上动态捕捉 seccomp 过滤器
 |===

@@ -228,6 +228,9 @@ NOTE: Since _version 3.1_, multiple process tracing is introduced, and when trac
 forking/resolving/exiting, an extra INFO message is printed. You can discard
 it by running command like `ceccomp trace -q PROG 2>/dev/null`.
 
+NOTE: Since _version 4.2_, `dump` sub command is added as an alias of `trace`,
+to keep compatibility with `seccomp-tools`.
+
 |===
 |Command|Difference
 
@@ -236,7 +239,7 @@ it by running command like `ceccomp trace -q PROG 2>/dev/null`.
 file; killing *PROGRAM* once *LIMIT* times of filters loaded; wrapping *PROGRAM*
 in `sh -c`
 
-|`ceccomp trace`
+|`ceccomp trace` or `ceccomp dump`
 |All filters are output to a single file; never kill *PROGRAM*; *PROGRAM* is
 launched directly, so `./` is not needed; explicitly print when forking;
 able to attach to pid for dynamic seccomp filter capturing
