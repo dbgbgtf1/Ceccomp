@@ -14,8 +14,15 @@ Items marked with :star: is the major change why we release a new version.
 * Packager is set to `NAME` from `/etc/os-release` if prefix is `/usr` and packager is not set
 * Print reason when failed to load in trace
 * Fix potential buffer overflow via TOCTOU :link: [#31]
+* Add some info in `configure` about devmode :heart: [@k4lizen] :link: [!33]
+* `dump` is now an alias of `trace` :heart: [@k4lizen] :link: [!35]
+* Make objects depend on `Makefile` to apply new rules after configure :link: [#34]
 
 [#31]: https://github.com/dbgbgtf1/Ceccomp/issues/31
+[@k4lizen]: https://github.com/k4lizen
+[!33]: https://github.com/dbgbgtf1/Ceccomp/pulls/33
+[!35]: https://github.com/dbgbgtf1/Ceccomp/pulls/35
+[#34]: https://github.com/dbgbgtf1/Ceccomp/issues/34
 ## 4.1
 * :star: Fix asm handle STX incorrectly
 * :star: Fix big endian machine tracing failure :link: [#29]
