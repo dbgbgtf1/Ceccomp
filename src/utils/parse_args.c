@@ -51,7 +51,7 @@ parse_subcommand (const char *arg)
     return DISASM_MODE;
   else if (!strcmp (arg, "emu"))
     return EMU_MODE;
-  else if (!strcmp (arg, "trace"))
+  else if (!strcmp (arg, "trace") || !strcmp (arg, "dump"))
     return TRACE_MODE;
   else if (!strcmp (arg, "probe"))
     return PROBE_MODE;

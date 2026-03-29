@@ -22,15 +22,16 @@
 #define VERSION_HINT "ceccomp version"
 
 #define M_SUBCMD_HINT                                                         \
-  _ ("asm      -- Assemble bpf text to raw bytes\n"                           \
-     "disasm   -- Disassemble raw bytes to bpf text\n"                        \
-     "emu      -- Emulate bpf program with given syscall and bpf text\n"      \
-     "help     -- Display ceccomp help information\n"                         \
-     "probe    -- Trace the program for the first filter and emulate common " \
+  _ ("asm          -- Assemble bpf text to raw bytes\n"                       \
+     "disasm       -- Disassemble raw bytes to bpf text\n"                    \
+     "emu          -- Emulate bpf program with given syscall and bpf text\n"  \
+     "help         -- Display ceccomp help information\n"                     \
+     "probe        -- Trace the program for the first filter and emulate "    \
+     "common "                                                                \
      "syscalls\n"                                                             \
-     "trace    -- Run program or trace pid, extract bpf filter and then "     \
+     "trace (dump) -- Run program or trace pid, extract bpf filter and then " \
      "print to text\n"                                                        \
-     "version  -- Display ceccomp version\n")
+     "version      -- Display ceccomp version\n")
 
 #define M_OPTION_HINT                                                         \
   _ ("Options:\n"                                                             \
