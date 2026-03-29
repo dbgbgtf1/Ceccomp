@@ -53,6 +53,8 @@ parse_subcommand (const char *arg)
     return EMU_MODE;
   else if (!strcmp (arg, "trace"))
     return TRACE_MODE;
+  else if (!strcmp (arg, "dump")) // Alias for seccomp-tools compat.
+    return TRACE_MODE;
   else if (!strcmp (arg, "probe"))
     return PROBE_MODE;
   else if (!strcmp (arg, "version"))
