@@ -22,13 +22,3 @@ Run `clang-format` to format your code. The config is under repo root and should
 by `clang-format` automatically.
 
 Once your pull request is merged, you know that your code is licensed under GPL v3 or later.
-
-## Buliding
-
-Use
-```bash
-./configure --devmode
-make all
-```
-to build `ceccomp`. Using `make all` instead of just `make` is important as it builds the
-localization files.
