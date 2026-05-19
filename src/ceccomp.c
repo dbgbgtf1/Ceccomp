@@ -3,10 +3,13 @@
 #include "disasm.h"
 #include "emu.h"
 #include "help.h"
+#include "main.h"
 #include "probe.h"
 #include "trace.h"
 #include "utils/arch_trans.h"
 #include "utils/color.h"
+#include "utils/error.h"
+#include "utils/logger.h"
 #include "utils/parse_args.h"
 #include <assert.h>
 #include <libintl.h>
@@ -49,8 +52,17 @@ static const struct argp_option options[] = {
 static void
 init_args (ceccomp_arg_t *args)
 {
+  const char *no_color = getenv ("NO_COLOR");
+  if (no_color != NULL && no_color[0] != '\0')
+    args->when = NEVER;
+  else
+    args->when = AUTO;
+  set_color (args->when, stderr);
+
   uname (&uts);
-  uint32_t scmp_arch = str_to_scmp_arch (uts.machine);
+  uint32_t scmp_arch = str_to_scmp_arch (uts.machine, true);
+  if (UNLIKELY (scmp_arch == (uint32_t)-1))
+    warn (M_UNSUPPORTED_ARCH, uts.machine);
   args->asm_arg->scmp_arch = scmp_arch;
   args->asm_arg->mode = HEXLINE;
   args->asm_arg->text_file = stdin;
@@ -75,12 +87,6 @@ init_args (ceccomp_arg_t *args)
   args->trace_arg->prog_idx = 0;
   args->trace_arg->quiet = false;
   args->trace_arg->seize = false;
-
-  const char *no_color = getenv ("NO_COLOR");
-  if (no_color != NULL && no_color[0] != '\0')
-    args->when = NEVER;
-  else
-    args->when = AUTO;
 }
 
 __attribute__ ((noreturn)) static void
@@ -144,23 +150,19 @@ main (int argc, char *argv[])
   switch (args.cmd)
     {
     case ASM_MODE:
-      set_color (args.when, stdout);
       assemble (asm_arg.text_file, asm_arg.scmp_arch, asm_arg.mode);
       break;
     case DISASM_MODE:
-      set_color (args.when, stdout);
       disasm (disasm_arg.raw_file, disasm_arg.scmp_arch);
       break;
     case EMU_MODE:
       if (emu_arg.sys_name == NULL)
         goto incomplete_command;
-      set_color (args.when, stdout);
       emulate (&emu_arg);
       break;
     case TRACE_MODE:
       if (trace_arg.mode == TRACE_PID)
         {
-          set_color (args.when, stdout);
           pid_trace (trace_arg.pid, trace_arg.seize, trace_arg.quiet);
         }
       else if (trace_arg.mode == TRACE_PROG)

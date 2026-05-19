@@ -80,61 +80,62 @@ scmp_arch_to_internal_arch (uint32_t scmp_arch)
 }
 
 // match ending \0
-#define MAYBE_MATCH_ARCH(arch)                                                \
-  if (!strncmp (str, token_pairs[arch].start, token_pairs[arch].len + 1))     \
+#define MAYBE_MATCH_ARCH(arch, ext)                                           \
+  if (!strncmp (str, token_pairs[arch].start, token_pairs[arch].len + ext))   \
     return arch;
 
 token_type
-str_to_internal_arch (const char *str)
+str_to_internal_arch (const char *str, bool strict)
 {
+  int ext = strict ? 1 : 0;
   switch (*str)
     {
     case 'i':
-      MAYBE_MATCH_ARCH (ARCH_X86);
-      MAYBE_MATCH_ARCH (ARCH_I686);
+      MAYBE_MATCH_ARCH (ARCH_X86, ext);
+      MAYBE_MATCH_ARCH (ARCH_I686, ext);
       break;
     case 'x':
-      MAYBE_MATCH_ARCH (ARCH_X86_64);
-      MAYBE_MATCH_ARCH (ARCH_X32);
+      MAYBE_MATCH_ARCH (ARCH_X86_64, ext);
+      MAYBE_MATCH_ARCH (ARCH_X32, ext);
       break;
     case 'a':
-      MAYBE_MATCH_ARCH (ARCH_ARM);
-      MAYBE_MATCH_ARCH (ARCH_AARCH64);
+      MAYBE_MATCH_ARCH (ARCH_ARM, ext);
+      MAYBE_MATCH_ARCH (ARCH_AARCH64, ext);
       break;
     case 'l':
-      MAYBE_MATCH_ARCH (ARCH_LOONGARCH64);
+      MAYBE_MATCH_ARCH (ARCH_LOONGARCH64, ext);
       break;
     case 'm':
-      MAYBE_MATCH_ARCH (ARCH_M68K);
-      MAYBE_MATCH_ARCH (ARCH_MIPSEL64N32);
-      MAYBE_MATCH_ARCH (ARCH_MIPSEL64);
-      MAYBE_MATCH_ARCH (ARCH_MIPSEL);
-      MAYBE_MATCH_ARCH (ARCH_MIPS64N32);
-      MAYBE_MATCH_ARCH (ARCH_MIPS64);
-      MAYBE_MATCH_ARCH (ARCH_MIPS);
+      MAYBE_MATCH_ARCH (ARCH_M68K, ext);
+      MAYBE_MATCH_ARCH (ARCH_MIPSEL64N32, ext);
+      MAYBE_MATCH_ARCH (ARCH_MIPSEL64, ext);
+      MAYBE_MATCH_ARCH (ARCH_MIPSEL, ext);
+      MAYBE_MATCH_ARCH (ARCH_MIPS64N32, ext);
+      MAYBE_MATCH_ARCH (ARCH_MIPS64, ext);
+      MAYBE_MATCH_ARCH (ARCH_MIPS, ext);
       break;
     case 'p':
-      MAYBE_MATCH_ARCH (ARCH_PARISC64);
-      MAYBE_MATCH_ARCH (ARCH_PARISC);
-      MAYBE_MATCH_ARCH (ARCH_PPC64LE);
-      MAYBE_MATCH_ARCH (ARCH_PPC64);
-      MAYBE_MATCH_ARCH (ARCH_PPC);
+      MAYBE_MATCH_ARCH (ARCH_PARISC64, ext);
+      MAYBE_MATCH_ARCH (ARCH_PARISC, ext);
+      MAYBE_MATCH_ARCH (ARCH_PPC64LE, ext);
+      MAYBE_MATCH_ARCH (ARCH_PPC64, ext);
+      MAYBE_MATCH_ARCH (ARCH_PPC, ext);
       break;
     case 's':
-      MAYBE_MATCH_ARCH (ARCH_S390X);
-      MAYBE_MATCH_ARCH (ARCH_S390);
+      MAYBE_MATCH_ARCH (ARCH_S390X, ext);
+      MAYBE_MATCH_ARCH (ARCH_S390, ext);
       break;
     case 'r':
-      MAYBE_MATCH_ARCH (ARCH_RISCV64);
+      MAYBE_MATCH_ARCH (ARCH_RISCV64, ext);
       break;
     }
   return UNKNOWN;
 }
 
 uint32_t
-str_to_scmp_arch (const char *str)
+str_to_scmp_arch (const char *str, bool strict)
 {
-  token_type tk = str_to_internal_arch (str);
+  token_type tk = str_to_internal_arch (str, strict);
   if (tk == UNKNOWN)
     return -1;
   return internal_arch_to_scmp_arch (tk);

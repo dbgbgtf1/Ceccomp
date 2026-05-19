@@ -149,7 +149,7 @@ scan_token (token_t *token)
       token_type tk = match_token_range (RETURN, ELSE);
       if (tk != UNKNOWN)
         INIT_TOKEN (tk);
-      tk = str_to_internal_arch (scanner.current_char);
+      tk = str_to_internal_arch (scanner.current_char, false);
       if (tk != UNKNOWN)
         {
           advance (token_pairs[tk].len);

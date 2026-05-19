@@ -1,0 +1,8 @@
+Test if cli accepts invalid arch name
+CLI
+asm - -a whatever
+STDIN
+return ALLOW
+STDOUT
+STDERR
+[ERROR]: Architecture name whatever is not supported

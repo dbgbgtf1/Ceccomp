@@ -3,7 +3,7 @@
 
 #include "i18n.h"
 
-#define M_NO_SUCH_ARCH _ ("Architecture name %s is not supported")
+#define M_UNSUPPORTED_ARCH _ ("Architecture name %s is not supported")
 // probe
 #define M_PROBE_TERMINATED _ ("Found errors when assembling BPF from trace")
 #define M_REQUEST_TMPFILE_FAILED _ ("Failed to request a temporary file: %s")

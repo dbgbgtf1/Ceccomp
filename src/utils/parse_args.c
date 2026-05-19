@@ -45,9 +45,9 @@ fail_fast_fopen (const char *restrict filename, const char *restrict mode)
 static uint32_t
 fail_fast_resolve_arch (const char *archname)
 {
-  uint32_t arch = str_to_scmp_arch (archname);
+  uint32_t arch = str_to_scmp_arch (archname, true);
   if (arch == (uint32_t)-1)
-    error (M_NO_SUCH_ARCH, archname);
+    error (M_UNSUPPORTED_ARCH, archname);
   return arch;
 }
 
