@@ -86,6 +86,8 @@ def test_edge_cases(errns: SimpleNamespace, edgeid: str):
     errns.stderr = real_err
     if is_disasm:
         assert real_out.decode() == stdout
+    elif stdout.rstrip() == '$STANDARD_HELP':
+        assert real_out == STANDARD_HELP
     else:
         assert real_out == stdout
     if stderr:

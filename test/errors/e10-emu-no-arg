@@ -1,0 +1,6 @@
+Test ceccomp emu should fail
+CLI
+emu
+STDIN
+STDOUT
+$STANDARD_HELP

@@ -2,9 +2,9 @@
 #include "config.h"
 #include "disasm.h"
 #include "emu.h"
+#include "help.h"
 #include "probe.h"
 #include "trace.h"
-#include "help.h"
 #include "utils/arch_trans.h"
 #include "utils/color.h"
 #include "utils/parse_args.h"
@@ -152,6 +152,8 @@ main (int argc, char *argv[])
       disasm (disasm_arg.raw_file, disasm_arg.scmp_arch);
       break;
     case EMU_MODE:
+      if (emu_arg.sys_name == NULL)
+        goto incomplete_command;
       set_color (args.when, stdout);
       emulate (&emu_arg);
       break;
@@ -163,11 +165,20 @@ main (int argc, char *argv[])
         }
       else if (trace_arg.mode == TRACE_PROG)
         {
+          if (trace_arg.prog_idx == 0)
+            goto incomplete_command;
           program_trace (&argv[trace_arg.prog_idx], trace_arg.output_file,
                          trace_arg.quiet, false);
         }
+      else
+        {
+          assert (trace_arg.mode == UNDECIDED);
+          goto incomplete_command;
+        }
       break;
     case PROBE_MODE:
+      if (probe_arg.prog_idx == 0)
+        goto incomplete_command;
       probe (&argv[probe_arg.prog_idx], probe_arg.output_file,
              probe_arg.quiet);
       break;
@@ -175,6 +186,7 @@ main (int argc, char *argv[])
       help (0);
       break;
     case HELP_ABNORMAL:
+    incomplete_command:
       help (1);
       break;
     case VERSION_MODE:

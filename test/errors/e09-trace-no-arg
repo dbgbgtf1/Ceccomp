@@ -1,0 +1,6 @@
+Test ceccomp trace should fail
+CLI
+trace
+STDIN
+STDOUT
+$STANDARD_HELP

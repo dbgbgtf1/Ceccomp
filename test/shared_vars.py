@@ -52,3 +52,5 @@ TIER_2_ARCH = [ # untested, but listed in libseccomp
 XFAIL_DYNAMIC = platform.machine() not in TIER_1_ARCH \
     or (platform.machine() == 'x86_64' and platform.architecture()[0] == '32bit')
 XFAIL_REASON = 'Dynamic test may fail on this unsupported platform'
+
+STANDARD_HELP = run_process([CECCOMP, 'help'])[1]
