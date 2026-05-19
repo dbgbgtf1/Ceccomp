@@ -13,6 +13,7 @@
 #include "utils/read_source.h"
 #include "utils/vector.h"
 #include <assert.h>
+#include <errno.h>
 #include <linux/bpf_common.h>
 #include <linux/filter.h>
 #include <seccomp.h>
@@ -339,9 +340,10 @@ init_attr (emu_arg_t *emu_arg)
   if ((int32_t)syscall_nr == __NR_SCMP_ERROR)
     {
       char *end;
-      syscall_nr = strtoull (emu_arg->sys_name, &end, 0);
-      if (*end != '\0')
+      uint64_t tmp = strtoull (emu_arg->sys_name, &end, 0);
+      if (*end != '\0' || (uint32_t)tmp != tmp)
         error ("%s", M_INVALID_SYSNR);
+      syscall_nr = tmp;
     }
 
   scmp_arch = emu_arg->scmp_arch;
