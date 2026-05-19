@@ -33,10 +33,14 @@ dont_handle (int sig)
 }
 
 static const struct sock_filter filters[] = {
+  BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, 0, 0, 6),
   BPF_STMT (BPF_LD | BPF_W | BPF_ABS, (offsetof (struct seccomp_data, nr))),
-  BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, SYS_execve, 1, 0),
+  BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, SYS_execve, 2, 0),
+  BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, SYS_read, 2, 0),
   BPF_STMT (BPF_RET | BPF_K, SECCOMP_RET_ALLOW),
   BPF_STMT (BPF_RET | BPF_K, SECCOMP_RET_ERRNO | 1),
+  BPF_STMT (BPF_LD | BPF_W | BPF_K, SECCOMP_RET_KILL),
+  BPF_STMT (BPF_RET | BPF_A, 0),
 };
 
 static void
