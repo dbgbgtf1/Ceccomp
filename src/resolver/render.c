@@ -132,6 +132,7 @@ try_resolve_sysnr (obj_t *cmpobj)
     arch_str = scmp_arch_to_str (cur_arch);
   cmpobj->literal = persist_object (sys_name, arch_str);
   free (sys_name);
+  sys_name = NULL;
 }
 
 static void
