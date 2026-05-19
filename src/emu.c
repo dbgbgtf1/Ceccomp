@@ -327,6 +327,10 @@ out:
 static void
 init_attr (emu_arg_t *emu_arg)
 {
+  A_reg = 0;
+  X_reg = 0;
+  // mem must be written first to be read, so skip clearing them
+
   if (emu_arg->sys_name == NULL)
     error ("%s", M_INPUT_SYS_NR);
   syscall_nr = seccomp_syscall_resolve_name_arch (emu_arg->scmp_arch,
