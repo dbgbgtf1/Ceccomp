@@ -79,6 +79,8 @@ match_token (token_type tk)
   register string_t token = token_pairs[tk];
   if (strncmp (token.start, scanner.current_char, token.len))
     return false;
+  if (UNLIKELY (isidentifier (peek (token.len))))
+    return false;
 
   advance (token.len);
   return true;
@@ -150,7 +152,7 @@ scan_token (token_t *token)
       if (tk != UNKNOWN)
         INIT_TOKEN (tk);
       tk = str_to_internal_arch (scanner.current_char, false);
-      if (tk != UNKNOWN)
+      if (tk != UNKNOWN && !isidentifier (peek (token_pairs[tk].len)))
         {
           advance (token_pairs[tk].len);
           INIT_TOKEN (tk);

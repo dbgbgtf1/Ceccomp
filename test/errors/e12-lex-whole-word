@@ -1,0 +1,15 @@
+Test if ceccomp accepts token pattern like ifx
+CLI
+asm - -f hexfmt
+STDIN
+goto ifx
+goto ALLOWx
+goto s390xx
+ALLOWx:
+s390xx:
+ifx: return ALLOW
+STDOUT
+"\x05\x00\x00\x00\x02\x00\x00\x00",
+"\x05\x00\x00\x00\x01\x00\x00\x00",
+"\x05\x00\x00\x00\x00\x00\x00\x00",
+"\x06\x00\x00\x00\x00\x00\xff\x7f",

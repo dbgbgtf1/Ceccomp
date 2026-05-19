@@ -14,6 +14,7 @@ Items marked with :star: is the major change why we release a new version.
 * :star: Reject `ceccomp trace/probe/emu` without positional arguments
 * :star: Clear value of register A and X when start emulation
 * :star: Fix in-place return object modification which impacts probe emulations
+* :star: Lexical scanner now scan a whole word and treat pattern like "ifx" as identifier
 * Packager is set to `NAME` from `/etc/os-release` if prefix is `/usr` and packager is not set
 * Print reason when failed to load in trace
 * Fix potential buffer overflow via TOCTOU :link: [#31]
