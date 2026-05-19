@@ -175,7 +175,7 @@ return_line (statement_t *statement, bool quiet)
   static char formatted_val[0x28];
 
   obj_t *ret_obj = &statement->return_line.ret_obj;
-  obj_t real_ret = (obj_t){ .type = UNKNOWN };
+  obj_t *real_obj = &statement->return_line.real_obj;
   int sz;
   const string_t *tkstr;
 
@@ -183,29 +183,31 @@ return_line (statement_t *statement, bool quiet)
   // return $A and return NUMBER
   if (ret_obj->type == A)
     {
-      real_ret.type = decode_return_k (&real_ret, A_reg);
-      tkstr = &token_pairs[real_ret.type];
+      real_obj->type = decode_return_k (real_obj, A_reg);
+      tkstr = &token_pairs[real_obj->type];
       sz = snprintf (formatted_val, 0x28, "# $A = %#x, %.*s", A_reg,
                      tkstr->len, tkstr->start);
     }
   else if (ret_obj->type == NUMBER)
     {
-      real_ret.type = decode_return_k (&real_ret, ret_obj->data);
-      tkstr = &token_pairs[real_ret.type];
+      real_obj->type = decode_return_k (real_obj, ret_obj->data);
+      tkstr = &token_pairs[real_obj->type];
       sz = snprintf (formatted_val, 0x28, "# %.*s", tkstr->len, tkstr->start);
     }
-  // do nothing if ret_obj has KILL/ALLOW/TRACE type
   else
-    return;
+    {
+      // do nothing if ret_obj has KILL/ALLOW/TRACE type
+      real_obj->type = ret_obj->type;
+      real_obj->data = ret_obj->data;
+      return;
+    }
 
-  register token_type tk = real_ret.type;
+  register token_type tk = real_obj->type;
   if (tk == TRACE || tk == TRAP || tk == ERRNO)
-    sz += snprintf (formatted_val + sz, 0x28 - sz, "(%u)", real_ret.data);
+    sz += snprintf (formatted_val + sz, 0x28 - sz, "(%u)", real_obj->data);
   assert (sz);
 
-  if (quiet)
-    statement->return_line.ret_obj = real_ret;
-  else
+  if (!quiet)
     {
       statement->line_start = formatted_val;
       statement->line_len = sz;
@@ -365,7 +367,7 @@ emulate_v (vector_t *text_v, vector_t *code_ptr_v, emu_arg_t *emu_arg,
     }
   else
     {
-      extern_obj_printer (output_fp, &ret->return_line.ret_obj);
+      extern_obj_printer (output_fp, &ret->return_line.real_obj);
       fputc ('\n', output_fp);
     }
 }

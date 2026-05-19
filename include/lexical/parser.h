@@ -60,6 +60,7 @@ typedef struct
   // token_type return
   // return_line_t must have return, so skip it
   obj_t ret_obj;
+  obj_t real_obj; // only used in emu quiet
 } return_line_t;
 
 typedef void *empty_line_t;
