@@ -42,6 +42,15 @@ fail_fast_fopen (const char *restrict filename, const char *restrict mode)
   return fp;
 }
 
+static uint32_t
+fail_fast_resolve_arch (const char *archname)
+{
+  uint32_t arch = str_to_scmp_arch (archname);
+  if (arch == (uint32_t)-1)
+    error (M_NO_SUCH_ARCH, archname);
+  return arch;
+}
+
 static subcommand_t
 parse_subcommand (const char *arg)
 {
@@ -99,7 +108,7 @@ parse_asm (asm_arg_t *args, int key, const char *arg, struct argp_state *state)
         args->text_file = fail_fast_fopen (arg, "r");
       return 0;
     case 'a':
-      args->scmp_arch = str_to_scmp_arch (arg);
+      args->scmp_arch = fail_fast_resolve_arch (arg);
       return 0;
     case 'f':
       args->mode = parse_print_mode (arg);
@@ -120,7 +129,7 @@ parse_disasm (disasm_arg_t *args, int key, const char *arg,
         args->raw_file = fail_fast_fopen (arg, "r");
       return 0;
     case 'a':
-      args->scmp_arch = str_to_scmp_arch (arg);
+      args->scmp_arch = fail_fast_resolve_arch (arg);
       return 0;
     }
 
@@ -144,7 +153,7 @@ parse_emu (emu_arg_t *args, int key, const char *arg, struct argp_state *state)
         args->ip = fail_fast_strtoull (arg, M_INVALID_NUMBER);
       return 0;
     case 'a':
-      args->scmp_arch = str_to_scmp_arch (arg);
+      args->scmp_arch = fail_fast_resolve_arch (arg);
       return 0;
     case 'q':
       args->quiet = true;

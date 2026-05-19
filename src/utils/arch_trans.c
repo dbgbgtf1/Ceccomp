@@ -79,8 +79,9 @@ scmp_arch_to_internal_arch (uint32_t scmp_arch)
   return -1;
 }
 
+// match ending \0
 #define MAYBE_MATCH_ARCH(arch)                                                \
-  if (!strncmp (str, token_pairs[arch].start, token_pairs[arch].len))         \
+  if (!strncmp (str, token_pairs[arch].start, token_pairs[arch].len + 1))     \
     return arch;
 
 token_type
