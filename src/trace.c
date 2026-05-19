@@ -140,7 +140,7 @@ child (char *argv[])
   int err = execv (argv[0], argv);
   if (err)
     error ("%s %s: %s", M_EXECV_ERR, argv[0], strerror (errno));
-  exit (0);
+  assert (!"exec should either succeed or fail with `error`");
 }
 
 static void
