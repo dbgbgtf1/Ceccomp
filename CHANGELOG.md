@@ -11,6 +11,9 @@ Items marked with :star: is the major change why we release a new version.
 * **BREAKING** :star: Default installation path is set to `/usr/local` like normal programs
 * :star: Fix seccomp argument comparison in trace since v2.8
 * :star: Allow `zig cc` and other compilers that has multiple arguments in `configure`
+* :star: Reject `ceccomp trace/probe/emu` without positional arguments
+* :star: Clear value of register A and X when start emulation
+* :star: Fix in-place return object modification which impacts probe emulations
 * Packager is set to `NAME` from `/etc/os-release` if prefix is `/usr` and packager is not set
 * Print reason when failed to load in trace
 * Fix potential buffer overflow via TOCTOU :link: [#31]
