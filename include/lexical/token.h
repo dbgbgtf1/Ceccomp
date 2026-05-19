@@ -5,11 +5,12 @@
 #include <stddef.h>
 #include <stdint.h>
 // clang-format off
-// many thing rely on the enum order, careful when modify this
+// many things rely on the enum order, be careful when modify this
 typedef enum
 {
   ARCH_X86, ARCH_I686, ARCH_X86_64,
-  ARCH_X32, ARCH_ARM, ARCH_AARCH64,
+  ARCH_X32, ARCH_AARCH64,
+  ARCH_ARMV8L, ARCH_ARMV7L, ARCH_ARM,
   ARCH_LOONGARCH64, ARCH_M68K, ARCH_MIPSEL64N32,
   ARCH_MIPSEL64, ARCH_MIPSEL, ARCH_MIPS64N32,
   ARCH_MIPS64, ARCH_MIPS, ARCH_PARISC64,

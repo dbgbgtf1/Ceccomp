@@ -8,7 +8,8 @@
 // clang-format off
 const string_t token_pairs[] = {
   [ARCH_X86] = DEFTK ("i386"), [ARCH_I686] = DEFTK ("i686"), [ARCH_X86_64] = DEFTK ("x86_64"),
-  [ARCH_X32] = DEFTK ("x32"), [ARCH_ARM] = DEFTK ("arm"), [ARCH_AARCH64] = DEFTK ("aarch64"),
+  [ARCH_X32] = DEFTK ("x32"), [ARCH_AARCH64] = DEFTK ("aarch64"),
+  [ARCH_ARMV8L] = DEFTK("armv8l"), [ARCH_ARMV7L] = DEFTK("armv7l"), [ARCH_ARM] = DEFTK ("arm"),
   [ARCH_LOONGARCH64] = DEFTK ("loongarch64"), [ARCH_M68K] = DEFTK ("m68k"),
   [ARCH_MIPSEL64N32] = DEFTK ("mipsel64n32"), [ARCH_MIPSEL64] = DEFTK ("mipsel64"),
   [ARCH_MIPSEL] = DEFTK ("mipsel"), [ARCH_MIPS64N32] = DEFTK ("mips64n32"),

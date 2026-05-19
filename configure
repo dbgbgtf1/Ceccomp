@@ -377,10 +377,10 @@ def check_platform(_: Makefile):
 
 TIER_1_ARCH = [ # tested
     'x86_64', 'i386', 'i686', 'riscv64', 'loongarch64', 'aarch64',
-    'ppc', 'ppc64le', 's390x', 'arm',
+    'ppc', 'ppc64le', 's390x', 'armv8l', 'armv7l',
 ]
 TIER_2_ARCH = [ # untested, but listed in libseccomp
-    'x32', 'parisc', 'parisc64', 'mips', 'm68k', 's390', 'ppc64',
+    'x32', 'parisc', 'parisc64', 'mips', 'm68k', 's390', 'ppc64', 'arm',
 ]
 @new_task
 def check_architecture(_: Makefile):

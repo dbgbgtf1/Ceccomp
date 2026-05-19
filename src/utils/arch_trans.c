@@ -9,8 +9,10 @@ static const uint32_t arch_pairs[] = {
   [ARCH_I686] = SCMP_ARCH_X86,
   [ARCH_X86_64] = SCMP_ARCH_X86_64,
   [ARCH_X32] = SCMP_ARCH_X32,
-  [ARCH_ARM] = SCMP_ARCH_ARM,
   [ARCH_AARCH64] = SCMP_ARCH_AARCH64,
+  [ARCH_ARMV8L] = SCMP_ARCH_ARM,
+  [ARCH_ARMV7L] = SCMP_ARCH_ARM,
+  [ARCH_ARM] = SCMP_ARCH_ARM,
 #if SCMP_VER_MAJOR >= 2 && SCMP_VER_MINOR >= 6
   [ARCH_LOONGARCH64] = SCMP_ARCH_LOONGARCH64,
   [ARCH_M68K] = SCMP_ARCH_M68K,
@@ -99,8 +101,10 @@ str_to_internal_arch (const char *str, bool strict)
       MAYBE_MATCH_ARCH (ARCH_X32, ext);
       break;
     case 'a':
-      MAYBE_MATCH_ARCH (ARCH_ARM, ext);
       MAYBE_MATCH_ARCH (ARCH_AARCH64, ext);
+      MAYBE_MATCH_ARCH (ARCH_ARMV8L, ext)
+      MAYBE_MATCH_ARCH (ARCH_ARMV7L, ext)
+      MAYBE_MATCH_ARCH (ARCH_ARM, ext);
       break;
     case 'l':
       MAYBE_MATCH_ARCH (ARCH_LOONGARCH64, ext);

@@ -22,6 +22,7 @@ Items marked with :star: is the major change why we release a new version.
 * `dump` is now an alias of `trace` :heart: [@k4lizen] :link: [!35]
 * Make objects depend on `Makefile` to apply new rules after configure :link: [#34]
 * Reject invalid architecture name
+* Add support for 32-bit arm, armv7l and armv8l
 
 [#31]: https://github.com/dbgbgtf1/Ceccomp/issues/31
 [@k4lizen]: https://github.com/k4lizen
