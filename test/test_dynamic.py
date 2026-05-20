@@ -42,13 +42,11 @@ def pid_state(pid: int) -> str | None:
         return None if state == 'Z' else state
 
 def filter_execve_k(text: str) -> str:
-    if len(text) != 391:
-        return text
-    try:
-        int(text[174:184], 16)
-    except ValueError:
-        return text
-    return text[:174] + ' MAY VARY ' + text[184:]
+    lines = text.splitlines()
+    for i, line in enumerate(lines):
+        if 'execve' in line or 'read' in line:
+            lines[i] = line[:23] + ' MAY VARY ' + line[33:]
+    return '\n'.join(lines)
 
 # -a x86_64 option in COMMON_OPTS will be ignored in trace/probe
 
