@@ -10,7 +10,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 # constants
-VERSION = '4.2'
+VERSION = '4.2.1'
 TAG_TIME = '2026-5-20'
 
 # color escape code definition

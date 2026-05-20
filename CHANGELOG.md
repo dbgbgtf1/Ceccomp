@@ -8,6 +8,8 @@ Items marked with :star: is the major change why we release a new version.
 <!-- reversed. Then run scripts/complete-url.py to format raw ref to URL. -->
 
 ## 4.3 (INCOMING)
+## 4.2.1
+* Fix test error on different architectures
 ## 4.2
 * **BREAKING** :star: Default installation path is set to `/usr/local` like normal programs
 * :star: Fix seccomp argument comparison in trace since v2.8
