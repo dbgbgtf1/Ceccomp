@@ -7,7 +7,8 @@ Items marked with :star: is the major change why we release a new version.
 <!-- write @some*user !num to reference user and PR at the same time. The order can not be -->
 <!-- reversed. Then run scripts/complete-url.py to format raw ref to URL. -->
 
-## 4.2 (INCOMING)
+## 4.3 (INCOMING)
+## 4.2
 * **BREAKING** :star: Default installation path is set to `/usr/local` like normal programs
 * :star: Fix seccomp argument comparison in trace since v2.8
 * :star: Allow `zig cc` and other compilers that has multiple arguments in `configure`
