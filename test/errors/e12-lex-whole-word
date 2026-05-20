@@ -1,6 +1,6 @@
 Test if ceccomp accepts token pattern like ifx
 CLI
-asm - -f hexfmt
+asm - -f hexfmt -a x86_64
 STDIN
 goto ifx
 goto ALLOWx
