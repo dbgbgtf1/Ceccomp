@@ -89,9 +89,11 @@ assign_line (assign_line_t *line)
         *left = 0;
       break;
     case LSH_TO:
+      *right = *right & 0x1f;
       DO_OPERATE (<<=);
       break;
     case RSH_TO:
+      *right = *right & 0x1f;
       DO_OPERATE (>>=);
       break;
     case AND_TO:

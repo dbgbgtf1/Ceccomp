@@ -1,0 +1,13 @@
+Test if ceccomp allow emulates $X = 33, $A <<= $X and behaves the same as what kernel does
+CLI
+emu - 0
+STDIN
+$A = 0x7fff000
+$X = 0x24
+$A <<= $X
+return $A
+STDOUT
+$A = 0x7fff000
+$X = 0x24
+$A <<= $X
+return $A # $A = 0x7fff0000, ALLOW
