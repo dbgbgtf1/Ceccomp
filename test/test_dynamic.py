@@ -154,3 +154,22 @@ def test_trace_pid(errns: SimpleNamespace):
     expect_file = TEST_DIR / 'dyn_log' / 'trace.log'
     with expect_file.open() as f:
         assert filter_execve_k(stdout) == filter_execve_k(f.read())
+
+@pytest.mark.xfail(XFAIL_DYNAMIC, reason=XFAIL_REASON)
+def test_seccomp_flags(errns: SimpleNamespace):
+    piper, pipew = os.pipe()
+    os.set_inheritable(pipew, True)
+    argv = [CECCOMP, 'trace', *COMMON_OPTS, '-o', f'/proc/self/fd/{pipew}', TEST, '4']
+    _, stdout, stderr = run_process(argv, False, pipew)
+    os.close(pipew)
+    pid = int(stdout.split('=')[1])
+    errns.stderr = stderr
+
+    expect_file = TEST_DIR / 'dyn_log' / 'trace.log'
+    with expect_file.open() as f:
+        expect = f.read()
+    with os.fdopen(piper) as f:
+        assert filter_execve_k(f.read()) == filter_execve_k(expect)
+    expect_file = TEST_DIR / 'dyn_log' / 'flag_stderr.log'
+    with expect_file.open() as f:
+        assert stderr.replace(str(pid), '$PID') == f.read()

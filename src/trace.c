@@ -29,12 +29,35 @@
 #define LOAD_FAIL 2
 #define LOAD_ELSE 3
 
+#define SECCOMP_FLAG_LIST(X)                                                  \
+  X (SECCOMP_FILTER_FLAG_TSYNC)                                               \
+  X (SECCOMP_FILTER_FLAG_LOG)                                                 \
+  X (SECCOMP_FILTER_FLAG_SPEC_ALLOW)                                          \
+  X (SECCOMP_FILTER_FLAG_NEW_LISTENER)                                        \
+  X (SECCOMP_FILTER_FLAG_TSYNC_ESRCH)                                         \
+  X (SECCOMP_FILTER_FLAG_WAIT_KILLABLE_RECV)
+
+struct flag_name
+{
+  uint32_t bit;
+  const char *name;
+};
+
+#define FLAG_ENTRY(x) { x, #x },
+
+static const struct flag_name seccomp_flags[]
+    = { SECCOMP_FLAG_LIST (FLAG_ENTRY) };
+#undef FLAG_ENTRY
+#undef SECCOMP_FLAG_LIST
+
+#define MACRO_STR(x) #x
+
 static uint64_t seccomp_nr;
 static uint64_t prctl_nr;
 static uint32_t saved_arch = -1;
 
 static long
-check_scmp_mode (syscall_info *info, int pid)
+check_scmp_mode (syscall_info *info, int pid, long *rval)
 {
   long seccomp_mode = LOAD_ELSE;
   uint64_t nr = info->entry.nr;
@@ -58,7 +81,7 @@ check_scmp_mode (syscall_info *info, int pid)
     return LOAD_ELSE;
   // get seccomp_mode
   // prctl (PR_SET_SECCOMP, seccomp_mode, &prog);
-  // seccomp (seccomp_mode, 0, &prog);
+  // seccomp (seccomp_mode, flags, &prog);
 
   syscall_info exit_info;
   ptrace (PTRACE_SYSCALL, pid, 0, 0);
@@ -67,10 +90,38 @@ check_scmp_mode (syscall_info *info, int pid)
 
   assert (exit_info.op == PTRACE_SYSCALL_INFO_EXIT);
 
-  long rval = exit_info.exit.rval;
-  if (rval)
-    seccomp_mode = rval > 0 ? LOAD_FAIL : rval;
-  // seccomp set failed, nothing happened
+  *rval = exit_info.exit.rval;
+  if (*rval < 0)
+    seccomp_mode = LOAD_FAIL;
+  if (*rval > 0)
+    {
+      char path[0x40];
+      char buf[0x20];
+      int32_t size;
+
+      snprintf (path, sizeof (path), "/proc/%d/fd/%ld", pid, *rval);
+      // this should return anon_inode:seccomp notify if succeed
+
+      size = readlink (path, buf, sizeof (buf));
+      if (size < 0)
+        {
+          seccomp_mode = LOAD_FAIL;
+          return seccomp_mode;
+        }
+      buf[size] = '\0';
+#define NOTIFY_S "anon_inode:seccomp notify"
+      if (memcmp (buf, NOTIFY_S, ARRAY_SIZE (NOTIFY_S)))
+        {
+          seccomp_mode = LOAD_FAIL;
+          return seccomp_mode;
+        }
+    }
+  // clang-format off
+  // if rval > 0, it could be SECCOMP_FILTER_FLAG_NEW_LISTENER return a
+  // fd(succees) or fail due to other reasons.
+  // if rval < 0, seccomp failed
+  // if rval == 0, seccomp succeed. seccomp set failed, nothing happened
+  // clang-format on
 
   return seccomp_mode;
 }
@@ -157,12 +208,44 @@ handle_fork (pid_t pid, int status, bool quiet)
     }
 }
 
+static void
+info_parse (syscall_info *info, pid_t pid)
+{
+  // prctl (PR_SET_SECCOMP, seccomp_mode, &prog);
+  // seccomp (seccomp_mode, flags, &prog);
+  uint32_t flag = info->entry.args[1];
+  uint32_t nr = info->entry.nr;
+
+  if (nr == prctl_nr)
+    return info (M_PID_BPF_PRCTL, pid, MACRO_STR (SECCOMP_MODE_FILTER));
+
+  bool not_first = false;
+  char flag_buf[0x100];
+  uint32_t offset = 0;
+  memcpy (flag_buf, "0", 2);
+  for (uint32_t i = 0; i < sizeof (seccomp_flags) / sizeof (seccomp_flags[0]);
+       i++)
+    {
+      if (!(seccomp_flags[i].bit & flag))
+        continue;
+      if (not_first)
+        offset += sprintf (flag_buf + offset, " | %s", seccomp_flags[i].name);
+      else
+        {
+          offset += sprintf (flag_buf + offset, "%s", seccomp_flags[i].name);
+          not_first = true;
+        }
+    }
+  info (M_PID_BPF_SECCOMP, pid, MACRO_STR (SECCOMP_SET_MODE_FILTER), flag_buf);
+}
+
 static bool
 handle_syscall (pid_t pid, FILE *output_fp, bool quiet, bool oneshot)
 {
   syscall_info info;
   fprog prog;
   long seccomp_mode;
+  long rval;
 
   ptrace (PTRACE_GET_SYSCALL_INFO, pid, sizeof (info), &info);
   if (info.op != PTRACE_SYSCALL_INFO_ENTRY)
@@ -178,17 +261,14 @@ handle_syscall (pid_t pid, FILE *output_fp, bool quiet, bool oneshot)
         error (M_TRACEE_ARCH_NOT_SUPPORTED, saved_arch);
     }
 
-  seccomp_mode = check_scmp_mode (&info, pid);
+  seccomp_mode = check_scmp_mode (&info, pid, &rval);
 
   if (!quiet)
     {
       if (seccomp_mode == LOAD_FAIL)
-        warn (M_PID_BPF_LOAD_FAIL, pid, M_BPF_FAIL_UNKNOWN);
-      else if (seccomp_mode < 0) // kernel return error code
-        warn (M_PID_BPF_LOAD_FAIL, pid, strerror (-seccomp_mode));
-      else if (seccomp_mode == SECCOMP_SET_MODE_FILTER
-               || seccomp_mode == SECCOMP_SET_MODE_STRICT)
-        info (M_PARSE_PID_BPF, pid);
+        warn (M_PID_BPF_LOAD_FAIL, pid, strerror (-rval));
+      else if (seccomp_mode == SECCOMP_SET_MODE_FILTER)
+        info_parse (&info, pid);
     }
   if (seccomp_mode == SECCOMP_SET_MODE_STRICT)
     warn (M_FOUND_STRICT_MODE, pid);
