@@ -109,7 +109,8 @@ check_scmp_mode (syscall_info *info, int pid, long *rval)
           return seccomp_mode;
         }
       buf[size] = '\0';
-      if (memcmp (buf, "anon_inode:seccomp notify", 26))
+#define NOTIFY_S "anon_inode:seccomp notify"
+      if (memcmp (buf, NOTIFY_S, ARRAY_SIZE (NOTIFY_S)))
         {
           seccomp_mode = LOAD_FAIL;
           return seccomp_mode;
@@ -235,8 +236,7 @@ info_parse (syscall_info *info, pid_t pid)
           not_first = true;
         }
     }
-  info (M_PID_BPF_SECCOMP, pid, MACRO_STR (SECCOMP_SET_MODE_FILTER),
-        flag_buf);
+  info (M_PID_BPF_SECCOMP, pid, MACRO_STR (SECCOMP_SET_MODE_FILTER), flag_buf);
 }
 
 static bool
