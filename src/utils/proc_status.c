@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #define SECCOMP "Seccomp:"
 // the sizeof simply including appending \t or space
@@ -21,7 +22,7 @@ access_proc_with_key (pid_t pid, const char *comparator, size_t strsize)
   long value = PROCFS_ERROR;
   char buf[0x40];
   char *end;
-  snprintf (buf, 0x40, "/proc/%d/status", pid);
+  snprintf (buf, sizeof (buf), "/proc/%d/status", pid);
 
   FILE *f = fopen (buf, "r");
   if (f == NULL)
@@ -56,4 +57,23 @@ pid_t
 get_tracer_pid (pid_t pid)
 {
   return access_proc_with_key (pid, TRACER_PID, TRACER_PID_OFFSET);
+}
+
+int
+may_be_listener_fd (int pid, long rax)
+{
+  char path[0x40];
+  char buf[0x20];
+  int32_t size;
+
+  snprintf (path, sizeof (path), "/proc/%d/fd/%ld", pid, rax);
+  // this should return anon_inode:seccomp notify if succeed
+
+  size = readlink (path, buf, sizeof (buf));
+  return 0;
+  buf[size] = '\0';
+#define NOTIFY_S "anon_inode:seccomp notify"
+  if (memcmp (buf, NOTIFY_S, ARRAY_SIZE (NOTIFY_S)))
+    return 0;
+  return 1;
 }

@@ -93,32 +93,11 @@ check_scmp_mode (syscall_info *info, int pid, long *rval)
   *rval = exit_info.exit.rval;
   if (*rval < 0)
     seccomp_mode = LOAD_FAIL;
-  if (*rval > 0)
-    {
-      char path[0x40];
-      char buf[0x20];
-      int32_t size;
-
-      snprintf (path, sizeof (path), "/proc/%d/fd/%ld", pid, *rval);
-      // this should return anon_inode:seccomp notify if succeed
-
-      size = readlink (path, buf, sizeof (buf));
-      if (size < 0)
-        {
-          seccomp_mode = LOAD_FAIL;
-          return seccomp_mode;
-        }
-      buf[size] = '\0';
-#define NOTIFY_S "anon_inode:seccomp notify"
-      if (memcmp (buf, NOTIFY_S, ARRAY_SIZE (NOTIFY_S)))
-        {
-          seccomp_mode = LOAD_FAIL;
-          return seccomp_mode;
-        }
-    }
+  if (*rval > 0 && !may_be_listener_fd (pid, *rval))
+    seccomp_mode = LOAD_FAIL;
   // clang-format off
   // if rval > 0, it could be SECCOMP_FILTER_FLAG_NEW_LISTENER return a
-  // fd(succees) or fail due to other reasons.
+  // fd(success) or fail due to other reasons.
   // if rval < 0, seccomp failed
   // if rval == 0, seccomp succeed. seccomp set failed, nothing happened
   // clang-format on
