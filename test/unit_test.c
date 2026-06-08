@@ -70,7 +70,7 @@ main (int argc, char **argv)
       printf ("pid=%d\n", pid);
 
       assert (efd != 0);
-      read (efd, &sem, 8);
+      assert (read (efd, &sem, 8) == 8);
       pid = fork ();
       if (pid)
         {
@@ -80,7 +80,7 @@ main (int argc, char **argv)
       // child
       load_filter (false);
       printf ("child=%d\n", getpid ());
-      read (efd, &sem, 8);
+      assert (read (efd, &sem, 8) == 8);
       break;
     case TEST_PROBE:
       pid = fork ();
@@ -108,7 +108,7 @@ main (int argc, char **argv)
       load_filter (false);
       printf ("pid=%d\n", getpid ());
       assert (efd != 0);
-      read (efd, &sem, 8);
+      assert (read (efd, &sem, 8) == 8);
       break;
     default:
       load_filter (true);
