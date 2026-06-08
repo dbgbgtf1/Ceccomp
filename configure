@@ -185,6 +185,8 @@ class BuildOptions:
             return None
 
         self.cc = self.cc.strip().split() if self.cc else None
+        if isinstance(self.cc, list) and len(self.cc) == 1:
+            self.cc = self.cc[0]
 
         # the None value will be processed in check
         if self.target:
