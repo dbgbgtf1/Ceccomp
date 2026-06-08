@@ -32,6 +32,9 @@ else:
     def TXT_GRAY(s): return s
 
 # error handling
+def info(*args, **kwargs):
+    print(*args, **kwargs, flush=True)
+
 def warn(msg: any):
     print(TXT_YELLOW(f'[WARN] {msg}'), flush=True, file=sys.stderr)
 
@@ -223,7 +226,7 @@ class BuildOptions:
                 error(f'Unrecognized options: {" ".join(self.unknown_options)}, please pass --help to see correct options!')
             else:
                 for opt in self.unknown_options:
-                    print(TXT_GRAY(f'Ignoring unknown option {opt}'))
+                    info(TXT_GRAY(f'Ignoring unknown option {opt}'))
                 warn(f'Discarding {len(self.unknown_options)} unknown options!')
 
         self.is_official_package = self.prefix == '/usr'
@@ -320,7 +323,7 @@ class TaskManager:
         total = len(self.tasks)
         for seq, handler in enumerate(self.tasks, start=1):
             # no need to flush as stdout will be flushed in handler
-            print(f'[{seq:>{width}}/{total}] ', end='')
+            info(f'[{seq:>{width}}/{total}] ', end='')
             handler(self.makefile)
 
     def add_task(self, handler: Callable[[Makefile], None]):
@@ -330,7 +333,7 @@ taskmgr = TaskManager('Makefile.in')
 
 
 def pcheck(txt: str):
-    print(f'Checking {txt}... ', end='', flush=True)
+    info(f'Checking {txt}... ', end='')
 
 def run_command(argv: list[str], stdin: str | None=None, push_sys_dir: bool=False) -> tuple[int, str, str]:
     """
@@ -370,11 +373,11 @@ def new_task(func: Callable) -> Callable:
 def check_platform(_: Makefile):
     pcheck('system platform')
     if sys.platform == 'linux':
-        print(TXT_GREEN('linux'))
+        info(TXT_GREEN('linux'))
     elif sys.platform == 'android':
-        print(TXT_CYAN('android'))
+        info(TXT_CYAN('android'))
     else:
-        print(TXT_MAGENTA(sys.platform))
+        info(TXT_MAGENTA(sys.platform))
         error(f'Ceccomp only support Linux!')
 
 TIER_1_ARCH = [ # tested
@@ -391,11 +394,11 @@ def check_architecture(_: Makefile):
     arch = platform.machine()
     mach = f'{bits}, {arch}'
     if arch in TIER_1_ARCH:
-        print(TXT_GREEN(mach))
+        info(TXT_GREEN(mach))
     elif arch in TIER_2_ARCH:
-        print(TXT_CYAN(mach))
+        info(TXT_CYAN(mach))
     else:
-        print(TXT_BLUE(mach))
+        info(TXT_BLUE(mach))
         warn('Current architecture is not supported by libseccomp')
 
 @new_task
@@ -403,11 +406,11 @@ def check_flock(makefile: Makefile):
     pcheck('if flock in system')
     if shutil.which('flock') is None:
         makefile.inject('VERBOSE', '1')
-        print(TXT_BLUE('no'))
+        info(TXT_BLUE('no'))
         warn('flock not found in system, Makefile verbose is set to true. You may need util-linux package')
     else:
         makefile.inject('VERBOSE', '1' if buildopts.verbose else '0')
-        print(TXT_GREEN('yes'))
+        info(TXT_GREEN('yes'))
 
 @new_task
 def check_i18n(makefile: Makefile):
@@ -416,32 +419,32 @@ def check_i18n(makefile: Makefile):
         makefile.inject('I18N', False)
         makefile.inject('LOCALEDIR', buildopts.localedir)
         makefile.inject('LOCALE_SED', 's|@@LOCALEDIR@@||')
-        print(TXT_BLUE('no'))
+        info(TXT_BLUE('no'))
         return
     if shutil.which('xgettext') is None:
-        print(TXT_MAGENTA('no gettext'))
+        info(TXT_MAGENTA('no gettext'))
         error('xgettext and other tools not found, pass --without-i18n to disable l10n generation or install gettext package!')
     makefile.inject('I18N', True)
     makefile.inject('LOCALEDIR', buildopts.localedir)
     makefile.inject('LOCALE_SED', f's|@@LOCALEDIR@@|#define LOCALEDIR "{buildopts.localedir}"|')
-    print(TXT_GREEN('yes'))
+    info(TXT_GREEN('yes'))
 
 @new_task
 def check_doc(makefile: Makefile):
     pcheck('documentation settings')
     if not buildopts.doc:
         makefile.inject('DOC', False)
-        print(TXT_BLUE('no doc'))
+        info(TXT_BLUE('no doc'))
         return
     if buildopts.asciidoc is None:
-        print(TXT_MAGENTA('no asciidoc found'))
+        info(TXT_MAGENTA('no asciidoc found'))
         error('Asciidoc compiler not found, pass --without-doc to disable documentation generation or install asciidoctor package!')
     makefile.inject('DOC', True)
     makefile.inject('ASCIIDOC', buildopts.asciidoc)
     if 'asciidoctor' in buildopts.asciidoc:
-        print(TXT_GREEN(buildopts.asciidoc))
+        info(TXT_GREEN(buildopts.asciidoc))
     else:
-        print(TXT_CYAN(buildopts.asciidoc))
+        info(TXT_CYAN(buildopts.asciidoc))
         warn(f'Your asciidoc compiler {buildopts.asciidoc} is not tested and may fail to generate docs')
 
 standard_c = '''
@@ -457,20 +460,20 @@ int main() {
 def check_cc(makefile: Makefile):
     pcheck('C compiler')
     if buildopts.cc is None:
-        print(TXT_MAGENTA('no cc found'))
+        info(TXT_MAGENTA('no cc found'))
         error('C compiler command not found in system!')
     code, _, stderr = run_command([*buildopts.cc, '-x', 'c', '-', '-o', '/dev/null'], standard_c)
     if code:
-        print(TXT_MAGENTA(' '.join(buildopts.cc)))
+        info(TXT_MAGENTA(' '.join(buildopts.cc)))
         if code == -1:
             error(f'C compiler is not working: {stderr}')
         if code == -2:
             error(f'Unexpected error: {stderr}')
-        print(f'Compiler returned non-zero returncode with message:\n{stderr}', end='')
+        info(f'Compiler returned non-zero returncode with message:\n{stderr}', end='')
         error(f'C compiler can not compile minimum C unit')
     # code == 0
     makefile.inject('CC', ' '.join(buildopts.cc))
-    print(TXT_GREEN(' '.join(buildopts.cc)))
+    info(TXT_GREEN(' '.join(buildopts.cc)))
 
 
 linux_headers = '''
@@ -488,14 +491,14 @@ def check_linux_headers(_: Makefile):
     pcheck('Linux-related headers')
     code, _, stderr = run_command([*buildopts.cc, '-x', 'c', '-', '-o', '/dev/null'], linux_headers, push_sys_dir=True)
     if code:
-        print(TXT_MAGENTA('no'))
+        info(TXT_MAGENTA('no'))
         if code == -1:
             error(f'C compiler is not working: {stderr}')
         if code == -2:
             error(f'Unexpected error: {stderr}')
-        print(f'Compiler returned non-zero returncode with message:\n{stderr}', end='')
+        info(f'Compiler returned non-zero returncode with message:\n{stderr}', end='')
         error(f'Can not compile Linux-related unit, you may install linux-headers package')
-    print(TXT_GREEN('yes'))
+    info(TXT_GREEN('yes'))
 
 
 libseccomp = '''
@@ -511,14 +514,14 @@ def check_libseccomp(_: Makefile):
     pcheck('libseccomp')
     code, _, stderr = run_command([*buildopts.cc, '-x', 'c', '-', '-lseccomp', '-o', '/dev/null'], libseccomp, push_sys_dir=True)
     if code:
-        print(TXT_MAGENTA('no'))
+        info(TXT_MAGENTA('no'))
         if code == -1:
             error(f'C compiler is not working: {stderr}')
         if code == -2:
             error(f'Unexpected error: {stderr}')
-        print(f'Compiler returned non-zero returncode with message:\n{stderr}', end='')
+        info(f'Compiler returned non-zero returncode with message:\n{stderr}', end='')
         error(f'Can not compile libseccomp unit, you may install libseccomp package')
-    print(TXT_GREEN('yes'))
+    info(TXT_GREEN('yes'))
 
 
 argp = '''
@@ -533,41 +536,41 @@ def check_argp(makefile: Makefile):
     code, _, stderr = run_command([*buildopts.cc, '-x', 'c', '-', '-o', '/dev/null'], argp, push_sys_dir=True)
     if code:
         if code == -1:
-            print(TXT_MAGENTA('no'))
+            info(TXT_MAGENTA('no'))
             error(f'C compiler is not working: {stderr}')
         if code == -2:
-            print(TXT_MAGENTA('no'))
+            info(TXT_MAGENTA('no'))
             error(f'Unexpected error: {stderr}')
         # code > 0
         # some system need external argp package, so we try to link
         code, _, stderr = run_command([*buildopts.cc, '-x', 'c', '-', '-largp', '-o', '/dev/null'], argp)
         if code:
-            print(TXT_MAGENTA('no'))
+            info(TXT_MAGENTA('no'))
             if code == -1:
-                print(TXT_MAGENTA('no'))
+                info(TXT_MAGENTA('no'))
                 error(f'C compiler is not working: {stderr}')
             if code == -2:
-                print(TXT_MAGENTA('no'))
+                info(TXT_MAGENTA('no'))
                 error(f'Unexpected error: {stderr}')
-            print(f'Compiler returned non-zero returncode with message:\n{stderr}', end='')
+            info(f'Compiler returned non-zero returncode with message:\n{stderr}', end='')
             error(f'Can not compile argp unit, you may install argp package')
         # code == 0 and link argp
         makefile.inject('LIBARGP', '-largp')
-        print(TXT_CYAN('external'))
+        info(TXT_CYAN('external'))
         return
     # code == 0
     makefile.inject('LIBARGP', '')
-    print(TXT_GREEN('builtin'))
+    info(TXT_GREEN('builtin'))
 
 @new_task
 def check_source(_: Makefile):
     pcheck('source code type')
     if os.path.isdir('.git'):
         buildopts.git_install = True
-        print(TXT_GREEN('git install'))
+        info(TXT_GREEN('git install'))
     else:
         buildopts.git_install = False
-        print(TXT_CYAN('tarball install'))
+        info(TXT_CYAN('tarball install'))
 
 @new_task
 def check_version(makefile: Makefile):
@@ -576,8 +579,8 @@ def check_version(makefile: Makefile):
         if not buildopts.devmode:
             code, stdout, stderr = run_command(['git', 'describe', '--exact-match'])
             if code < 0:
-                print(TXT_MAGENTA('git failed'))
-                print(f'Git not accessible? {stderr}')
+                info(TXT_MAGENTA('git failed'))
+                info(f'Git not accessible? {stderr}')
                 error('Can not run git, you may install git package')
 
             elif code == 0: # we are at a tag, adopt it
@@ -585,29 +588,29 @@ def check_version(makefile: Makefile):
                 buildopts.version = tag if not tag.startswith('v') else tag[1:]
                 code, stdout, _ = run_command(['git', 'log', '-1', '--format=format:%as', tag])
                 if code:
-                    print(TXT_MAGENTA('get tag time failed'))
-                    print(stderr, end='' if stderr[-1] == '\n' else '\n')
+                    info(TXT_MAGENTA('get tag time failed'))
+                    info(stderr, end='' if stderr[-1] == '\n' else '\n')
                     error('Can not get tag-time for the latest tag')
                 buildopts.tag_time = stdout.strip()
 
             else: # we are not at a tag, try to go to a tag
                 code, stdout, _ = run_command(['git', 'rev-list', '--tags', '--max-count=1'])
                 if code:
-                    print(TXT_MAGENTA('git failed'))
-                    print(stderr, end='' if stderr[-1] == '\n' else '\n')
+                    info(TXT_MAGENTA('git failed'))
+                    info(stderr, end='' if stderr[-1] == '\n' else '\n')
                     error('Can not determine the latest tag by git, to build from git, you need to pull the whole repo!')
                 code, stdout, _ = run_command(['git', 'describe', '--tags', stdout.strip()])
                 if code:
-                    print(TXT_MAGENTA('git failed'))
-                    print(stderr, end='' if stderr[-1] == '\n' else '\n')
+                    info(TXT_MAGENTA('git failed'))
+                    info(stderr, end='' if stderr[-1] == '\n' else '\n')
                     error('Can not determine the latest tag by git')
                 tag = stdout.strip()
                 code, stdout, _ = run_command(['git', 'checkout', tag]) # checkout to that tag
                 if code:
-                    print(TXT_MAGENTA('checkout failed'))
-                    print(stderr, end='' if stderr[-1] == '\n' else '\n')
+                    info(TXT_MAGENTA('checkout failed'))
+                    info(stderr, end='' if stderr[-1] == '\n' else '\n')
                     error('Could not checkout the latest tag. Do you need to `git stash` changes?')
-                print(TXT_CYAN(tag))
+                info(TXT_CYAN(tag))
                 warn('Checked out to new tag, please rerun me to build stable version of ceccomp! '
                      '(or use --devmode to build on an arbitrary commit)')
                 sys.exit(0)
@@ -615,8 +618,8 @@ def check_version(makefile: Makefile):
         else: # devmode is True
             code, stdout, stderr = run_command(['git', 'describe', '--long'])
             if code < 0:
-                print(TXT_MAGENTA('git failed'))
-                print(f'Git not accessible? {stderr}')
+                info(TXT_MAGENTA('git failed'))
+                info(f'Git not accessible? {stderr}')
                 error('Can not run git, you may install git package')
 
             elif code == 0: # current commit get correctly resolved (tag-rev-gcommit or tag)
@@ -626,14 +629,14 @@ def check_version(makefile: Makefile):
                 buildopts.version = f'{ver}.r{revision}_{commit[1:]}' # skip g
                 code, stdout, _ = run_command(['git', 'log', '-1', '--format=format:%as'])
                 if code:
-                    print(TXT_MAGENTA('get tag time failed'))
-                    print(stderr, end='' if stderr[-1] == '\n' else '\n')
+                    info(TXT_MAGENTA('get tag time failed'))
+                    info(stderr, end='' if stderr[-1] == '\n' else '\n')
                     error('Can not get tag-time for the latest tag')
                 buildopts.tag_time = stdout.strip()
 
             else: # git failed to describe
-                print(TXT_MAGENTA('describe failed'))
-                print(stderr, end='' if stderr[-1] == '\n' else '\n')
+                info(TXT_MAGENTA('describe failed'))
+                info(stderr, end='' if stderr[-1] == '\n' else '\n')
                 error('Can not determine the latest tag by git, to build from git, you need to pull the whole repo!')
 
     else: # tarball install
@@ -645,28 +648,28 @@ def check_version(makefile: Makefile):
     makefile.inject('VERSION', buildopts.version)
     makefile.inject('TAG_TIME', buildopts.tag_time)
     if buildopts.git_install and not buildopts.devmode:
-        print(TXT_GREEN(buildopts.version))
+        info(TXT_GREEN(buildopts.version))
     elif buildopts.git_install and buildopts.devmode:
-        print(TXT_BLUE(buildopts.version))
+        info(TXT_BLUE(buildopts.version))
     else:
-        print(TXT_CYAN(buildopts.version))
+        info(TXT_CYAN(buildopts.version))
 
 @new_task
 def check_builder_name(makefile: Makefile):
     pcheck('builder name')
     if '^' in buildopts.builder:
-        print(TXT_MAGENTA(buildopts.builder))
+        info(TXT_MAGENTA(buildopts.builder))
         error(f"Found '^' in builder name {buildopts.builder}, which is not allowed.")
     if not buildopts.builder.strip():
-        print(TXT_MAGENTA('(empty)'))
+        info(TXT_MAGENTA('(empty)'))
         error(f'Empty builder name is not accepted.')
     makefile.inject('BUILDER', buildopts.builder)
     if buildopts.has_set_packager:
-        print(TXT_CYAN(buildopts.builder))
+        info(TXT_CYAN(buildopts.builder))
     elif buildopts.is_official_package and buildopts.builder != 'manual':
-        print(TXT_GREEN(buildopts.builder))
+        info(TXT_GREEN(buildopts.builder))
     else:
-        print(TXT_BLUE(buildopts.builder))
+        info(TXT_BLUE(buildopts.builder))
 
 @new_task
 def check_omit_leaf_frame_pointer_flag(makefile: Makefile):
@@ -675,10 +678,10 @@ def check_omit_leaf_frame_pointer_flag(makefile: Makefile):
                                    '-mno-omit-leaf-frame-pointer', '-o', '/dev/null'],
                                    standard_c, push_sys_dir=True)
     if code:
-        print(TXT_CYAN('no'))
+        info(TXT_CYAN('no'))
         makefile.inject('ARCH_PRESERVE_FP', '')
     else:
-        print(TXT_GREEN('yes'))
+        info(TXT_GREEN('yes'))
         makefile.inject('ARCH_PRESERVE_FP', '-mno-omit-leaf-frame-pointer')
 
 taskmgr.run_tasks()
@@ -699,12 +702,12 @@ taskmgr.makefile.inject('SYS_LIB_DIR', f'-L{buildopts.sys_libdir}' if buildopts.
 
 assert taskmgr.makefile.s.find('{{') == -1
 
-print('Writting back to Makefile... ', end='', flush=True)
+info('Writting back to Makefile... ', end='')
 try:
     with open('Makefile', 'w') as f:
         f.write(taskmgr.makefile.s)
 except Exception as e:
-    print(TXT_RED('failed'))
+    info(TXT_RED('failed'))
     error(f'Unexpected error when write back: {e}')
 else:
-    print(TXT_GREEN('ok'))
+    info(TXT_GREEN('ok'))
