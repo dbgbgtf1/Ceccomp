@@ -26,8 +26,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#define LOAD_FAIL 2
-#define LOAD_ELSE 3
+#define LOAD_FAIL 7
+#define LOAD_ELSE 8
 
 #define SECCOMP_FLAG_LIST(X)                                                  \
   X (SECCOMP_FILTER_FLAG_TSYNC)                                               \
@@ -40,10 +40,11 @@
 struct flag_name
 {
   uint32_t bit;
+  uint32_t namelen;
   const char *name;
 };
 
-#define FLAG_ENTRY(x) { x, #x },
+#define FLAG_ENTRY(x) { x, LITERAL_STRLEN (#x), #x },
 
 static const struct flag_name seccomp_flags[]
     = { SECCOMP_FLAG_LIST (FLAG_ENTRY) };
@@ -201,17 +202,25 @@ info_parse (syscall_info *info, pid_t pid)
   bool not_first = false;
   char flag_buf[0x100];
   uint32_t offset = 0;
-  memcpy (flag_buf, "0", 2);
-  for (uint32_t i = 0; i < sizeof (seccomp_flags) / sizeof (seccomp_flags[0]);
-       i++)
+  size_t slen;
+  memcpy (flag_buf, "0", sizeof ("0"));
+  for (uint32_t i = 0; i < ARRAY_SIZE (seccomp_flags); i++)
     {
       if (!(seccomp_flags[i].bit & flag))
         continue;
       if (not_first)
-        offset += sprintf (flag_buf + offset, " | %s", seccomp_flags[i].name);
+        {
+          memcpy (flag_buf + offset, " | ", 3);
+          offset += 3;
+          slen = seccomp_flags[i].namelen;
+          memcpy (flag_buf + offset, seccomp_flags[i].name, slen + 1); // \0
+          offset += slen;
+        }
       else
         {
-          offset += sprintf (flag_buf + offset, "%s", seccomp_flags[i].name);
+          slen = seccomp_flags[i].namelen;
+          memcpy (flag_buf, seccomp_flags[i].name, slen + 1); // \0
+          offset = slen;
           not_first = true;
         }
     }
@@ -245,7 +254,10 @@ handle_syscall (pid_t pid, FILE *output_fp, bool quiet, bool oneshot)
   if (!quiet)
     {
       if (seccomp_mode == LOAD_FAIL)
-        warn (M_PID_BPF_LOAD_FAIL, pid, strerror (-rval));
+        if (rval > 0)
+          warn (M_PID_BPF_LOAD_FAIL, pid, M_BPF_FAIL_UNKNOWN);
+        else
+          warn (M_PID_BPF_LOAD_FAIL, pid, strerror (-rval));
       else if (seccomp_mode == SECCOMP_SET_MODE_FILTER)
         info_parse (&info, pid);
     }
