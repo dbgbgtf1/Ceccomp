@@ -1,11 +1,11 @@
 open      -> [32mALLOW[0m
 openat    -> [32mALLOW[0m
-read      -> [31mKILL[0m
+read      -> [32mALLOW[0m
 write     -> [32mALLOW[0m
 execve    -> [31mERRNO(1)[0m
 execveat  -> [32mALLOW[0m
 mmap      -> [32mALLOW[0m
 mprotect  -> [32mALLOW[0m
-sendfile  -> [32mALLOW[0m
+sendfile  -> [31mKILL[0m
 ptrace    -> [32mALLOW[0m
 fork      -> [32mALLOW[0m

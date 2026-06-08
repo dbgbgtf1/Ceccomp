@@ -1,10 +1,10 @@
 // this is for separately function testing
+#include <assert.h>
 #include <linux/audit.h>
 #include <linux/bpf_common.h>
 #include <linux/filter.h>
 #include <linux/prctl.h>
 #include <linux/seccomp.h>
-#include <signal.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -27,17 +27,11 @@ enum test_case
   TEST_FLAGS = 4,
 };
 
-static void
-dont_handle (int sig)
-{
-  (void)sig;
-}
-
 static const struct sock_filter filters[] = {
   BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, 0, 0, 6),
   BPF_STMT (BPF_LD | BPF_W | BPF_ABS, (offsetof (struct seccomp_data, nr))),
   BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, SYS_execve, 2, 0),
-  BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, SYS_read, 2, 0),
+  BPF_JUMP (BPF_JMP | BPF_JEQ | BPF_K, SYS_sendfile, 2, 0),
   BPF_STMT (BPF_RET | BPF_K, SECCOMP_RET_ALLOW),
   BPF_STMT (BPF_RET | BPF_K, SECCOMP_RET_ERRNO | 1),
   BPF_STMT (BPF_LD | BPF_W | BPF_K, SECCOMP_RET_KILL),
@@ -75,9 +69,8 @@ main (int argc, char **argv)
 {
   setvbuf (stdout, NULL, _IOLBF, 0x100);
   int choice = argc < 2 ? 0 : atoi (argv[1]);
-
-  struct sigaction sa = { 0 };
-  sa.sa_handler = dont_handle;
+  int efd = argc < 3 ? 0 : atoi (argv[2]);
+  uint64_t sem;
 
   switch (choice)
     {
@@ -87,10 +80,10 @@ main (int argc, char **argv)
     case TEST_SEIZE:
       prctl (PR_SET_PTRACER, PR_SET_PTRACER_ANY);
       pid_t pid = getpid ();
-      sigaction (SIGCONT, &sa, NULL);
       printf ("pid=%d\n", pid);
 
-      pause (); // waiting SIGCONT
+      assert (efd != 0);
+      read (efd, &sem, 8);
       pid = fork ();
       if (pid)
         {
@@ -100,7 +93,7 @@ main (int argc, char **argv)
       // child
       load_filter (false);
       printf ("child=%d\n", getpid ());
-      pause ();
+      read (efd, &sem, 8);
       break;
     case TEST_PROBE:
       pid = fork ();
@@ -125,10 +118,10 @@ main (int argc, char **argv)
         }
       break;
     case TEST_TRACE_PID:
-      sigaction (SIGCONT, &sa, NULL);
       load_filter (false);
       printf ("pid=%d\n", getpid ());
-      pause ();
+      assert (efd != 0);
+      read (efd, &sem, 8);
       break;
     case TEST_FLAGS:
       test_flag ();

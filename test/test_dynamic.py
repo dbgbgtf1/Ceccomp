@@ -44,7 +44,7 @@ def pid_state(pid: int) -> str | None:
 def filter_execve_k(text: str) -> str:
     lines = text.splitlines()
     for i, line in enumerate(lines):
-        if 'execve' in line or 'read' in line:
+        if 'execve' in line or 'sendfile' in line:
             lines[i] = line[:23] + ' MAY VARY ' + line[33:]
     return '\n'.join(lines)
 
@@ -70,7 +70,8 @@ def test_probe(errns: SimpleNamespace):
     end = time.time() + 3
     while pid_state(pid) and time.time() < end:
         time.sleep(0.0625)
-    assert pid_state(pid) is None
+    last_state = pid_state(pid)
+    assert last_state is None or last_state == 'X'
 
 
 @pytest.mark.xfail(XFAIL_DYNAMIC, reason=XFAIL_REASON)
@@ -92,14 +93,16 @@ def test_trace(errns: SimpleNamespace):
 
 @pytest.mark.xfail(XFAIL_DYNAMIC, reason=XFAIL_REASON)
 def test_seize(errns: SimpleNamespace):
-    tp = subprocess.Popen([TEST, '2'], stdin=DEVNULL, stdout=PIPE, stderr=DEVNULL, text=True)
+    efd = os.eventfd(0, 0)
+    tp = subprocess.Popen([TEST, '2', str(efd)],
+        stdin=DEVNULL, stdout=PIPE, stderr=DEVNULL, text=True, pass_fds=(efd,))
     pid = int(tp.stdout.readline().split('=')[1])
 
     argv = [CECCOMP, 'trace', *COMMON_OPTS, '-p', str(pid), '-s']
     cp = subprocess.Popen(argv, stdin=DEVNULL, stdout=PIPE, stderr=PIPE, text=True)
     pre_line = cp.stderr.readline()
 
-    os.kill(pid, signal.SIGCONT)
+    os.eventfd_write(efd, 1)
 
     rl, _, _ = select.select([tp.stdout], [], [], 2)
     if rl:
@@ -124,7 +127,7 @@ def test_seize(errns: SimpleNamespace):
     except ProcessLookupError:
         pid_exist = False
     else:
-        os.kill(pid, signal.SIGCONT)
+        os.eventfd_write(efd, 1)
     assert pid_exist is True
 
     expect_file = TEST_DIR / 'dyn_log' / 'trace.log'
@@ -136,7 +139,9 @@ def test_trace_pid(errns: SimpleNamespace):
     if msg := is_not_cap_sys_admin():
         pytest.skip(msg)
 
-    tp = subprocess.Popen([TEST, '3'], stdin=DEVNULL, stdout=PIPE, stderr=DEVNULL, text=True)
+    efd = os.eventfd(0, 0)
+    tp = subprocess.Popen([TEST, '3', str(efd)],
+        stdin=DEVNULL, stdout=PIPE, stderr=DEVNULL, text=True, pass_fds=(efd,))
     pid = int(tp.stdout.readline().split('=')[1])
 
     _, stdout, stderr = run_process(
@@ -144,7 +149,7 @@ def test_trace_pid(errns: SimpleNamespace):
     )
     errns.stderr = stderr
 
-    os.kill(pid, signal.SIGCONT)
+    os.eventfd_write(efd, 1)
 
     expect_file = TEST_DIR / 'dyn_log' / 'trace.log'
     with expect_file.open() as f:
