@@ -8,6 +8,13 @@ Items marked with :star: is the major change why we release a new version.
 <!-- reversed. Then run scripts/complete-url.py to format raw ref to URL. -->
 
 ## 4.3 (INCOMING)
+## 4.2.2
+* :star: Keep `CC` as string in `configure` :link: [#37]
+* :star: Fix flaky seize test with `eventfd` :link: [#38]
+* Flush stdout in `configure` immediately
+
+[#37]: https://github.com/dbgbgtf1/Ceccomp/issues/37
+[#38]: https://github.com/dbgbgtf1/Ceccomp/issues/38
 ## 4.2.1
 * Fix test error on different architectures
 ## 4.2
