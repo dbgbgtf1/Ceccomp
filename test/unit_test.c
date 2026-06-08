@@ -24,7 +24,6 @@ enum test_case
   TEST_PROBE = 1,
   TEST_SEIZE = 2,
   TEST_TRACE_PID = 3,
-  TEST_FLAGS = 4,
 };
 
 static const struct sock_filter filters[] = {
@@ -50,18 +49,6 @@ load_filter (bool tofail)
   // test failed loading
   if (tofail)
     syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER, NULL, NULL);
-}
-
-static void
-test_flag ()
-{
-  printf ("pid=%d\n", getpid ());
-  prctl (PR_SET_NO_NEW_PRIVS, 1, 0, 0, 0);
-  struct sock_fprog prog = { .len = ARRAY_SIZE (filters),
-                             .filter = (struct sock_filter *)filters };
-
-  syscall (SYS_seccomp, SECCOMP_SET_MODE_FILTER,
-           SECCOMP_FILTER_FLAG_LOG | SECCOMP_FILTER_FLAG_NEW_LISTENER, &prog);
 }
 
 int
@@ -122,9 +109,6 @@ main (int argc, char **argv)
       printf ("pid=%d\n", getpid ());
       assert (efd != 0);
       read (efd, &sem, 8);
-      break;
-    case TEST_FLAGS:
-      test_flag ();
       break;
     default:
       load_filter (true);

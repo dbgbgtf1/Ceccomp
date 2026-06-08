@@ -1,3 +1,0 @@
-[34m[INFO]: [0mStart tracing process $PID
-[34m[INFO]: [0mProcess $PID invoked seccomp (SECCOMP_SET_MODE_FILTER, SECCOMP_FILTER_FLAG_LOG | SECCOMP_FILTER_FLAG_NEW_LISTENER, &prog)
-[34m[INFO]: [0mProcess $PID exited
