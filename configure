@@ -65,6 +65,7 @@ def parse_args() -> tuple[argparse.Namespace, list[str]]:
     ASCIIDOC           Asciidoc document compiler
     BPF_CC             BPF compiler (specify clang or bpf-*-gcc)
     BPFTOOL            BPF tool command
+    BPF_CFLAGS         Extra BPF C compiler flags
 
 Please report bug at https://github.com/ceccomp/ceccomp
 Copyright (C) 2025-present, distributed under GPLv3 or later
@@ -152,6 +153,7 @@ class BuildOptions:
     asciidoc: str | None
     cflags: str
     ldflags: str
+    bpf_cflags: str
 
     unknown_options: list[str]
 
@@ -234,6 +236,8 @@ class BuildOptions:
             self.cflags = ''
         if self.ldflags is None:
             self.ldflags = ''
+        if self.bpf_cflags is None:
+            self.bpf_cflags = ''
         if self.tag_time == 'CONFIG':
             self.tag_time = datetime.datetime.today().strftime('%Y-%m-%d')
         elif self.tag_time:
@@ -316,6 +320,7 @@ buildopts = BuildOptions(
     asciidoc=os.getenv('ASCIIDOC'),
     cflags=os.getenv('CFLAGS'),
     ldflags=os.getenv('LDFLAGS'),
+    bpf_cflags=os.getenv('BPF_CFLAGS'),
 
     unknown_options=unknown,
 )
@@ -1006,7 +1011,10 @@ def check_bpf_arch(makefile: Makefile):
 
     arch = platform.machine()
     le = True # little endian
-    extra_flags = vmlinux_h_flags
+    extra_flags = []
+    if buildopts.bpf_cflags:
+        extra_flags.append(buildopts.bpf_cflags)
+    extra_flags.extend(vmlinux_h_flags)
     if is_gcc_bpf:
         extra_flags.extend(['-isystem', f'{sys.prefix}/local/include',
                             '-isystem', f'{sys.prefix}/include',
