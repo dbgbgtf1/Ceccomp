@@ -7,7 +7,7 @@ Items marked with :star: is the major change why we release a new version.
 <!-- write @some*user !num to reference user and PR at the same time. The order can not be -->
 <!-- reversed. Then run scripts/complete-url.py to format raw ref to URL. -->
 
-## 4.3 (INCOMING)
+## 4.3
 * :star: New subcommand `capture` to manipulate seccomp with eBPF :link: [#24]
 * :star: Add new asm format **c-macro** to port *TEXT* easily :link: [#39]
 * :star: Add support for *sh* since libseccomp 2.6
