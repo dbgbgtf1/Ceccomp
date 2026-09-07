@@ -10,6 +10,7 @@ import sys
 import tempfile
 from collections.abc import Callable
 from dataclasses import dataclass
+from pathlib import Path
 
 # constants
 VERSION = '4.2.2'
@@ -88,6 +89,11 @@ Copyright (C) 2025-present, distributed under GPLv3 or later
         help='Which target to build against, optional. For instance, x86_64-linux-gnu')
     config_grp.add_argument('--includedir', type=str, metavar='DIR', help='Optional system include directory')
     config_grp.add_argument('--libdir', type=str, metavar='DIR', help='Optional system library directory')
+    config_grp.add_argument('--vmlinuxdir', type=str, metavar='DIR', default='auto',
+                            help='The directory containing vmlinux or vmlinux.h for eBPF support. '
+                                 '"auto" (detect vmlinux.h or vmlinux automatically) and '
+                                 '"generated" (always generate vmlinux.h from vmlinux in default /sys path) '
+                                 'are special values configure accepts.')
     # argp is dynamically tested
 
     make_grp = parser.add_argument_group('Make-time options (can be overridden by make cli) [make var]')
@@ -140,6 +146,7 @@ class BuildOptions:
     target: str
     sys_includedir: str
     sys_libdir: str
+    vmlinuxdir: str
 
     cc: list[str] | None
     asciidoc: str | None
@@ -181,6 +188,7 @@ class BuildOptions:
 
         self.sys_includedir = replace_prefix(self.sys_includedir)
         self.sys_libdir = replace_prefix(self.sys_libdir)
+        self.vmlinuxdir = replace_prefix(self.vmlinuxdir)
 
         if self.debug_level not in (0, 1, 2):
             error('debug_level option can only be 0, 1 or 2!')
@@ -297,6 +305,7 @@ buildopts = BuildOptions(
     target=args.build,
     sys_includedir=args.includedir,
     sys_libdir=args.libdir,
+    vmlinuxdir=args.vmlinuxdir,
 
     ebpf=not args.without_ebpf,
     bpf_cc=os.getenv('BPF_CC'),
@@ -773,33 +782,6 @@ def check_ebpf_infra(_: Makefile):
         buildopts.ebpf = False
         return
 
-    try:
-        with open('/sys/kernel/btf/vmlinux') as _:
-            pass
-    except Exception as e:
-        info(TXT_MAGENTA('unsupported kernel'))
-        warn(f'Failed to read /sys/kernel/btf/vmlinux due to {e}')
-        buildopts.ebpf = False
-        return
-
-    code, vmlinux_h, stderr = run_command([buildopts.bpftool, 'btf', 'dump', 'file',
-                                          '/sys/kernel/btf/vmlinux', 'format', 'c'])
-    if code:
-        info(TXT_MAGENTA(f'broken {buildopts.bpftool}'))
-        info(f'bpftool returned non-zero return code with message:\n{stderr}', end='')
-        error('Provided can not dump vmlinux to vmlinux.h, you may disable eBPF support')
-
-    global vmlinux_dir
-    try:
-        vmlinux_dir = tempfile.TemporaryDirectory()
-        with open(f'{vmlinux_dir.name}/vmlinux.h', 'w') as file:
-            file.write(vmlinux_h)
-    except Exception as e:
-        info(TXT_MAGENTA('/tmp not available'))
-        warn(f'Failed to dump vmlinux.h due to {e}')
-        buildopts.ebpf = False
-        return
-
     info(TXT_GREEN(f'yes, {buildopts.bpf_cc[0]}'))
 
     if shutil.which('llvm-strip'):
@@ -807,6 +789,143 @@ def check_ebpf_infra(_: Makefile):
         found_llvm_strip = True
     elif not is_gcc_bpf:
         warn('Can not find llvm-strip to strip bpf object, the final binary may be large')
+
+tmpdir = None
+vmlinux_h_flags = []
+ebpf_source = '''
+#include <vmlinux.h>
+struct seccomp_filter *test(struct task_struct *task) {
+    return task->seccomp.filter;
+}
+'''
+@new_task
+def check_vmlinuxdir(makefile: Makefile):
+    pcheck('vmlinux.h location')
+    if not buildopts.ebpf:
+        info(TXT_BLUE('skipped'))
+        return
+
+    def _test_bpfcc(vmlinux_h_dir: str, suppress_error: bool=False,
+                    tmp: tempfile.TemporaryDirectory | None=None) -> bool:
+        # no return if error, or when suppress_error enabled, False is returned
+        bpfcc_flags = []
+        if is_gcc_bpf:
+            # bpf-gcc
+            bpfcc_flags = ['-O2', '-std=gnu17']
+        code, _, stderr = run_command([*buildopts.bpf_cc, '-x', 'c', '-',
+                                       '-o', '/dev/null', '-c', '-isystem',
+                                       vmlinux_h_dir, *bpfcc_flags],
+                                      ebpf_source)
+        if code:
+            if tmp:
+                tmp.cleanup()
+            if suppress_error:
+                return False
+            info(TXT_MAGENTA(f'broken {buildopts.bpf_cc[0]}'))
+            if code == -1:
+                error(f'BPF compiler is not working: {stderr}')
+            if code == -2:
+                error(f'Unexpected error: {stderr}')
+            info(f'BPF Compiler returned non-zero return code with message:\n{stderr}', end='')
+            error('Can not compile a minimum unit of eBPF object, you may disable eBPF support')
+        return True
+
+    def _test_vmlinux(vmlinux: Path) -> bool:
+        # print error when returning False
+        try:
+            with vmlinux.open('rb') as _:
+                pass
+        except Exception as e:
+            info(TXT_BRIGHT_BLUE('unsupported kernel/vmlinux'))
+            warn(f'Failed to read {vmlinux} due to {e}')
+            buildopts.ebpf = False
+            return False
+
+        code, vmlinux_h, stderr = run_command([buildopts.bpftool, 'btf', 'dump', 'file',
+                                               str(vmlinux), 'format', 'c'])
+        if code:
+            info(TXT_BRIGHT_BLUE(f'broken {buildopts.bpftool}'))
+            info(f'bpftool returned non-zero return code with message:\n{stderr}', end='')
+            warn('Provided can not dump vmlinux to vmlinux.h, you may disable eBPF support')
+            buildopts.ebpf = False
+            return False
+
+        try:
+            global tmpdir
+            tmpdir = tempfile.TemporaryDirectory()
+            header_dir = tmpdir.name
+            with open(f'{header_dir}/vmlinux.h', 'w') as file:
+                file.write(vmlinux_h)
+
+            _test_bpfcc(header_dir, tmp=tmpdir) # no return if error
+        except Exception as e:
+            info(TXT_BRIGHT_BLUE('/tmp not available'))
+            warn(f'Failed to dump vmlinux.h due to {e}')
+            buildopts.ebpf = False
+            return False
+
+        return True
+
+    passed = False
+    default_vmlinux = Path('/sys/kernel/btf/vmlinux')
+    if buildopts.vmlinuxdir == 'auto':
+        vmlinux_h_dir = None
+        # detects several places
+        def _pick_path(vmlinux_h: str) -> bool:
+            candidate = Path(vmlinux_h)
+            if candidate.exists() and candidate.is_file():
+                nonlocal vmlinux_h_dir
+                vmlinux_h_dir = str(candidate.parent)
+                return True
+            return False
+
+        if not ((buildopts.target and \
+            _pick_path(f'/usr/include/{buildopts.target}/linux/bpf/vmlinux.h')) or \
+            _pick_path('/usr/src/linux/vmlinux.h') or \
+            _pick_path('/usr/include/bpf/vmlinux.h')):
+            # fedora case?
+            ksrcdir = Path('/usr/src/kernels')
+            if ksrcdir.exists() and ksrcdir.is_dir():
+                for kdir, _, _ in ksrcdir.iterdir():
+                    if _pick_path(str(kdir / 'vmlinux.h')):
+                        break
+
+        tried = None
+        if vmlinux_h_dir and (tried := _test_bpfcc(vmlinux_h_dir, True)):
+            info(TXT_GREEN(f'{vmlinux_h_dir}/vmlinux.h'))
+            vmlinux_h_flags.extend(['-isystem', vmlinux_h_dir])
+            makefile.inject('VMLINUX', False)
+        elif _test_vmlinux(default_vmlinux):
+            info(TXT_GREEN(f'generated from {default_vmlinux} (default)'))
+            makefile.inject('VMLINUX_FILE', str(default_vmlinux))
+            makefile.inject('VMLINUX', True)
+        if tried is False:
+            warn(f'Not picking {vmlinux_h_dir}/vmlinux.h as BPF_CC can not include it')
+        # if vmlinux can not be processed, the whole ebpf part will be erased later
+    elif buildopts.vmlinuxdir == 'generated' and _test_vmlinux(default_vmlinux):
+        info(TXT_GREEN(f'generated from {default_vmlinux} (default)'))
+        makefile.inject('VMLINUX_FILE', str(default_vmlinux))
+        makefile.inject('VMLINUX', True)
+    else:
+        # should be a directory containing vmlinux or vmlinux.h
+        vmlinux_dir = Path(buildopts.vmlinuxdir)
+        if (candidate := vmlinux_dir / 'vmlinux.h').exists() and candidate.is_file():
+            if _test_bpfcc(str(vmlinux_dir)):
+                info(TXT_CYAN(str(candidate)))
+                vmlinux_h_flags.extend(['-isystem', str(vmlinux_dir)])
+                makefile.inject('VMLINUX', False)
+            else:
+                error(f'BPF_CC can not include {candidate}')
+        elif (candidate := vmlinux_dir / 'vmlinux').exists() and candidate.is_file():
+            if _test_vmlinux(candidate):
+                info(TXT_CYAN(f'generated from {candidate}'))
+                makefile.inject('VMLINUX_FILE', str(candidate))
+                makefile.inject('VMLINUX', True)
+            else:
+                error(f'{candidate} can not be processed correctly')
+        else:
+            error(f'Can not find available vmlinux or vmlinux.h in {vmlinux_dir}')
+
 
 libbpf = '''
 #include <bpf/libbpf.h>
@@ -817,7 +936,7 @@ int main(void) {
 }
 '''
 libbpf_ebpf = '''
-#include "vmlinux.h"
+#include <vmlinux.h>
 #include <bpf/bpf_helpers.h>
 unsigned test(void) {
     return bpf_get_prandom_u32();
@@ -830,12 +949,16 @@ def check_libbpf(makefile: Makefile):
         info(TXT_BLUE('skipped'))
         makefile.inject('LIBBPF_FLAG', '')
         return
+
+    global tmpdir
     link_flags = probe_library_flags('bpf')
     code, _, stderr = run_command([*buildopts.cc, '-x', 'c', '-',
                                    *link_flags, '-o', '/dev/null'],
                                   libbpf, push_sys_dir=True)
     if code:
         info(TXT_MAGENTA('no'))
+        if tmpdir:
+            tmpdir.cleanup()
         if code == -1:
             error(f'C compiler is not working: {stderr}')
         if code == -2:
@@ -843,17 +966,18 @@ def check_libbpf(makefile: Makefile):
         info(f'Compiler returned non-zero return code with message:\n{stderr}', end='')
         error('Can not compile a minimum unit of libbpf, you may install it or disable eBPF support')
 
-    bpfcc_flags = []
+    bpfcc_flags = vmlinux_h_flags.copy()
+    if not bpfcc_flags:
+        bpfcc_flags.extend(['-isystem', tmpdir.name])
     if is_gcc_bpf:
         # bpf-gcc
-        bpfcc_flags = ['-O2', '-std=gnu17', '-isystem', f'{sys.prefix}/local/include',
-                       '-isystem', f'{sys.prefix}/include']
-    global vmlinux_dir
+        bpfcc_flags.extend(['-O2', '-std=gnu17', '-isystem', f'{sys.prefix}/local/include',
+                            '-isystem', f'{sys.prefix}/include'])
     code, _, stderr = run_command([*buildopts.bpf_cc, '-x', 'c', '-',
-                                   '-o', '/dev/null', '-c', f'-I{vmlinux_dir.name}',
-                                   *bpfcc_flags],
+                                   '-o', '/dev/null', '-c', *bpfcc_flags],
                                   libbpf_ebpf, push_sys_dir=True)
-    vmlinux_dir.cleanup()
+    if tmpdir:
+        tmpdir.cleanup()
     if code:
         info(TXT_MAGENTA(f'broken {buildopts.bpf_cc[0]}'))
         if code == -1:
@@ -882,7 +1006,7 @@ def check_bpf_arch(makefile: Makefile):
 
     arch = platform.machine()
     le = True # little endian
-    extra_flags = []
+    extra_flags = vmlinux_h_flags
     if is_gcc_bpf:
         extra_flags.extend(['-isystem', f'{sys.prefix}/local/include',
                             '-isystem', f'{sys.prefix}/include',
