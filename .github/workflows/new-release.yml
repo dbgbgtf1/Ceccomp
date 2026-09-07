@@ -5,6 +5,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -21,7 +23,7 @@ jobs:
       - name: Preview Changelog
         run: cat ${{ github.workspace }}-CHANGELOG.md
       - name: Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           body_path: ${{ github.workspace }}-CHANGELOG.md
           repository: ceccomp/ceccomp
