@@ -1056,11 +1056,11 @@ def check_bpf_arch(makefile: Makefile):
     info(TXT_GREEN(f"{buildopts.bpf_arch}, {'little' if le else 'big'} endian"))
     makefile.inject('BPF_ARCH', buildopts.bpf_arch)
     makefile.inject('BPF_EXTRA_FLAG', ' '.join(extra_flags))
-    if buildopts.bpf_cc[0].startswith('bpf'):
+    if is_gcc_bpf:
         if not le:
             buildopts.bpf_cc[-1] = '-mbig-endian'
     else:
-        buildopts.bpf_cc[-1] = 'bpf' + 'el' if le else 'eb'
+        buildopts.bpf_cc[-1] = 'bpf' + ('el' if le else 'eb')
     makefile.inject('BPF_CC', ' '.join(buildopts.bpf_cc))
     makefile.inject('BPFTOOL', buildopts.bpftool)
 
